@@ -11,7 +11,7 @@ jobs:
       # ADD THIS SECTION BELOW actions/checkout@v3
       - uses: subosito/flutter-action@v2 # Use a specific version, e.g., v2
         with:
-          flutter-version: '3.x.x' # IMPORTANT: Replace with the Flutter version you are using!
+          flutter-version: '3.32.5' # IMPORTANT: Replace with the Flutter version you are using!
                                   # For example: '3.10.x', '3.13.x', or '3.16.x'
                                   # You can find your version by running `flutter --version` locally.
           channel: 'stable' # Or 'beta', 'dev', depending on your setup
