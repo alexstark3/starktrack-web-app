@@ -1,0 +1,129 @@
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+
+/* your own files */
+import 'providers/theme_provider.dart';
+import 'theme/light_theme.dart';
+import 'theme/dark_theme.dart';
+import 'screens/auth/company_login_screen.dart';
+import 'screens/dashboard/company_dashboard_screen.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(
+      apiKey: 'AIzaSyC5zsqzKMp7v4MzlwzGTNQRD2T61ZS4FO0',
+      appId: '1:831761597377:web:86fdc3b4268b4e3944e540',
+      messagingSenderId: '831761597377',
+      projectId: 'starktracklog',
+      authDomain: 'starktracklog.firebaseapp.com',
+      storageBucket: 'starktracklog.appspot.com',
+    ),
+  );
+
+  runApp(
+    ChangeNotifierProvider(create: (_) => ThemeProvider(), child: const MyApp()),
+  );
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final tp = context.watch<ThemeProvider>();
+    if (!tp.isReady) {
+      return const MaterialApp(debugShowCheckedModeBanner: false, home: Scaffold(body: Center(child: CircularProgressIndicator())));
+    }
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Stark Track',
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: tp.themeMode,
+      home: const AuthGate(),
+    );
+  }
+}
+
+/* ───────────── Auth gate ───────────── */
+
+class AuthGate extends StatelessWidget {
+  const AuthGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snap) {
+        if (snap.connectionState == ConnectionState.waiting) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+        if (!snap.hasData) return const CompanyLoginScreen();
+
+        final uid = snap.data!.uid;
+
+        // Try to find the company the user belongs to by iterating all companies
+        return FutureBuilder<QuerySnapshot>(
+          future: FirebaseFirestore.instance.collection('companies').get(),
+          builder: (context, companySnap) {
+            if (companySnap.connectionState == ConnectionState.waiting) {
+              return const Scaffold(body: Center(child: CircularProgressIndicator()));
+            }
+            if (!companySnap.hasData || companySnap.data!.docs.isEmpty) {
+              return const Scaffold(body: Center(child: Text('No companies found.')));
+            }
+
+            // Search for user in each company
+            return _findUserInCompanies(companySnap.data!.docs, uid);
+          },
+        );
+      },
+    );
+  }
+
+  // Helper: Searches all company docs for a user, returns dashboard if found, else error
+  Widget _findUserInCompanies(List<QueryDocumentSnapshot> companies, String uid) {
+    return FutureBuilder<List<DocumentSnapshot>>(
+      future: Future.wait(
+        companies.map((company) => company.reference.collection('users').doc(uid).get()),
+      ),
+      builder: (context, usersSnap) {
+        if (usersSnap.connectionState == ConnectionState.waiting) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+        final docs = usersSnap.data;
+        if (docs == null) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+
+        for (int i = 0; i < docs.length; i++) {
+          final userDoc = docs[i];
+          if (userDoc.exists) {
+            final data = userDoc.data() as Map<String, dynamic>;
+            final companyId = companies[i].id;
+
+            // Compose a safe full name
+            final full = (data['fullName'] as String?)?.trim() ?? '';
+            final first = (data['firstName'] as String?)?.trim() ?? '';
+            final sur = (data['surname'] as String?)?.trim() ?? '';
+            final fullName = full.isNotEmpty ? full : '$first $sur'.trim();
+
+            return CompanyDashboardScreen(
+              companyId: companyId,
+              userId: uid,
+              fullName: fullName,
+              email: data['email'] ?? '',
+              roles: List<String>.from(data['roles'] ?? []),
+              access: Map<String, dynamic>.from(data['access'] ?? {}),
+            );
+          }
+        }
+
+        return const Scaffold(body: Center(child: Text('User not assigned to any company.')));
+      },
+    );
+  }
+}

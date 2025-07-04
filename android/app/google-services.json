@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "831761597377",
+    "project_id": "starktracklog",
+    "storage_bucket": "starktracklog.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:831761597377:android:34b9161fd1a8f25b44e540",
+        "android_client_info": {
+          "package_name": "com.example.starktrack"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5zsqzKMp7v4MzlwzGTNQRD2T61ZS4FO0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
