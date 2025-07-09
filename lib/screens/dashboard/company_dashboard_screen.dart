@@ -1,12 +1,10 @@
 // lib/screens/company_dashboard_screen.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import '../modules/time_tracker/time_tracker_screen.dart';
 import '../modules/history/history.dart';
-import '../admin/admin_panel.dart';
+import '../modules/admin/admin_panel.dart';
 import '../settings_screen.dart';
-
 import '../../widgets/company/company_side_menu.dart';
 import '../../widgets/company/company_top_bar.dart';
 import 'package:starktrack/theme/app_colors.dart';
@@ -64,7 +62,7 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
             companyId: widget.companyId, userId: widget.userId),
         'History'     => HistoryLogs(
             companyId: widget.companyId, userId: widget.userId),
-        'Admin'       => AdminPanel(companyId: widget.companyId),
+        'Admin'       => AdminPanel(companyId: widget.companyId,currentUserRoles: widget.roles,),
         'Settings'    => const SettingsScreen(),
         _             => const Center(child: Text('No screen')),
       },
@@ -122,9 +120,9 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
       ),
     );
   }
-
   List<_ScreenCfg> get _screens {
     final l = <_ScreenCfg>[];
+    // ←— USE null-aware to be bullet-proof
     if (widget.access['time_tracker'] == true) {
       l.addAll([
         _ScreenCfg('Time Tracker', Icons.access_time),
@@ -137,6 +135,9 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
     l.add(_ScreenCfg('Settings', Icons.settings));
     return l;
   }
+
+
+
 }
 
 class _ScreenCfg {

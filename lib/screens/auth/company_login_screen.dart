@@ -68,14 +68,31 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
       final roles = (data['roles'] is List)
           ? (data['roles'] as List).map((e) => e.toString()).toList()
           : <String>[];
-      final access = (data['access'] is Map)
-          ? Map<String, dynamic>.from(data['access'] as Map)
-          : <String, dynamic>{};
-      final email = (data['email'] ?? '') as String;
-      final firstName = (data['firstName'] ?? '') as String;
-      final surname = (data['surname'] ?? '') as String;
-      final fullName = (firstName + ' ' + surname).trim();
+      final modules = (data['modules'] is List)
+          ? (data['modules'] as List).map((e) => e.toString()).toList()
+          : <String>[];
+      final access = <String, dynamic>{
+        'time_tracker': modules.contains('time_tracker'),
+        'admin'       : modules.contains('admin'),
+      };
 
+      final String email    = (data['email']     ?? '') as String;
+      final String firstName= (data['firstName'] ?? '') as String;
+      final String surname  = (data['surname']   ?? '') as String;
+      final String fullName = '${firstName.trim()} ${surname.trim()}'.trim();
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => CompanyDashboardScreen(
+            companyId: companyId!,
+            userId: userId,
+            roles: roles,
+            access: access,
+            fullName: fullName,      // ← from (firstName + ' ' + surname)
+            email: email,
+          ),
+        ),
+      );
       print('LOGIN: User found! Navigating to dashboard for company $companyId');
       if (!mounted) return;
       Navigator.of(context).pushReplacement(

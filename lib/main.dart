@@ -113,9 +113,13 @@ class AuthGate extends StatelessWidget {
             final roles = (data['roles'] is List)
                 ? (data['roles'] as List).map((e) => e.toString()).toList()
                 : <String>[];
-            final access = (data['access'] is Map)
-                ? Map<String, dynamic>.from(data['access'] as Map)
-                : <String, dynamic>{};
+            final modules = (data['modules'] is List)
+        ? (data['modules'] as List).map((e) => e.toString()).toList()
+        : <String>[];
+    final access = <String, dynamic>{
+      'time_tracker': modules.contains('time_tracker'),
+      'admin'       : modules.contains('admin'),
+    };
 
             return CompanyDashboardScreen(
               companyId: companyId,
