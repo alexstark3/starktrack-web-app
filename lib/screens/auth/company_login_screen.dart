@@ -64,10 +64,16 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
       }
 
       final data = userDocSnap.data()!;
-      final roles = List<String>.from(data['roles'] ?? []);
-      final access = Map<String, dynamic>.from(data['access'] ?? {});
-      final firstName = data['firstName'] ?? '';
-      final surname = data['surname'] ?? '';
+      // --- SAFE EXTRACTION ---
+      final roles = (data['roles'] is List)
+          ? (data['roles'] as List).map((e) => e.toString()).toList()
+          : <String>[];
+      final access = (data['access'] is Map)
+          ? Map<String, dynamic>.from(data['access'] as Map)
+          : <String, dynamic>{};
+      final email = (data['email'] ?? '') as String;
+      final firstName = (data['firstName'] ?? '') as String;
+      final surname = (data['surname'] ?? '') as String;
       final fullName = (firstName + ' ' + surname).trim();
 
       print('LOGIN: User found! Navigating to dashboard for company $companyId');
@@ -80,7 +86,7 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
             roles: roles,
             access: access,
             fullName: fullName,
-            email: _emailController.text.trim(),
+            email: email,
           ),
         ),
       );

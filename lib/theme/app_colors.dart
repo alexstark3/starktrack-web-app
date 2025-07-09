@@ -8,6 +8,8 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color green;
   final Color red;
   final Color dashboardBackground;
+  final Color whiteTextOnBlue;
+  final Color orange;
 
   // semantic aliases
   final Color textColor;
@@ -26,6 +28,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.backgroundLight,
     required this.success,
     required this.error,
+    required this.whiteTextOnBlue,
+    required this.orange,
   });
 
   @override
@@ -40,6 +44,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? backgroundLight,
     Color? success,
     Color? error,
+    Color? whiteTextOnBlue,
+    Color? orange,
   }) {
     return AppColors(
       primaryBlue: primaryBlue ?? this.primaryBlue,
@@ -52,6 +58,8 @@ class AppColors extends ThemeExtension<AppColors> {
       backgroundLight: backgroundLight ?? this.backgroundLight,
       success: success ?? this.success,
       error: error ?? this.error,
+      whiteTextOnBlue: whiteTextOnBlue ?? this.whiteTextOnBlue,
+      orange: orange ?? this.orange,
     );
   }
 
@@ -69,6 +77,8 @@ class AppColors extends ThemeExtension<AppColors> {
       backgroundLight: Color.lerp(backgroundLight, other.backgroundLight, t)!,
       success: Color.lerp(success, other.success, t)!,
       error: Color.lerp(error, other.error, t)!,
+      whiteTextOnBlue: Color.lerp(whiteTextOnBlue, other.whiteTextOnBlue, t)!,
+      orange: Color.lerp(orange, other.orange, t)!,
     );
   }
 
@@ -81,10 +91,12 @@ class AppColors extends ThemeExtension<AppColors> {
     green: Color(0xFF67C187),
     red: Color(0xFFD76C6C),
     dashboardBackground: Color(0xFFF3F3F7), // light gray
-    textColor: Color.fromRGBO(88, 89, 91, 1),
+    textColor: Color.fromRGBO(0, 0, 0, 1),
     backgroundLight: Color(0xFFEAEAEB),
     success: Color(0xFF67C187),
     error: Color(0xFFD76C6C),
+    whiteTextOnBlue: Colors.white,
+    orange: Color(0xFFFF9800),
   );
 
   static const AppColors dark = AppColors(
@@ -98,5 +110,7 @@ class AppColors extends ThemeExtension<AppColors> {
     backgroundLight: Color(0xFF232323),
     success: Color(0xFF67C187),
     error: Color(0xFFD76C6C),
+    whiteTextOnBlue: Color(0xFFF3F3F7),
+    orange: Color(0xFFFF9800),
   );
 }

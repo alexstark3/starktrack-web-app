@@ -3,8 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
-
-/* your own files */
 import 'providers/theme_provider.dart';
 import 'theme/light_theme.dart';
 import 'theme/dark_theme.dart';
@@ -23,6 +21,8 @@ Future<void> main() async {
       storageBucket: 'starktracklog.appspot.com',
     ),
   );
+
+  print('FIREBASE PROJECT ID: ${Firebase.app().options.projectId}'); // Print the actual projectId being used
 
   runApp(
     ChangeNotifierProvider(create: (_) => ThemeProvider(), child: const MyApp()),
@@ -47,8 +47,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-/* ───────────── Auth gate ───────────── */
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
@@ -84,7 +82,6 @@ class AuthGate extends StatelessWidget {
     );
   }
 
-  // Helper: Searches all company docs for a user, returns dashboard if found, else error
   Widget _findUserInCompanies(List<QueryDocumentSnapshot> companies, String uid) {
     return FutureBuilder<List<DocumentSnapshot>>(
       future: Future.wait(
@@ -111,13 +108,22 @@ class AuthGate extends StatelessWidget {
             final sur = (data['surname'] as String?)?.trim() ?? '';
             final fullName = full.isNotEmpty ? full : '$first $sur'.trim();
 
+            // --- SAFE EXTRACTION ---
+            final email = (data['email'] ?? '') as String;
+            final roles = (data['roles'] is List)
+                ? (data['roles'] as List).map((e) => e.toString()).toList()
+                : <String>[];
+            final access = (data['access'] is Map)
+                ? Map<String, dynamic>.from(data['access'] as Map)
+                : <String, dynamic>{};
+
             return CompanyDashboardScreen(
               companyId: companyId,
               userId: uid,
               fullName: fullName,
-              email: data['email'] ?? '',
-              roles: List<String>.from(data['roles'] ?? []),
-              access: Map<String, dynamic>.from(data['access'] ?? {}),
+              email: email,
+              roles: roles,
+              access: access,
             );
           }
         }

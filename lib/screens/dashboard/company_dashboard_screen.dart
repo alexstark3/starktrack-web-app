@@ -1,31 +1,24 @@
+// lib/screens/company_dashboard_screen.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../widgets/company/company_side_menu.dart';
-import '../../widgets/company/company_top_bar.dart';
-import '../modules/time_tracker_screen.dart';
+
+import '../modules/time_tracker/time_tracker_screen.dart';
+import '../modules/history/history.dart';
 import '../admin/admin_panel.dart';
 import '../settings_screen.dart';
+
+import '../../widgets/company/company_side_menu.dart';
+import '../../widgets/company/company_top_bar.dart';
 import 'package:starktrack/theme/app_colors.dart';
 
-// Util for initials (GP for Goran Petrov)
-String getInitials(String fullName) {
-  final parts = fullName.trim().split(RegExp(r'\s+'));
-  if (parts.length >= 2) {
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-  } else if (parts.isNotEmpty && parts[0].isNotEmpty) {
-    return parts[0][0].toUpperCase();
-  }
-  return '?';
+String _initials(String name) {
+  final parts = name.trim().split(RegExp(r'\s+'));
+  return parts.length >= 2
+      ? (parts[0][0] + parts[1][0]).toUpperCase()
+      : parts[0][0].toUpperCase();
 }
 
 class CompanyDashboardScreen extends StatefulWidget {
-  final String companyId;
-  final String userId;
-  final List<String> roles;
-  final Map<String, dynamic> access;
-  final String fullName;
-  final String email;
-
   const CompanyDashboardScreen({
     super.key,
     required this.companyId,
@@ -36,90 +29,93 @@ class CompanyDashboardScreen extends StatefulWidget {
     required this.email,
   });
 
+  final String companyId, userId, fullName, email;
+  final List<String> roles;
+  final Map<String, dynamic> access;
+
   @override
   State<CompanyDashboardScreen> createState() => _CompanyDashboardScreenState();
 }
 
 class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
-  late String selectedScreen;
+  late String _selected;
 
   @override
   void initState() {
     super.initState();
-    final available = _availableScreens();
-    selectedScreen = available.isNotEmpty ? available.first.label : 'Access Denied';
+    _selected = _screens.first.label;
   }
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final initials = _initials(widget.fullName);
+    final colors   = Theme.of(context).extension<AppColors>()!;
 
-    // Choose background color for main area depending on theme
-    final dashboardBgColor = Theme.of(context).extension<AppColors>()!.dashboardBackground;
+    // rail width depends on compact
+    final bool compact = MediaQuery.of(context).size.width < 600;
+    final double railWidth = compact ? 72 : 220;
+    final double barHeight = CompanyTopBar.kHeight;
 
-    final allScreens = <String, Widget>{
-      'Time Tracker': TimeTrackerScreen(
-        companyId: widget.companyId,
-        userId: widget.userId,
-      ),
-      'Admin': AdminPanel(companyId: widget.companyId),
-      'Settings': const SettingsScreen(),
-    };
-
-    final availableScreens = _availableScreens();
-    final selectedWidget = allScreens[selectedScreen] ??
-        const Center(child: Text('Screen Not Found'));
-
-    final initials = getInitials(widget.fullName);
+    // The page body under the bar:
+    final body = Container(
+      color: colors.dashboardBackground,
+      child: switch (_selected) {
+        'Time Tracker' => TimeTrackerScreen(
+            companyId: widget.companyId, userId: widget.userId),
+        'History'     => HistoryLogs(
+            companyId: widget.companyId, userId: widget.userId),
+        'Admin'       => AdminPanel(companyId: widget.companyId),
+        'Settings'    => const SettingsScreen(),
+        _             => const Center(child: Text('No screen')),
+      },
+    );
 
     return Scaffold(
-      backgroundColor: colorScheme.background,
-      body: Column(
+      backgroundColor: Theme.of(context).colorScheme.background,
+      body: Stack(
         children: [
-          // Top Bar (white or black only)
-          CompanyTopBar(
-            fullName: widget.fullName,
-            email: widget.email,
-            initials: initials,
-            selectedScreen: selectedScreen,
-            onSettings: () {
-              setState(() {
-                selectedScreen = 'Settings';
-              });
-            },
-            onLogout: () async {
-              await FirebaseAuth.instance.signOut();
-              if (mounted) {
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              }
-            },
+          // ── Layer 1: body + padding for rail & bar ──
+          Padding(
+            padding: EdgeInsets.only(left: railWidth, top: barHeight),
+            child: body,
           ),
-          Expanded(
-            child: Row(
-              children: [
-                // Sidebar (white or black only)
-                Container(
-                  color: colorScheme.background,
-                  child: CompanySideMenu(
-                    menuItems: availableScreens.map((item) {
-                      return SideMenuItem(
-                        label: item.label,
-                        icon: item.icon,
-                        selected: selectedScreen == item.label,
-                        onTap: () => setState(() => selectedScreen = item.label),
-                      );
-                    }).toList(),
-                  ),
-                ),
-                // Main content (gray or dark gray)
-                Expanded(
-                  child: Container(
-                    width: double.infinity,
-                    color: dashboardBgColor,
-                    child: selectedWidget,
-                  ),
-                ),
-              ],
+
+          // ── Layer 2: side-rail on top with elevation ──
+          Positioned(
+            top: 0,
+            bottom: 0,
+            left: 0,
+            width: railWidth,
+            child: CompanySideMenu(
+              menuItems: _screens
+                  .map((s) => SideMenuItem(
+                        label   : s.label,
+                        icon    : s.icon,
+                        selected: _selected == s.label,
+                        onTap   : () => setState(() => _selected = s.label),
+                      ))
+                  .toList(),
+              compact: compact,
+              showBrand: true,
+            ),
+          ),
+
+          // ── Layer 3: top-bar floats above content to right of rail ──
+          Positioned(
+            top: 0,
+            left: railWidth,
+            right: 0,
+            child: CompanyTopBar(
+              screenTitle:   _selected,
+              fullName:      widget.fullName,
+              email:         widget.email,
+              initials:      initials,
+              selectedScreen: _selected,
+              onSettings:    () => setState(() => _selected = 'Settings'),
+              onLogout: () async {
+                await FirebaseAuth.instance.signOut();
+                if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
+              },
             ),
           ),
         ],
@@ -127,23 +123,24 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
     );
   }
 
-  List<_ScreenConfig> _availableScreens() {
-    final List<_ScreenConfig> screens = [];
-
+  List<_ScreenCfg> get _screens {
+    final l = <_ScreenCfg>[];
     if (widget.access['time_tracker'] == true) {
-      screens.add(_ScreenConfig('Time Tracker', Icons.access_time));
+      l.addAll([
+        _ScreenCfg('Time Tracker', Icons.access_time),
+        _ScreenCfg('History',      Icons.history),
+      ]);
     }
     if (widget.roles.contains('admin')) {
-      screens.add(_ScreenConfig('Admin', Icons.admin_panel_settings));
+      l.add(_ScreenCfg('Admin', Icons.admin_panel_settings));
     }
-    screens.add(_ScreenConfig('Settings', Icons.settings));
-    return screens;
+    l.add(_ScreenCfg('Settings', Icons.settings));
+    return l;
   }
 }
 
-class _ScreenConfig {
+class _ScreenCfg {
   final String label;
   final IconData icon;
-
-  _ScreenConfig(this.label, this.icon);
+  const _ScreenCfg(this.label, this.icon);
 }

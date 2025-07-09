@@ -10,6 +10,8 @@ final ThemeData lightTheme = ThemeData(
     error: Color(0xFFD76C6C),
   ),
   scaffoldBackgroundColor: Color(0xFFF3F3F7), // light gray,
+  cardColor: Colors.white,              // <-- This is your card background!
+  dividerColor: Color(0xFFE5EAF1),
   extensions: <ThemeExtension<dynamic>>[
     AppColors.light,
   ],
