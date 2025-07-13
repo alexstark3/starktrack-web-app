@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
 
-@immutable
 class AppColors extends ThemeExtension<AppColors> {
   final Color primaryBlue;
   final Color darkGray;
+  final Color midGray;      // NEW: mid-range gray
   final Color lightGray;
   final Color green;
   final Color red;
   final Color dashboardBackground;
-  final Color whiteTextOnBlue;
-  final Color orange;
-
-  // semantic aliases
   final Color textColor;
   final Color backgroundLight;
   final Color success;
   final Color error;
+  final Color whiteTextOnBlue;
+  final Color orange;
 
   const AppColors({
     required this.primaryBlue,
     required this.darkGray,
+    required this.midGray,
     required this.lightGray,
     required this.green,
     required this.red,
@@ -36,6 +35,7 @@ class AppColors extends ThemeExtension<AppColors> {
   AppColors copyWith({
     Color? primaryBlue,
     Color? darkGray,
+    Color? midGray,
     Color? lightGray,
     Color? green,
     Color? red,
@@ -50,6 +50,7 @@ class AppColors extends ThemeExtension<AppColors> {
     return AppColors(
       primaryBlue: primaryBlue ?? this.primaryBlue,
       darkGray: darkGray ?? this.darkGray,
+      midGray: midGray ?? this.midGray,
       lightGray: lightGray ?? this.lightGray,
       green: green ?? this.green,
       red: red ?? this.red,
@@ -69,6 +70,7 @@ class AppColors extends ThemeExtension<AppColors> {
     return AppColors(
       primaryBlue: Color.lerp(primaryBlue, other.primaryBlue, t)!,
       darkGray: Color.lerp(darkGray, other.darkGray, t)!,
+      midGray: Color.lerp(midGray, other.midGray, t)!, // Added here
       lightGray: Color.lerp(lightGray, other.lightGray, t)!,
       green: Color.lerp(green, other.green, t)!,
       red: Color.lerp(red, other.red, t)!,
@@ -83,14 +85,14 @@ class AppColors extends ThemeExtension<AppColors> {
   }
 
   // Light and dark presets
-
   static const AppColors light = AppColors(
     primaryBlue: Color(0xFF65AAEA),
     darkGray: Color(0xFF58595B),
+    midGray: Color(0xFFB0B0B0),     // Example mid gray (you can adjust this)
     lightGray: Color(0xFFEAEAEB),
     green: Color(0xFF67C187),
     red: Color(0xFFD76C6C),
-    dashboardBackground: Color(0xFFF3F3F7), // light gray
+    dashboardBackground: Color(0xFFF3F3F7),
     textColor: Color.fromRGBO(0, 0, 0, 1),
     backgroundLight: Color(0xFFEAEAEB),
     success: Color(0xFF67C187),
@@ -101,11 +103,12 @@ class AppColors extends ThemeExtension<AppColors> {
 
   static const AppColors dark = AppColors(
     primaryBlue: Color(0xFF65AAEA),
-    darkGray: Color(0xFF58595B),
-    lightGray: Color(0xFFEAEAEB),
+    darkGray: Color(0xFFB0B0B0),
+    midGray: Color(0xFF58595B),      // Swap for higher contrast in dark mode
+    lightGray: Color(0xFF232323),
     green: Color(0xFF67C187),
     red: Color(0xFFD76C6C),
-    dashboardBackground: Color(0xFF232323), // dark gray
+    dashboardBackground: Color(0xFF232323),
     textColor: Color(0xFFF3F3F7),
     backgroundLight: Color(0xFF232323),
     success: Color(0xFF67C187),

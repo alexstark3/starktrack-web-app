@@ -70,7 +70,6 @@ class _AdminPanelState extends State<AdminPanel> {
     }
 
     String password = '';
-    bool manualPassword = false;
     String errorText = '';
     bool isSubmitting = false;
 
@@ -257,26 +256,20 @@ class _AdminPanelState extends State<AdminPanel> {
                       ),
                       const SizedBox(height: 18),
 
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: manualPassword,
-                            activeColor: appColors.primaryBlue,
-                            onChanged: (val) =>
-                                setState(() => manualPassword = val ?? false),
-                          ),
-                          Text('Set password manually',
-                              style: TextStyle(
-                                  color: appColors.textColor, fontSize: 15)),
-                        ],
-                      ),
-                      if (manualPassword)
+                      if (!isEdit) ...[
                         _themedTextField(
                           ctx,
-                          label: 'Password',
+                          label: 'Password (manual entry)',
                           obscureText: true,
                           onChanged: (v) => password = v,
                         ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Password must be at least 6 characters.',
+                          style: TextStyle(color: appColors.darkGray, fontSize: 13),
+                        ),
+                      ],
+
                       if (errorText.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.only(top: 8.0),
@@ -290,6 +283,7 @@ class _AdminPanelState extends State<AdminPanel> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: appColors.primaryBlue,
+                            foregroundColor: appColors.whiteTextOnBlue,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8)),
                           ),
@@ -333,16 +327,19 @@ class _AdminPanelState extends State<AdminPanel> {
                                     });
                                     return;
                                   }
-                                  if (manualPassword && password.length < 6) {
-                                    setState(() {
-                                      errorText = 'Password must be at least 6 characters!';
-                                      isSubmitting = false;
-                                    });
-                                    return;
+                                  // Only require password on create
+                                  if (!isEdit) {
+                                    if (password.length < 6) {
+                                      setState(() {
+                                        errorText = 'Password must be at least 6 characters!';
+                                        isSubmitting = false;
+                                      });
+                                      return;
+                                    }
                                   }
 
                                   // Check if email already exists in Firestore
-                                  if (!manualPassword && !isEdit) {
+                                  if (!isEdit) {
                                     var existing = await FirebaseFirestore
                                         .instance
                                         .collection('companies')
@@ -379,32 +376,20 @@ class _AdminPanelState extends State<AdminPanel> {
                                     } else {
                                       UserCredential? newAuthUser;
                                       // === Create Auth user first ===
-                                      if (manualPassword) {
-                                        try {
-                                          newAuthUser = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                                            email: userData['email'],
-                                            password: password,
-                                          );
-                                        } on FirebaseAuthException catch (e) {
-                                          setState(() {
-                                            errorText = e.message ?? 'Auth error';
-                                            isSubmitting = false;
-                                          });
-                                          return;
-                                        }
-                                      } else {
+                                      try {
+                                        newAuthUser = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                                          email: userData['email'],
+                                          password: password,
+                                        );
+                                      } on FirebaseAuthException catch (e) {
                                         setState(() {
-                                          errorText = 'Registration by invite link is not yet supported in this dialog.';
+                                          errorText = e.message ?? 'Auth error';
                                           isSubmitting = false;
                                         });
                                         return;
                                       }
                                       // === Try to create Firestore doc with Auth UID ===
                                       try {
-                                        print('==== DEBUG: About to write userData to Firestore ====');
-                                        print('userData = $userData');
-                                        print('companyId = ${widget.companyId}');
-                                        print('newAuthUser UID = ${newAuthUser.user!.uid}');
                                         await FirebaseFirestore.instance
                                             .collection('companies')
                                             .doc(widget.companyId)
@@ -428,22 +413,61 @@ class _AdminPanelState extends State<AdminPanel> {
                                     });
                                   }
                                 },
-                          child: isSubmitting
-                              ? SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    color: appColors.whiteTextOnBlue,
-                                    strokeWidth: 2.4,
-                                  ),
-                                )
-                              : Text(isEdit ? 'Save Changes' : 'Create User',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: appColors.whiteTextOnBlue,
-                                      fontSize: 16)),
+                          child: Text(isEdit ? 'Save Changes' : 'Create User',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: appColors.whiteTextOnBlue,
+                                  fontSize: 16)),
                         ),
                       ),
+                      // Password reset button only in EDIT mode
+                      if (isEdit)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16.0),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              icon: Icon(Icons.lock_reset, color: appColors.whiteTextOnBlue),
+                              label: Text("Send password reset email",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: appColors.whiteTextOnBlue,
+                                  fontSize: 16)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: appColors.primaryBlue,
+                                foregroundColor: appColors.whiteTextOnBlue,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8)),
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                              ),
+                              onPressed: () async {
+                                try {
+                                  await FirebaseAuth.instance
+                                    .sendPasswordResetEmail(email: userData['email']);
+                                  if (ctx.mounted) {
+                                    ScaffoldMessenger.of(ctx).showSnackBar(
+                                      SnackBar(
+                                        content: Text("Password reset email sent to ${userData['email']}"),
+                                        backgroundColor: appColors.primaryBlue,
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  if (ctx.mounted) {
+                                    ScaffoldMessenger.of(ctx).showSnackBar(
+                                      SnackBar(
+                                        content: Text("Failed to send reset email: $e"),
+                                        backgroundColor: appColors.red,
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -463,6 +487,7 @@ class _AdminPanelState extends State<AdminPanel> {
     TextInputType? keyboardType,
     Function(String)? onChanged,
     bool enabled = true,
+    Widget? suffixIcon,
   }) {
     final appColors = Theme.of(ctx).extension<AppColors>()!;
     final controller = TextEditingController(text: initialValue ?? '');
@@ -477,11 +502,11 @@ class _AdminPanelState extends State<AdminPanel> {
         filled: true,
         fillColor: appColors.lightGray,
         border: OutlineInputBorder(
-          borderSide: BorderSide(
-              color: appColors.darkGray, width: 1.2),
+          borderSide: BorderSide(color: appColors.darkGray, width: 1.2),
           borderRadius: BorderRadius.circular(8),
         ),
         labelStyle: TextStyle(color: appColors.darkGray),
+        suffixIcon: suffixIcon,
       ),
       onChanged: onChanged,
     );
@@ -747,7 +772,10 @@ class _AdminPanelState extends State<AdminPanel> {
                                           ),
                                           ElevatedButton(
                                             child: const Text('Delete'),
-                                            style: ElevatedButton.styleFrom(backgroundColor: appColors.red),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: appColors.red,
+                                              foregroundColor: Colors.white,
+                                            ),
                                             onPressed: () => Navigator.of(ctx).pop(true),
                                           ),
                                         ],
