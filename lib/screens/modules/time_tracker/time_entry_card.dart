@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:starktrack/theme/app_colors.dart';
+import 'package:flutter/services.dart';
 
 const double kEntryHeight = 38;
 const double kEntryRadius = 9;
@@ -451,26 +452,30 @@ class _TimeEntryCardState extends State<TimeEntryCard>
     );
 
     Widget timeBox(TextEditingController c, FocusNode f, String hint) => Container(
-          width: 92,
-          height: kEntryHeight,
-          decoration: fieldDecoration,
-          alignment: Alignment.center,
-          child: TextField(
-            controller: c,
-            focusNode: f,
-            textAlign: TextAlign.center,
-            style: fieldStyle,
-            maxLines: 1,
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              hintText: hint,
-              hintStyle: fieldStyle.copyWith(color: app.textColor),
-              isDense: true,
-              contentPadding: EdgeInsets.zero,
-            ),
-            keyboardType: TextInputType.datetime,
-          ),
-        );
+  width: 92,
+  height: kEntryHeight,
+  decoration: fieldDecoration,
+  alignment: Alignment.center,
+  child: TextField(
+    controller: c,
+    focusNode: f,
+    textAlign: TextAlign.center,
+    style: fieldStyle,
+    maxLines: 1,
+    decoration: InputDecoration(
+      border: InputBorder.none,
+      hintText: hint,
+      hintStyle: fieldStyle.copyWith(color: app.textColor),
+      isDense: true,
+      contentPadding: EdgeInsets.zero,
+    ),
+    keyboardType: TextInputType.number,
+inputFormatters: [
+  FilteringTextInputFormatter.digitsOnly,
+  LengthLimitingTextInputFormatter(4),
+],
+  ),
+);
 
     Widget selector(String text, VoidCallback onTap) => InkWell(
           borderRadius: BorderRadius.circular(kEntryRadius),
