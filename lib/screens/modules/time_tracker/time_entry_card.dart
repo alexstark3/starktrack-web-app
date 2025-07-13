@@ -393,90 +393,89 @@ class _TimeEntryCardState extends State<TimeEntryCard> {
     }
   }
 
-  // --------- TIME PICKER ---------
+  // --------- TIME PICKER (24h) ---------
   Widget timeBox(TextEditingController c, String hint) {
-  final app = Theme.of(context).extension<AppColors>()!;
-  final theme = Theme.of(context);
-  final isDark = theme.brightness == Brightness.dark;
-  final boxShadow = [
-    BoxShadow(
-      color: isDark ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.2),
-      blurRadius: 1,
-      offset: const Offset(0, 2),
-    )
-  ];
-  BoxDecoration fieldDecoration = BoxDecoration(
-    color: theme.cardColor,
-    borderRadius: BorderRadius.circular(kEntryRadius),
-    boxShadow: boxShadow,
-    border: Border.all(color: theme.dividerColor),
-  );
-  TextStyle fieldStyle = TextStyle(
-    color: app.textColor,
-    fontSize: 16,
-    fontWeight: FontWeight.w400,
-    height: 1.2,
-  );
+    final app = Theme.of(context).extension<AppColors>()!;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final boxShadow = [
+      BoxShadow(
+        color: isDark ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.2),
+        blurRadius: 1,
+        offset: const Offset(0, 2),
+      )
+    ];
+    BoxDecoration fieldDecoration = BoxDecoration(
+      color: theme.cardColor,
+      borderRadius: BorderRadius.circular(kEntryRadius),
+      boxShadow: boxShadow,
+      border: Border.all(color: theme.dividerColor),
+    );
+    TextStyle fieldStyle = TextStyle(
+      color: app.textColor,
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      height: 1.2,
+    );
 
-  return GestureDetector(
-    onTap: () async {
-      // Try to parse current text, fallback to now
-      TimeOfDay initialTime;
-      try {
-        if (c.text.isNotEmpty) {
-          final parts = c.text.split(':');
-          initialTime = TimeOfDay(
-            hour: int.parse(parts[0]),
-            minute: int.parse(parts[1]),
-          );
-        } else {
+    return GestureDetector(
+      onTap: () async {
+        // Try to parse current text, fallback to now
+        TimeOfDay initialTime;
+        try {
+          if (c.text.isNotEmpty) {
+            final parts = c.text.split(':');
+            initialTime = TimeOfDay(
+              hour: int.parse(parts[0]),
+              minute: int.parse(parts[1]),
+            );
+          } else {
+            initialTime = TimeOfDay.now();
+          }
+        } catch (_) {
           initialTime = TimeOfDay.now();
         }
-      } catch (_) {
-        initialTime = TimeOfDay.now();
-      }
 
-      final picked = await showTimePicker(
-        context: context,
-        initialTime: initialTime,
-        builder: (context, child) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
-            child: child!,
-          );
-        },
-      );
+        final picked = await showTimePicker(
+          context: context,
+          initialTime: initialTime,
+          builder: (context, child) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+              child: child!,
+            );
+          },
+        );
 
-      if (picked != null) {
-        final formatted = picked.hour.toString().padLeft(2, '0') + ':' + picked.minute.toString().padLeft(2, '0');
-        setState(() => c.text = formatted);
-      }
-    },
-    child: AbsorbPointer(
-      child: Container(
-        width: 92,
-        height: kEntryHeight,
-        decoration: fieldDecoration,
-        alignment: Alignment.center,
-        child: TextField(
-          controller: c,
-          textAlign: TextAlign.center,
-          style: fieldStyle,
-          maxLines: 1,
-          readOnly: true, // This disables the keyboard!
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: hint,
-            hintStyle: fieldStyle.copyWith(color: app.textColor),
-            isDense: true,
-            contentPadding: EdgeInsets.zero,
+        if (picked != null) {
+          final formatted = picked.hour.toString().padLeft(2, '0') + ':' + picked.minute.toString().padLeft(2, '0');
+          setState(() => c.text = formatted);
+        }
+      },
+      child: AbsorbPointer(
+        child: Container(
+          width: 92,
+          height: kEntryHeight,
+          decoration: fieldDecoration,
+          alignment: Alignment.center,
+          child: TextField(
+            controller: c,
+            textAlign: TextAlign.center,
+            style: fieldStyle,
+            maxLines: 1,
+            readOnly: true, // This disables the keyboard!
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              hintText: hint,
+              hintStyle: fieldStyle.copyWith(color: app.textColor),
+              isDense: true,
+              contentPadding: EdgeInsets.zero,
+            ),
           ),
         ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   Widget selector(String text, VoidCallback onTap) {
     final app = Theme.of(context).extension<AppColors>()!;
@@ -534,6 +533,50 @@ class _TimeEntryCardState extends State<TimeEntryCard> {
       )
     ];
 
+    // Responsive: check width
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isPhone = screenWidth < 600; // Adjust as needed
+
+    final timeFields = [
+      timeBox(_startController, 'Start'),
+      const SizedBox(width: kFieldSpacing),
+      timeBox(_endController, 'End'),
+      const SizedBox(width: kFieldSpacing),
+      selector(_project ?? 'Project +', _showProjectPopup),
+      const SizedBox(width: kFieldSpacing),
+      selector(_expenses.containsKey('Per diem') ? 'Per Diem' : 'Expenses +', _showExpensePopup),
+    ];
+
+    final noteAndAdd = [
+      Expanded(
+        child: selector(_note ?? 'Add Note', _showNotePopup),
+      ),
+      const SizedBox(width: kFieldSpacing),
+      SizedBox(
+        height: kEntryHeight,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: app.primaryBlue,
+            foregroundColor: theme.colorScheme.onPrimary,
+            textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kEntryRadius)),
+            minimumSize: const Size(60, kEntryHeight),
+            maximumSize: const Size(86, kEntryHeight),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            elevation: 0,
+          ),
+          onPressed: _isLoading ? null : _onAddPressed,
+          child: _isLoading
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Add'),
+        ),
+      ),
+    ];
+
     return SizedBox(
       width: double.infinity,
       child: Container(
@@ -545,45 +588,28 @@ class _TimeEntryCardState extends State<TimeEntryCard> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           child: Padding(
             padding: const EdgeInsets.all(10),
-            child: Row(
-              children: [
-                timeBox(_startController, 'Start'),
-                const SizedBox(width: kFieldSpacing),
-                timeBox(_endController, 'End'),
-                const SizedBox(width: kFieldSpacing),
-                selector(_project ?? 'Project +', _showProjectPopup),
-                const SizedBox(width: kFieldSpacing),
-                selector(_expenses.containsKey('Per diem') ? 'Per Diem' : 'Expenses +', _showExpensePopup),
-                const SizedBox(width: kFieldSpacing),
-                Expanded(
-                  child: selector(_note ?? 'Add Note', _showNotePopup),
-                ),
-                const SizedBox(width: kFieldSpacing),
-                SizedBox(
-                  height: kEntryHeight,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: app.primaryBlue,
-                      foregroundColor: theme.colorScheme.onPrimary,
-                      textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kEntryRadius)),
-                      minimumSize: const Size(60, kEntryHeight),
-                      maximumSize: const Size(86, kEntryHeight),
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      elevation: 0,
-                    ),
-                    onPressed: _isLoading ? null : _onAddPressed,
-                    child: _isLoading
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Add'),
+            child: isPhone
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Wrap(
+                        spacing: kFieldSpacing,
+                        runSpacing: kFieldSpacing,
+                        children: timeFields,
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: noteAndAdd,
+                      ),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      ...timeFields,
+                      const SizedBox(width: kFieldSpacing),
+                      ...noteAndAdd,
+                    ],
                   ),
-                ),
-              ],
-            ),
           ),
         ),
       ),
