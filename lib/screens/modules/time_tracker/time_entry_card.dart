@@ -59,7 +59,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
     super.dispose();
   }
 
-  void _formatOnUnfocus(TextEditingController c, FocusNode n) {
+  Future<void> _formatOnUnfocus(TextEditingController c, FocusNode n)async {
     if (!n.hasFocus) {
       final t = c.text.trim();
       if (t.isEmpty) return;
@@ -67,6 +67,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
         final clean = t.replaceAll(':', '').padLeft(4, '0');
         final h = int.parse(clean.substring(0, 2));
         final m = int.parse(clean.substring(2, 4));
+        await Future.delayed(Duration(milliseconds: 100));
         c.text = DateFormat.Hm().format(DateTime(2000, 1, 1, h, m));
       } catch (_) {}
     }
