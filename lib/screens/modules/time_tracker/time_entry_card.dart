@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:starktrack/theme/app_colors.dart';
-import 'package:flutter/services.dart';
 
 const double kEntryHeight = 38;
 const double kEntryRadius = 9;
@@ -26,15 +25,9 @@ class TimeEntryCard extends StatefulWidget {
   State<TimeEntryCard> createState() => _TimeEntryCardState();
 }
 
-class _TimeEntryCardState extends State<TimeEntryCard>
-    with AutomaticKeepAliveClientMixin {
-  @override
-  bool get wantKeepAlive => true;
-
+class _TimeEntryCardState extends State<TimeEntryCard> {
   final _startController = TextEditingController();
-  final _endController   = TextEditingController();
-  final FocusNode _startFocus = FocusNode();
-  final FocusNode _endFocus   = FocusNode();
+  final _endController = TextEditingController();
 
   String? _project;
   String? _note;
@@ -44,33 +37,10 @@ class _TimeEntryCardState extends State<TimeEntryCard>
   Map<String, dynamic> _expenses = {};
 
   @override
-  void initState() {
-    super.initState();
-    _startFocus.addListener(() => _formatOnUnfocus(_startController, _startFocus));
-    _endFocus.addListener(() => _formatOnUnfocus(_endController, _endFocus));
-  }
-
-  @override
   void dispose() {
     _startController.dispose();
     _endController.dispose();
-    _startFocus.dispose();
-    _endFocus.dispose();
     super.dispose();
-  }
-
-  Future<void> _formatOnUnfocus(TextEditingController c, FocusNode n)async {
-    if (!n.hasFocus) {
-      final t = c.text.trim();
-      if (t.isEmpty) return;
-      try {
-        final clean = t.replaceAll(':', '').padLeft(4, '0');
-        final h = int.parse(clean.substring(0, 2));
-        final m = int.parse(clean.substring(2, 4));
-        await Future.delayed(Duration(milliseconds: 100));
-        c.text = DateFormat.Hm().format(DateTime(2000, 1, 1, h, m));
-      } catch (_) {}
-    }
   }
 
   Future<void> _showProjectPopup() async {
@@ -423,13 +393,95 @@ class _TimeEntryCardState extends State<TimeEntryCard>
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    final app   = Theme.of(context).extension<AppColors>()!;
+  // --------- TIME PICKER ---------
+  Widget timeBox(TextEditingController c, String hint) {
+  final app = Theme.of(context).extension<AppColors>()!;
+  final theme = Theme.of(context);
+  final isDark = theme.brightness == Brightness.dark;
+  final boxShadow = [
+    BoxShadow(
+      color: isDark ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.2),
+      blurRadius: 1,
+      offset: const Offset(0, 2),
+    )
+  ];
+  BoxDecoration fieldDecoration = BoxDecoration(
+    color: theme.cardColor,
+    borderRadius: BorderRadius.circular(kEntryRadius),
+    boxShadow: boxShadow,
+    border: Border.all(color: theme.dividerColor),
+  );
+  TextStyle fieldStyle = TextStyle(
+    color: app.textColor,
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+    height: 1.2,
+  );
+
+  return GestureDetector(
+    onTap: () async {
+      // Try to parse current text, fallback to now
+      TimeOfDay initialTime;
+      try {
+        if (c.text.isNotEmpty) {
+          final parts = c.text.split(':');
+          initialTime = TimeOfDay(
+            hour: int.parse(parts[0]),
+            minute: int.parse(parts[1]),
+          );
+        } else {
+          initialTime = TimeOfDay.now();
+        }
+      } catch (_) {
+        initialTime = TimeOfDay.now();
+      }
+
+      final picked = await showTimePicker(
+        context: context,
+        initialTime: initialTime,
+        builder: (context, child) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+            child: child!,
+          );
+        },
+      );
+
+      if (picked != null) {
+        final formatted = picked.hour.toString().padLeft(2, '0') + ':' + picked.minute.toString().padLeft(2, '0');
+        setState(() => c.text = formatted);
+      }
+    },
+    child: AbsorbPointer(
+      child: Container(
+        width: 92,
+        height: kEntryHeight,
+        decoration: fieldDecoration,
+        alignment: Alignment.center,
+        child: TextField(
+          controller: c,
+          textAlign: TextAlign.center,
+          style: fieldStyle,
+          maxLines: 1,
+          readOnly: true, // This disables the keyboard!
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            hintText: hint,
+            hintStyle: fieldStyle.copyWith(color: app.textColor),
+            isDense: true,
+            contentPadding: EdgeInsets.zero,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+
+  Widget selector(String text, VoidCallback onTap) {
+    final app = Theme.of(context).extension<AppColors>()!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
     final boxShadow = [
       BoxShadow(
         color: isDark ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.2),
@@ -437,14 +489,12 @@ class _TimeEntryCardState extends State<TimeEntryCard>
         offset: const Offset(0, 2),
       )
     ];
-
     BoxDecoration fieldDecoration = BoxDecoration(
       color: theme.cardColor,
       borderRadius: BorderRadius.circular(kEntryRadius),
       boxShadow: boxShadow,
       border: Border.all(color: theme.dividerColor),
     );
-
     TextStyle fieldStyle = TextStyle(
       color: app.textColor,
       fontSize: 16,
@@ -452,49 +502,37 @@ class _TimeEntryCardState extends State<TimeEntryCard>
       height: 1.2,
     );
 
-    Widget timeBox(TextEditingController c, FocusNode f, String hint) => Container(
-  width: 92,
-  height: kEntryHeight,
-  decoration: fieldDecoration,
-  alignment: Alignment.center,
-  child: TextField(
-    controller: c,
-    focusNode: f,
-    textAlign: TextAlign.center,
-    style: fieldStyle,
-    maxLines: 1,
-    decoration: InputDecoration(
-      border: InputBorder.none,
-      hintText: hint,
-      hintStyle: fieldStyle.copyWith(color: app.textColor),
-      isDense: true,
-      contentPadding: EdgeInsets.zero,
-    ),
-    keyboardType: TextInputType.number,
-inputFormatters: [
-  FilteringTextInputFormatter.digitsOnly,
-  LengthLimitingTextInputFormatter(4),
-],
-  ),
-);
+    return InkWell(
+      borderRadius: BorderRadius.circular(kEntryRadius),
+      onTap: onTap,
+      child: Container(
+        width: 130,
+        height: kEntryHeight,
+        decoration: fieldDecoration,
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Text(
+          text,
+          style: fieldStyle,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
+  }
 
-    Widget selector(String text, VoidCallback onTap) => InkWell(
-          borderRadius: BorderRadius.circular(kEntryRadius),
-          onTap: onTap,
-          child: Container(
-            width: 130,
-            height: kEntryHeight,
-            decoration: fieldDecoration,
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              text,
-              style: fieldStyle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        );
+  @override
+  Widget build(BuildContext context) {
+    final app   = Theme.of(context).extension<AppColors>()!;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final boxShadow = [
+      BoxShadow(
+        color: isDark ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.2),
+        blurRadius: 1,
+        offset: const Offset(0, 2),
+      )
+    ];
 
     return SizedBox(
       width: double.infinity,
@@ -509,9 +547,9 @@ inputFormatters: [
             padding: const EdgeInsets.all(10),
             child: Row(
               children: [
-                timeBox(_startController, _startFocus, 'Start'),
+                timeBox(_startController, 'Start'),
                 const SizedBox(width: kFieldSpacing),
-                timeBox(_endController, _endFocus, 'End'),
+                timeBox(_endController, 'End'),
                 const SizedBox(width: kFieldSpacing),
                 selector(_project ?? 'Project +', _showProjectPopup),
                 const SizedBox(width: kFieldSpacing),
