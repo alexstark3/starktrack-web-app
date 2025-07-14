@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
+const double kFilterHeight = 38;
+const double kFilterRadius = 9;
+const double kFilterSpacing = 8;
+const double kFilterFontSize = 16;
+
 enum GroupType { day, week, month, year }
 
 class HistoryLogs extends StatefulWidget {
@@ -39,107 +44,230 @@ class _HistoryLogsState extends State<HistoryLogs> {
         .collection('all_logs')
         .orderBy('begin', descending: true);
 
+    BoxDecoration pillDecoration = BoxDecoration(
+      border: Border.all(color: Colors.black26, width: 1),
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(kFilterRadius),
+    );
+
+    TextStyle pillTextStyle = TextStyle(
+      fontSize: kFilterFontSize,
+      fontWeight: FontWeight.w500,
+      color: Colors.black87,
+    );
+
+    // From and To date pickers
+    final dateGroup = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        InkWell(
+          borderRadius: BorderRadius.circular(kFilterRadius),
+          onTap: () async {
+            DateTime? picked = await showDatePicker(
+              context: context,
+              initialDate: fromDate ?? DateTime.now(),
+              firstDate: DateTime(2023),
+              lastDate: DateTime(2100),
+            );
+            if (picked != null) setState(() => fromDate = picked);
+          },
+          child: Container(
+            height: kFilterHeight,
+            padding: const EdgeInsets.symmetric(horizontal: 18),
+            decoration: pillDecoration,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.date_range, color: Colors.blue, size: 20),
+                const SizedBox(width: 6),
+                Text(
+                  fromDate == null ? "From" : dateFormat.format(fromDate!),
+                  style: TextStyle(
+                    color: fromDate == null ? Colors.blue : Colors.black87,
+                    fontWeight: FontWeight.w500,
+                    fontSize: kFilterFontSize,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: kFilterSpacing),
+        InkWell(
+          borderRadius: BorderRadius.circular(kFilterRadius),
+          onTap: () async {
+            DateTime? picked = await showDatePicker(
+              context: context,
+              initialDate: toDate ?? DateTime.now(),
+              firstDate: DateTime(2023),
+              lastDate: DateTime(2100),
+            );
+            if (picked != null) setState(() => toDate = picked);
+          },
+          child: Container(
+            height: kFilterHeight,
+            padding: const EdgeInsets.symmetric(horizontal: 18),
+            decoration: pillDecoration,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.date_range, color: Colors.blue, size: 20),
+                const SizedBox(width: 6),
+                Text(
+                  toDate == null ? "To" : dateFormat.format(toDate!),
+                  style: TextStyle(
+                    color: toDate == null ? Colors.blue : Colors.black87,
+                    fontWeight: FontWeight.w500,
+                    fontSize: kFilterFontSize,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+
+    // Group type dropdown
+    final groupDropdown = Container(
+      height: kFilterHeight,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: pillDecoration,
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<GroupType>(
+          value: groupType,
+          style: pillTextStyle,
+          icon: const Icon(Icons.keyboard_arrow_down, size: 22),
+          items: const [
+            DropdownMenuItem(
+              value: GroupType.day,
+              child: Text('Day'),
+            ),
+            DropdownMenuItem(
+              value: GroupType.week,
+              child: Text('Week'),
+            ),
+            DropdownMenuItem(
+              value: GroupType.month,
+              child: Text('Month'),
+            ),
+            DropdownMenuItem(
+              value: GroupType.year,
+              child: Text('Year'),
+            ),
+          ],
+          onChanged: (val) {
+            if (val != null) setState(() => groupType = val);
+          },
+        ),
+      ),
+    );
+
+    // Project and Note filters, same style
+    final projectBox = Container(
+      height: kFilterHeight,
+      width: 150,
+      alignment: Alignment.centerLeft,
+      decoration: pillDecoration,
+      padding: const EdgeInsets.symmetric(horizontal: 18),
+      child: TextField(
+        decoration: InputDecoration(
+          hintText: 'Project',
+          border: InputBorder.none,
+          isDense: true,
+          contentPadding: EdgeInsets.zero,
+        ),
+        style: pillTextStyle,
+        onChanged: (v) => setState(() => searchProject = v.trim()),
+      ),
+    );
+
+    final noteBox = Container(
+      height: kFilterHeight,
+      width: 150,
+      alignment: Alignment.centerLeft,
+      decoration: pillDecoration,
+      padding: const EdgeInsets.symmetric(horizontal: 18),
+      child: TextField(
+        decoration: InputDecoration(
+          hintText: 'Note',
+          border: InputBorder.none,
+          isDense: true,
+          contentPadding: EdgeInsets.zero,
+        ),
+        style: pillTextStyle,
+        onChanged: (v) => setState(() => searchNote = v.trim()),
+      ),
+    );
+
+    // Refresh icon styled to match, but filled
+    final refreshBtn = Container(
+      height: kFilterHeight,
+      decoration: BoxDecoration(
+        color: Colors.blue[100],
+        borderRadius: BorderRadius.circular(kFilterRadius),
+      ),
+      child: IconButton(
+        icon: const Icon(Icons.refresh, color: Colors.blue, size: 24),
+        tooltip: 'Clear filters',
+        onPressed: () {
+          setState(() {
+            fromDate = null;
+            toDate = null;
+            searchProject = '';
+            searchNote = '';
+          });
+        },
+      ),
+    );
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Column(
         children: [
           // FILTER & GROUP BAR
-          Row(
-            children: [
-              OutlinedButton.icon(
-                icon: const Icon(Icons.date_range),
-                label: Text(fromDate == null
-                    ? 'From'
-                    : dateFormat.format(fromDate!)),
-                onPressed: () async {
-                  DateTime? picked = await showDatePicker(
-                    context: context,
-                    initialDate: fromDate ?? DateTime.now(),
-                    firstDate: DateTime(2023),
-                    lastDate: DateTime(2100),
-                  );
-                  if (picked != null) setState(() => fromDate = picked);
-                },
-              ),
-              const SizedBox(width: 10),
-              OutlinedButton.icon(
-                icon: const Icon(Icons.date_range),
-                label: Text(toDate == null
-                    ? 'To'
-                    : dateFormat.format(toDate!)),
-                onPressed: () async {
-                  DateTime? picked = await showDatePicker(
-                    context: context,
-                    initialDate: toDate ?? DateTime.now(),
-                    firstDate: DateTime(2023),
-                    lastDate: DateTime(2100),
-                  );
-                  if (picked != null) setState(() => toDate = picked);
-                },
-              ),
-              const SizedBox(width: 16),
-              SizedBox(
-                width: 130,
-                child: TextField(
-                  decoration: const InputDecoration(
-                    labelText: 'Project',
-                    isDense: true,
-                  ),
-                  onChanged: (v) => setState(() => searchProject = v.trim()),
-                ),
-              ),
-              const SizedBox(width: 8),
-              SizedBox(
-                width: 130,
-                child: TextField(
-                  decoration: const InputDecoration(
-                    labelText: 'Note',
-                    isDense: true,
-                  ),
-                  onChanged: (v) => setState(() => searchNote = v.trim()),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                tooltip: 'Clear filters',
-                onPressed: () {
-                  setState(() {
-                    fromDate = null;
-                    toDate = null;
-                    searchProject = '';
-                    searchNote = '';
-                  });
-                },
-              ),
-              const SizedBox(width: 16),
-              // Group type dropdown
-              DropdownButton<GroupType>(
-                value: groupType,
-                items: const [
-                  DropdownMenuItem(
-                    value: GroupType.day,
-                    child: Text('Day'),
-                  ),
-                  DropdownMenuItem(
-                    value: GroupType.week,
-                    child: Text('Week'),
-                  ),
-                  DropdownMenuItem(
-                    value: GroupType.month,
-                    child: Text('Month'),
-                  ),
-                  DropdownMenuItem(
-                    value: GroupType.year,
-                    child: Text('Year'),
-                  ),
-                ],
-                onChanged: (val) {
-                  if (val != null) setState(() => groupType = val);
-                },
-              ),
-            ],
-          ),
-          const Divider(height: 22),
+
+
+          Container(
+  width: double.infinity, // stretch to full width!
+  decoration: BoxDecoration(
+    color: Colors.white,
+    border: Border.all(color: Colors.grey.shade300, width: 1),
+    borderRadius: BorderRadius.circular(kFilterRadius + 2),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.03),
+        blurRadius: 4,
+        offset: Offset(0, 2),
+      ),
+    ],
+  ),
+  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+  alignment: Alignment.centerLeft, // keep fields left-aligned
+  child: Wrap(
+    alignment: WrapAlignment.start, // aligns all children left!
+    spacing: kFilterSpacing,
+    runSpacing: kFilterSpacing,
+    crossAxisAlignment: WrapCrossAlignment.center,
+    children: [
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          dateGroup,
+          const SizedBox(width: kFilterSpacing),
+          groupDropdown,
+        ],
+      ),
+      projectBox,
+      noteBox,
+      refreshBtn,
+    ],
+  ),
+),
+
+
+
+          
           // DATA LIST
           Expanded(
             child: StreamBuilder<QuerySnapshot>(

@@ -25,9 +25,15 @@ class TimeEntryCard extends StatefulWidget {
   State<TimeEntryCard> createState() => _TimeEntryCardState();
 }
 
-class _TimeEntryCardState extends State<TimeEntryCard> {
+class _TimeEntryCardState extends State<TimeEntryCard>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   final _startController = TextEditingController();
-  final _endController = TextEditingController();
+  final _endController   = TextEditingController();
+  final FocusNode _startFocus = FocusNode();
+  final FocusNode _endFocus   = FocusNode();
 
   String? _project;
   String? _note;
@@ -37,10 +43,32 @@ class _TimeEntryCardState extends State<TimeEntryCard> {
   Map<String, dynamic> _expenses = {};
 
   @override
+  void initState() {
+    super.initState();
+    _startFocus.addListener(() => _formatOnUnfocus(_startController, _startFocus));
+    _endFocus.addListener(() => _formatOnUnfocus(_endController, _endFocus));
+  }
+
+  @override
   void dispose() {
     _startController.dispose();
     _endController.dispose();
+    _startFocus.dispose();
+    _endFocus.dispose();
     super.dispose();
+  }
+
+  void _formatOnUnfocus(TextEditingController c, FocusNode n) {
+    if (!n.hasFocus) {
+      final t = c.text.trim();
+      if (t.isEmpty) return;
+      try {
+        final clean = t.replaceAll(':', '').padLeft(4, '0');
+        final h = int.parse(clean.substring(0, 2));
+        final m = int.parse(clean.substring(2, 4));
+        c.text = DateFormat.Hm().format(DateTime(2000, 1, 1, h, m));
+      } catch (_) {}
+    }
   }
 
   Future<void> _showProjectPopup() async {
@@ -322,6 +350,17 @@ class _TimeEntryCardState extends State<TimeEntryCard> {
     return false;
   }
 
+  // === LOG ID GENERATOR ===
+  String _generateLogId(DateTime dt) {
+    final y = dt.year.toString().padLeft(4, '0');
+    final m = dt.month.toString().padLeft(2, '0');
+    final d = dt.day.toString().padLeft(2, '0');
+    final h = dt.hour.toString().padLeft(2, '0');
+    final min = dt.minute.toString().padLeft(2, '0');
+    final s = dt.second.toString().padLeft(2, '0');
+    return '$y$m$d$h$min$s';
+  }
+
   Future<void> _onAddPressed() async {
     setState(() => _isLoading = true);
     try {
@@ -361,11 +400,14 @@ class _TimeEntryCardState extends State<TimeEntryCard> {
       final mins = end.difference(begin).inMinutes;
       final sessionDate = DateFormat('yyyy-MM-dd').format(d);
 
+      // --- THIS LINE CHANGED ---
+      final logId = _generateLogId(begin);
+
       await FirebaseFirestore.instance
           .collection('companies').doc(widget.companyId)
           .collection('users').doc(widget.userId)
           .collection('all_logs')
-          .doc()
+          .doc(logId) // Now using time-based log ID!
           .set({
         'sessionDate': sessionDate,
         'begin': begin,
@@ -393,138 +435,13 @@ class _TimeEntryCardState extends State<TimeEntryCard> {
     }
   }
 
-  // --------- TIME PICKER (24h) ---------
-  Widget timeBox(TextEditingController c, String hint) {
-    final app = Theme.of(context).extension<AppColors>()!;
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final boxShadow = [
-      BoxShadow(
-        color: isDark ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.2),
-        blurRadius: 1,
-        offset: const Offset(0, 2),
-      )
-    ];
-    BoxDecoration fieldDecoration = BoxDecoration(
-      color: theme.cardColor,
-      borderRadius: BorderRadius.circular(kEntryRadius),
-      boxShadow: boxShadow,
-      border: Border.all(color: theme.dividerColor),
-    );
-    TextStyle fieldStyle = TextStyle(
-      color: app.textColor,
-      fontSize: 16,
-      fontWeight: FontWeight.w400,
-      height: 1.2,
-    );
-
-    return GestureDetector(
-      onTap: () async {
-        // Try to parse current text, fallback to now
-        TimeOfDay initialTime;
-        try {
-          if (c.text.isNotEmpty) {
-            final parts = c.text.split(':');
-            initialTime = TimeOfDay(
-              hour: int.parse(parts[0]),
-              minute: int.parse(parts[1]),
-            );
-          } else {
-            initialTime = TimeOfDay.now();
-          }
-        } catch (_) {
-          initialTime = TimeOfDay.now();
-        }
-
-        final picked = await showTimePicker(
-          context: context,
-          initialTime: initialTime,
-          builder: (context, child) {
-            return MediaQuery(
-              data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
-              child: child!,
-            );
-          },
-        );
-
-        if (picked != null) {
-          final formatted = picked.hour.toString().padLeft(2, '0') + ':' + picked.minute.toString().padLeft(2, '0');
-          setState(() => c.text = formatted);
-        }
-      },
-      child: AbsorbPointer(
-        child: Container(
-          width: 92,
-          height: kEntryHeight,
-          decoration: fieldDecoration,
-          alignment: Alignment.center,
-          child: TextField(
-            controller: c,
-            textAlign: TextAlign.center,
-            style: fieldStyle,
-            maxLines: 1,
-            readOnly: true, // This disables the keyboard!
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              hintText: hint,
-              hintStyle: fieldStyle.copyWith(color: app.textColor),
-              isDense: true,
-              contentPadding: EdgeInsets.zero,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget selector(String text, VoidCallback onTap) {
-    final app = Theme.of(context).extension<AppColors>()!;
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final boxShadow = [
-      BoxShadow(
-        color: isDark ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.2),
-        blurRadius: 1,
-        offset: const Offset(0, 2),
-      )
-    ];
-    BoxDecoration fieldDecoration = BoxDecoration(
-      color: theme.cardColor,
-      borderRadius: BorderRadius.circular(kEntryRadius),
-      boxShadow: boxShadow,
-      border: Border.all(color: theme.dividerColor),
-    );
-    TextStyle fieldStyle = TextStyle(
-      color: app.textColor,
-      fontSize: 16,
-      fontWeight: FontWeight.w400,
-      height: 1.2,
-    );
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(kEntryRadius),
-      onTap: onTap,
-      child: Container(
-        width: 130,
-        height: kEntryHeight,
-        decoration: fieldDecoration,
-        alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Text(
-          text,
-          style: fieldStyle,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final app   = Theme.of(context).extension<AppColors>()!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
     final boxShadow = [
       BoxShadow(
         color: isDark ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.2),
@@ -533,49 +450,96 @@ class _TimeEntryCardState extends State<TimeEntryCard> {
       )
     ];
 
-    // Responsive: check width
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isPhone = screenWidth < 600; // Adjust as needed
+    BoxDecoration fieldDecoration = BoxDecoration(
+      color: theme.cardColor,
+      borderRadius: BorderRadius.circular(kEntryRadius),
+      boxShadow: boxShadow,
+      border: Border.all(color: theme.dividerColor),
+    );
 
-    final timeFields = [
-      timeBox(_startController, 'Start'),
-      const SizedBox(width: kFieldSpacing),
-      timeBox(_endController, 'End'),
-      const SizedBox(width: kFieldSpacing),
-      selector(_project ?? 'Project +', _showProjectPopup),
-      const SizedBox(width: kFieldSpacing),
-      selector(_expenses.containsKey('Per diem') ? 'Per Diem' : 'Expenses +', _showExpensePopup),
-    ];
+    TextStyle fieldStyle = TextStyle(
+      color: app.textColor,
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      height: 1.2,
+    );
 
-    final noteAndAdd = [
-      Expanded(
-        child: selector(_note ?? 'Add Note', _showNotePopup),
-      ),
-      const SizedBox(width: kFieldSpacing),
-      SizedBox(
-        height: kEntryHeight,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: app.primaryBlue,
-            foregroundColor: theme.colorScheme.onPrimary,
-            textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kEntryRadius)),
-            minimumSize: const Size(60, kEntryHeight),
-            maximumSize: const Size(86, kEntryHeight),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            elevation: 0,
+    Widget timeBox(TextEditingController c, String hint) {
+      return GestureDetector(
+        onTap: () async {
+          TimeOfDay initialTime;
+          try {
+            if (c.text.isNotEmpty) {
+              final parts = c.text.split(':');
+              initialTime = TimeOfDay(
+                hour: int.parse(parts[0]),
+                minute: int.parse(parts[1]),
+              );
+            } else {
+              initialTime = TimeOfDay.now();
+            }
+          } catch (_) {
+            initialTime = TimeOfDay.now();
+          }
+
+          final picked = await showTimePicker(
+            context: context,
+            initialTime: initialTime,
+            builder: (context, child) {
+              return MediaQuery(
+                data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+                child: child!,
+              );
+            },
+          );
+
+          if (picked != null) {
+            final formatted = picked.hour.toString().padLeft(2, '0') + ':' + picked.minute.toString().padLeft(2, '0');
+            setState(() => c.text = formatted);
+          }
+        },
+        child: AbsorbPointer(
+          child: Container(
+            width: 92,
+            height: kEntryHeight,
+            decoration: fieldDecoration,
+            alignment: Alignment.center,
+            child: TextField(
+              controller: c,
+              textAlign: TextAlign.center,
+              style: fieldStyle,
+              maxLines: 1,
+              readOnly: true, // This disables the keyboard!
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: hint,
+                hintStyle: fieldStyle.copyWith(color: app.textColor),
+                isDense: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
           ),
-          onPressed: _isLoading ? null : _onAddPressed,
-          child: _isLoading
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('Add'),
         ),
-      ),
-    ];
+      );
+    }
+
+    Widget selector(String text, VoidCallback onTap) => InkWell(
+          borderRadius: BorderRadius.circular(kEntryRadius),
+          onTap: onTap,
+          child: Container(
+            width: 130,
+            height: kEntryHeight,
+            decoration: fieldDecoration,
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Text(
+              text,
+              style: fieldStyle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        );
 
     return SizedBox(
       width: double.infinity,
@@ -588,28 +552,56 @@ class _TimeEntryCardState extends State<TimeEntryCard> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           child: Padding(
             padding: const EdgeInsets.all(10),
-            child: isPhone
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Wrap(
-                        spacing: kFieldSpacing,
-                        runSpacing: kFieldSpacing,
-                        children: timeFields,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  spacing: kFieldSpacing,
+                  runSpacing: kFieldSpacing,
+                  children: [
+                    timeBox(_startController, 'Start'),
+                    const SizedBox(width: kFieldSpacing),
+                    timeBox(_endController, 'End'),
+                    const SizedBox(width: kFieldSpacing),
+                    selector(_project ?? 'Project +', _showProjectPopup),
+                    const SizedBox(width: kFieldSpacing),
+                    selector(_expenses.containsKey('Per diem') ? 'Per Diem' : 'Expenses +', _showExpensePopup),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: selector(_note ?? 'Add Note', _showNotePopup),
+                    ),
+                    const SizedBox(width: kFieldSpacing),
+                    SizedBox(
+                      height: kEntryHeight,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: app.primaryBlue,
+                          foregroundColor: theme.colorScheme.onPrimary,
+                          textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kEntryRadius)),
+                          minimumSize: const Size(60, kEntryHeight),
+                          maximumSize: const Size(86, kEntryHeight),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          elevation: 0,
+                        ),
+                        onPressed: _isLoading ? null : _onAddPressed,
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Text('Add'),
                       ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: noteAndAdd,
-                      ),
-                    ],
-                  )
-                : Row(
-                    children: [
-                      ...timeFields,
-                      const SizedBox(width: kFieldSpacing),
-                      ...noteAndAdd,
-                    ],
-                  ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -193,7 +193,11 @@ class LogsList extends StatelessWidget {
             theme,
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-              child : Column(children: rows),
+              child: Wrap(
+                runSpacing: 4,
+                spacing: 0,
+                children: rows,
+              ),
             ),
           );
         },
