@@ -123,76 +123,97 @@ class LogsList extends StatelessWidget {
               final prevEnd= (prev['end'] as Timestamp?)?.toDate();
               if (prevEnd != null && begin != null && prevEnd.isBefore(begin)) {
                 rows.add(
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2),
-                    child: LogRowDisplay(
-                      label      : 'Break:',
-                      start      : DateFormat.Hm().format(prevEnd),
-                      end        : DateFormat.Hm().format(begin),
-                      total      : _fmtDur(begin.difference(prevEnd)),
-                      projectLines : const [],
-                      expenseLines : const [],
-                      note       : '',
-                      textColor  : textColor.withOpacity(0.5),
-                      showIcons  : false,
-                    ),
-                  ),
-                );
-              }
-            }
 
-            rows.add(
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 2),
-                child: _LogEditRow(
-                  logId      : logId,
-                  begin      : begin,
-                  end        : end,
-                  project    : projectRaw,
-                  projectLines : projectLines,
-                  expenseLines : expenseLines,
-                  expensesMap  : expensesMap,
-                  note       : noteText,
-                  appColors  : appColors,
-                  borderColor: borderColor,
-                  textColor  : textColor,
-                  duration   : (begin != null && end != null)
-                      ? end.difference(begin)
-                      : Duration.zero,
-                  onDelete   : () => doc.reference.delete(),
-                  onSave     : (newStart, newEnd, newNote, newProj, newExpenses) async {
-                    try {
-                      final ns = DateFormat.Hm().parse(newStart);
-                      final ne = DateFormat.Hm().parse(newEnd);
-                      final d  = selectedDay;
-                      final nb = DateTime(d.year, d.month, d.day, ns.hour, ns.minute);
-                      final nn = DateTime(d.year, d.month, d.day, ne.hour, ne.minute);
-                      if (!nn.isAfter(nb)) throw Exception('Invalid time');
 
-                      await doc.reference.update({
-                        'begin' : nb,
-                        'end'   : nn,
-                        'duration_minutes': nn.difference(nb).inMinutes,
-                        'note'  : newNote,
-                        'project': newProj,
-                        'expenses': newExpenses,
-                      });
-                    } catch (err) {
-                      ScaffoldMessenger.of(context)
-                          .showSnackBar(SnackBar(content: Text(err.toString())));
-                    }
-                  },
-                  projects: projects,
-                  perDiemLogId: perDiemLogId,
-                ),
-              ),
-            );
+                  Card(
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          elevation: 1,
+child: SizedBox(
+            width: double.infinity, // <-- makes Card full width
+/* Breaks
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+            child: LogRowDisplay(
+              label      : 'Break:',
+              start      : DateFormat.Hm().format(prevEnd),
+              end        : DateFormat.Hm().format(begin),
+              total      : _fmtDur(begin.difference(prevEnd)),
+              projectLines : const [],
+              expenseLines : const [],
+              note       : '',
+              textColor  : textColor.withOpacity(0.5),
+              showIcons  : false,
+            ),
+          ),*/
+        ),
+        ),
+      );
+    }
+  }
+
+rows.add(
+  Card(
+    margin: const EdgeInsets.symmetric(vertical: 4),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    elevation: 2,
+    child: SizedBox(
+
+      width: double.infinity, // <-- makes the Card fill horizontal space
+      child: Padding(
+
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      child: _LogEditRow(
+        logId      : logId,
+        begin      : begin,
+        end        : end,
+        project    : projectRaw,
+        projectLines : projectLines,
+        expenseLines : expenseLines,
+        expensesMap  : expensesMap,
+        note       : noteText,
+        appColors  : appColors,
+        borderColor: borderColor,
+        textColor  : textColor,
+        duration   : (begin != null && end != null)
+            ? end.difference(begin)
+            : Duration.zero,
+        onDelete   : () => doc.reference.delete(),
+        onSave     : (newStart, newEnd, newNote, newProj, newExpenses) async {
+          try {
+            final ns = DateFormat.Hm().parse(newStart);
+            final ne = DateFormat.Hm().parse(newEnd);
+            final d  = selectedDay;
+            final nb = DateTime(d.year, d.month, d.day, ns.hour, ns.minute);
+            final nn = DateTime(d.year, d.month, d.day, ne.hour, ne.minute);
+            if (!nn.isAfter(nb)) throw Exception('Invalid time');
+
+            await doc.reference.update({
+              'begin' : nb,
+              'end'   : nn,
+              'duration_minutes': nn.difference(nb).inMinutes,
+              'note'  : newNote,
+              'project': newProj,
+              'expenses': newExpenses,
+            });
+          } catch (err) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(err.toString())));
+          }
+        },
+        projects: projects,
+        perDiemLogId: perDiemLogId,
+      ),
+    ),
+  ),
+  ),
+);
           }
 
           return _shellCard(
             theme,
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
               child: Wrap(
                 runSpacing: 4,
                 spacing: 0,
@@ -247,9 +268,11 @@ class LogRowDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = TextStyle(color: textColor, fontSize: 16);
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+  spacing: 8,    // or whatever spacing you like
+  runSpacing: 4, // vertical gap between wraps
+  children: [
         SizedBox(width: kWidthLabel,  child: Text(label, style: style)),
         const SizedBox(width: kWidthSpacer),
         SizedBox(width: kWidthTime,   child: Text(start, style: style, textAlign: TextAlign.center)),
@@ -285,9 +308,8 @@ class LogRowDisplay extends StatelessWidget {
           ),
         ),
         const SizedBox(width: kWidthSpacer),
-        Expanded(
-          child: Text(note, style: style, softWrap: true, overflow: TextOverflow.visible),
-        ),
+        Text(note, style: style, softWrap: true, overflow: TextOverflow.visible),
+        
         if (showIcons) ...[
           SizedBox(
             width: kWidthIcon,
