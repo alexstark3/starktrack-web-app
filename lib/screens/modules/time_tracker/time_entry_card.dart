@@ -500,7 +500,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
         },
         child: AbsorbPointer(
           child: Container(
-            width: 92,
+            width: 130,
             height: kEntryHeight,
             decoration: fieldDecoration,
             alignment: Alignment.center,
