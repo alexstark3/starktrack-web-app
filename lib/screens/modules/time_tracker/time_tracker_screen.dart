@@ -20,9 +20,12 @@ class TimeTrackerScreen extends StatefulWidget {
   State<TimeTrackerScreen> createState() => _TimeTrackerScreenState();
 }
 
-class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
-  // Removed GlobalKey! Not needed.
+class _TimeTrackerScreenState extends State<TimeTrackerScreen> with AutomaticKeepAliveClientMixin {
   late final DateTime _today;
+
+  @override
+  bool get wantKeepAlive => true; // This keeps the state alive!
+
   @override
   void initState() {
     super.initState();
@@ -32,6 +35,8 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // <- IMPORTANT for keepAlive
+
     final sessionId = DateFormat('yyyy-MM-dd').format(_today);
 
     final logsRef = FirebaseFirestore.instance
