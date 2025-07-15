@@ -307,7 +307,10 @@ class _LogEditRow extends StatefulWidget {
   State<_LogEditRow> createState() => _LogEditRowState();
 }
 
-class _LogEditRowState extends State<_LogEditRow> {
+class _LogEditRowState extends State<_LogEditRow>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;       // ← keeps focus across rebuilds
   bool editing = false;
   late TextEditingController startCtrl, endCtrl, noteCtrl;
   final FocusNode _noteFocus = FocusNode();            // ← NEW
@@ -556,6 +559,7 @@ class _LogEditRowState extends State<_LogEditRow> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final style = TextStyle(color: widget.textColor, fontSize: 16);
 
     if (!editing) {
