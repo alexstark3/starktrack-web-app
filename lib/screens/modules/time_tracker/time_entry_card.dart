@@ -75,7 +75,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
     if (widget.projects.isEmpty) return;
     final res = await showDialog<String>(
       context: context,
-      useRootNavigator: false,                         // <— FIX
+      useRootNavigator: false,            // keep within same navigator tree
       builder: (_) => SimpleDialog(
         title: const Text('Select Project'),
         children: widget.projects
@@ -93,7 +93,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
     final ctrl = TextEditingController(text: _note ?? '');
     final res = await showDialog<String>(
       context: context,
-      useRootNavigator: false,                         // <— FIX
+      useRootNavigator: false,
       builder: (_) => AlertDialog(
         title: const Text('Note'),
         content: TextField(controller: ctrl, maxLines: 3),
@@ -137,7 +137,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
 
     await showDialog(
       context: context,
-      useRootNavigator: false,                         // <— FIX
+      useRootNavigator: false,
       barrierDismissible: false,
       builder: (_) => StatefulBuilder(
         builder: (context, setStateDialog) {
@@ -417,7 +417,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
         'end': end,
         'duration_minutes': mins,
         'project': _project ?? '',
-        'projectId': _project ?? '',   // NEW FIELD FOR FILTERING
+        'projectId': _project ?? '',
         'note': _note ?? '',
         'expenses': _expenses,
         'createdAt': FieldValue.serverTimestamp(),
@@ -559,20 +559,25 @@ class _TimeEntryCardState extends State<TimeEntryCard>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // ------------- FIELDS -------------
                 Wrap(
                   spacing: kFieldSpacing,
                   runSpacing: kFieldSpacing,
                   children: [
                     timeBox(_startController, 'Start'),
-                    const SizedBox(width: kFieldSpacing),
                     timeBox(_endController, 'End'),
-                    const SizedBox(width: kFieldSpacing),
                     selector(_project ?? 'Project +', _showProjectPopup),
-                    const SizedBox(width: kFieldSpacing),
-                    selector(_expenses.containsKey('Per diem') ? 'Per Diem' : 'Expenses +', _showExpensePopup),
+                    selector(
+                      _expenses.containsKey('Per diem')
+                          ? 'Per Diem'
+                          : 'Expenses +',
+                      _showExpensePopup,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 10),
+
+                // ----------- NOTE + ADD -----------
                 Row(
                   children: [
                     Expanded(
