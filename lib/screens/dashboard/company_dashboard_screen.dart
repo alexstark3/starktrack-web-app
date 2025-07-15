@@ -38,11 +38,15 @@ class CompanyDashboardScreen extends StatefulWidget {
 
 class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
   late String _selected;
+  late final List<_ScreenCfg> _screenConfigs;
+  late final List<String> _tabLabels;
 
   @override
   void initState() {
     super.initState();
-    _selected = _screens.first.label;
+    _screenConfigs = _screens;
+    _tabLabels = _screenConfigs.map((s) => s.label).toList();
+    _selected = _tabLabels.first;
   }
 
   @override
@@ -55,23 +59,40 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
     final double railWidth = compact ? 72 : 220;
     final double barHeight = CompanyTopBar.kHeight;
 
-    // The page body under the bar:
+    // --- IndexedStack for persistent tab state ---
     final body = Container(
       color: colors.dashboardBackground,
-      child: switch (_selected) {
-        'Time Tracker' => TimeTrackerScreen(
-            companyId: widget.companyId, userId: widget.userId),
-        'History'     => HistoryLogs(
-            companyId: widget.companyId, userId: widget.userId),
-        // --- TEAM MODULE ADDITION ---
-        'Team'        => TeamModuleTabScreen(
-            companyId: widget.companyId,
-            userId: widget.userId,
-          ),
-        'Admin'       => AdminPanel(companyId: widget.companyId, currentUserRoles: widget.roles,),
-        'Settings'    => const SettingsScreen(),
-        _             => const Center(child: Text('No screen')),
-      },
+      child: IndexedStack(
+        index: _tabLabels.indexOf(_selected),
+        children: [
+          if (_tabLabels.contains('Time Tracker'))
+            TimeTrackerScreen(
+              key: const PageStorageKey('tracker'),
+              companyId: widget.companyId,
+              userId: widget.userId,
+            ),
+          if (_tabLabels.contains('History'))
+            HistoryLogs(
+              key: const PageStorageKey('history'),
+              companyId: widget.companyId,
+              userId: widget.userId,
+            ),
+          if (_tabLabels.contains('Team'))
+            TeamModuleTabScreen(
+              key: const PageStorageKey('team'),
+              companyId: widget.companyId,
+              userId: widget.userId,
+            ),
+          if (_tabLabels.contains('Admin'))
+            AdminPanel(
+              key: const PageStorageKey('admin'),
+              companyId: widget.companyId,
+              currentUserRoles: widget.roles,
+            ),
+          if (_tabLabels.contains('Settings'))
+            const SettingsScreen(key: PageStorageKey('settings')),
+        ],
+      ),
     );
 
     return Scaffold(
@@ -91,7 +112,7 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
             left: 0,
             width: railWidth,
             child: CompanySideMenu(
-              menuItems: _screens
+              menuItems: _screenConfigs
                   .map((s) => SideMenuItem(
                         label   : s.label,
                         icon    : s.icon,
