@@ -20,12 +20,12 @@ class TimeTrackerScreen extends StatefulWidget {
   State<TimeTrackerScreen> createState() => _TimeTrackerScreenState();
 }
 
-class _TimeTrackerScreenState extends State<TimeTrackerScreen> with AutomaticKeepAliveClientMixin {
+class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
+  // Stable key so TimeEntryCard’s State is always reused
+  static final GlobalKey _entryCardKey = GlobalKey();
+
+  // Cache “today” once so the same DateTime instance is reused
   late final DateTime _today;
-
-  @override
-  bool get wantKeepAlive => true; // This keeps the state alive!
-
   @override
   void initState() {
     super.initState();
@@ -35,8 +35,6 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> with AutomaticKee
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // <- IMPORTANT for keepAlive
-
     final sessionId = DateFormat('yyyy-MM-dd').format(_today);
 
     final logsRef = FirebaseFirestore.instance
@@ -68,12 +66,12 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> with AutomaticKee
           }
 
           final projects = projectSnap.data!.docs
-              .map((d) => {
-                    'id': d.id,
-                    'name': (d.data() as Map<String, dynamic>)['name'] as String? ?? d.id,
-                  })
-              .where((proj) => (proj['name'] ?? '').toString().trim().isNotEmpty)
-              .toList();
+    .map((d) => {
+      'id': d.id,
+      'name': (d.data() as Map<String, dynamic>)['name'] as String? ?? d.id,
+    })
+    .where((proj) => (proj['name'] ?? '').toString().trim().isNotEmpty)
+    .toList();
 
           return SingleChildScrollView(
             child: Padding(
@@ -84,8 +82,9 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> with AutomaticKee
                   TodayLine(),
                   const SizedBox(height: 10),
 
-                  /// Time-entry card – NO KEY!
+                  /// Time-entry card – key guarantees the same State object
                   TimeEntryCard(
+                    key: _entryCardKey,
                     companyId: widget.companyId,
                     userId: widget.userId,
                     selectedDay: _today,

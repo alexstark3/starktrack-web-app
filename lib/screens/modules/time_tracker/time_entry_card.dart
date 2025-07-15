@@ -105,12 +105,11 @@ class _TimeEntryCardState extends State<TimeEntryCard>
   }
 
   Future<void> _showExpensePopup() async {
-    // --- FIX: These controllers and tempExpenses must live for the duration of the dialog! ---
     final TextEditingController nameCtrl = TextEditingController();
     final TextEditingController amountCtrl = TextEditingController();
+
     Map<String, dynamic> tempExpenses = Map<String, dynamic>.from(_expenses);
     bool tempPerDiem = tempExpenses.containsKey('Per diem');
-
     Color primaryColor = Colors.blue;
 
     // CHECK for Per Diem in any log for this day!
@@ -131,27 +130,208 @@ class _TimeEntryCardState extends State<TimeEntryCard>
         break;
       }
     }
+    // For new session, only allow per diem if not present in any other session yet
     bool canEditPerDiem = (perDiemSessionId == null);
 
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) {
-        // Make controllers and tempExpenses live outside builder, manage with setStateDialog
-        return _ExpenseDialog(
-          nameCtrl: nameCtrl,
-          amountCtrl: amountCtrl,
-          tempExpenses: tempExpenses,
-          tempPerDiem: tempPerDiem,
-          canEditPerDiem: canEditPerDiem,
-          primaryColor: primaryColor,
-          onSave: (newExpenses) {
-            setState(() {
-              _expenses = Map<String, dynamic>.from(newExpenses);
+      builder: (_) => StatefulBuilder(
+        builder: (context, setStateDialog) {
+          bool canAddExpense() {
+            final name = nameCtrl.text.trim();
+            final amountStr = amountCtrl.text.trim();
+            final amount = double.tryParse(amountStr.replaceAll(',', '.'));
+            return name.isNotEmpty &&
+                amountStr.isNotEmpty &&
+                amount != null &&
+                amount > 0 &&
+                !tempExpenses.containsKey(name) &&
+                name != 'Per diem';
+          }
+
+          void addExpense() {
+            final name = nameCtrl.text.trim();
+            final amountStr = amountCtrl.text.trim();
+            if (!canAddExpense()) return;
+            setStateDialog(() {
+              tempExpenses[name] = double.parse(amountStr.replaceAll(',', '.'));
+              nameCtrl.clear();
+              amountCtrl.clear();
             });
-          },
-        );
-      },
+          }
+
+          void handlePerDiemChange(bool? checked) {
+            setStateDialog(() {
+              tempPerDiem = checked ?? false;
+              if (tempPerDiem) {
+                tempExpenses['Per diem'] = 16.00;
+              } else {
+                tempExpenses.remove('Per diem');
+              }
+            });
+          }
+
+          void handleExpenseChange(String key, bool? checked) {
+            if (checked == false) {
+              setStateDialog(() => tempExpenses.remove(key));
+            }
+          }
+
+          // Expenses for display (Per diem last)
+          final List<String> otherExpenseKeys =
+              tempExpenses.keys.where((k) => k != 'Per diem').toList();
+          final List<Widget> expenseWidgets = [
+            for (final key in otherExpenseKeys)
+              Row(
+                children: [
+                  Checkbox(
+                    value: true,
+                    onChanged: (checked) => handleExpenseChange(key, checked),
+                    activeColor: primaryColor,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4)),
+                  ),
+                  Text(
+                    key,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.normal, fontSize: 16),
+                  ),
+                  const Spacer(),
+                  Text(
+                    '${(tempExpenses[key] as num).toStringAsFixed(2)} CHF',
+                    style: const TextStyle(
+                        fontWeight: FontWeight.normal, fontSize: 16),
+                  ),
+                ],
+              ),
+            Row(
+              children: [
+                Checkbox(
+                  value: tempPerDiem,
+                  onChanged: canEditPerDiem ? handlePerDiemChange : null,
+                  activeColor: primaryColor,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4)),
+                ),
+                Text('Per Diem',
+                  style: TextStyle(
+                    fontWeight: FontWeight.normal,
+                    fontSize: 16,
+                    color: canEditPerDiem
+                        ? Colors.black
+                        : Colors.grey.shade400,
+                  ),
+                ),
+                const Spacer(),
+                const Text('16.00 CHF',
+                    style: TextStyle(
+                        fontWeight: FontWeight.normal, fontSize: 16)),
+                if (!canEditPerDiem)
+                  const Padding(
+                    padding: EdgeInsets.only(left: 8),
+                    child: Tooltip(
+                      message: "Per Diem already used for this day",
+                      child: Icon(Icons.lock, color: Colors.grey, size: 17),
+                    ),
+                  ),
+              ],
+            ),
+          ];
+
+          // ====== IMPORTANT FIX BELOW: ======
+          // Never call parent setState in here, only use setStateDialog. Also, avoid any closure capturing the parent's context.
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            title: const Text('Expenses'),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ...expenseWidgets,
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: TextField(
+                          controller: nameCtrl,
+                          decoration: const InputDecoration(
+                            hintText: 'Name',
+                            border: UnderlineInputBorder(),
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(vertical: 4),
+                          ),
+                          onChanged: (_) => setStateDialog(() {}),
+                          onSubmitted: (_) => canAddExpense() ? addExpense() : null,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        flex: 1,
+                        child: TextField(
+                          controller: amountCtrl,
+                          decoration: const InputDecoration(
+                            hintText: 'Amount',
+                            border: UnderlineInputBorder(),
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(vertical: 4),
+                          ),
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          onChanged: (_) => setStateDialog(() {}),
+                          onSubmitted: (_) => canAddExpense() ? addExpense() : null,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      SizedBox(
+                        height: 32,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            backgroundColor: Colors.grey.shade200,
+                            foregroundColor: primaryColor,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          onPressed: canAddExpense() ? addExpense : null,
+                          child: const Text('Add'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cancel', style: TextStyle(color: primaryColor, fontSize: 16)),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
+                  textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                onPressed: () {
+                  // Use only setStateDialog above for temp variables.
+                  // Here, update the parent only when user saves.
+                  setState(() {
+                    _expenses = Map<String, dynamic>.from(tempExpenses);
+                  });
+                  Navigator.pop(context);
+                },
+                child: const Text('Save'),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -430,231 +610,6 @@ class _TimeEntryCardState extends State<TimeEntryCard>
           ),
         ),
       ),
-    );
-  }
-}
-
-// --- New widget for the dialog ---
-class _ExpenseDialog extends StatefulWidget {
-  final TextEditingController nameCtrl;
-  final TextEditingController amountCtrl;
-  final Map<String, dynamic> tempExpenses;
-  final bool tempPerDiem;
-  final bool canEditPerDiem;
-  final Color primaryColor;
-  final Function(Map<String, dynamic> newExpenses) onSave;
-
-  const _ExpenseDialog({
-    required this.nameCtrl,
-    required this.amountCtrl,
-    required this.tempExpenses,
-    required this.tempPerDiem,
-    required this.canEditPerDiem,
-    required this.primaryColor,
-    required this.onSave,
-  });
-
-  @override
-  State<_ExpenseDialog> createState() => __ExpenseDialogState();
-}
-
-class __ExpenseDialogState extends State<_ExpenseDialog> {
-  late Map<String, dynamic> tempExpenses;
-  late bool tempPerDiem;
-
-  @override
-  void initState() {
-    super.initState();
-    tempExpenses = Map<String, dynamic>.from(widget.tempExpenses);
-    tempPerDiem = widget.tempPerDiem;
-  }
-
-  bool canAddExpense() {
-    final name = widget.nameCtrl.text.trim();
-    final amountStr = widget.amountCtrl.text.trim();
-    final amount = double.tryParse(amountStr.replaceAll(',', '.'));
-    return name.isNotEmpty &&
-        amountStr.isNotEmpty &&
-        amount != null &&
-        amount > 0 &&
-        !tempExpenses.containsKey(name) &&
-        name != 'Per diem';
-  }
-
-  void addExpense() {
-    final name = widget.nameCtrl.text.trim();
-    final amountStr = widget.amountCtrl.text.trim();
-    if (!canAddExpense()) return;
-    setState(() {
-      tempExpenses[name] = double.parse(amountStr.replaceAll(',', '.'));
-      widget.nameCtrl.clear();
-      widget.amountCtrl.clear();
-    });
-  }
-
-  void handlePerDiemChange(bool? checked) {
-    setState(() {
-      tempPerDiem = checked ?? false;
-      if (tempPerDiem) {
-        tempExpenses['Per diem'] = 16.00;
-      } else {
-        tempExpenses.remove('Per diem');
-      }
-    });
-  }
-
-  void handleExpenseChange(String key, bool? checked) {
-    if (checked == false) {
-      setState(() => tempExpenses.remove(key));
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final List<String> otherExpenseKeys =
-        tempExpenses.keys.where((k) => k != 'Per diem').toList();
-    final List<Widget> expenseWidgets = [
-      for (final key in otherExpenseKeys)
-        Row(
-          children: [
-            Checkbox(
-              value: true,
-              onChanged: (checked) => handleExpenseChange(key, checked),
-              activeColor: widget.primaryColor,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4)),
-            ),
-            Text(
-              key,
-              style: const TextStyle(
-                  fontWeight: FontWeight.normal, fontSize: 16),
-            ),
-            const Spacer(),
-            Text(
-              '${(tempExpenses[key] as num).toStringAsFixed(2)} CHF',
-              style: const TextStyle(
-                  fontWeight: FontWeight.normal, fontSize: 16),
-            ),
-          ],
-        ),
-      Row(
-        children: [
-          Checkbox(
-            value: tempPerDiem,
-            onChanged: widget.canEditPerDiem ? handlePerDiemChange : null,
-            activeColor: widget.primaryColor,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4)),
-          ),
-          Text('Per Diem',
-            style: TextStyle(
-              fontWeight: FontWeight.normal,
-              fontSize: 16,
-              color: widget.canEditPerDiem
-                  ? Colors.black
-                  : Colors.grey.shade400,
-            ),
-          ),
-          const Spacer(),
-          const Text('16.00 CHF',
-              style: TextStyle(
-                  fontWeight: FontWeight.normal, fontSize: 16)),
-          if (!widget.canEditPerDiem)
-            const Padding(
-              padding: EdgeInsets.only(left: 8),
-              child: Tooltip(
-                message: "Per Diem already used for this day",
-                child: Icon(Icons.lock, color: Colors.grey, size: 17),
-              ),
-            ),
-        ],
-      ),
-    ];
-
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      title: const Text('Expenses'),
-      content: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ...expenseWidgets,
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: TextField(
-                    controller: widget.nameCtrl,
-                    decoration: const InputDecoration(
-                      hintText: 'Name',
-                      border: UnderlineInputBorder(),
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(vertical: 4),
-                    ),
-                    onChanged: (_) => setState(() {}),
-                    onSubmitted: (_) => canAddExpense() ? addExpense() : null,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  flex: 1,
-                  child: TextField(
-                    controller: widget.amountCtrl,
-                    decoration: const InputDecoration(
-                      hintText: 'Amount',
-                      border: UnderlineInputBorder(),
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(vertical: 4),
-                    ),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    onChanged: (_) => setState(() {}),
-                    onSubmitted: (_) => canAddExpense() ? addExpense() : null,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                SizedBox(
-                  height: 32,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      backgroundColor: Colors.grey.shade200,
-                      foregroundColor: widget.primaryColor,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    onPressed: canAddExpense() ? addExpense : null,
-                    child: const Text('Add'),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-      actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text('Cancel', style: TextStyle(color: widget.primaryColor, fontSize: 16)),
-        ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: widget.primaryColor,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
-            textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          onPressed: () {
-            widget.onSave(tempExpenses);
-            Navigator.pop(context);
-          },
-          child: const Text('Save'),
-        ),
-      ],
     );
   }
 }

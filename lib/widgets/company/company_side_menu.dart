@@ -18,12 +18,14 @@ class CompanySideMenu extends StatelessWidget {
   final List<SideMenuItem> menuItems;
   final bool compact;
   final bool showBrand;
+  final String version; // <-- Added version param
 
   const CompanySideMenu({
     super.key,
     required this.menuItems,
     this.compact = false,
     this.showBrand = true,
+    this.version = 'Stark Track v1.2b', // <-- Default is empty
   });
 
   @override
@@ -31,11 +33,10 @@ class CompanySideMenu extends StatelessWidget {
     final theme  = Theme.of(context);
     final width  = compact ? 72.0 : 220.0;
 
-    /* ── YOUR EXACT SETTINGS ── */
     return Material(
-      elevation: 8,                             // right-side shadow
+      elevation: 8,
       shadowColor: Colors.black.withOpacity(0.80),
-      clipBehavior: Clip.none,                  // let shadow spill
+      clipBehavior: Clip.none,
       child: SizedBox(
         width: width,
         child: Column(
@@ -44,7 +45,7 @@ class CompanySideMenu extends StatelessWidget {
             if (showBrand) ...[
               const SizedBox(height: 12),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25), // brand shift
+                padding: const EdgeInsets.symmetric(horizontal: 25),
                 child: Text(
                   compact ? 'ST' : 'Stark Track',
                   style: const TextStyle(
@@ -53,16 +54,34 @@ class CompanySideMenu extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 18), // aligns with top bar
+              const SizedBox(height: 18),
               Divider(
                 height: 1,
                 thickness: 1,
                 color: theme.colorScheme.outlineVariant.withOpacity(0.30),
               ),
             ],
-            ...menuItems.map(
-              (m) => _AnimatedMenuItem(item: m, compact: compact),
+            // Use Expanded to push the version label to the bottom
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: menuItems
+                    .map((m) => _AnimatedMenuItem(item: m, compact: compact))
+                    .toList(),
+              ),
             ),
+            // Version label at the bottom
+            if (version.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Text(
+                  version,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: theme.colorScheme.onSurface.withOpacity(0.4),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -70,7 +89,6 @@ class CompanySideMenu extends StatelessWidget {
   }
 }
 
-/* row widget unchanged */
 class _AnimatedMenuItem extends StatefulWidget {
   final SideMenuItem item;
   final bool compact;
