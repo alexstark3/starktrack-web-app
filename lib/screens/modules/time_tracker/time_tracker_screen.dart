@@ -33,6 +33,21 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
     _today = DateTime(now.year, now.month, now.day);
   }
 
+  Future<List<Map<String, String>>> _fetchProjects() async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('companies')
+        .doc(widget.companyId)
+        .collection('projects')
+        .get();
+    return snapshot.docs
+        .map((d) => {
+              'id': d.id,
+              'name': d.data()['name'] as String? ?? d.id,
+            })
+        .where((proj) => (proj['name'] ?? '').toString().trim().isNotEmpty)
+        .toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final sessionId = DateFormat('yyyy-MM-dd').format(_today);
@@ -48,12 +63,8 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('companies')
-            .doc(widget.companyId)
-            .collection('projects')
-            .snapshots(),
+      body: FutureBuilder<List<Map<String, String>>>(
+        future: _fetchProjects(),
         builder: (context, projectSnap) {
           if (projectSnap.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -61,17 +72,11 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
           if (projectSnap.hasError) {
             return Center(child: Text('Error loading projects: ${projectSnap.error}'));
           }
-          if (!projectSnap.hasData || projectSnap.data!.docs.isEmpty) {
+          if (!projectSnap.hasData || projectSnap.data!.isEmpty) {
             return const Center(child: Text('No projects found in Firestore.'));
           }
 
-          final projects = projectSnap.data!.docs
-    .map((d) => {
-      'id': d.id,
-      'name': (d.data() as Map<String, dynamic>)['name'] as String? ?? d.id,
-    })
-    .where((proj) => (proj['name'] ?? '').toString().trim().isNotEmpty)
-    .toList();
+          final projects = projectSnap.data!;
 
           return SingleChildScrollView(
             child: Padding(
