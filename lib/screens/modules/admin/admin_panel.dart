@@ -60,6 +60,7 @@ class _AdminPanelState extends State<AdminPanel> {
       'workPercent': 100,
       'weeklyHours': 40,
       'teamLeaderId': '',
+      'showBreaks': true,
     };
 
     if (isEdit) {
@@ -68,7 +69,11 @@ class _AdminPanelState extends State<AdminPanel> {
         (userData['modules'] as List).add('time_tracker'); // Enforce on edit, too
       }
     }
-
+// In case showBreaks is missing in old user, default to true
+    if (!userData.containsKey('showBreaks')) {
+      userData['showBreaks'] = true;
+    }
+  
     String password = '';
     String errorText = '';
     bool isSubmitting = false;
@@ -88,6 +93,8 @@ class _AdminPanelState extends State<AdminPanel> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+
+
                       Text(isEdit ? 'Edit User' : 'Add New User',
                           style: TextStyle(
                             fontSize: 22,
@@ -201,6 +208,26 @@ class _AdminPanelState extends State<AdminPanel> {
                           ),
                         ],
                       ),
+
+  // --- NEW: Show Breaks Toggle ---
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Show Breaks',
+                            style: TextStyle(
+                                color: appColors.textColor,
+                                fontWeight: FontWeight.w500)),
+                        Switch(
+                          value: userData['showBreaks'],
+                          activeColor: appColors.primaryBlue,
+                          inactiveThumbColor: appColors.lightGray,
+                          onChanged: (v) =>
+                              setState(() => userData['showBreaks'] = v),
+                        ),
+                      ],
+                    ),
+
+
                       const SizedBox(height: 8),
 
                       _themedTextField(

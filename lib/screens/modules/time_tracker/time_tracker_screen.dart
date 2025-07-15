@@ -27,7 +27,7 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
   // Cache “today” once so the same DateTime instance is reused
   late final DateTime _today;
 
-  // NEW: cache the projects future so it isn’t recreated on every rebuild
+  // Cache the projects future so it isn’t recreated on every rebuild
   late final Future<List<Map<String, String>>> _projectsFuture;
 
   @override
@@ -36,7 +36,7 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
     final now = DateTime.now();
     _today = DateTime(now.year, now.month, now.day);
 
-    // NEW: initialise the cached future
+    // Initialise the cached future
     _projectsFuture = _fetchProjects();
   }
 
@@ -70,12 +70,9 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-
-      // NEW: prevent full rebuilds when the keyboard appears
       resizeToAvoidBottomInset: false,
-
       body: FutureBuilder<List<Map<String, String>>>(
-        future: _projectsFuture,        // NEW: use cached future
+        future: _projectsFuture,
         builder: (context, projectSnap) {
           if (projectSnap.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -89,81 +86,98 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
 
           final projects = projectSnap.data!;
 
-          return SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TodayLine(),
-                  const SizedBox(height: 10),
+          // === NEW: Listen to user document for showBreaks toggle ===
+          return StreamBuilder<DocumentSnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('companies')
+                .doc(widget.companyId)
+                .collection('users')
+                .doc(widget.userId)
+                .snapshots(),
+            builder: (context, userSnap) {
+              if (!userSnap.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              final userData = userSnap.data!.data() as Map<String, dynamic>? ?? {};
 
-                  /// Time-entry card – key guarantees the same State object
-                  TimeEntryCard(
-                    key: _entryCardKey,
-                    companyId: widget.companyId,
-                    userId: widget.userId,
-                    selectedDay: _today,
-                    projects: projects.map((p) => p['name'] as String).toList(),
-                  ),
-                  const SizedBox(height: 10),
+              return SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TodayLine(),
+                      const SizedBox(height: 10),
 
-                  /// Chips + Logs
-                  StreamBuilder<QuerySnapshot>(
-                    stream: logsRef.snapshots(),
-                    builder: (context, snap) {
-                      Duration worked = Duration.zero, breaks = Duration.zero;
-                      List<Map<String, dynamic>> logs = [];
+                      /// Time-entry card – key guarantees the same State object
+                      TimeEntryCard(
+                        key: _entryCardKey,
+                        companyId: widget.companyId,
+                        userId: widget.userId,
+                        selectedDay: _today,
+                        projects: projects.map((p) => p['name'] as String).toList(),
+                      ),
+                      const SizedBox(height: 10),
 
-                      if (snap.hasData && snap.data!.docs.isNotEmpty) {
-                        for (var doc in snap.data!.docs) {
-                          final data = doc.data() as Map<String, dynamic>;
-                          logs.add({...data, 'logId': doc.id});
+                      /// Chips + Logs
+                      StreamBuilder<QuerySnapshot>(
+                        stream: logsRef.snapshots(),
+                        builder: (context, snap) {
+                          Duration worked = Duration.zero, breaks = Duration.zero;
+                          List<Map<String, dynamic>> logs = [];
 
-                          final begin = (data['begin'] as Timestamp?)?.toDate();
-                          final end   = (data['end']   as Timestamp?)?.toDate();
-                          if (begin != null && end != null) {
-                            worked += end.difference(begin);
+                          if (snap.hasData && snap.data!.docs.isNotEmpty) {
+                            for (var doc in snap.data!.docs) {
+                              final data = doc.data() as Map<String, dynamic>;
+                              logs.add({...data, 'logId': doc.id});
+
+                              final begin = (data['begin'] as Timestamp?)?.toDate();
+                              final end   = (data['end']   as Timestamp?)?.toDate();
+                              if (begin != null && end != null) {
+                                worked += end.difference(begin);
+                              }
+                            }
+                            logs.sort((a, b) {
+                              final aBegin = (a['begin'] as Timestamp?)?.toDate();
+                              final bBegin = (b['begin'] as Timestamp?)?.toDate();
+                              return (aBegin ?? DateTime(2000))
+                                  .compareTo(bBegin ?? DateTime(2000));
+                            });
+                            for (int i = 1; i < logs.length; i++) {
+                              final prevEnd = (logs[i - 1]['end'] as Timestamp?)?.toDate();
+                              final thisBeg = (logs[i]['begin'] as Timestamp?)?.toDate();
+                              if (prevEnd != null &&
+                                  thisBeg != null &&
+                                  prevEnd.isBefore(thisBeg)) {
+                                breaks += thisBeg.difference(prevEnd);
+                              }
+                            }
                           }
-                        }
-                        logs.sort((a, b) {
-                          final aBegin = (a['begin'] as Timestamp?)?.toDate();
-                          final bBegin = (b['begin'] as Timestamp?)?.toDate();
-                          return (aBegin ?? DateTime(2000))
-                              .compareTo(bBegin ?? DateTime(2000));
-                        });
-                        for (int i = 1; i < logs.length; i++) {
-                          final prevEnd = (logs[i - 1]['end'] as Timestamp?)?.toDate();
-                          final thisBeg = (logs[i]['begin'] as Timestamp?)?.toDate();
-                          if (prevEnd != null &&
-                              thisBeg != null &&
-                              prevEnd.isBefore(thisBeg)) {
-                            breaks += thisBeg.difference(prevEnd);
-                          }
-                        }
-                      }
 
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ChipsCard(
-                            worked: worked,
-                            breaks: breaks,
-                          ),
-                          const SizedBox(height: 10),
-                          LogsList(
-                            companyId: widget.companyId,
-                            userId: widget.userId,
-                            selectedDay: _today,
-                            projects: projects,
-                          ),
-                        ],
-                      );
-                    },
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ChipsCard(
+                                worked: worked,
+                                breaks: breaks,
+                                showBreaks: userData['showBreaks'] != false, // default: true
+                              ),
+                              const SizedBox(height: 10),
+                              LogsList(
+                                companyId: widget.companyId,
+                                userId: widget.userId,
+                                selectedDay: _today,
+                                projects: projects,
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           );
         },
       ),

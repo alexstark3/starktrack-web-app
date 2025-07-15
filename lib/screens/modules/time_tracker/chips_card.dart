@@ -4,11 +4,13 @@ import 'package:starktrack/theme/app_colors.dart';
 class ChipsCard extends StatelessWidget {
   final Duration worked;
   final Duration breaks;
+  final bool showBreaks; // <-- NEW
 
   const ChipsCard({
     Key? key,
     required this.worked,
     required this.breaks,
+    this.showBreaks = true, // default to true for backwards compatibility
   }) : super(key: key);
 
   String _formatDuration(Duration d) {
@@ -84,8 +86,10 @@ class ChipsCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             buildChip('Worked: ${_formatDuration(worked)}'),
-            const SizedBox(width: 10),
-            buildChip('Breaks: ${_formatDuration(breaks)}'),
+            if (showBreaks) ...[
+              const SizedBox(width: 10),
+              buildChip('Breaks: ${_formatDuration(breaks)}'),
+            ],
           ],
         ),
       ),
