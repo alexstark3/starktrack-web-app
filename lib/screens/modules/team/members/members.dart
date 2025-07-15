@@ -3,86 +3,80 @@ import 'package:flutter/material.dart';
 import '../../../../theme/app_colors.dart';
 import 'members_view.dart';
 
-class MembersTab extends StatefulWidget {
+class MembersTab extends StatelessWidget {
   final String companyId;
   final String? teamLeaderId;
+  final DocumentSnapshot? selectedMember;
+  final void Function(DocumentSnapshot?) onSelectMember;
+
   const MembersTab({
     Key? key,
     required this.companyId,
     this.teamLeaderId,
+    required this.selectedMember,
+    required this.onSelectMember,
   }) : super(key: key);
 
   @override
-  State<MembersTab> createState() => _MembersTabState();
-}
-
-class _MembersTabState extends State<MembersTab> {
-  String _search = '';
-  DocumentSnapshot? _selectedMember;
-
-  void _showMemberHistory(DocumentSnapshot doc) {
-    setState(() {
-      _selectedMember = doc;
-    });
-  }
-
-
-  @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
-    // Show the details/history view if a member is selected
-    if (_selectedMember != null) {
+    if (selectedMember != null) {
       return MemberHistoryScreen(
-        companyId: widget.companyId,
-        memberDoc: _selectedMember!,
+        companyId: companyId,
+        memberDoc: selectedMember!,
+        onBack: () => onSelectMember(null), // <- Correct usage for back
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 28),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextField(
-            decoration: InputDecoration(
-              hintText: 'Search by name, surname or email',
-              prefixIcon: const Icon(Icons.search),
-              isDense: true,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: colors.midGray),
+    final colors = Theme.of(context).extension<AppColors>()!;
+    String _search = '';
+
+    return StatefulBuilder(builder: (context, setState) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              decoration: InputDecoration(
+                hintText: 'Search by name, surname or email',
+                prefixIcon: const Icon(Icons.search),
+                isDense: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: colors.midGray),
+                ),
+                filled: true,
+                fillColor: colors.lightGray,
               ),
-              filled: true,
-              fillColor: colors.lightGray,
+              style: TextStyle(color: colors.textColor),
+              onChanged: (val) => setState(() => _search = val.trim().toLowerCase()),
             ),
-            style: TextStyle(color: colors.textColor),
-            onChanged: (val) => setState(() => _search = val.trim().toLowerCase()),
-          ),
-          const SizedBox(height: 20),
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minWidth: constraints.maxWidth,
-                      maxWidth: double.infinity,
+            const SizedBox(height: 20),
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minWidth: constraints.maxWidth,
+                        maxWidth: double.infinity,
+                      ),
+                      child: _MembersTable(
+                        companyId: companyId,
+                        search: _search,
+                        teamLeaderId: teamLeaderId,
+                        onView: onSelectMember,
+                      ),
                     ),
-                    child: _MembersTable(
-                      companyId: widget.companyId,
-                      search: _search,
-                      teamLeaderId: widget.teamLeaderId,
-                      onView: _showMemberHistory,
-                    ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
   }
 }
 
@@ -123,7 +117,6 @@ class _MembersTable extends StatelessWidget {
           final firstName = (data['firstName'] ?? '').toString().toLowerCase();
           final surname = (data['surname'] ?? '').toString().toLowerCase();
           final email = (data['email'] ?? '').toString().toLowerCase();
-          // Exclude team leader by doc ID
           final isNotTeamLeader = teamLeaderId == null || doc.id != teamLeaderId;
           return isNotTeamLeader &&
               (firstName.contains(search) ||
@@ -137,11 +130,11 @@ class _MembersTable extends StatelessWidget {
 
         return DataTable(
           columns: const [
+            DataColumn(label: Text('Actions')),
             DataColumn(label: Text('First Name')),
             DataColumn(label: Text('Surname')),
             DataColumn(label: Text('Email')),
             DataColumn(label: Text('Phone')),
-            DataColumn(label: Text('Actions')),
           ],
           rows: filtered.map((doc) {
             final data = doc.data() as Map<String, dynamic>;
@@ -150,10 +143,6 @@ class _MembersTable extends StatelessWidget {
             final email = data['email'] ?? '';
             final phone = data['phone'] ?? '';
             return DataRow(cells: [
-              DataCell(Text(firstName, style: TextStyle(color: colors.textColor))),
-              DataCell(Text(surname, style: TextStyle(color: colors.textColor))),
-              DataCell(Text(email, style: TextStyle(color: colors.textColor))),
-              DataCell(Text(phone, style: TextStyle(color: colors.textColor))),
               DataCell(
                 ElevatedButton(
                   onPressed: () => onView(doc),
@@ -169,6 +158,10 @@ class _MembersTable extends StatelessWidget {
                   ),
                 ),
               ),
+              DataCell(Text(firstName, style: TextStyle(color: colors.textColor))),
+              DataCell(Text(surname, style: TextStyle(color: colors.textColor))),
+              DataCell(Text(email, style: TextStyle(color: colors.textColor))),
+              DataCell(Text(phone, style: TextStyle(color: colors.textColor))),
             ]);
           }).toList(),
         );

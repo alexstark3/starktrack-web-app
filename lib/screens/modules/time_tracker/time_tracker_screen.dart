@@ -66,9 +66,12 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
           }
 
           final projects = projectSnap.data!.docs
-              .map((d) => (d.data() as Map<String, dynamic>)['name'] as String)
-              .where((name) => name.trim().isNotEmpty)
-              .toList();
+    .map((d) => {
+      'id': d.id,
+      'name': (d.data() as Map<String, dynamic>)['name'] as String? ?? d.id,
+    })
+    .where((proj) => (proj['name'] ?? '').toString().trim().isNotEmpty)
+    .toList();
 
           return SingleChildScrollView(
             child: Padding(
@@ -85,7 +88,7 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
                     companyId: widget.companyId,
                     userId: widget.userId,
                     selectedDay: _today,
-                    projects: projects,
+                    projects: projects.map((p) => p['name'] as String).toList(),
                   ),
                   const SizedBox(height: 10),
 

@@ -6,11 +6,13 @@ import '../../../../theme/app_colors.dart';
 class MemberHistoryScreen extends StatefulWidget {
   final String companyId;
   final DocumentSnapshot memberDoc;
+  final VoidCallback? onBack;
 
   const MemberHistoryScreen({
     Key? key,
     required this.companyId,
     required this.memberDoc,
+    this.onBack,
   }) : super(key: key);
 
   @override

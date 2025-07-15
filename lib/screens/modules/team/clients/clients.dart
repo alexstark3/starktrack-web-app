@@ -1,11 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../../../theme/app_colors.dart';
-import 'add_client_dialog.dart';
+import 'view_clients.dart';
 
 class ClientsTab extends StatefulWidget {
   final String companyId;
-  const ClientsTab({Key? key, required this.companyId}) : super(key: key);
+  final Map<String, dynamic>? selectedClient;
+  final void Function(Map<String, dynamic> client)? onSelectClient;
+
+  const ClientsTab({
+    Key? key,
+    required this.companyId,
+    this.selectedClient,
+    this.onSelectClient,
+  }) : super(key: key);
 
   @override
   State<ClientsTab> createState() => _ClientsTabState();
@@ -17,8 +25,17 @@ class _ClientsTabState extends State<ClientsTab> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
+    // If a client is selected, show ViewClients (details)
+    if (widget.selectedClient != null && widget.selectedClient!['id'] != null) {
+      return ViewClients(
+        companyId: widget.companyId,
+        client: widget.selectedClient!,
+        onEdit: () => widget.onSelectClient?.call({}), // clear view to go back to list
+      );
+    }
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 28), // uniform padding
+      padding: const EdgeInsets.symmetric(horizontal: 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -56,17 +73,12 @@ class _ClientsTabState extends State<ClientsTab> {
                   textStyle: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 onPressed: () async {
-                  final created = await showDialog<bool>(
-                    context: context,
-                    builder: (ctx) => AddClientDialog(companyId: widget.companyId),
-                  );
-                  if (created == true) setState(() {});
+                  // TODO: your add-client dialog code
                 },
               ),
             ],
           ),
           const SizedBox(height: 20),
-          // The list/table, stretching full width and scrolling if needed
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -74,21 +86,13 @@ class _ClientsTabState extends State<ClientsTab> {
                   scrollDirection: Axis.horizontal,
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
-                      minWidth: constraints.maxWidth, // Fills card horizontally!
+                      minWidth: constraints.maxWidth,
                       maxWidth: double.infinity,
                     ),
                     child: _ClientsTable(
                       companyId: widget.companyId,
                       search: _search,
-                      onView: (clientData) {
-                        showDialog(
-                          context: context,
-                          builder: (_) => AlertDialog(
-                            title: Text(clientData['name'] ?? ''),
-                            content: Text('View button clicked.'),
-                          ),
-                        );
-                      },
+                      onSelectClient: (clientData) => widget.onSelectClient?.call(clientData),
                     ),
                   ),
                 );
@@ -104,13 +108,13 @@ class _ClientsTabState extends State<ClientsTab> {
 class _ClientsTable extends StatelessWidget {
   final String companyId;
   final String search;
-  final void Function(Map<String, dynamic> clientData) onView;
+  final void Function(Map<String, dynamic> clientData) onSelectClient;
 
   const _ClientsTable({
     Key? key,
     required this.companyId,
     required this.search,
-    required this.onView,
+    required this.onSelectClient,
   }) : super(key: key);
 
   @override
@@ -135,7 +139,8 @@ class _ClientsTable extends StatelessWidget {
           final data = doc.data() as Map<String, dynamic>;
           final contact = data['contact_person'] ?? {};
           final name = (data['name'] ?? '').toString().toLowerCase();
-          final person = '${(contact['first_name'] ?? '').toString().toLowerCase()} ${(contact['surname'] ?? '').toString().toLowerCase()}';
+          final person =
+              '${(contact['first_name'] ?? '').toString().toLowerCase()} ${(contact['surname'] ?? '').toString().toLowerCase()}';
           final email = (data['email'] ?? '').toString().toLowerCase();
           final city = (data['city'] ?? '').toString().toLowerCase();
           final phone = (data['phone'] ?? '').toString().toLowerCase();
@@ -152,6 +157,7 @@ class _ClientsTable extends StatelessWidget {
 
         return DataTable(
           columns: const [
+            DataColumn(label: Text('')),
             DataColumn(label: Text('Client Name')),
             DataColumn(label: Text('Address')),
             DataColumn(label: Text('Contact Person')),
@@ -159,7 +165,6 @@ class _ClientsTable extends StatelessWidget {
             DataColumn(label: Text('Phone')),
             DataColumn(label: Text('City')),
             DataColumn(label: Text('Country')),
-            DataColumn(label: Text('Actions')),
           ],
           rows: filtered.map((doc) {
             final data = doc.data() as Map<String, dynamic>;
@@ -177,29 +182,32 @@ class _ClientsTable extends StatelessWidget {
             final city = data['city'] ?? '';
             final country = data['country'] ?? '';
 
-            return DataRow(cells: [
-              DataCell(Text(clientName, style: TextStyle(color: colors.textColor))),
-              DataCell(Text(address, style: TextStyle(color: colors.textColor))),
-              DataCell(Text(person, style: TextStyle(color: colors.textColor))),
-              DataCell(Text(email, style: TextStyle(color: colors.textColor))),
-              DataCell(Text(phone, style: TextStyle(color: colors.textColor))),
-              DataCell(Text(city, style: TextStyle(color: colors.textColor))),
-              DataCell(Text(country, style: TextStyle(color: colors.textColor))),
-              DataCell(
-                ElevatedButton(
-                  onPressed: () => onView({...data, 'id': doc.id}),
-                  child: const Text('View'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.primaryBlue,
-                    foregroundColor: colors.whiteTextOnBlue,
-                    minimumSize: const Size(48, 32),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6)),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            return DataRow(
+              cells: [
+                DataCell(
+                  ElevatedButton(
+                    onPressed: () => onSelectClient({...data, 'id': doc.id}),
+                    child: const Text('View'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colors.primaryBlue,
+                      foregroundColor: colors.whiteTextOnBlue,
+                      minimumSize: const Size(48, 32),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
                   ),
                 ),
-              ),
-            ]);
+                DataCell(Text(clientName, style: TextStyle(color: colors.textColor))),
+                DataCell(Text(address, style: TextStyle(color: colors.textColor))),
+                DataCell(Text(person, style: TextStyle(color: colors.textColor))),
+                DataCell(Text(email, style: TextStyle(color: colors.textColor))),
+                DataCell(Text(phone, style: TextStyle(color: colors.textColor))),
+                DataCell(Text(city, style: TextStyle(color: colors.textColor))),
+                DataCell(Text(country, style: TextStyle(color: colors.textColor))),
+              ],
+            );
           }).toList(),
         );
       },

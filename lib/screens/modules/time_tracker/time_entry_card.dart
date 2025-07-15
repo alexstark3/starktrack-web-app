@@ -11,7 +11,7 @@ class TimeEntryCard extends StatefulWidget {
   final String companyId;
   final String userId;
   final DateTime selectedDay;
-  final List<String> projects;
+  final List<String> projects; // List of project names (adjust if structure changes)
 
   const TimeEntryCard({
     Key? key,
@@ -400,20 +400,21 @@ class _TimeEntryCardState extends State<TimeEntryCard>
       final mins = end.difference(begin).inMinutes;
       final sessionDate = DateFormat('yyyy-MM-dd').format(d);
 
-      // --- THIS LINE CHANGED ---
+      // --- Save both project (name) and projectId (same value for now) ---
       final logId = _generateLogId(begin);
 
       await FirebaseFirestore.instance
           .collection('companies').doc(widget.companyId)
           .collection('users').doc(widget.userId)
           .collection('all_logs')
-          .doc(logId) // Now using time-based log ID!
+          .doc(logId)
           .set({
         'sessionDate': sessionDate,
         'begin': begin,
         'end': end,
         'duration_minutes': mins,
         'project': _project ?? '',
+        'projectId': _project ?? '',   // NEW FIELD FOR FILTERING
         'note': _note ?? '',
         'expenses': _expenses,
         'createdAt': FieldValue.serverTimestamp(),
@@ -509,7 +510,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
               textAlign: TextAlign.center,
               style: fieldStyle,
               maxLines: 1,
-              readOnly: true, // This disables the keyboard!
+              readOnly: true,
               decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: hint,

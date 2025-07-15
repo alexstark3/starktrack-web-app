@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../theme/app_colors.dart';
 import 'members/members.dart';
 import 'projects/projects.dart';
@@ -19,91 +20,159 @@ class TeamModuleTabScreen extends StatefulWidget {
 
 class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
   int _selectedIndex = 0;
-  Map<String, dynamic>? _selectedProject;
 
-  final List<String> _folders = ['Members', 'Projects', 'Clients'];
+  DocumentSnapshot? _selectedMemberDoc;
+  Map<String, dynamic>? _selectedProject;
+  Map<String, dynamic>? _selectedClient; // <-- Add client selection
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
-    final bool inProjectView = _selectedIndex == 1 && _selectedProject != null;
-
     return Container(
       color: colors.dashboardBackground,
       child: Column(
         children: [
+          // --- Tab bar ---
           Padding(
             padding: const EdgeInsets.only(top: 12, left: 54, right: 24),
             child: Row(
-              children: List.generate(_folders.length, (index) {
-                final isSelected = _selectedIndex == index;
-                final icon = index == 0
-                    ? Icons.group
-                    : index == 1
-                        ? Icons.folder_copy_rounded
-                        : Icons.people_alt_rounded;
-                final isProjectViewGray =
-                    (index == 1 && inProjectView); // Only gray text if in project view
-                return GestureDetector(
+              children: [
+                // Members tab
+                GestureDetector(
                   onTap: () {
-                    if (index == 1) {
-                      if (inProjectView) {
-                        setState(() => _selectedProject = null);
-                      } else {
-                        setState(() => _selectedIndex = 1);
-                      }
-                    } else {
-                      setState(() => _selectedIndex = index);
-                    }
+                    setState(() {
+                      _selectedIndex = 0;
+                      _selectedMemberDoc = null;
+                    });
                   },
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 140),
-                    margin: EdgeInsets.only(right: 16),
-                    padding: EdgeInsets.symmetric(horizontal: 26, vertical: 12),
+                    margin: const EdgeInsets.only(right: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
                     decoration: BoxDecoration(
-                      color: isSelected ? Colors.white : colors.lightGray,
+                      color: _selectedIndex == 0 ? Colors.white : colors.lightGray,
                       borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(6),
-                        bottom: Radius.circular(isSelected ? 0 : 6),
+                        top: const Radius.circular(6),
+                        bottom: Radius.circular(_selectedIndex == 0 ? 0 : 6),
                       ),
-                      boxShadow: isSelected
-                          ? [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 3,
-                                offset: Offset(0, 1),
-                              )
-                            ]
+                      boxShadow: _selectedIndex == 0
+                          ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
                           : [],
                     ),
                     child: Row(
                       children: [
-                        Icon(
-                          icon,
-                          size: 20,
-                          color: isProjectViewGray
-                              ? colors.darkGray
-                              : (isSelected ? colors.primaryBlue : colors.darkGray),
-                        ),
-                        SizedBox(width: 8),
+                        Icon(Icons.group,
+                            size: 20,
+                            color: _selectedIndex == 0
+                                ? (_selectedMemberDoc == null ? colors.primaryBlue : colors.darkGray)
+                                : colors.darkGray),
+                        const SizedBox(width: 8),
                         Text(
-                          _folders[index],
+                          'Members',
                           style: TextStyle(
                             fontSize: 16,
-                            fontWeight:
-                                isSelected ? FontWeight.bold : FontWeight.w600,
-                            color: isProjectViewGray
-                                ? colors.darkGray
-                                : (isSelected ? colors.primaryBlue : colors.darkGray),
+                            fontWeight: _selectedIndex == 0 ? FontWeight.bold : FontWeight.w600,
+                            color: _selectedIndex == 0
+                                ? (_selectedMemberDoc == null ? colors.primaryBlue : colors.darkGray)
+                                : colors.darkGray,
                           ),
                         ),
                       ],
                     ),
                   ),
-                );
-              }),
+                ),
+                // Projects tab
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedIndex = 1;
+                      _selectedProject = null;
+                    });
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 140),
+                    margin: const EdgeInsets.only(right: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: _selectedIndex == 1 ? Colors.white : colors.lightGray,
+                      borderRadius: BorderRadius.vertical(
+                        top: const Radius.circular(6),
+                        bottom: Radius.circular(_selectedIndex == 1 ? 0 : 6),
+                      ),
+                      boxShadow: _selectedIndex == 1
+                          ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
+                          : [],
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.folder_copy_rounded,
+                            size: 20,
+                            color: _selectedIndex == 1
+                                ? (_selectedProject == null ? colors.primaryBlue : colors.darkGray)
+                                : colors.darkGray),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Projects',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: _selectedIndex == 1 ? FontWeight.bold : FontWeight.w600,
+                            color: _selectedIndex == 1
+                                ? (_selectedProject == null ? colors.primaryBlue : colors.darkGray)
+                                : colors.darkGray,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // Clients tab
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedIndex = 2;
+                      _selectedClient = null;
+                    });
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 140),
+                    margin: const EdgeInsets.only(right: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: _selectedIndex == 2 ? Colors.white : colors.lightGray,
+                      borderRadius: BorderRadius.vertical(
+                        top: const Radius.circular(6),
+                        bottom: Radius.circular(_selectedIndex == 2 ? 0 : 6),
+                      ),
+                      boxShadow: _selectedIndex == 2
+                          ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
+                          : [],
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.people_alt_rounded,
+                            size: 20,
+                            color: _selectedIndex == 2
+                                ? (_selectedClient == null ? colors.primaryBlue : colors.darkGray)
+                                : colors.darkGray),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Clients',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: _selectedIndex == 2 ? FontWeight.bold : FontWeight.w600,
+                            color: _selectedIndex == 2
+                                ? (_selectedClient == null ? colors.primaryBlue : colors.darkGray)
+                                : colors.darkGray,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
+          // --- Main white area ---
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(left: 24, right: 24, bottom: 24),
@@ -112,12 +181,7 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                   Align(
                     alignment: Alignment.topCenter,
                     child: _NoTopShadowMaterial(
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(10),
-                        topRight: Radius.circular(10),
-                        bottomLeft: Radius.circular(10),
-                        bottomRight: Radius.circular(10),
-                      ),
+                      borderRadius: const BorderRadius.all(Radius.circular(10)),
                       color: Colors.white,
                       elevation: 10,
                       child: Container(
@@ -137,26 +201,48 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
   }
 
   Widget _buildTabContent() {
-    switch (_selectedIndex) {
-      case 0:
-        return MembersTab(
-            companyId: widget.companyId, teamLeaderId: widget.userId);
-      case 1:
-        return ProjectsTab(
-          companyId: widget.companyId,
-          selectedProject: _selectedProject,
-          onSelectProject: (project) {
-            setState(() => _selectedProject = project);
-          },
-        );
-      case 2:
-        return ClientsTab(companyId: widget.companyId);
-      default:
-        return SizedBox.shrink();
-    }
+    if (_selectedIndex == 0) {
+      return MembersTab(
+        companyId: widget.companyId,
+        teamLeaderId: widget.userId,
+        selectedMember: _selectedMemberDoc,
+        onSelectMember: (doc) {
+          setState(() {
+            _selectedMemberDoc = doc;
+          });
+        },
+      );
+    } else if (_selectedIndex == 1) {
+      return ProjectsTab(
+        companyId: widget.companyId,
+        selectedProject: _selectedProject,
+        onSelectProject: (project) {
+          setState(() {
+            _selectedProject = project;
+          });
+        },
+      );
+    } else if (_selectedIndex == 2) {
+  // --- Clients logic with tab navigation and detail view ---
+  return ClientsTab(
+    companyId: widget.companyId,
+    selectedClient: _selectedClient,
+    onSelectClient: (Map<String, dynamic>? clientData) { // <-- now nullable!
+      setState(() {
+        if (clientData == null || clientData['id'] == null || clientData.isEmpty) {
+          _selectedClient = null;
+        } else {
+          _selectedClient = clientData;
+        }
+      });
+    },
+  );
+}
+    return const SizedBox.shrink();
   }
 }
 
+// --- Helper for shadowed white card, no shadow on top ---
 class _NoTopShadowMaterial extends StatelessWidget {
   final Widget child;
   final Color color;
