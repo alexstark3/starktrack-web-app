@@ -104,122 +104,132 @@ class LogsList extends StatelessWidget {
             }
           }
 
-          for (int i = 0; i < docs.length; i++) {
-            final doc  = docs[i];
-            final log  = doc.data() as Map<String, dynamic>;
-            final logId= doc.id;
 
-            final begin = (log['begin'] as Timestamp?)?.toDate();
-            final end   = (log['end']   as Timestamp?)?.toDate();
+//Keyboard fix-------------------------------------------------------------
+// ───────── REPLACE your current for-loop with this whole block ─────────
+for (int i = 0; i < docs.length; i++) {
+  final doc   = docs[i];
+  final log   = doc.data() as Map<String, dynamic>;
+  final logId = doc.id;
 
-            final Map<String, dynamic> expensesMap =
-                Map<String, dynamic>.from(log['expenses'] ?? {});
-            final List<String> expenseLines = [];
-            for (var entry in expensesMap.entries) {
-              if (entry.key == 'Per diem') continue;
-              expenseLines.add('${entry.key} ${(entry.value as num).toStringAsFixed(2)} CHF');
-            }
-            if (expensesMap.containsKey('Per diem')) {
-              final value = expensesMap['Per diem'];
-              expenseLines.add('Per diem ${(value as num).toStringAsFixed(2)} CHF');
-            }
+  final begin = (log['begin'] as Timestamp?)?.toDate();
+  final end   = (log['end']   as Timestamp?)?.toDate();
 
-            final String noteText = log['note'] ?? '';
-            final String projectId = (log['projectId'] ?? log['project'] ?? '') as String;
-            final String projectName = _projectNameFromId(projectId);
-            final List<String> projectLines = [projectName];
+  final Map<String, dynamic> expensesMap =
+      Map<String, dynamic>.from(log['expenses'] ?? {});
+  final List<String> expenseLines = [];
+  for (var entry in expensesMap.entries) {
+    if (entry.key == 'Per diem') continue;
+    expenseLines.add('${entry.key} ${(entry.value as num).toStringAsFixed(2)} CHF');
+  }
+  if (expensesMap.containsKey('Per diem')) {
+    final value = expensesMap['Per diem'];
+    expenseLines.add('Per diem ${(value as num).toStringAsFixed(2)} CHF');
+  }
 
-            // --- INSERT BREAK CARD IF THERE'S A GAP and break cards should be shown ---
-            if (showBreakCards && i > 0) {
-              final prev   = docs[i - 1].data() as Map<String, dynamic>;
-              final prevEnd= (prev['end'] as Timestamp?)?.toDate();
-              if (prevEnd != null && begin != null && prevEnd.isBefore(begin)) {
-                final breakDuration = begin.difference(prevEnd);
-                final breakStr = _formatBreak(prevEnd, begin, breakDuration);
+  final String noteText  = log['note'] ?? '';
+  final String projectId = (log['projectId'] ?? log['project'] ?? '') as String;
+  final String projectName = _projectNameFromId(projectId);
+  final List<String> projectLines = [projectName];
 
-                rows.add(
-                  Card(
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                    color: Colors.grey[200],
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
-                        child: Text(
-                          breakStr,
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 15,
-                            fontStyle: FontStyle.italic,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }
-            }
+  /* -------- BREAK CARD between sessions (honours showBreakCards) ------- */
+  if (showBreakCards && i > 0) {
+    final prev    = docs[i - 1].data() as Map<String, dynamic>;
+    final prevEnd = (prev['end'] as Timestamp?)?.toDate();
+    if (prevEnd != null && begin != null && prevEnd.isBefore(begin)) {
+      final breakDuration = begin.difference(prevEnd);
+      final breakStr      = _formatBreak(prevEnd, begin, breakDuration);
 
-            rows.add(
-              Card(
-                margin: const EdgeInsets.symmetric(vertical: 4),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                elevation: 2,
-                child: SizedBox(
-                  width: double.infinity,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
-                    child: _LogEditRow(
-                      logId      : logId,
-                      begin      : begin,
-                      end        : end,
-                      projectId  : projectId,
-                      projectName: projectName,
-                      projectLines : projectLines,
-                      expenseLines : expenseLines,
-                      expensesMap  : expensesMap,
-                      note       : noteText,
-                      appColors  : appColors,
-                      borderColor: borderColor,
-                      textColor  : textColor,
-                      duration   : (begin != null && end != null)
-                          ? end.difference(begin)
-                          : Duration.zero,
-                      onDelete   : () => doc.reference.delete(),
-                      onSave     : (newStart, newEnd, newNote, newProjId, newExpenses) async {
-                        try {
-                          final ns = DateFormat.Hm().parse(newStart);
-                          final ne = DateFormat.Hm().parse(newEnd);
-                          final d  = selectedDay;
-                          final nb = DateTime(d.year, d.month, d.day, ns.hour, ns.minute);
-                          final nn = DateTime(d.year, d.month, d.day, ne.hour, ne.minute);
-                          if (!nn.isAfter(nb)) throw Exception('Invalid time');
-                          await doc.reference.update({
-                            'begin' : nb,
-                            'end'   : nn,
-                            'duration_minutes': nn.difference(nb).inMinutes,
-                            'note'  : newNote,
-                            'projectId': newProjId,
-                            'project': _projectNameFromId(newProjId),
-                            'expenses': newExpenses,
-                          });
-                        } catch (err) {
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(SnackBar(content: Text(err.toString())));
-                        }
-                      },
-                      projects: projects,
-                      perDiemLogId: perDiemLogId,
-                    ),
-                  ),
+      rows.add(
+        Card(
+          key  : ValueKey('break_$i'),                      // ➊ keep break card
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          color : Colors.grey[200],
+          elevation: 0,
+          shape : RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10)),
+          child : SizedBox(
+            width: double.infinity,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
+              child: Text(
+                breakStr,
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 15,
+                  fontStyle: FontStyle.italic,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-            );
-          }
+            ),
+          ),
+        ),
+      );
+    }
+  }
 
+  /* ----------------------- WORK-SESSION CARD -------------------------- */
+  rows.add(
+    Card(
+      key  : ValueKey(logId),                               // ➋ keep card alive
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      shape : RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10)),
+      elevation: 2,
+      child : SizedBox(
+        width: double.infinity,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
+          child: _LogEditRow(
+            key          : ValueKey('row_$logId'),          // ➌ keep _LogEditRowState
+            logId        : logId,
+            begin        : begin,
+            end          : end,
+            projectId    : projectId,
+            projectName  : projectName,
+            projectLines : projectLines,
+            expenseLines : expenseLines,
+            expensesMap  : expensesMap,
+            note         : noteText,
+            appColors    : appColors,
+            borderColor  : borderColor,
+            textColor    : textColor,
+            duration     : (begin != null && end != null)
+                            ? end.difference(begin)
+                            : Duration.zero,
+            onDelete     : () => doc.reference.delete(),
+            onSave       : (newStart, newEnd, newNote, newProjId, newExpenses) async {
+              try {
+                final ns = DateFormat.Hm().parse(newStart);
+                final ne = DateFormat.Hm().parse(newEnd);
+                final d  = selectedDay;
+                final nb = DateTime(d.year, d.month, d.day, ns.hour, ns.minute);
+                final nn = DateTime(d.year, d.month, d.day, ne.hour, ne.minute);
+                if (!nn.isAfter(nb)) throw Exception('Invalid time');
+                await doc.reference.update({
+                  'begin' : nb,
+                  'end'   : nn,
+                  'duration_minutes': nn.difference(nb).inMinutes,
+                  'note'  : newNote,
+                  'projectId': newProjId,
+                  'project': _projectNameFromId(newProjId),
+                  'expenses': newExpenses,
+                });
+              } catch (err) {
+                ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text(err.toString())));
+              }
+            },
+            projects     : projects,
+            perDiemLogId : perDiemLogId,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+//Keyboard fix end ------------------------------------------
           return _shellCard(
             theme,
             Padding(
