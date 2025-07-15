@@ -26,11 +26,18 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
 
   // Cache “today” once so the same DateTime instance is reused
   late final DateTime _today;
+
+  // NEW: cache the projects future so it isn’t recreated on every rebuild
+  late final Future<List<Map<String, String>>> _projectsFuture;
+
   @override
   void initState() {
     super.initState();
     final now = DateTime.now();
     _today = DateTime(now.year, now.month, now.day);
+
+    // NEW: initialise the cached future
+    _projectsFuture = _fetchProjects();
   }
 
   Future<List<Map<String, String>>> _fetchProjects() async {
@@ -42,7 +49,7 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
     return snapshot.docs
         .map((d) => {
               'id': d.id,
-              'name': d.data()['name'] as String? ?? d.id,
+              'name': (d.data()['name'] as String?) ?? d.id,
             })
         .where((proj) => (proj['name'] ?? '').toString().trim().isNotEmpty)
         .toList();
@@ -63,8 +70,12 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+
+      // NEW: prevent full rebuilds when the keyboard appears
+      resizeToAvoidBottomInset: false,
+
       body: FutureBuilder<List<Map<String, String>>>(
-        future: _fetchProjects(),
+        future: _projectsFuture,        // NEW: use cached future
         builder: (context, projectSnap) {
           if (projectSnap.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -111,17 +122,22 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
 
                           final begin = (data['begin'] as Timestamp?)?.toDate();
                           final end   = (data['end']   as Timestamp?)?.toDate();
-                          if (begin != null && end != null) worked += end.difference(begin);
+                          if (begin != null && end != null) {
+                            worked += end.difference(begin);
+                          }
                         }
                         logs.sort((a, b) {
                           final aBegin = (a['begin'] as Timestamp?)?.toDate();
                           final bBegin = (b['begin'] as Timestamp?)?.toDate();
-                          return (aBegin ?? DateTime(2000)).compareTo(bBegin ?? DateTime(2000));
+                          return (aBegin ?? DateTime(2000))
+                              .compareTo(bBegin ?? DateTime(2000));
                         });
                         for (int i = 1; i < logs.length; i++) {
                           final prevEnd = (logs[i - 1]['end'] as Timestamp?)?.toDate();
                           final thisBeg = (logs[i]['begin'] as Timestamp?)?.toDate();
-                          if (prevEnd != null && thisBeg != null && prevEnd.isBefore(thisBeg)) {
+                          if (prevEnd != null &&
+                              thisBeg != null &&
+                              prevEnd.isBefore(thisBeg)) {
                             breaks += thisBeg.difference(prevEnd);
                           }
                         }
