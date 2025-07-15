@@ -21,10 +21,7 @@ class TimeTrackerScreen extends StatefulWidget {
 }
 
 class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
-  // Stable key so TimeEntryCard’s State is always reused
-  static final GlobalKey _entryCardKey = GlobalKey();
-
-  // Cache “today” once so the same DateTime instance is reused
+  // Removed GlobalKey! Not needed.
   late final DateTime _today;
   @override
   void initState() {
@@ -66,12 +63,12 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
           }
 
           final projects = projectSnap.data!.docs
-    .map((d) => {
-      'id': d.id,
-      'name': (d.data() as Map<String, dynamic>)['name'] as String? ?? d.id,
-    })
-    .where((proj) => (proj['name'] ?? '').toString().trim().isNotEmpty)
-    .toList();
+              .map((d) => {
+                    'id': d.id,
+                    'name': (d.data() as Map<String, dynamic>)['name'] as String? ?? d.id,
+                  })
+              .where((proj) => (proj['name'] ?? '').toString().trim().isNotEmpty)
+              .toList();
 
           return SingleChildScrollView(
             child: Padding(
@@ -82,9 +79,8 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
                   TodayLine(),
                   const SizedBox(height: 10),
 
-                  /// Time-entry card – key guarantees the same State object
+                  /// Time-entry card – NO KEY!
                   TimeEntryCard(
-                    key: _entryCardKey,
                     companyId: widget.companyId,
                     userId: widget.userId,
                     selectedDay: _today,
