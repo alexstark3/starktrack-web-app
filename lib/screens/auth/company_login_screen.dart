@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../widgets/company/login_form.dart'; // Adjust if needed
-import '../dashboard/company_dashboard_screen.dart'; // Adjust if needed
+import '../../widgets/company/login_form.dart';
+import '../dashboard/company_dashboard_screen.dart';
 
 class CompanyLoginScreen extends StatefulWidget {
   const CompanyLoginScreen({Key? key}) : super(key: key);
@@ -81,20 +81,7 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
       final String surname  = (data['surname']   ?? '') as String;
       final String fullName = '${firstName.trim()} ${surname.trim()}'.trim();
 
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => CompanyDashboardScreen(
-            companyId: companyId!,
-            userId: userId,
-            roles: roles,
-            access: access,
-            fullName: fullName,      // ← from (firstName + ' ' + surname)
-            email: email,
-          ),
-        ),
-      );
-      print('LOGIN: User found! Navigating to dashboard for company $companyId');
-      if (!mounted) return;
+      // Only navigate once!
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (_) => CompanyDashboardScreen(
@@ -107,6 +94,8 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
           ),
         ),
       );
+      print('LOGIN: User found! Navigating to dashboard for company $companyId');
+
     } on FirebaseAuthException catch (e) {
       print('LOGIN: FirebaseAuthException: ${e.message}');
       if (!mounted) return;

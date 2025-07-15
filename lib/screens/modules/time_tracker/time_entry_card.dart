@@ -75,6 +75,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
     if (widget.projects.isEmpty) return;
     final res = await showDialog<String>(
       context: context,
+      useRootNavigator: false,                         // <— FIX
       builder: (_) => SimpleDialog(
         title: const Text('Select Project'),
         children: widget.projects
@@ -92,6 +93,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
     final ctrl = TextEditingController(text: _note ?? '');
     final res = await showDialog<String>(
       context: context,
+      useRootNavigator: false,                         // <— FIX
       builder: (_) => AlertDialog(
         title: const Text('Note'),
         content: TextField(controller: ctrl, maxLines: 3),
@@ -135,6 +137,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
 
     await showDialog(
       context: context,
+      useRootNavigator: false,                         // <— FIX
       barrierDismissible: false,
       builder: (_) => StatefulBuilder(
         builder: (context, setStateDialog) {
@@ -239,8 +242,6 @@ class _TimeEntryCardState extends State<TimeEntryCard>
             ),
           ];
 
-          // ====== IMPORTANT FIX BELOW: ======
-          // Never call parent setState in here, only use setStateDialog. Also, avoid any closure capturing the parent's context.
           return AlertDialog(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
             title: const Text('Expenses'),
@@ -319,8 +320,6 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                   textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 onPressed: () {
-                  // Use only setStateDialog above for temp variables.
-                  // Here, update the parent only when user saves.
                   setState(() {
                     _expenses = Map<String, dynamic>.from(tempExpenses);
                   });
