@@ -310,6 +310,7 @@ class _LogEditRow extends StatefulWidget {
 class _LogEditRowState extends State<_LogEditRow> {
   bool editing = false;
   late TextEditingController startCtrl, endCtrl, noteCtrl;
+  final FocusNode _noteFocus = FocusNode();            // ← NEW
   bool _saving = false;
   String? selectedProjectId;
   late Map<String, dynamic> expenses;
@@ -333,6 +334,7 @@ class _LogEditRowState extends State<_LogEditRow> {
     startCtrl.dispose();
     endCtrl.dispose();
     noteCtrl.dispose();
+    _noteFocus.dispose();
     super.dispose();
   }
 
@@ -675,6 +677,7 @@ class _LogEditRowState extends State<_LogEditRow> {
             const SizedBox(width: 8),
             Expanded(
               child: TextField(
+                focusNode: _noteFocus, 
                 controller: noteCtrl,
                 style: style,
                 minLines: 1,
