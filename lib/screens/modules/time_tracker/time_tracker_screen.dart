@@ -168,6 +168,7 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
                                 userId: widget.userId,
                                 selectedDay: _today,
                                 projects: projects,
+                                showBreakCards: userData['showBreaks'] != false, // <-- LINKED TO USER!
                               ),
                             ],
                           );
