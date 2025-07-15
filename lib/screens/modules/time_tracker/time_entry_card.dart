@@ -104,6 +104,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
     if (res != null) setState(() => _note = res.trim());
   }
 
+  // ---- FIXED DIALOG POPUP CODE STARTS HERE ----
   Future<void> _showExpensePopup() async {
     final TextEditingController nameCtrl = TextEditingController();
     final TextEditingController amountCtrl = TextEditingController();
@@ -133,7 +134,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
     // For new session, only allow per diem if not present in any other session yet
     bool canEditPerDiem = (perDiemSessionId == null);
 
-    await showDialog(
+    final result = await showDialog<Map<String, dynamic>>(
       context: context,
       barrierDismissible: false,
       builder: (_) => StatefulBuilder(
@@ -317,10 +318,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                   textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 onPressed: () {
-                  setState(() {
-                    _expenses = Map<String, dynamic>.from(tempExpenses);
-                  });
-                  Navigator.pop(context);
+                  Navigator.pop(context, Map<String, dynamic>.from(tempExpenses));
                 },
                 child: const Text('Save'),
               ),
@@ -329,7 +327,13 @@ class _TimeEntryCardState extends State<TimeEntryCard>
         },
       ),
     );
+    if (result != null) {
+      setState(() {
+        _expenses = result;
+      });
+    }
   }
+  // ---- FIXED DIALOG POPUP CODE ENDS HERE ----
 
   Future<bool> _hasOverlap(DateTime begin, DateTime end) async {
     final d = DateFormat('yyyy-MM-dd').format(widget.selectedDay);
