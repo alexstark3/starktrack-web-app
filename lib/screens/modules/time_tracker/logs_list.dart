@@ -22,6 +22,7 @@ class LogsList extends StatelessWidget {
   final String userId;
   final DateTime selectedDay;
   final List<ProjectInfo> projects;
+  final bool showBreakCards;   // NEW
 
   const LogsList({
     Key? key,
@@ -29,6 +30,7 @@ class LogsList extends StatelessWidget {
     required this.userId,
     required this.selectedDay,
     required this.projects,
+    this.showBreakCards = true,  // default for backward compat
   }) : super(key: key);
 
   String _projectNameFromId(String id) {
@@ -127,17 +129,34 @@ class LogsList extends StatelessWidget {
             final String projectName = _projectNameFromId(projectId);
             final List<String> projectLines = [projectName];
 
-            if (i > 0) {
+            // --- INSERT BREAK CARD IF THERE'S A GAP and break cards should be shown ---
+            if (showBreakCards && i > 0) {
               final prev   = docs[i - 1].data() as Map<String, dynamic>;
               final prevEnd= (prev['end'] as Timestamp?)?.toDate();
               if (prevEnd != null && begin != null && prevEnd.isBefore(begin)) {
+                final breakDuration = begin.difference(prevEnd);
+                final breakStr = _formatBreak(prevEnd, begin, breakDuration);
+
                 rows.add(
                   Card(
                     margin: const EdgeInsets.symmetric(vertical: 4),
+                    color: Colors.grey[200],
+                    elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    elevation: 1,
                     child: SizedBox(
                       width: double.infinity,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
+                        child: Text(
+                          breakStr,
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 15,
+                            fontStyle: FontStyle.italic,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 );
@@ -215,6 +234,14 @@ class LogsList extends StatelessWidget {
         },
       ),
     );
+  }
+
+  String _formatBreak(DateTime from, DateTime to, Duration d) {
+    final startStr = DateFormat.Hm().format(from);
+    final endStr   = DateFormat.Hm().format(to);
+    final h = d.inHours.toString().padLeft(2, '0');
+    final m = (d.inMinutes % 60).toString().padLeft(2, '0');
+    return 'Break: $startStr - $endStr = $h:$m' + 'h';
   }
 
   Widget _shellCard(ThemeData theme, Widget child) => Card(
@@ -494,22 +521,25 @@ class _LogEditRowState extends State<_LogEditRow> {
 
   Widget _projectDropdown(TextStyle s) {
     return DropdownButtonHideUnderline(
-      child: DropdownButton<String>(
-        value: selectedProjectId,
-        items: widget.projects.map((proj) {
-          return DropdownMenuItem(
-            value: proj['id'],
-            child: Text(proj['name'] ?? proj['id']!, style: s),
-          );
-        }).toList(),
-        onChanged: (value) {
-          setState(() {
-            selectedProjectId = value;
-          });
-        },
-        isExpanded: true,
-      ),
-    );
+  child: DropdownButton<String>(
+    value: widget.projects.any((proj) => proj['id'] == selectedProjectId)
+        ? selectedProjectId
+        : null,
+    items: widget.projects.map((proj) {
+      return DropdownMenuItem(
+        value: proj['id'],
+        child: Text(proj['name'] ?? proj['id']!, style: s),
+      );
+    }).toList(),
+    hint: const Text('Select project'),
+    onChanged: (value) {
+      setState(() {
+        selectedProjectId = value;
+      });
+    },
+    isExpanded: true,
+  ),
+);
   }
 
   @override
@@ -525,19 +555,16 @@ class _LogEditRowState extends State<_LogEditRow> {
             ? '00:00h'
             : '${widget.duration.inHours.toString().padLeft(2, '0')}:${(widget.duration.inMinutes % 60).toString().padLeft(2, '0')}h'}'),
           _infoText('Project', widget.projectName),
-          GestureDetector(
-            onTap: _showEditExpensesPopup,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text('Expenses:', style: style),
-                const SizedBox(width: 8),
-                if (widget.expenseLines.isEmpty)
-                  Text('Tap to add', style: style.copyWith(color: Colors.grey)),
-                ...widget.expenseLines.map((line) => Text(line, style: style)),
-              ],
-            ),
-          ),
+          Row(
+  crossAxisAlignment: CrossAxisAlignment.center,
+  children: [
+    Text('Expenses:', style: style),
+    const SizedBox(width: 8),
+    if (widget.expenseLines.isEmpty)
+      Text('-', style: style.copyWith(color: Colors.grey)),
+    ...widget.expenseLines.map((line) => Text(line, style: style)),
+  ],
+),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -559,7 +586,32 @@ class _LogEditRowState extends State<_LogEditRow> {
               children: [
                 _iconBtn(Icons.edit, Colors.blue[400]!, () => setState(() => editing = true)),
                 const SizedBox(width: 8),
-                _iconBtn(Icons.delete, Colors.red[300]!, widget.onDelete),
+                _iconBtn(Icons.delete, Colors.red[300]!, () async {
+  final confirm = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('Delete Entry'),
+      content: const Text('Are you sure you want to delete this entry? This cannot be undone.'),
+      actions: [
+        TextButton(
+          child: const Text('Cancel'),
+          onPressed: () => Navigator.of(ctx).pop(false),
+        ),
+        ElevatedButton(
+          child: const Text('Delete'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+            foregroundColor: Colors.white,
+          ),
+          onPressed: () => Navigator.of(ctx).pop(true),
+        ),
+      ],
+    ),
+  );
+  if (confirm == true) {
+    widget.onDelete();
+  }
+}),
               ],
             ),
           ),
@@ -652,7 +704,32 @@ class _LogEditRowState extends State<_LogEditRow> {
               _iconBtn(Icons.cancel, widget.appColors.orange,
                   () => setState(() => editing = false)),
               const SizedBox(width: 8),
-              _iconBtn(Icons.delete, widget.appColors.red, widget.onDelete),
+              _iconBtn(Icons.delete, Colors.red[300]!, () async {
+  final confirm = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('Delete Entry'),
+      content: const Text('Are you sure you want to delete this entry? This cannot be undone.'),
+      actions: [
+        TextButton(
+          child: const Text('Cancel'),
+          onPressed: () => Navigator.of(ctx).pop(false),
+        ),
+        ElevatedButton(
+          child: const Text('Delete'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+            foregroundColor: Colors.white,
+          ),
+          onPressed: () => Navigator.of(ctx).pop(true),
+        ),
+      ],
+    ),
+  );
+  if (confirm == true) {
+    widget.onDelete();
+  }
+}),
             ],
           ),
         ),
