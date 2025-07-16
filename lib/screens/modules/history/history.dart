@@ -249,65 +249,62 @@ class _HistoryLogsState extends State<HistoryLogs> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Column(
         children: [
-          // FILTER & GROUP BAR
-
-
+          // Search filters
           Container(
-  width: double.infinity, // stretch to full width!
-  decoration: BoxDecoration(
-    color: isDark 
-      ? const Color(0xFF2D2D30)
-      : const Color(0xFFF8F8F8),
-    borderRadius: BorderRadius.circular(12),
-    border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : null,
-    boxShadow: isDark ? null : [
-      BoxShadow(
-        color: Colors.black.withOpacity(0.12),
-        blurRadius: 6,
-        offset: const Offset(0, 3),
-      ),
-    ],
-  ),
-  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-  alignment: Alignment.centerLeft, // keep fields left-aligned
-  child: Wrap(
-    alignment: WrapAlignment.start, // aligns all children left!
-    spacing: kFilterSpacing,
-    runSpacing: kFilterSpacing,
-    crossAxisAlignment: WrapCrossAlignment.center,
-    children: [
-      Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          dateGroup,
-          const SizedBox(width: kFilterSpacing),
-          groupDropdown,
-        ],
-      ),
-      projectBox,
-      noteBox,
-      refreshBtn,
-    ],
-  ),
-),
-
-
-
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF2D2D30) : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: isDark ? null : [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    dateGroup,
+                    const SizedBox(width: kFilterSpacing),
+                    groupDropdown,
+                    const SizedBox(width: kFilterSpacing),
+                    projectBox,
+                    const SizedBox(width: kFilterSpacing),
+                    noteBox,
+                    const SizedBox(width: kFilterSpacing),
+                    refreshBtn,
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20), // Add spacing between search card and list
           
-          // DATA LIST
+          // Results
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: logsRef.snapshots(),
-              builder: (context, snap) {
-                if (snap.connectionState == ConnectionState.waiting) {
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                if (!snap.hasData || snap.data!.docs.isEmpty) {
-                  return const Center(child: Text('No entries found.'));
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No logs found.',
+                      style: TextStyle(
+                        color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
+                        fontSize: 16,
+                      ),
+                    ),
+                  );
                 }
 
                 // Get logs and filter on client
-                var logs = snap.data!.docs;
+                var logs = snapshot.data!.docs;
 
                 List<QueryDocumentSnapshot> filteredLogs = logs.where((doc) {
                   final data = doc.data() as Map<String, dynamic>;
@@ -449,96 +446,140 @@ class _HistoryLogsState extends State<HistoryLogs> {
 
                     return Card(
                       margin: EdgeInsets.zero,
-                      elevation: isDark ? 0 : 2,
+                      elevation: isDark ? 0 : 4,
+                      color: isDark ? const Color(0xFF2D2D30) : Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Column(
-                        children: [
-                          ExpansionTile(
-                            initiallyExpanded: groupIdx == 0,
-                            title: Text(
-                              groupKey,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: isDark ? null : [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
                             ),
-                            children: groupList.map((entry) {
-                              return ListTile(
-                                leading: const Icon(Icons.access_time),
-                                title: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        (entry.begin != null && entry.end != null)
-                                            ? '${dateFormat.format(entry.begin!)}  ${timeFormat.format(entry.begin!)} - ${timeFormat.format(entry.end!)}'
-                                            : entry.sessionDate,
-                                        style: const TextStyle(fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                    if (entry.expense > 0)
-                                      Text(
-                                        expenseFormat.format(entry.expense),
-                                        style: const TextStyle(
-                                            color: Colors.red,
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 15),
-                                      ),
-                                  ],
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            ExpansionTile(
+                              initiallyExpanded: groupIdx == 0,
+                              title: Text(
+                                groupKey,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? const Color(0xFFCCCCCC) : Colors.black87,
                                 ),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (entry.project != '') Text('Project: ${entry.project}'),
-                                    if (entry.duration != Duration.zero)
-                                      Text('Duration: ${_formatDuration(entry.duration)}'),
-                                    if (entry.note != '') Text('Note: ${entry.note}'),
-                                    if (entry.perDiem == true)
-                                      Text('Per diem: Yes', style: TextStyle(color: theme.colorScheme.primary)),
-                                    if (entry.expensesMap.isNotEmpty)
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 2.0),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: entry.expensesMap.entries.map((e) =>
-                                            Text('${e.key}: ${expenseFormat.format((e.value as num).toDouble())}',
-                                              style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.w600, fontSize: 15),
-                                            )).toList(),
+                              ),
+                              children: groupList.map((entry) {
+                                return ListTile(
+                                  leading: Icon(
+                                    Icons.access_time,
+                                    color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
+                                  ),
+                                  title: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          (entry.begin != null && entry.end != null)
+                                              ? '${dateFormat.format(entry.begin!)}  ${timeFormat.format(entry.begin!)} - ${timeFormat.format(entry.end!)}'
+                                              : entry.sessionDate,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: isDark ? const Color(0xFFCCCCCC) : Colors.black87,
+                                          ),
                                         ),
                                       ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                          // Blue bar with group totals
-                          Container(
-                            width: double.infinity,
-                            color: isDark 
-                              ? theme.colorScheme.primary.withOpacity(0.2)
-                              : theme.colorScheme.primary.withOpacity(0.1),
-                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Total Time: ${_formatDuration(groupTotal)}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    color: theme.colorScheme.primary,
+                                      if (entry.expense > 0)
+                                        Text(
+                                          expenseFormat.format(entry.expense),
+                                          style: const TextStyle(
+                                              color: Colors.red,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 15),
+                                        ),
+                                    ],
                                   ),
-                                ),
-                                Text(
-                                  'Total Expenses: ${expenseFormat.format(groupExpense)}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    color: theme.colorScheme.primary,
+                                  subtitle: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      if (entry.project != '') 
+                                        Text(
+                                          'Project: ${entry.project}',
+                                          style: TextStyle(
+                                            color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
+                                          ),
+                                        ),
+                                      if (entry.duration != Duration.zero)
+                                        Text(
+                                          'Duration: ${_formatDuration(entry.duration)}',
+                                          style: TextStyle(
+                                            color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
+                                          ),
+                                        ),
+                                      if (entry.note != '') 
+                                        Text(
+                                          'Note: ${entry.note}',
+                                          style: TextStyle(
+                                            color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
+                                          ),
+                                        ),
+                                      if (entry.perDiem == true)
+                                        Text(
+                                          'Per diem: Yes', 
+                                          style: TextStyle(
+                                            color: theme.colorScheme.primary,
+                                          ),
+                                        ),
+                                      if (entry.expensesMap.isNotEmpty)
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 2.0),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: entry.expensesMap.entries.map((e) =>
+                                              Text('${e.key}: ${expenseFormat.format((e.value as num).toDouble())}',
+                                                style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.w600, fontSize: 15),
+                                              )).toList(),
+                                          ),
+                                        ),
+                                    ],
                                   ),
-                                ),
-                              ],
+                                );
+                              }).toList(),
                             ),
-                          ),
-                        ],
+                            // Blue bar with group totals
+                            Container(
+                              width: double.infinity,
+                              color: isDark 
+                                ? theme.colorScheme.primary.withOpacity(0.2)
+                                : theme.colorScheme.primary.withOpacity(0.1),
+                              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Total Time: ${_formatDuration(groupTotal)}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Total Expenses: ${expenseFormat.format(groupExpense)}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
