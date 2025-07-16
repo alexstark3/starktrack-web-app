@@ -395,6 +395,7 @@ Future<void> _showEditExpensesPopup() async {
   final TextEditingController amountCtrl = TextEditingController();
 
   Map<String, dynamic> tempExpenses = Map<String, dynamic>.from(expenses);
+  print('DEBUG: Initial tempExpenses: $tempExpenses');
 
   bool tempPerDiem = tempExpenses.containsKey('Per diem');
   String? errorMsg;
@@ -447,9 +448,12 @@ Future<void> _showEditExpensesPopup() async {
           }
 
           void handleExpenseChange(String key, bool? checked) {
+            print('DEBUG: handleExpenseChange called - key: $key, checked: $checked');
             if (checked == false) {
+              print('DEBUG: Removing expense: $key');
               setStateDialog(() => tempExpenses.remove(key));
             }
+            print('DEBUG: tempExpenses after handleExpenseChange: $tempExpenses');
           }
 
           final List<String> otherExpenseKeys =
@@ -586,7 +590,10 @@ Future<void> _showEditExpensesPopup() async {
                   padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
                   textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-                onPressed: () => Navigator.pop(context, Map<String, dynamic>.from(tempExpenses)),
+                onPressed: () {
+                  print('DEBUG: Final tempExpenses before dialog close: $tempExpenses');
+                  Navigator.pop(context, Map<String, dynamic>.from(tempExpenses));
+                },
                 child: const Text('Save'),
               ),
             ],
