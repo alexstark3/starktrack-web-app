@@ -303,6 +303,7 @@ class _LogEditRowState extends State<_LogEditRow>
   @override
   bool get wantKeepAlive => true;
   bool editing = false;
+  bool _dialogOpen = false;
   late TextEditingController startCtrl, endCtrl, noteCtrl;
   final FocusNode _noteFocus = FocusNode();
   bool _saving = false;
@@ -340,6 +341,7 @@ class _LogEditRowState extends State<_LogEditRow>
 
   // ---- Note Popup (WORKS FOR ALL DEVICES!) ----
   Future<void> _showNotePopup() async {
+    setState(() => _dialogOpen = true);
     final ctrl = TextEditingController(text: noteCtrl.text);
     final res = await showDialog<String>(
       context: context,
@@ -358,15 +360,17 @@ class _LogEditRowState extends State<_LogEditRow>
       ),
     );
     if (!mounted) return;
-    if (res != null) {
-      setState(() {
+    setState(() {
+      _dialogOpen = false;
+      if (res != null) {
         noteCtrl.text = res.trim();
-      });
-    }
+      }
+    });
   }
 
   // ---- Expenses Popup (WORKS FOR ALL DEVICES!) ----
 Future<void> _showEditExpensesPopup() async {
+  setState(() => _dialogOpen = true);
   final TextEditingController nameCtrl = TextEditingController();
   final TextEditingController amountCtrl = TextEditingController();
 
@@ -573,11 +577,12 @@ Future<void> _showEditExpensesPopup() async {
   );
   
   if (!mounted) return;
-  if (result != null) {
-    setState(() {
+  setState(() {
+    _dialogOpen = false;
+    if (result != null) {
       expenses = result;
-    });
-  }
+    }
+  });
 }
 
 
@@ -607,6 +612,11 @@ Future<void> _showEditExpensesPopup() async {
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    
+    // Prevent edit state loss when dialogs are open
+    if (_dialogOpen && !editing) {
+      return const SizedBox.shrink();
+    }
     final style = TextStyle(color: widget.textColor, fontSize: 16);
 
     if (!editing) {
