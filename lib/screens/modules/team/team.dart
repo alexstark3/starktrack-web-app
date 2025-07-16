@@ -93,7 +93,7 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                     child: _NoTopShadowMaterial(
                       borderRadius: const BorderRadius.all(Radius.circular(10)),
                       color: Theme.of(context).brightness == Brightness.dark 
-                        ? const Color(0xFF1A1A1A) 
+                        ? const Color(0xFF252526) 
                         : Colors.white,
                       elevation: Theme.of(context).brightness == Brightness.light ? 6 : 0,
                       child: Container(
@@ -246,18 +246,9 @@ class _TeamTabState extends State<_TeamTab> {
           margin: const EdgeInsets.only(right: 16),
           padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
           decoration: BoxDecoration(
-            gradient: widget.isSelected ? LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: isDark
-                ? [const Color(0xFF404040), const Color(0xFF2D2D2D)]
-                : [const Color(0xFFF8F8F8), const Color(0xFFF0F0F0)],
-            ) : (_isHovered && isDark ? LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)],
-            ) : null),
-            color: widget.isSelected ? null : (_isHovered ? null : (isDark ? const Color(0xFF1E1E1E) : widget.colors.lightGray)),
+            color: widget.isSelected 
+              ? (isDark ? widget.colors.lightGray : const Color(0xFFF0F0F0))
+              : (_isHovered && isDark ? const Color(0xFF252526) : (isDark ? widget.colors.dashboardBackground : widget.colors.lightGray)),
             borderRadius: BorderRadius.vertical(
               top: const Radius.circular(6),
               bottom: Radius.circular(widget.isSelected ? 0 : 6),
@@ -266,7 +257,7 @@ class _TeamTabState extends State<_TeamTab> {
                 ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
                 : null,
             border: isDark
-                ? Border.all(color: widget.isSelected ? const Color(0xFF505050) : const Color(0xFF2A2A2A), width: 1)
+                ? Border.all(color: widget.isSelected ? const Color(0xFF404040) : const Color(0xFF2A2A2A), width: 1)
                 : null,
           ),
           child: Row(

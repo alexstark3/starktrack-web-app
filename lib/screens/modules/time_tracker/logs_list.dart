@@ -105,19 +105,10 @@ class _LogsListState extends State<LogsList> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: isDark 
-            ? [
-                const Color(0xFF1A1A1A),
-                const Color(0xFF0F0F0F),
-              ]
-            : [
-                const Color(0xFFFFFFFF),
-                const Color(0xFFF8F8F8),
-              ],
-        ),
+        color: isDark 
+          ? const Color(0xFF1E1E1E) 
+          : const Color(0xFFFFFFFF),
+      ),
       ),
       child: StreamBuilder<QuerySnapshot>(
         stream: logsRef.snapshots(),
@@ -218,23 +209,18 @@ class _LogsListState extends State<LogsList> {
               Container(
                 key  : ValueKey(logId),
                 margin: const EdgeInsets.symmetric(vertical: 4),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  gradient: isDark ? LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [const Color(0xFF404040), const Color(0xFF2D2D2D)],
-                  ) : null,
-                  color: isDark ? null : theme.cardColor,
-                  border: isDark ? Border.all(color: const Color(0xFF505050), width: 1) : null,
-                  boxShadow: isDark ? null : [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
+                                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: isDark ? const Color(0xFF2D2D30) : theme.cardColor,
+                    border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : null,
+                    boxShadow: isDark ? null : [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
                 child : SizedBox(
                   width: double.infinity,
                   child: Padding(
@@ -784,19 +770,9 @@ Future<void> _showEditExpensesPopup() async {
                                          children: widget.expenseLines.map((line) => Container(
                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                        decoration: BoxDecoration(
-                         gradient: LinearGradient(
-                           begin: Alignment.topLeft,
-                           end: Alignment.bottomRight,
-                           colors: Theme.of(context).brightness == Brightness.dark 
-                             ? [
-                                 widget.appColors.primaryBlue.withOpacity(0.3),
-                                 widget.appColors.primaryBlue.withOpacity(0.1),
-                               ]
-                             : [
-                                 widget.appColors.primaryBlue.withOpacity(0.1),
-                                 widget.appColors.primaryBlue.withOpacity(0.05),
-                               ],
-                         ),
+                         color: Theme.of(context).brightness == Brightness.dark 
+                           ? widget.appColors.primaryBlue.withOpacity(0.2)
+                           : widget.appColors.primaryBlue.withOpacity(0.1),
                          borderRadius: BorderRadius.circular(4),
                          border: Border.all(
                            color: widget.appColors.primaryBlue.withOpacity(0.3),
@@ -909,19 +885,9 @@ Future<void> _showEditExpensesPopup() async {
                                                  children: currExpenseLines.map((line) => Container(
                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                            decoration: BoxDecoration(
-                             gradient: LinearGradient(
-                               begin: Alignment.topLeft,
-                               end: Alignment.bottomRight,
-                               colors: Theme.of(context).brightness == Brightness.dark 
-                                 ? [
-                                     widget.appColors.primaryBlue.withOpacity(0.3),
-                                     widget.appColors.primaryBlue.withOpacity(0.1),
-                                   ]
-                                 : [
-                                     widget.appColors.primaryBlue.withOpacity(0.1),
-                                     widget.appColors.primaryBlue.withOpacity(0.05),
-                                   ],
-                             ),
+                             color: Theme.of(context).brightness == Brightness.dark 
+                               ? widget.appColors.primaryBlue.withOpacity(0.2)
+                               : widget.appColors.primaryBlue.withOpacity(0.1),
                              borderRadius: BorderRadius.circular(4),
                              border: Border.all(
                                color: widget.appColors.primaryBlue.withOpacity(0.3),
@@ -950,19 +916,9 @@ Future<void> _showEditExpensesPopup() async {
                   decoration: BoxDecoration(
                     border: Border.all(color: widget.borderColor),
                     borderRadius: BorderRadius.circular(8),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: Theme.of(context).brightness == Brightness.dark 
-                        ? [
-                            const Color(0xFF2A2A2A),
-                            const Color(0xFF1E1E1E),
-                          ]
-                        : [
-                            const Color(0xFFF8F8F8),
-                            const Color(0xFFF0F0F0),
-                          ],
-                    ),
+                    color: Theme.of(context).brightness == Brightness.dark 
+                      ? const Color(0xFF2D2D30)
+                      : const Color(0xFFF0F0F0),
                   ),
                   child: Builder(
                     builder: (context) {

@@ -448,14 +448,9 @@ class _TimeEntryCardState extends State<TimeEntryCard>
     final isDark = theme.brightness == Brightness.dark;
 
     BoxDecoration fieldDecoration = BoxDecoration(
-      gradient: isDark ? LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [const Color(0xFF404040), const Color(0xFF2D2D2D)],
-      ) : null,
-      color: isDark ? null : theme.cardColor,
+      color: isDark ? const Color(0xFF2D2D30) : theme.cardColor,
       borderRadius: BorderRadius.circular(kEntryRadius),
-      border: Border.all(color: isDark ? const Color(0xFF505050) : theme.dividerColor),
+      border: Border.all(color: isDark ? const Color(0xFF404040) : theme.dividerColor),
       boxShadow: isDark ? null : [
         BoxShadow(
           color: Colors.black.withOpacity(0.1),
@@ -554,13 +549,8 @@ class _TimeEntryCardState extends State<TimeEntryCard>
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          gradient: isDark ? LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [const Color(0xFF404040), const Color(0xFF2D2D2D)],
-          ) : null,
-          color: isDark ? null : theme.cardColor,
-          border: isDark ? Border.all(color: const Color(0xFF505050), width: 1) : null,
+          color: isDark ? const Color(0xFF2D2D30) : theme.cardColor,
+          border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : null,
           boxShadow: isDark ? null : [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),

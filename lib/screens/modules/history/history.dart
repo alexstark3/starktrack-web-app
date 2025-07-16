@@ -52,19 +52,9 @@ class _HistoryLogsState extends State<HistoryLogs> {
         color: isDark ? Colors.white24 : Colors.black26, 
         width: 1
       ),
-      gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: isDark 
-          ? [
-              const Color(0xFF2A2A2A),
-              const Color(0xFF1A1A1A),
-            ]
-          : [
-              const Color(0xFFFFFFFF),
-              const Color(0xFFF8F8F8),
-            ],
-      ),
+      color: isDark 
+        ? const Color(0xFF2D2D30)
+        : const Color(0xFFF8F8F8),
       borderRadius: BorderRadius.circular(kFilterRadius),
     );
 
@@ -222,19 +212,9 @@ class _HistoryLogsState extends State<HistoryLogs> {
     final refreshBtn = Container(
       height: kFilterHeight,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: isDark 
-            ? [
-                theme.colorScheme.primary.withOpacity(0.3),
-                theme.colorScheme.primary.withOpacity(0.1),
-              ]
-            : [
-                theme.colorScheme.primary.withOpacity(0.1),
-                theme.colorScheme.primary.withOpacity(0.05),
-              ],
-        ),
+        color: isDark 
+          ? theme.colorScheme.primary.withOpacity(0.2)
+          : theme.colorScheme.primary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(kFilterRadius),
       ),
       child: IconButton(
@@ -261,21 +241,11 @@ class _HistoryLogsState extends State<HistoryLogs> {
           Container(
   width: double.infinity, // stretch to full width!
   decoration: BoxDecoration(
-    gradient: LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: isDark 
-        ? [
-            const Color(0xFF2A2A2A),
-            const Color(0xFF1A1A1A),
-          ]
-        : [
-            const Color(0xFFFFFFFF),
-            const Color(0xFFF8F8F8),
-          ],
-    ),
-
+    color: isDark 
+      ? const Color(0xFF2D2D30)
+      : const Color(0xFFF8F8F8),
     borderRadius: BorderRadius.circular(kFilterRadius + 2),
+    border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : null,
   ),
   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
   alignment: Alignment.centerLeft, // keep fields left-aligned
@@ -520,21 +490,9 @@ class _HistoryLogsState extends State<HistoryLogs> {
                           // Blue bar with group totals
                           Container(
                             width: double.infinity,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: isDark 
-                                  ? [
-                                      theme.colorScheme.primary.withOpacity(0.25),
-                                      theme.colorScheme.primary.withOpacity(0.15),
-                                    ]
-                                  : [
-                                      theme.colorScheme.primary.withOpacity(0.12),
-                                      theme.colorScheme.primary.withOpacity(0.08),
-                                    ],
-                              ),
-                            ),
+                            color: isDark 
+                              ? theme.colorScheme.primary.withOpacity(0.2)
+                              : theme.colorScheme.primary.withOpacity(0.1),
                             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,

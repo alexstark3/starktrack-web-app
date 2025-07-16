@@ -103,17 +103,17 @@ class AppColors extends ThemeExtension<AppColors> {
 
   static const AppColors dark = AppColors(
     primaryBlue: Color(0xFF65AAEA),
-    darkGray: Color(0xFFB0B0B0),
-    midGray: Color(0xFF58595B),      // Swap for higher contrast in dark mode
-    lightGray: Color(0xFF232323),
+    darkGray: Color(0xFF969696),     // VS Code secondary text
+    midGray: Color(0xFF6A6A6A),      // VS Code muted text
+    lightGray: Color(0xFF2D2D30),    // VS Code active elements
     green: Color(0xFF67C187),
     red: Color(0xFFD76C6C),
-    dashboardBackground: Color(0xFF232323),
-    textColor: Color(0xFFF3F3F7),
-    backgroundLight: Color(0xFF232323),
+    dashboardBackground: Color(0xFF1E1E1E),  // VS Code background
+    textColor: Color(0xFFCCCCCC),    // VS Code primary text (off-white)
+    backgroundLight: Color(0xFF252526),      // VS Code sidebar
     success: Color(0xFF67C187),
     error: Color(0xFFD76C6C),
-    whiteTextOnBlue: Color(0xFFF3F3F7),
+    whiteTextOnBlue: Color(0xFFCCCCCC),      // Consistent with textColor
     orange: Color(0xFFFF9800),
   );
 }
