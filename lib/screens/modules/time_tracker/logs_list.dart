@@ -1,19 +1,22 @@
+// lib/screens/modules/time_tracker/logs_list.dart
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:starktrack/theme/app_colors.dart';
 
-typedef ProjectInfo = Map<String, String>;
+typedef ProjectInfo = Map<String, String>; // {'id': '…', 'name': '…'}
 
-const double kWidthLabel    = 50;
-const double kWidthSpacer   = 5;
-const double kWidthTime     = 50;
-const double kWidthDash     = 5;
-const double kWidthEquals   = 5;
-const double kWidthTotal    = 60;
-const double kWidthProject  = 150;
-const double kWidthExpense  = 170;
-const double kWidthIcon     = 38;
+/* ─────────── column widths (unchanged) ─────────── */
+const double kWidthLabel   = 50;
+const double kWidthSpacer  = 5;
+const double kWidthTime    = 50;
+const double kWidthDash    = 5;
+const double kWidthEquals  = 5;
+const double kWidthTotal   = 60;
+const double kWidthProject = 150;
+const double kWidthExpense = 170;
+const double kWidthIcon    = 38;
+/* ──────────────────────────────────────────────── */
 
 class LogsList extends StatelessWidget {
   final String companyId;
@@ -91,11 +94,12 @@ class LogsList extends StatelessWidget {
           final docs = snap.data!.docs;
           final rows = <Widget>[];
 
+          /* Which session (if any) already has Per-Diem so we can disable it elsewhere */
           String? perDiemLogId;
           for (final doc in docs) {
             final log = doc.data() as Map<String, dynamic>;
-            final expenses = Map<String, dynamic>.from(log['expenses'] ?? {});
-            if (expenses.containsKey('Per diem')) {
+            final exp = Map<String, dynamic>.from(log['expenses'] ?? {});
+            if (exp.containsKey('Per diem')) {
               perDiemLogId = doc.id;
               break;
             }
@@ -111,49 +115,38 @@ class LogsList extends StatelessWidget {
 
             final Map<String, dynamic> expensesMap =
                 Map<String, dynamic>.from(log['expenses'] ?? {});
-            final List<String> expenseLines = [];
-            for (var entry in expensesMap.entries) {
-              if (entry.key == 'Per diem') continue;
-              expenseLines.add('${entry.key} ${(entry.value as num).toStringAsFixed(2)} CHF');
-            }
-            if (expensesMap.containsKey('Per diem')) {
-              final value = expensesMap['Per diem'];
-              expenseLines.add('Per diem ${(value as num).toStringAsFixed(2)} CHF');
-            }
+            final List<String> expenseLines = [
+              for (var e in expensesMap.entries)
+                if (e.key != 'Per diem')
+                  '${e.key} ${(e.value as num).toStringAsFixed(2)} CHF',
+              if (expensesMap.containsKey('Per diem'))
+                'Per diem ${(expensesMap['Per diem'] as num).toStringAsFixed(2)} CHF',
+            ];
 
             final String noteText  = log['note'] ?? '';
             final String projectId = (log['projectId'] ?? log['project'] ?? '') as String;
             final String projectName = _projectNameFromId(projectId);
-            final List<String> projectLines = [projectName];
 
+            /* Break card */
             if (showBreakCards && i > 0) {
               final prev    = docs[i - 1].data() as Map<String, dynamic>;
               final prevEnd = (prev['end'] as Timestamp?)?.toDate();
               if (prevEnd != null && begin != null && prevEnd.isBefore(begin)) {
-                final breakDuration = begin.difference(prevEnd);
-                final breakStr      = _formatBreak(prevEnd, begin, breakDuration);
-
+                final d = begin.difference(prevEnd);
                 rows.add(
                   Card(
-                    key  : ValueKey('break_$i'),
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                    color : Colors.grey[200],
+                    key: ValueKey('break_$i'),
+                    margin : const EdgeInsets.symmetric(vertical: 4),
+                    color  : Colors.grey[200],
+                    shape  : RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     elevation: 0,
-                    shape : RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    child : SizedBox(
-                      width: double.infinity,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
-                        child: Text(
-                          breakStr,
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 15,
-                            fontStyle: FontStyle.italic,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+                    child  : Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
+                      child  : Text(
+                        'Break: ${DateFormat.Hm().format(prevEnd)} - ${DateFormat.Hm().format(begin)} = '
+                        '${d.inHours.toString().padLeft(2, '0')}:${(d.inMinutes % 60).toString().padLeft(2, '0')}h',
+                        style: const TextStyle(
+                            color: Colors.grey, fontStyle: FontStyle.italic),
                       ),
                     ),
                   ),
@@ -161,60 +154,56 @@ class LogsList extends StatelessWidget {
               }
             }
 
+            /* Work-session card */
             rows.add(
               Card(
-                key  : ValueKey(logId),
-                margin: const EdgeInsets.symmetric(vertical: 4),
-                shape : RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+                key      : ValueKey(logId),
+                margin   : const EdgeInsets.symmetric(vertical: 4),
                 elevation: 2,
-                child : SizedBox(
-                  width: double.infinity,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
-                    child: _LogEditRow(
-                      key          : ValueKey('row_$logId'),
-                      logId        : logId,
-                      begin        : begin,
-                      end          : end,
-                      projectId    : projectId,
-                      projectName  : projectName,
-                      projectLines : projectLines,
-                      expenseLines : expenseLines,
-                      expensesMap  : expensesMap,
-                      note         : noteText,
-                      appColors    : appColors,
-                      borderColor  : borderColor,
-                      textColor    : textColor,
-                      duration     : (begin != null && end != null)
+                shape    : RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                child    : Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
+                  child  : _LogEditRow(
+                    key            : ValueKey('row_$logId'),
+                    logId          : logId,
+                    begin          : begin,
+                    end            : end,
+                    projectId      : projectId,
+                    projectName    : projectName,
+                    expenseLines   : expenseLines,
+                    expensesMap    : expensesMap,
+                    note           : noteText,
+                    appColors      : appColors,
+                    borderColor    : borderColor,
+                    textColor      : textColor,
+                    duration       : (begin != null && end != null)
                                       ? end.difference(begin)
                                       : Duration.zero,
-                      onDelete     : () => doc.reference.delete(),
-                      onSave       : (newStart, newEnd, newNote, newProjId, newExpenses) async {
-                        try {
-                          final ns = DateFormat.Hm().parse(newStart);
-                          final ne = DateFormat.Hm().parse(newEnd);
-                          final d  = selectedDay;
-                          final nb = DateTime(d.year, d.month, d.day, ns.hour, ns.minute);
-                          final nn = DateTime(d.year, d.month, d.day, ne.hour, ne.minute);
-                          if (!nn.isAfter(nb)) throw Exception('Invalid time');
-                          await doc.reference.update({
-                            'begin' : nb,
-                            'end'   : nn,
-                            'duration_minutes': nn.difference(nb).inMinutes,
-                            'note'  : newNote,
-                            'projectId': newProjId,
-                            'project': _projectNameFromId(newProjId),
-                            'expenses': newExpenses,
-                          });
-                        } catch (err) {
-                          ScaffoldMessenger.of(context)
-                            .showSnackBar(SnackBar(content: Text(err.toString())));
-                        }
-                      },
-                      projects     : projects,
-                      perDiemLogId : perDiemLogId,
-                    ),
+                    onDelete       : () => doc.reference.delete(),
+                    onSave         : (s, e, n, p, ex) async {
+                      try {
+                        final ns = DateFormat.Hm().parse(s);
+                        final ne = DateFormat.Hm().parse(e);
+                        final d  = selectedDay;
+                        final nb = DateTime(d.year, d.month, d.day, ns.hour, ns.minute);
+                        final nn = DateTime(d.year, d.month, d.day, ne.hour, ne.minute);
+                        if (!nn.isAfter(nb)) throw Exception('Invalid time');
+                        await doc.reference.update({
+                          'begin'   : nb,
+                          'end'     : nn,
+                          'duration_minutes': nn.difference(nb).inMinutes,
+                          'note'    : n,
+                          'projectId': p,
+                          'project' : _projectNameFromId(p),
+                          'expenses': ex,
+                        });
+                      } catch (err) {
+                        ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text(err.toString())));
+                      }
+                    },
+                    projects       : projects,
+                    perDiemLogId   : perDiemLogId,
                   ),
                 ),
               ),
@@ -225,24 +214,12 @@ class LogsList extends StatelessWidget {
             theme,
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-              child: Wrap(
-                runSpacing: 4,
-                spacing: 0,
-                children: rows,
-              ),
+              child: Wrap(runSpacing: 4, children: rows),
             ),
           );
         },
       ),
     );
-  }
-
-  String _formatBreak(DateTime from, DateTime to, Duration d) {
-    final startStr = DateFormat.Hm().format(from);
-    final endStr   = DateFormat.Hm().format(to);
-    final h = d.inHours.toString().padLeft(2, '0');
-    final m = (d.inMinutes % 60).toString().padLeft(2, '0');
-    return 'Break: $startStr - $endStr = $h:$m' + 'h';
   }
 
   Widget _shellCard(ThemeData theme, Widget child) => Card(
@@ -254,22 +231,21 @@ class LogsList extends StatelessWidget {
       );
 }
 
+/* ─────────────────────────── _LogEditRow ─────────────────────────── */
+
 class _LogEditRow extends StatefulWidget {
   final String logId;
-  final DateTime? begin;
-  final DateTime? end;
-  final String projectId;
-  final String projectName;
-  final List<String> projectLines;
+  final DateTime? begin, end;
+  final String projectId, projectName;
   final List<String> expenseLines;
   final Map<String, dynamic> expensesMap;
   final String note;
   final AppColors appColors;
-  final Color borderColor;
-  final Color textColor;
+  final Color borderColor, textColor;
   final Duration duration;
   final VoidCallback onDelete;
-  final Future<void> Function(String, String, String, String, Map<String, dynamic>) onSave;
+  final Future<void> Function(
+      String, String, String, String, Map<String, dynamic>) onSave;
   final List<ProjectInfo> projects;
   final String? perDiemLogId;
 
@@ -280,7 +256,6 @@ class _LogEditRow extends StatefulWidget {
     required this.end,
     required this.projectId,
     required this.projectName,
-    required this.projectLines,
     required this.expenseLines,
     required this.expensesMap,
     required this.note,
@@ -302,9 +277,9 @@ class _LogEditRowState extends State<_LogEditRow>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
+
   bool editing = false;
   late TextEditingController startCtrl, endCtrl, noteCtrl;
-  final FocusNode _noteFocus = FocusNode();
   bool _saving = false;
   String? selectedProjectId;
   late Map<String, dynamic> expenses;
@@ -313,19 +288,15 @@ class _LogEditRowState extends State<_LogEditRow>
   void initState() {
     super.initState();
     startCtrl = TextEditingController(
-      text: widget.begin != null ? DateFormat.Hm().format(widget.begin!) : '');
-    endCtrl = TextEditingController(
-      text: widget.end != null ? DateFormat.Hm().format(widget.end!) : '');
-    noteCtrl    = TextEditingController(text: widget.note);
+        text: widget.begin != null ? DateFormat.Hm().format(widget.begin!) : '');
+    endCtrl   = TextEditingController(
+        text: widget.end   != null ? DateFormat.Hm().format(widget.end!)   : '');
+    noteCtrl  = TextEditingController(text: widget.note);
 
-    final projectListIds = widget.projects.map((p) => p['id']).toList();
-    if (projectListIds.contains(widget.projectId)) {
-      selectedProjectId = widget.projectId;
-    } else if (widget.projects.isNotEmpty) {
-      selectedProjectId = widget.projects.first['id'];
-    } else {
-      selectedProjectId = null;
-    }
+    selectedProjectId = widget.projectId.isNotEmpty
+        ? widget.projectId
+        : (widget.projects.isNotEmpty ? widget.projects.first['id'] : null);
+
     expenses = Map<String, dynamic>.from(widget.expensesMap);
   }
 
@@ -334,357 +305,233 @@ class _LogEditRowState extends State<_LogEditRow>
     startCtrl.dispose();
     endCtrl.dispose();
     noteCtrl.dispose();
-    _noteFocus.dispose();
     super.dispose();
   }
 
-  // ---- Note Popup (WORKS FOR ALL DEVICES!) ----
+  /* ------------------------------ NOTE POPUP ------------------------------ */
   Future<void> _showNotePopup() async {
     final ctrl = TextEditingController(text: noteCtrl.text);
-    final res = await showDialog<String>(
+    final res  = await showDialog<String>(
       context: context,
-      useRootNavigator: true,   // <-- KEY! Use root navigator for dialogs
       builder: (ctx) => AlertDialog(
-        title: const Text('Note'),
+        title  : const Text('Note'),
         content: TextField(controller: ctrl, maxLines: 3, autofocus: true),
         actions: [
-          TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(),
               child: const Text('Cancel')),
-          TextButton(
-              onPressed: () => Navigator.of(ctx).pop(ctrl.text),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(ctrl.text),
               child: const Text('Save')),
         ],
       ),
     );
     if (!mounted) return;
-    if (res != null) {
-      setState(() {
-        noteCtrl.text = res.trim();
-      });
-    }
+    if (res != null) setState(() => noteCtrl.text = res.trim());
   }
 
-  // ---- Expenses Popup (WORKS FOR ALL DEVICES!) ----
-Future<void> _showEditExpensesPopup() async {
-  final TextEditingController nameCtrl = TextEditingController();
-  final TextEditingController amountCtrl = TextEditingController();
+  /* --------------------------- EXPENSES POPUP ----------------------------- */
+  Future<void> _showEditExpensesPopup() async {
+    final nameCtrl   = TextEditingController();
+    final amountCtrl = TextEditingController();
 
-  Map<String, dynamic> tempExpenses = Map<String, dynamic>.from(expenses);
+    Map<String, dynamic> tmp = Map<String, dynamic>.from(expenses);
+    bool perDiem = tmp.containsKey('Per diem');
+    String? err;
 
-  bool tempPerDiem = tempExpenses.containsKey('Per diem');
-  String? errorMsg;
+    final bool perDiemUsedElsewhere =
+        widget.perDiemLogId != null && widget.perDiemLogId != widget.logId;
 
-  Color primaryColor = Colors.blue;
-
-  final bool perDiemUsedElsewhere = widget.perDiemLogId != null && widget.perDiemLogId != widget.logId;
-  final bool perDiemAvailableHere = widget.perDiemLogId == null || widget.perDiemLogId == widget.logId;
-
-  await showDialog(
-    context: context,
-    barrierDismissible: true,            // Allow tap-away to close
-    useRootNavigator: true,              // Always use root navigator
-    builder: (dialogCtx) {
-      return StatefulBuilder(
-        builder: (context, setStateDialog) {
-          bool canAddExpense() {
-            final name = nameCtrl.text.trim();
-            final amountStr = amountCtrl.text.trim();
-            final amount = double.tryParse(amountStr.replaceAll(',', '.'));
-            return name.isNotEmpty &&
-                amountStr.isNotEmpty &&
-                amount != null &&
-                amount > 0 &&
-                !tempExpenses.containsKey(name) &&
-                name != 'Per diem';
+    final Map<String, dynamic>? result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (ctx, setState) {
+          bool canAdd() {
+            final n = nameCtrl.text.trim();
+            final a = double.tryParse(amountCtrl.text.trim().replaceAll(',', '.'));
+            return n.isNotEmpty &&
+                   a != null && a > 0 &&
+                   !tmp.containsKey(n) &&
+                   n != 'Per diem';
           }
 
           void addExpense() {
-            final name = nameCtrl.text.trim();
-            final amountStr = amountCtrl.text.trim();
-            if (!canAddExpense()) return;
-            setStateDialog(() {
-              tempExpenses[name] = double.parse(amountStr.replaceAll(',', '.'));
+            if (!canAdd()) return;
+            setState(() {
+              tmp[nameCtrl.text.trim()] =
+                  double.parse(amountCtrl.text.trim().replaceAll(',', '.'));
               nameCtrl.clear();
               amountCtrl.clear();
-              errorMsg = null;
+              err = null;
             });
           }
 
-          void handlePerDiemChange(bool? checked) {
-            setStateDialog(() {
-              tempPerDiem = checked ?? false;
-              if (tempPerDiem) {
-                tempExpenses['Per diem'] = 16.00;
-              } else {
-                tempExpenses.remove('Per diem');
-              }
-            });
-          }
-
-          void handleExpenseChange(String key, bool? checked) {
-            if (checked == false) {
-              setStateDialog(() => tempExpenses.remove(key));
-            }
-          }
-
-          final List<String> otherExpenseKeys =
-              tempExpenses.keys.where((k) => k != 'Per diem').toList();
-          final List<Widget> expenseWidgets = [
-            for (final key in otherExpenseKeys)
-              Row(
-                children: [
-                  Checkbox(
-                    value: true,
-                    onChanged: (checked) => handleExpenseChange(key, checked),
-                    activeColor: primaryColor,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4)),
-                  ),
-                  Text(
-                    key,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.normal, fontSize: 16),
-                  ),
-                  const Spacer(),
-                  Text(
-                    '${(tempExpenses[key] as num).toStringAsFixed(2)} CHF',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.normal, fontSize: 16),
-                  ),
-                ],
-              ),
-            Row(
-              children: [
-                Checkbox(
-                  value: tempPerDiem,
-                  onChanged: perDiemAvailableHere ? handlePerDiemChange : null,
-                  activeColor: primaryColor,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4)),
-                ),
-                const Text('Per Diem'),
-                if (perDiemUsedElsewhere)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 6),
-                    child: Tooltip(
-                      message: "Per diem already used in another session today",
-                      child: Icon(Icons.info_outline, color: Colors.grey, size: 18),
-                    ),
-                  ),
-                const Spacer(),
-                const Text('16.00 CHF',
-                    style: TextStyle(
-                        fontWeight: FontWeight.normal, fontSize: 16)),
-              ],
-            ),
-          ];
+          final other = tmp.keys.where((k) => k != 'Per diem');
 
           return AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-            title: const Text('Expenses'),
+            shape : RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            title : const Text('Expenses'),
             content: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ...expenseWidgets,
+                  for (final k in other)
+                    Row(children: [
+                      Checkbox(
+                          value: true,
+                          onChanged: (_) => setState(() => tmp.remove(k))),
+                      Text(k),
+                      const Spacer(),
+                      Text('${(tmp[k] as num).toStringAsFixed(2)} CHF'),
+                    ]),
+                  Row(children: [
+                    Checkbox(
+                      value: perDiem,
+                      onChanged: perDiemUsedElsewhere
+                          ? null
+                          : (v) => setState(() {
+                                perDiem = v ?? false;
+                                if (perDiem) {
+                                  tmp['Per diem'] = 16.00;
+                                } else {
+                                  tmp.remove('Per diem');
+                                }
+                              }),
+                    ),
+                    const Text('Per Diem'),
+                    if (perDiemUsedElsewhere)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 6),
+                        child  : Icon(Icons.info_outline, size: 18)),
+                    const Spacer(),
+                    const Text('16.00 CHF'),
+                  ]),
                   const SizedBox(height: 14),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: TextField(
-                          controller: nameCtrl,
-                          decoration: const InputDecoration(
-                            hintText: 'Name',
-                            border: UnderlineInputBorder(),
-                            isDense: true,
-                            contentPadding: EdgeInsets.symmetric(vertical: 4),
-                          ),
-                          onChanged: (_) => setStateDialog(() {}),
-                          onSubmitted: (_) => canAddExpense() ? addExpense() : null,
-                        ),
+                  Row(children: [
+                    Expanded(
+                      child: TextField(
+                        controller: nameCtrl,
+                        decoration: const InputDecoration(
+                            hintText: 'Name', isDense: true),
+                        onChanged: (_) => setState(() {}),
+                        onSubmitted: (_) => addExpense(),
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        flex: 1,
-                        child: TextField(
-                          controller: amountCtrl,
-                          decoration: const InputDecoration(
-                            hintText: 'Amount',
-                            border: UnderlineInputBorder(),
-                            isDense: true,
-                            contentPadding: EdgeInsets.symmetric(vertical: 4),
-                          ),
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          onChanged: (_) => setStateDialog(() {}),
-                          onSubmitted: (_) => canAddExpense() ? addExpense() : null,
-                        ),
+                    ),
+                    const SizedBox(width: 10),
+                    SizedBox(
+                      width: 90,
+                      child: TextField(
+                        controller: amountCtrl,
+                        decoration: const InputDecoration(
+                            hintText: 'Amount', isDense: true),
+                        keyboardType:
+                            const TextInputType.numberWithOptions(decimal: true),
+                        onChanged: (_) => setState(() {}),
+                        onSubmitted: (_) => addExpense(),
                       ),
-                      const SizedBox(width: 6),
-                      SizedBox(
-                        height: 32,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            backgroundColor: Colors.grey.shade200,
-                            foregroundColor: primaryColor,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
-                          onPressed: canAddExpense() ? addExpense : null,
-                          child: const Text('Add'),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (errorMsg != null)
+                    ),
+                    const SizedBox(width: 6),
+                    ElevatedButton(
+                      onPressed: canAdd() ? addExpense : null,
+                      child: const Text('Add'),
+                    ),
+                  ]),
+                  if (err != null)
                     Padding(
-                      padding: const EdgeInsets.only(top: 4.0, bottom: 2.0),
-                      child: Text(errorMsg!, style: const TextStyle(color: Colors.red)),
+                      padding: const EdgeInsets.only(top: 4),
+                      child  : Text(err!, style: const TextStyle(color: Colors.red)),
                     ),
                 ],
               ),
             ),
-            actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             actions: [
               TextButton(
-                onPressed: () {
-                  Navigator.of(dialogCtx).pop();  // Always close with correct dialogCtx
-                },
-                child: Text('Cancel', style: TextStyle(color: primaryColor, fontSize: 16)),
-              ),
+                  onPressed: () => Navigator.of(dialogCtx).pop(),
+                  child: const Text('Cancel')),
               ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
-                  textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                onPressed: () {
-                  setState(() {
-                    expenses = Map<String, dynamic>.from(tempExpenses);
-                  });
-                  Navigator.of(dialogCtx).pop(); // Always close with correct dialogCtx
-                },
+                onPressed: () =>
+                    Navigator.of(dialogCtx).pop(Map<String, dynamic>.from(tmp)),
                 child: const Text('Save'),
               ),
             ],
           );
         },
-      );
-    },
-  );
-}
-
-
-  Widget _projectDropdown(TextStyle s) {
-    return DropdownButtonHideUnderline(
-      child: DropdownButton<String>(
-        value: widget.projects.any((proj) => proj['id'] == selectedProjectId)
-            ? selectedProjectId
-            : null,
-        items: widget.projects.map((proj) {
-          return DropdownMenuItem(
-            value: proj['id'],
-            child: Text(proj['name'] ?? proj['id']!, style: s),
-          );
-        }).toList(),
-        hint: const Text('Select project'),
-        onChanged: (value) {
-          setState(() {
-            selectedProjectId = value;
-          });
-        },
-        isExpanded: true,
       ),
     );
+
+    if (result != null && mounted) setState(() => expenses = result);
   }
+
+  /* ---------------- UI helpers & build ---------------- */
+  Widget _dropdown(TextStyle s) => DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: widget.projects.any((p) => p['id'] == selectedProjectId)
+              ? selectedProjectId
+              : null,
+          isExpanded: true,
+          items: [
+            for (final p in widget.projects)
+              DropdownMenuItem(value: p['id'], child: Text(p['name']!, style: s)),
+          ],
+          hint: const Text('Select project'),
+          onChanged: (v) => setState(() => selectedProjectId = v),
+        ),
+      );
+
+  Widget _info(String l, String v, TextStyle s) =>
+      Padding(padding: const EdgeInsets.only(bottom: 3), child: Text('$l: $v', style: s));
+
+  Widget _icon(IconData i, Color c, VoidCallback? f) =>
+      SizedBox(width: kWidthIcon, child: IconButton(icon: Icon(i, color: c), onPressed: f));
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final style = TextStyle(color: widget.textColor, fontSize: 16);
+    final s = TextStyle(color: widget.textColor, fontSize: 16);
 
+    /* READ-ONLY ------------------------------------------------------ */
     if (!editing) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _infoText('Work', '${startCtrl.text.isNotEmpty ? startCtrl.text : '--'} - ${endCtrl.text.isNotEmpty ? endCtrl.text : '--'} = ${widget.duration.inMinutes == 0
-              ? '00:00h'
-              : '${widget.duration.inHours.toString().padLeft(2, '0')}:${(widget.duration.inMinutes % 60).toString().padLeft(2, '0')}h'}'),
-          _infoText('Project', widget.projectName),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text('Expenses:', style: style),
-              const SizedBox(width: 8),
-              if (widget.expenseLines.isEmpty)
-                Text('-', style: style.copyWith(color: Colors.grey)),
-              ...widget.expenseLines.map((line) => Text(line, style: style)),
-            ],
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text('Note:', style: style),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  noteCtrl.text,
-                  style: style,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
+          _info(
+              'Work',
+              '${startCtrl.text} - ${endCtrl.text} = '
+              '${widget.duration.inHours.toString().padLeft(2, '0')}:'
+              '${(widget.duration.inMinutes % 60).toString().padLeft(2, '0')}h',
+              s),
+          _info('Project', widget.projectName, s),
+          Row(children: [
+            Text('Expenses:', style: s),
+            const SizedBox(width: 8),
+            if (widget.expenseLines.isEmpty)
+              Text('-', style: s.copyWith(color: Colors.grey)),
+            ...widget.expenseLines.map((e) => Text(e, style: s)),
+          ]),
+          Row(children: [
+            Text('Note:', style: s),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(noteCtrl.text,
+                  style: s, maxLines: 2, overflow: TextOverflow.ellipsis),
+            ),
+          ]),
           Padding(
             padding: const EdgeInsets.only(top: 10),
-            child: Row(
-              children: [
-                _iconBtn(Icons.edit, Colors.blue[400]!, () => setState(() => editing = true)),
-                const SizedBox(width: 8),
-                _iconBtn(Icons.delete, Colors.red[300]!, () async {
-                  final confirm = await showDialog<bool>(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      title: const Text('Delete Entry'),
-                      content: const Text('Are you sure you want to delete this entry? This cannot be undone.'),
-                      actions: [
-                        TextButton(
-                          child: const Text('Cancel'),
-                          onPressed: () => Navigator.of(ctx).pop(false),
-                        ),
-                        ElevatedButton(
-                          child: const Text('Delete'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                          ),
-                          onPressed: () => Navigator.of(ctx).pop(true),
-                        ),
-                      ],
-                    ),
-                  );
-                  if (confirm == true) {
-                    widget.onDelete();
-                  }
-                }),
-              ],
-            ),
+            child: Row(children: [
+              _icon(Icons.edit, Colors.blue, () => setState(() => editing = true)),
+              const SizedBox(width: 8),
+              _icon(Icons.delete, Colors.red, widget.onDelete),
+            ]),
           ),
         ],
       );
     }
 
-    final List<String> currExpenseLines = [
-      for (var entry in expenses.entries)
-        if (entry.key != 'Per diem')
-          '${entry.key} ${(entry.value as num).toStringAsFixed(2)} CHF',
+    /* EDIT ----------------------------------------------------------- */
+    final expPreview = [
+      for (final e in expenses.entries)
+        if (e.key != 'Per diem')
+          '${e.key} ${(e.value as num).toStringAsFixed(2)} CHF',
       if (expenses.containsKey('Per diem'))
         'Per diem ${(expenses['Per diem'] as num).toStringAsFixed(2)} CHF',
     ];
@@ -692,126 +539,83 @@ Future<void> _showEditExpensesPopup() async {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _infoText('Work', '${startCtrl.text.isNotEmpty ? startCtrl.text : '--'} - ${endCtrl.text.isNotEmpty ? endCtrl.text : '--'} = ${widget.duration.inMinutes == 0
-            ? '00:00h'
-            : '${widget.duration.inHours.toString().padLeft(2, '0')}:${(widget.duration.inMinutes % 60).toString().padLeft(2, '0')}h'}'),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text('Project: ', style: style),
-            Expanded(child: _projectDropdown(style)),
-          ],
-        ),
+        _info(
+            'Work',
+            '${startCtrl.text} - ${endCtrl.text} = '
+            '${widget.duration.inHours.toString().padLeft(2, '0')}:'
+            '${(widget.duration.inMinutes % 60).toString().padLeft(2, '0')}h',
+            s),
+        Row(children: [
+          Text('Project:', style: s),
+          const SizedBox(width: 8),
+          Expanded(child: _dropdown(s)),
+        ]),
         GestureDetector(
           onTap: _showEditExpensesPopup,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text('Expenses:', style: style),
-              const SizedBox(width: 8),
-              if (currExpenseLines.isEmpty)
-                Text('Tap to add', style: style.copyWith(color: Colors.grey)),
-              ...currExpenseLines.map((line) => Text(line, style: style)),
-            ],
-          ),
+          child: Row(children: [
+            Text('Expenses:', style: s),
+            const SizedBox(width: 8),
+            if (expPreview.isEmpty)
+              Text('Tap to add', style: s.copyWith(color: Colors.grey)),
+            ...expPreview.map((e) => Text(e, style: s)),
+          ]),
         ),
         const SizedBox(height: 20),
         GestureDetector(
           onTap: _showNotePopup,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text('Note:', style: style),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: widget.borderColor),
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.grey[100],
-                  ),
-                  child: Text(
-                    noteCtrl.text.isNotEmpty ? noteCtrl.text : 'Tap to add note',
-                    style: style.copyWith(
-                        color: noteCtrl.text.isNotEmpty ? widget.textColor : Colors.grey),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+          child: Row(children: [
+            Text('Note:', style: s),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: widget.borderColor),
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.grey[100],
+                ),
+                child: Text(
+                  noteCtrl.text.isNotEmpty
+                      ? noteCtrl.text
+                      : 'Tap to add note',
+                  style: s.copyWith(
+                      color: noteCtrl.text.isNotEmpty
+                          ? widget.textColor
+                          : Colors.grey),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-            ],
-          ),
+            ),
+          ]),
         ),
         Padding(
           padding: const EdgeInsets.only(top: 10),
-          child: Row(
-            children: [
-              _iconBtn(Icons.save, widget.appColors.green, () async {
-                if (_saving) return;
-                setState(() => _saving = true);
-                await widget.onSave(
-                  startCtrl.text,
-                  endCtrl.text,
-                  noteCtrl.text,
-                  selectedProjectId ?? '',
-                  expenses,
-                );
-                setState(() {
-                  editing = false;
-                  _saving = false;
-                });
-              }),
-              const SizedBox(width: 8),
-              _iconBtn(Icons.cancel, widget.appColors.orange,
-                  () => setState(() => editing = false)),
-              const SizedBox(width: 8),
-              _iconBtn(Icons.delete, Colors.red[300]!, () async {
-                final confirm = await showDialog<bool>(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: const Text('Delete Entry'),
-                    content: const Text('Are you sure you want to delete this entry? This cannot be undone.'),
-                    actions: [
-                      TextButton(
-                        child: const Text('Cancel'),
-                        onPressed: () => Navigator.of(ctx).pop(false),
-                      ),
-                      ElevatedButton(
-                        child: const Text('Delete'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
-                        ),
-                        onPressed: () => Navigator.of(ctx).pop(true),
-                      ),
-                    ],
-                  ),
-                );
-                if (confirm == true) {
-                  widget.onDelete();
-                }
-              }),
-            ],
-          ),
+          child: Row(children: [
+            _icon(Icons.save, widget.appColors.green, () async {
+              if (_saving) return;
+              setState(() => _saving = true);
+              await widget.onSave(
+                startCtrl.text,
+                endCtrl.text,
+                noteCtrl.text,
+                selectedProjectId ?? '',
+                expenses,
+              );
+              if (mounted) setState(() {
+                editing = false;
+                _saving  = false;
+              });
+            }),
+            const SizedBox(width: 8),
+            _icon(Icons.cancel, widget.appColors.orange,
+                () => setState(() => editing = false)),
+            const SizedBox(width: 8),
+            _icon(Icons.delete, Colors.red, widget.onDelete),
+          ]),
         ),
       ],
     );
   }
-
-  Widget _infoText(String label, String value) => Padding(
-        padding: const EdgeInsets.only(bottom: 3),
-        child: Text('$label: $value', style: TextStyle(color: widget.textColor, fontSize: 16)),
-      );
-
-  Widget _iconBtn(IconData i, Color c, VoidCallback? onTap) => SizedBox(
-        width: kWidthIcon,
-        child: IconButton(
-          icon: Icon(i, color: c),
-          tooltip: i == Icons.save ? 'Save'
-                 : i == Icons.cancel ? 'Cancel'
-                 : 'Delete',
-          onPressed: onTap,
-        ),
-      );
 }
