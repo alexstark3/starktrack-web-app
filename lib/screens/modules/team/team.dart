@@ -45,103 +45,81 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                 final totalTabWidth = tabWidth * 3 + 16; // 3 tabs + spacing
                 final useHorizontalLayout = constraints.maxWidth > totalTabWidth;
                 
-                if (useHorizontalLayout) {
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
                     children: [
+                      // Members tab
                       _TeamTab(
                         icon: Icons.group,
                         title: 'Members',
                         isSelected: _selectedIndex == 0,
                         colors: colors,
                         selectedMemberDoc: _selectedMemberDoc,
-                        onTap: () => setState(() => _selectedIndex = 0),
+                        onTap: () {
+                          setState(() {
+                            _selectedIndex = 0;
+                            _selectedMemberDoc = null;
+                          });
+                        },
                       ),
+                      // Projects tab
                       _TeamTab(
-                        icon: Icons.work,
+                        icon: Icons.folder_copy_rounded,
                         title: 'Projects',
                         isSelected: _selectedIndex == 1,
                         colors: colors,
                         selectedProject: _selectedProject,
-                        onTap: () => setState(() => _selectedIndex = 1),
+                        onTap: () {
+                          setState(() {
+                            _selectedIndex = 1;
+                            _selectedProject = null;
+                          });
+                        },
                       ),
+                      // Clients tab
                       _TeamTab(
-                        icon: Icons.business,
+                        icon: Icons.people_alt_rounded,
                         title: 'Clients',
                         isSelected: _selectedIndex == 2,
                         colors: colors,
                         selectedClient: _selectedClient,
-                        onTap: () => setState(() => _selectedIndex = 2),
+                        onTap: () {
+                          setState(() {
+                            _selectedIndex = 2;
+                            _selectedClient = null;
+                          });
+                        },
                       ),
                     ],
-                  );
-                } else {
-                  // Vertical stacked layout for small screens
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _TeamTab(
-                        icon: Icons.group,
-                        title: 'Members',
-                        isSelected: _selectedIndex == 0,
-                        colors: colors,
-                        selectedMemberDoc: _selectedMemberDoc,
-                        onTap: () => setState(() => _selectedIndex = 0),
-                        isStacked: true,
-                      ),
-                      _TeamTab(
-                        icon: Icons.work,
-                        title: 'Projects',
-                        isSelected: _selectedIndex == 1,
-                        colors: colors,
-                        selectedProject: _selectedProject,
-                        onTap: () => setState(() => _selectedIndex = 1),
-                        isStacked: true,
-                      ),
-                      _TeamTab(
-                        icon: Icons.business,
-                        title: 'Clients',
-                        isSelected: _selectedIndex == 2,
-                        colors: colors,
-                        selectedClient: _selectedClient,
-                        onTap: () => setState(() => _selectedIndex = 2),
-                        isStacked: true,
-                      ),
-                    ],
-                  );
-                }
+                  ),
+                );
               },
             ),
           ),
           
-          // --- Content area ---
+          // --- Main white area ---
           Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF2D2D30) : Colors.white,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(0),
-                  topRight: Radius.circular(12),
-                  bottomLeft: Radius.circular(12),
-                  bottomRight: Radius.circular(12),
-                ),
-                boxShadow: isDark ? null : [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 24, right: 24, bottom: 24),
+              child: Stack(
+                children: [
+                  Align(
+                    alignment: Alignment.topCenter,
+                    child: _NoTopShadowMaterial(
+                      borderRadius: const BorderRadius.all(Radius.circular(12)),
+                      color: Theme.of(context).brightness == Brightness.dark 
+                        ? const Color(0xFF252526) 
+                        : Colors.white,
+                      elevation: Theme.of(context).brightness == Brightness.light ? 8 : 0,
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(28, 26, 28, 26),
+                        margin: const EdgeInsets.only(top: 0),
+                        child: _buildTabContent(),
+                      ),
+                    ),
                   ),
                 ],
-              ),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(0),
-                  topRight: Radius.circular(12),
-                  bottomLeft: Radius.circular(12),
-                  bottomRight: Radius.circular(12),
-                ),
-                child: _buildTabContent(),
               ),
             ),
           ),
@@ -245,8 +223,6 @@ class _TeamTab extends StatefulWidget {
   final DocumentSnapshot? selectedMemberDoc;
   final Map<String, dynamic>? selectedProject;
   final Map<String, dynamic>? selectedClient;
-  final bool isStacked;
-
   const _TeamTab({
     Key? key,
     required this.icon,
@@ -257,7 +233,6 @@ class _TeamTab extends StatefulWidget {
     this.selectedMemberDoc,
     this.selectedProject,
     this.selectedClient,
-    this.isStacked = false,
   }) : super(key: key);
 
   @override
@@ -283,54 +258,31 @@ class _TeamTabState extends State<_TeamTab> {
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 140),
-          margin: widget.isStacked 
-            ? const EdgeInsets.only(bottom: 2)
-            : const EdgeInsets.only(right: 2),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          margin: const EdgeInsets.only(right: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           decoration: BoxDecoration(
             color: widget.isSelected 
-              ? (isDark ? const Color(0xFF2D2D30) : Colors.white)
-              : (_isHovered 
-                  ? (isDark ? const Color(0xFF252526) : const Color(0xFFF5F5F5))
-                  : (isDark ? widget.colors.dashboardBackground : const Color(0xFFE8E8E8))),
-            borderRadius: widget.isStacked
-              ? (widget.isSelected 
-                  ? const BorderRadius.only(
-                      topLeft: Radius.circular(8),
-                      topRight: Radius.circular(8),
-                      bottomLeft: Radius.circular(0),
-                      bottomRight: Radius.circular(0),
-                    )
-                  : BorderRadius.circular(8))
-              : (widget.isSelected 
-                  ? const BorderRadius.only(
-                      topLeft: Radius.circular(8),
-                      topRight: Radius.circular(8),
-                      bottomLeft: Radius.circular(0),
-                      bottomRight: Radius.circular(0),
-                    )
-                  : BorderRadius.circular(8)),
+              ? (isDark ? widget.colors.lightGray : const Color(0xFFF0F0F0))
+              : (_isHovered && isDark ? const Color(0xFF252526) : (isDark ? widget.colors.dashboardBackground : widget.colors.lightGray)),
+            borderRadius: BorderRadius.vertical(
+              top: const Radius.circular(6),
+              bottom: Radius.circular(widget.isSelected ? 0 : 6),
+            ),
             boxShadow: !isDark && widget.isSelected
-                ? [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 4, offset: const Offset(0, 1))]
+                ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
                 : null,
-            border: widget.isSelected
-                ? null
-                : Border.all(
-                    color: isDark ? const Color(0xFF404040) : const Color(0xFFD0D0D0), 
-                    width: 1,
-                  ),
+            border: isDark
+                ? Border.all(color: widget.isSelected ? const Color(0xFF404040) : const Color(0xFF2A2A2A), width: 1)
+                : null,
           ),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 widget.icon,
                 size: 20,
                 color: widget.isSelected
-                    ? (hasSelectedContent 
-                        ? (isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A))
-                        : widget.colors.primaryBlue)
-                    : (isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A)),
+                    ? (hasSelectedContent ? widget.colors.darkGray : widget.colors.primaryBlue)
+                    : widget.colors.darkGray,
               ),
               const SizedBox(width: 8),
               Text(
@@ -339,10 +291,8 @@ class _TeamTabState extends State<_TeamTab> {
                   fontSize: 16,
                   fontWeight: widget.isSelected ? FontWeight.bold : FontWeight.w600,
                   color: widget.isSelected
-                      ? (hasSelectedContent 
-                          ? (isDark ? const Color(0xFFCCCCCC) : Colors.black87)
-                          : widget.colors.primaryBlue)
-                      : (isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A)),
+                      ? (hasSelectedContent ? widget.colors.darkGray : widget.colors.primaryBlue)
+                      : widget.colors.darkGray,
                 ),
               ),
             ],
