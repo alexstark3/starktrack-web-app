@@ -55,7 +55,14 @@ class _HistoryLogsState extends State<HistoryLogs> {
       color: isDark 
         ? const Color(0xFF2D2D30)
         : const Color(0xFFF8F8F8),
-      borderRadius: BorderRadius.circular(kFilterRadius),
+      borderRadius: BorderRadius.circular(10),
+      boxShadow: isDark ? null : [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.08),
+          blurRadius: 4,
+          offset: const Offset(0, 2),
+        ),
+      ],
     );
 
     TextStyle pillTextStyle = TextStyle(
@@ -215,7 +222,14 @@ class _HistoryLogsState extends State<HistoryLogs> {
         color: isDark 
           ? theme.colorScheme.primary.withOpacity(0.2)
           : theme.colorScheme.primary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(kFilterRadius),
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: isDark ? null : [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: IconButton(
         icon: Icon(Icons.refresh, color: theme.colorScheme.primary, size: 24),
@@ -244,8 +258,15 @@ class _HistoryLogsState extends State<HistoryLogs> {
     color: isDark 
       ? const Color(0xFF2D2D30)
       : const Color(0xFFF8F8F8),
-    borderRadius: BorderRadius.circular(kFilterRadius + 2),
+    borderRadius: BorderRadius.circular(12),
     border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : null,
+    boxShadow: isDark ? null : [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.12),
+        blurRadius: 6,
+        offset: const Offset(0, 3),
+      ),
+    ],
   ),
   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
   alignment: Alignment.centerLeft, // keep fields left-aligned
@@ -428,7 +449,10 @@ class _HistoryLogsState extends State<HistoryLogs> {
 
                     return Card(
                       margin: EdgeInsets.zero,
-                      elevation: 0,
+                      elevation: isDark ? 0 : 2,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       child: Column(
                         children: [
                           ExpansionTile(

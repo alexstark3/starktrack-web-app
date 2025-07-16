@@ -45,13 +45,13 @@ class ChipsCard extends StatelessWidget {
       return Container(
         decoration: BoxDecoration(
           color: cardColor,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(10),
           border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : chipBorder,
           boxShadow: isDark ? null : [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 2,
-              offset: const Offset(0, 1),
+              color: Colors.black.withOpacity(0.12),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
@@ -62,17 +62,17 @@ class ChipsCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: cardColor,
-        border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : null,
-        boxShadow: isDark ? null : [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+              decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+                  color: cardColor,
+          border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : null,
+          boxShadow: isDark ? null : [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(10),

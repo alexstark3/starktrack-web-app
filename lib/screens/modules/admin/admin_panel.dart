@@ -621,50 +621,59 @@ class _AdminPanelState extends State<AdminPanel> {
   @override
   Widget build(BuildContext context) {
     final appColors = Theme.of(context).extension<AppColors>()!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       color: appColors.dashboardBackground,
       padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          Row(
+      child: Card(
+        elevation: isDark ? 0 : 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
             children: [
-              Expanded(
-                child: TextField(
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.search, color: appColors.darkGray),
-                    hintText: 'Search by name, email, or role',
-                    hintStyle: TextStyle(color: appColors.darkGray),
-                    filled: true,
-                    fillColor: appColors.lightGray,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: appColors.darkGray),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.search, color: appColors.darkGray),
+                        hintText: 'Search by name, email, or role',
+                        hintStyle: TextStyle(color: appColors.darkGray),
+                        filled: true,
+                        fillColor: appColors.lightGray,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: appColors.darkGray),
+                        ),
+                      ),
+                      style: TextStyle(color: appColors.textColor),
+                      onChanged: (v) => setState(() => _searchText = v.trim()),
                     ),
                   ),
-                  style: TextStyle(color: appColors.textColor),
-                  onChanged: (v) => setState(() => _searchText = v.trim()),
-                ),
+                  const SizedBox(width: 18),
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.person_add, color: appColors.whiteTextOnBlue),
+                    label: Text('Add New User',
+                        style: TextStyle(
+                            color: appColors.whiteTextOnBlue,
+                            fontWeight: FontWeight.bold)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: appColors.primaryBlue,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 14, horizontal: 18),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: () => _showUserDialog(),
+                  ),
+                ],
               ),
-              const SizedBox(width: 18),
-              ElevatedButton.icon(
-                icon: Icon(Icons.person_add, color: appColors.whiteTextOnBlue),
-                label: Text('Add New User',
-                    style: TextStyle(
-                        color: appColors.whiteTextOnBlue,
-                        fontWeight: FontWeight.bold)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: appColors.primaryBlue,
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 14, horizontal: 18),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                ),
-                onPressed: () => _showUserDialog(),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Expanded(
+              const SizedBox(height: 24),
+              Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('companies')
@@ -703,8 +712,9 @@ class _AdminPanelState extends State<AdminPanel> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8)),
                   child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: DataTable(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: DataTable(
                       headingRowColor:
                           MaterialStateProperty.all(appColors.primaryBlue.withOpacity(0.14)),
                       dataRowColor: MaterialStateProperty.all(appColors.lightGray),
@@ -823,12 +833,13 @@ class _AdminPanelState extends State<AdminPanel> {
                       }).toList(),
                     ),
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

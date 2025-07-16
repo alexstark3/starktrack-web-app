@@ -34,52 +34,57 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
         children: [
           // --- Tab bar ---
           Padding(
-            padding: const EdgeInsets.only(top: 12, left: 54, right: 24),
-            child: Row(
-              children: [
-                                // Members tab
-                _TeamTab(
-                  icon: Icons.group,
-                  title: 'Members',
-                  isSelected: _selectedIndex == 0,
-                  colors: colors,
-                  selectedMemberDoc: _selectedMemberDoc,
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = 0;
-                      _selectedMemberDoc = null;
-                    });
-                  },
-                ),
-                                // Projects tab
-                _TeamTab(
-                  icon: Icons.folder_copy_rounded,
-                  title: 'Projects',
-                  isSelected: _selectedIndex == 1,
-                  colors: colors,
-                  selectedProject: _selectedProject,
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = 1;
-                      _selectedProject = null;
-                    });
-                  },
-                ),
-                                // Clients tab
-                _TeamTab(
-                  icon: Icons.people_alt_rounded,
-                  title: 'Clients',
-                  isSelected: _selectedIndex == 2,
-                  colors: colors,
-                  selectedClient: _selectedClient,
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = 2;
-                      _selectedClient = null;
-                    });
-                  },
-                ),
-              ],
+            padding: const EdgeInsets.only(top: 12, left: 24, right: 24),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  // Members tab
+                  _TeamTab(
+                    icon: Icons.group,
+                    title: 'Members',
+                    isSelected: _selectedIndex == 0,
+                    colors: colors,
+                    selectedMemberDoc: _selectedMemberDoc,
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 0;
+                        _selectedMemberDoc = null;
+                      });
+                    },
+                  ),
+                  // Projects tab
+                  _TeamTab(
+                    icon: Icons.folder_copy_rounded,
+                    title: 'Projects',
+                    isSelected: _selectedIndex == 1,
+                    colors: colors,
+                    selectedProject: _selectedProject,
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 1;
+                        _selectedProject = null;
+                      });
+                    },
+                  ),
+                  // Clients tab
+                  _TeamTab(
+                    icon: Icons.people_alt_rounded,
+                    title: 'Clients',
+                    isSelected: _selectedIndex == 2,
+                    colors: colors,
+                    selectedClient: _selectedClient,
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 2;
+                        _selectedClient = null;
+                      });
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
           // --- Main white area ---
@@ -91,11 +96,11 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                   Align(
                     alignment: Alignment.topCenter,
                     child: _NoTopShadowMaterial(
-                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                      borderRadius: const BorderRadius.all(Radius.circular(12)),
                       color: Theme.of(context).brightness == Brightness.dark 
                         ? const Color(0xFF252526) 
                         : Colors.white,
-                      elevation: Theme.of(context).brightness == Brightness.light ? 6 : 0,
+                      elevation: Theme.of(context).brightness == Brightness.light ? 8 : 0,
                       child: Container(
                         padding: const EdgeInsets.fromLTRB(28, 26, 28, 26),
                         margin: const EdgeInsets.only(top: 0),
@@ -243,8 +248,8 @@ class _TeamTabState extends State<_TeamTab> {
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 140),
-          margin: const EdgeInsets.only(right: 16),
-          padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
+          margin: const EdgeInsets.only(right: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           decoration: BoxDecoration(
             color: widget.isSelected 
               ? (isDark ? widget.colors.lightGray : const Color(0xFFF0F0F0))

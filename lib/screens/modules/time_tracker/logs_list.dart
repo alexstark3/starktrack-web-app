@@ -209,14 +209,14 @@ class _LogsListState extends State<LogsList> {
                 key  : ValueKey(logId),
                 margin: const EdgeInsets.symmetric(vertical: 4),
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                     color: isDark ? const Color(0xFF2D2D30) : theme.cardColor,
                     border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : null,
                     boxShadow: isDark ? null : [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
+                        color: Colors.black.withOpacity(0.15),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),

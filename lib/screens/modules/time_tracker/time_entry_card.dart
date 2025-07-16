@@ -449,13 +449,13 @@ class _TimeEntryCardState extends State<TimeEntryCard>
 
     BoxDecoration fieldDecoration = BoxDecoration(
       color: isDark ? const Color(0xFF2D2D30) : theme.cardColor,
-      borderRadius: BorderRadius.circular(kEntryRadius),
+      borderRadius: BorderRadius.circular(12),
       border: Border.all(color: isDark ? const Color(0xFF404040) : theme.dividerColor),
       boxShadow: isDark ? null : [
         BoxShadow(
-          color: Colors.black.withOpacity(0.1),
-          blurRadius: 2,
-          offset: const Offset(0, 1),
+          color: Colors.black.withOpacity(0.12),
+          blurRadius: 4,
+          offset: const Offset(0, 2),
         ),
       ],
     );
@@ -547,18 +547,18 @@ class _TimeEntryCardState extends State<TimeEntryCard>
     return SizedBox(
       width: double.infinity,
       child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: isDark ? const Color(0xFF2D2D30) : theme.cardColor,
-          border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : null,
-          boxShadow: isDark ? null : [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
+                  decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: isDark ? const Color(0xFF2D2D30) : theme.cardColor,
+            border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : null,
+            boxShadow: isDark ? null : [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
         child: Card(
           color: Colors.transparent,
           elevation: 0,
