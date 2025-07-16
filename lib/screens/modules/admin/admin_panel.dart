@@ -675,12 +675,12 @@ class _AdminPanelState extends State<AdminPanel> {
               const SizedBox(height: 24),
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('companies')
-                  .doc(widget.companyId)
-                  .collection('users')
-                  .snapshots(),
-              builder: (context, snapshot) {
+                  stream: FirebaseFirestore.instance
+                      .collection('companies')
+                      .doc(widget.companyId)
+                      .collection('users')
+                      .snapshots(),
+                  builder: (context, snapshot) {
                 if (!snapshot.hasData)
                   return Center(child: CircularProgressIndicator());
                 var docs = snapshot.data!.docs;
@@ -837,9 +837,10 @@ class _AdminPanelState extends State<AdminPanel> {
               );
             },
           ),
-        ],
-      ),
+        ),
+      ],
       ),
     ),
   );
+}
 }
