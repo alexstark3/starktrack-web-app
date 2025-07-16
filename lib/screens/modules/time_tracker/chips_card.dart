@@ -27,7 +27,7 @@ class ChipsCard extends StatelessWidget {
 
     // Gradient colors for dark theme
     final gradientColors = isDark 
-      ? [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)]
+      ? [const Color(0xFF404040), const Color(0xFF2D2D2D)]
       : [const Color(0xFFF8F8F8), const Color(0xFFF0F0F0)];
 
     final chipBorder = Border.all(
@@ -44,13 +44,21 @@ class ChipsCard extends StatelessWidget {
     Widget buildChip(String text) {
       return Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
+          gradient: isDark ? LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: gradientColors,
-          ),
+          ) : null,
+          color: isDark ? null : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(8),
-          border: chipBorder,
+          border: isDark ? Border.all(color: const Color(0xFF505050), width: 1) : chipBorder,
+          boxShadow: isDark ? null : [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 2,
+              offset: const Offset(0, 1),
+            ),
+          ],
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Text(text, style: chipStyle),
@@ -61,11 +69,20 @@ class ChipsCard extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        gradient: LinearGradient(
+        gradient: isDark ? LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: gradientColors,
-        ),
+        ) : null,
+        color: isDark ? null : Theme.of(context).cardColor,
+        border: isDark ? Border.all(color: const Color(0xFF505050), width: 1) : null,
+        boxShadow: isDark ? null : [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(10),

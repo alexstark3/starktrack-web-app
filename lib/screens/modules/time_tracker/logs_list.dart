@@ -110,8 +110,8 @@ class _LogsListState extends State<LogsList> {
           end: Alignment.bottomRight,
           colors: isDark 
             ? [
-                const Color(0xFF2A2A2A),
                 const Color(0xFF1A1A1A),
+                const Color(0xFF0F0F0F),
               ]
             : [
                 const Color(0xFFFFFFFF),
@@ -215,12 +215,26 @@ class _LogsListState extends State<LogsList> {
             }
 
             rows.add(
-              Card(
+              Container(
                 key  : ValueKey(logId),
                 margin: const EdgeInsets.symmetric(vertical: 4),
-                shape : RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                elevation: 0,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  gradient: isDark ? LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [const Color(0xFF404040), const Color(0xFF2D2D2D)],
+                  ) : null,
+                  color: isDark ? null : theme.cardColor,
+                  border: isDark ? Border.all(color: const Color(0xFF505050), width: 1) : null,
+                  boxShadow: isDark ? null : [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
                 child : SizedBox(
                   width: double.infinity,
                   child: Padding(
@@ -640,8 +654,8 @@ Future<void> _showEditExpensesPopup() async {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
-                            backgroundColor: Colors.grey.shade200,
-                            foregroundColor: primaryColor,
+                            backgroundColor: appColors.primaryBlue,
+                            foregroundColor: Colors.white,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),

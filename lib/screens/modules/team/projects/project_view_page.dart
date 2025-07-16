@@ -395,14 +395,22 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                             return Container(
                               margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
+                                gradient: Theme.of(context).brightness == Brightness.dark ? LinearGradient(
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
-                                  colors: Theme.of(context).brightness == Brightness.dark 
-                                    ? [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)]
-                                    : [const Color(0xFFF8F8F8), const Color(0xFFF0F0F0)],
-                                ),
+                                  colors: [const Color(0xFF404040), const Color(0xFF2D2D2D)],
+                                ) : null,
+                                color: Theme.of(context).brightness == Brightness.dark ? null : Colors.white,
                                 borderRadius: BorderRadius.circular(10),
+                                border: Theme.of(context).brightness == Brightness.dark ? Border.all(color: const Color(0xFF505050), width: 1) : null,
+                                boxShadow: Theme.of(context).brightness == Brightness.light ? [
+                                  BoxShadow(
+                                    color: Colors.black12,
+                                    blurRadius: 6,
+                                    spreadRadius: 0,
+                                    offset: Offset(0, 3),
+                                  ),
+                                ] : null,
                               ),
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 18.0),
@@ -552,9 +560,14 @@ class _EditProjectDialogState extends State<EditProjectDialog> {
     final colors = Theme.of(context).extension<AppColors>()!;
     return Dialog(
       backgroundColor: Theme.of(context).brightness == Brightness.dark 
-        ? const Color(0xFF2A2A2A) 
+        ? const Color(0xFF404040) 
         : Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: Theme.of(context).brightness == Brightness.dark 
+          ? BorderSide(color: const Color(0xFF505050), width: 1)
+          : BorderSide.none,
+      ),
       child: Container(
         padding: const EdgeInsets.all(24),
         width: 460,

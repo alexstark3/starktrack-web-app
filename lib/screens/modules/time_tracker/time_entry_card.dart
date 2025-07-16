@@ -289,8 +289,8 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
-                            backgroundColor: Colors.grey.shade200,
-                            foregroundColor: primaryColor,
+                            backgroundColor: app.primaryBlue,
+                            foregroundColor: Colors.white,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
@@ -447,15 +447,21 @@ class _TimeEntryCardState extends State<TimeEntryCard>
     final isDark = theme.brightness == Brightness.dark;
 
     BoxDecoration fieldDecoration = BoxDecoration(
-      gradient: LinearGradient(
+      gradient: isDark ? LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: isDark 
-          ? [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)]
-          : [const Color(0xFFF8F8F8), const Color(0xFFF0F0F0)],
-      ),
+        colors: [const Color(0xFF404040), const Color(0xFF2D2D2D)],
+      ) : null,
+      color: isDark ? null : theme.cardColor,
       borderRadius: BorderRadius.circular(kEntryRadius),
-      border: Border.all(color: theme.dividerColor),
+      border: Border.all(color: isDark ? const Color(0xFF505050) : theme.dividerColor),
+      boxShadow: isDark ? null : [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.1),
+          blurRadius: 2,
+          offset: const Offset(0, 1),
+        ),
+      ],
     );
 
     TextStyle fieldStyle = TextStyle(
@@ -547,13 +553,20 @@ class _TimeEntryCardState extends State<TimeEntryCard>
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          gradient: LinearGradient(
+          gradient: isDark ? LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: isDark 
-              ? [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)]
-              : [const Color(0xFFF8F8F8), const Color(0xFFF0F0F0)],
-          ),
+            colors: [const Color(0xFF404040), const Color(0xFF2D2D2D)],
+          ) : null,
+          color: isDark ? null : theme.cardColor,
+          border: isDark ? Border.all(color: const Color(0xFF505050), width: 1) : null,
+          boxShadow: isDark ? null : [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Card(
           color: Colors.transparent,

@@ -20,6 +20,7 @@ class TeamModuleTabScreen extends StatefulWidget {
 
 class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
   int _selectedIndex = 0;
+  int _hoveredTab = -1;
 
   DocumentSnapshot? _selectedMemberDoc;
   Map<String, dynamic>? _selectedProject;
@@ -38,14 +39,17 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
             child: Row(
               children: [
                 // Members tab
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = 0;
-                      _selectedMemberDoc = null;
-                    });
-                  },
-                  child: AnimatedContainer(
+                MouseRegion(
+                  onEnter: (_) => setState(() => _hoveredTab = 0),
+                  onExit: (_) => setState(() => _hoveredTab = -1),
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 0;
+                        _selectedMemberDoc = null;
+                      });
+                    },
+                    child: AnimatedContainer(
                     duration: const Duration(milliseconds: 140),
                     margin: const EdgeInsets.only(right: 16),
                     padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
@@ -54,14 +58,24 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: Theme.of(context).brightness == Brightness.dark
-                          ? [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)]
+                          ? [const Color(0xFF404040), const Color(0xFF2D2D2D)]
                           : [const Color(0xFFF8F8F8), const Color(0xFFF0F0F0)],
-                      ) : null,
-                      color: _selectedIndex == 0 ? null : colors.lightGray,
+                      ) : (_hoveredTab == 0 && Theme.of(context).brightness == Brightness.dark ? LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)],
+                      ) : null),
+                      color: _selectedIndex == 0 ? null : (_hoveredTab == 0 ? null : (Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E1E1E) : colors.lightGray)),
                       borderRadius: BorderRadius.vertical(
                         top: const Radius.circular(6),
                         bottom: Radius.circular(_selectedIndex == 0 ? 0 : 6),
                       ),
+                      boxShadow: Theme.of(context).brightness == Brightness.light && _selectedIndex == 0
+                          ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
+                          : null,
+                      border: Theme.of(context).brightness == Brightness.dark
+                          ? Border.all(color: _selectedIndex == 0 ? const Color(0xFF505050) : const Color(0xFF2A2A2A), width: 1)
+                          : null,
                     ),
                     child: Row(
                       children: [
@@ -83,17 +97,21 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                         ),
                       ],
                     ),
+                    ),
                   ),
                 ),
                 // Projects tab
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = 1;
-                      _selectedProject = null;
-                    });
-                  },
-                  child: AnimatedContainer(
+                MouseRegion(
+                  onEnter: (_) => setState(() => _hoveredTab = 1),
+                  onExit: (_) => setState(() => _hoveredTab = -1),
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 1;
+                        _selectedProject = null;
+                      });
+                    },
+                    child: AnimatedContainer(
                     duration: const Duration(milliseconds: 140),
                     margin: const EdgeInsets.only(right: 16),
                     padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
@@ -102,14 +120,24 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: Theme.of(context).brightness == Brightness.dark
-                          ? [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)]
+                          ? [const Color(0xFF404040), const Color(0xFF2D2D2D)]
                           : [const Color(0xFFF8F8F8), const Color(0xFFF0F0F0)],
-                      ) : null,
-                      color: _selectedIndex == 1 ? null : colors.lightGray,
+                      ) : (_hoveredTab == 1 && Theme.of(context).brightness == Brightness.dark ? LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)],
+                      ) : null),
+                      color: _selectedIndex == 1 ? null : (_hoveredTab == 1 ? null : (Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E1E1E) : colors.lightGray)),
                       borderRadius: BorderRadius.vertical(
                         top: const Radius.circular(6),
                         bottom: Radius.circular(_selectedIndex == 1 ? 0 : 6),
                       ),
+                      boxShadow: Theme.of(context).brightness == Brightness.light && _selectedIndex == 1
+                          ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
+                          : null,
+                      border: Theme.of(context).brightness == Brightness.dark
+                          ? Border.all(color: _selectedIndex == 1 ? const Color(0xFF505050) : const Color(0xFF2A2A2A), width: 1)
+                          : null,
                     ),
                     child: Row(
                       children: [
@@ -131,17 +159,21 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                         ),
                       ],
                     ),
+                    ),
                   ),
                 ),
                 // Clients tab
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = 2;
-                      _selectedClient = null;
-                    });
-                  },
-                  child: AnimatedContainer(
+                MouseRegion(
+                  onEnter: (_) => setState(() => _hoveredTab = 2),
+                  onExit: (_) => setState(() => _hoveredTab = -1),
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 2;
+                        _selectedClient = null;
+                      });
+                    },
+                    child: AnimatedContainer(
                     duration: const Duration(milliseconds: 140),
                     margin: const EdgeInsets.only(right: 16),
                     padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
@@ -150,14 +182,24 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: Theme.of(context).brightness == Brightness.dark
-                          ? [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)]
+                          ? [const Color(0xFF404040), const Color(0xFF2D2D2D)]
                           : [const Color(0xFFF8F8F8), const Color(0xFFF0F0F0)],
-                      ) : null,
-                      color: _selectedIndex == 2 ? null : colors.lightGray,
+                      ) : (_hoveredTab == 2 && Theme.of(context).brightness == Brightness.dark ? LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)],
+                      ) : null),
+                      color: _selectedIndex == 2 ? null : (_hoveredTab == 2 ? null : (Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E1E1E) : colors.lightGray)),
                       borderRadius: BorderRadius.vertical(
                         top: const Radius.circular(6),
                         bottom: Radius.circular(_selectedIndex == 2 ? 0 : 6),
                       ),
+                      boxShadow: Theme.of(context).brightness == Brightness.light && _selectedIndex == 2
+                          ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
+                          : null,
+                      border: Theme.of(context).brightness == Brightness.dark
+                          ? Border.all(color: _selectedIndex == 2 ? const Color(0xFF505050) : const Color(0xFF2A2A2A), width: 1)
+                          : null,
                     ),
                     child: Row(
                       children: [
@@ -179,6 +221,7 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                         ),
                       ],
                     ),
+                    ),
                   ),
                 ),
               ],
@@ -195,9 +238,9 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                     child: _NoTopShadowMaterial(
                       borderRadius: const BorderRadius.all(Radius.circular(10)),
                       color: Theme.of(context).brightness == Brightness.dark 
-                        ? const Color(0xFF2A2A2A) 
+                        ? const Color(0xFF1A1A1A) 
                         : Colors.white,
-                      elevation: 0,
+                      elevation: Theme.of(context).brightness == Brightness.light ? 6 : 0,
                       child: Container(
                         padding: const EdgeInsets.fromLTRB(28, 26, 28, 26),
                         margin: const EdgeInsets.only(top: 0),
