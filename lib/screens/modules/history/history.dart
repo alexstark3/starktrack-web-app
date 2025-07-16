@@ -54,7 +54,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
       ),
       color: isDark 
         ? const Color(0xFF2D2D30)
-        : const Color(0xFFF8F8F8),
+        : Colors.white,
       borderRadius: BorderRadius.circular(10),
       boxShadow: isDark ? null : [
         BoxShadow(
