@@ -324,6 +324,7 @@ class _LogEditRowState extends State<_LogEditRow>
   @override
   bool get wantKeepAlive => true;
   bool _dialogOpen = false;
+  bool _expenseDialogOpen = false;
   late TextEditingController startCtrl, endCtrl, noteCtrl;
   final FocusNode _noteFocus = FocusNode();
   bool _saving = false;
@@ -354,12 +355,12 @@ class _LogEditRowState extends State<_LogEditRow>
   @override
   void didUpdateWidget(_LogEditRow oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Only update expenses if not currently editing or dialog is not open
-    if (!widget.isEditing && !_dialogOpen) {
+    // Only update expenses if not currently editing or expense dialog is not open
+    if (!widget.isEditing && !_expenseDialogOpen) {
       print('DEBUG: Widget updated - updating expenses from ${expenses} to ${widget.expensesMap}');
       expenses = Map<String, dynamic>.from(widget.expensesMap);
     } else {
-      print('DEBUG: Widget updated - preserving current expenses: $expenses (editing: ${widget.isEditing}, dialog: $_dialogOpen)');
+      print('DEBUG: Widget updated - preserving current expenses: $expenses (editing: ${widget.isEditing}, expenseDialog: $_expenseDialogOpen)');
     }
   }
 
@@ -403,7 +404,10 @@ class _LogEditRowState extends State<_LogEditRow>
 
   // ---- Expenses Popup (WORKS FOR ALL DEVICES!) ----
 Future<void> _showEditExpensesPopup() async {
-  setState(() => _dialogOpen = true);
+  setState(() {
+    _dialogOpen = true;
+    _expenseDialogOpen = true;
+  });
   print('DEBUG: Current expenses before dialog: $expenses');
   final TextEditingController nameCtrl = TextEditingController();
   final TextEditingController amountCtrl = TextEditingController();
@@ -606,7 +610,9 @@ Future<void> _showEditExpensesPopup() async {
                 ),
                 onPressed: () {
                   print('DEBUG: Final tempExpenses before dialog close: $tempExpenses');
-                  Navigator.pop(context, Map<String, dynamic>.from(tempExpenses));
+                  final result = Map<String, dynamic>.from(tempExpenses);
+                  print('DEBUG: About to return from dialog: $result');
+                  Navigator.pop(context, result);
                 },
                 child: const Text('Save'),
               ),
@@ -617,20 +623,23 @@ Future<void> _showEditExpensesPopup() async {
     },
   );
   
+  print('DEBUG: Dialog showDialog completed with result: $result');
+  
   if (!mounted) return;
   print('DEBUG: Dialog result received: $result');
   
   // Immediately update expenses to prevent loss during StreamBuilder rebuilds
   if (result != null) {
     print('DEBUG: Updating expenses from dialog: $result');
-    expenses = result;
+    expenses = Map<String, dynamic>.from(result);
     print('DEBUG: Expenses after update: $expenses');
   } else {
-    print('DEBUG: No result from expense dialog');
+    print('DEBUG: No result from expense dialog - result is null');
   }
   
   setState(() {
     _dialogOpen = false;
+    _expenseDialogOpen = false;
   });
 }
 
@@ -663,7 +672,7 @@ Future<void> _showEditExpensesPopup() async {
     super.build(context);
     
     // Prevent edit state loss when dialogs are open
-    if (_dialogOpen && !widget.isEditing) {
+    if ((_dialogOpen || _expenseDialogOpen) && !widget.isEditing) {
       return const SizedBox.shrink();
     }
     final style = TextStyle(color: widget.textColor, fontSize: 16);
