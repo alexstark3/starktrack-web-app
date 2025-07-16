@@ -343,7 +343,7 @@ class _LogEditRowState extends State<_LogEditRow>
     final ctrl = TextEditingController(text: noteCtrl.text);
     final res = await showDialog<String>(
       context: context,
-      useRootNavigator: true,   // <-- KEY! Use root navigator for dialogs
+      useRootNavigator: false,  // <-- Use local navigator for mobile compatibility
       builder: (ctx) => AlertDialog(
         title: const Text('Note'),
         content: TextField(controller: ctrl, maxLines: 3, autofocus: true),
@@ -383,7 +383,7 @@ Future<void> _showEditExpensesPopup() async {
   final result = await showDialog<Map<String, dynamic>>(
     context: context,
     barrierDismissible: false,           // Disable tap-away to close for mobile
-    useRootNavigator: true,              // Always use root navigator
+    useRootNavigator: false,             // Use local navigator for mobile compatibility
     builder: (dialogCtx) {
       return StatefulBuilder(
         builder: (context, setStateDialog) {
