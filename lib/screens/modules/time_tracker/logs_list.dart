@@ -37,6 +37,7 @@ class LogsList extends StatefulWidget {
 
 class _LogsListState extends State<LogsList> {
   final Map<String, bool> _editingStates = {};
+  final Map<String, Map<String, dynamic>> _pendingExpenses = {};
 
   void setEditingState(String logId, bool editing) {
     setState(() {
@@ -45,6 +46,22 @@ class _LogsListState extends State<LogsList> {
   }
 
   bool isEditing(String logId) => _editingStates[logId] ?? false;
+  
+  void updateExpenses(String logId, Map<String, dynamic> expenses) {
+    setState(() {
+      _pendingExpenses[logId] = expenses;
+    });
+  }
+  
+  void clearPendingExpenses(String logId) {
+    setState(() {
+      _pendingExpenses.remove(logId);
+    });
+  }
+  
+  Map<String, dynamic> getExpenses(String logId, Map<String, dynamic> originalExpenses) {
+    return _pendingExpenses[logId] ?? originalExpenses;
+  }
 
   String _projectNameFromId(String id) {
     if (id.isEmpty) return '';
@@ -231,6 +248,9 @@ class _LogsListState extends State<LogsList> {
                       perDiemLogId : perDiemLogId,
                       isEditing    : isEditing(logId),
                       setEditingState: setEditingState,
+                      updateExpenses: updateExpenses,
+                      getExpenses: getExpenses,
+                      clearPendingExpenses: clearPendingExpenses,
                     ),
                   ),
                 ),
@@ -291,6 +311,9 @@ class _LogEditRow extends StatefulWidget {
   final String? perDiemLogId;
   final bool isEditing;
   final Function(String, bool) setEditingState;
+  final Function(String, Map<String, dynamic>) updateExpenses;
+  final Function(String, Map<String, dynamic>) getExpenses;
+  final Function(String) clearPendingExpenses;
 
   const _LogEditRow({
     Key? key,
@@ -313,6 +336,9 @@ class _LogEditRow extends StatefulWidget {
     required this.perDiemLogId,
     required this.isEditing,
     required this.setEditingState,
+    required this.updateExpenses,
+    required this.getExpenses,
+    required this.clearPendingExpenses,
   }) : super(key: key);
 
   @override
@@ -329,7 +355,6 @@ class _LogEditRowState extends State<_LogEditRow>
   final FocusNode _noteFocus = FocusNode();
   bool _saving = false;
   String? selectedProjectId;
-  late Map<String, dynamic> expenses;
 
   @override
   void initState() {
@@ -348,20 +373,17 @@ class _LogEditRowState extends State<_LogEditRow>
     } else {
       selectedProjectId = null;
     }
-    expenses = Map<String, dynamic>.from(widget.expensesMap);
-    print('DEBUG: Widget initialized with expenses: $expenses');
+    
+    final currentExpenses = widget.getExpenses(widget.logId, widget.expensesMap);
+    print('DEBUG: Widget initialized with expenses: $currentExpenses');
   }
 
   @override
   void didUpdateWidget(_LogEditRow oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Only update expenses if not currently editing or expense dialog is not open
-    if (!widget.isEditing && !_expenseDialogOpen) {
-      print('DEBUG: Widget updated - updating expenses from ${expenses} to ${widget.expensesMap}');
-      expenses = Map<String, dynamic>.from(widget.expensesMap);
-    } else {
-      print('DEBUG: Widget updated - preserving current expenses: $expenses (editing: ${widget.isEditing}, expenseDialog: $_expenseDialogOpen)');
-    }
+    // Expenses are now managed at parent level, no need to update here
+    final currentExpenses = widget.getExpenses(widget.logId, widget.expensesMap);
+    print('DEBUG: Widget updated - current expenses: $currentExpenses');
   }
 
   @override
@@ -408,11 +430,13 @@ Future<void> _showEditExpensesPopup() async {
     _dialogOpen = true;
     _expenseDialogOpen = true;
   });
-  print('DEBUG: Current expenses before dialog: $expenses');
+  
+  final currentExpenses = widget.getExpenses(widget.logId, widget.expensesMap);
+  print('DEBUG: Current expenses before dialog: $currentExpenses');
   final TextEditingController nameCtrl = TextEditingController();
   final TextEditingController amountCtrl = TextEditingController();
 
-  Map<String, dynamic> tempExpenses = Map<String, dynamic>.from(expenses);
+  Map<String, dynamic> tempExpenses = Map<String, dynamic>.from(currentExpenses);
   print('DEBUG: Initial tempExpenses: $tempExpenses');
 
   bool tempPerDiem = tempExpenses.containsKey('Per diem');
@@ -598,7 +622,8 @@ Future<void> _showEditExpensesPopup() async {
             actions: [
               TextButton(
                 onPressed: () {
-                  print('DEBUG: Cancel button pressed - expenses remain: $expenses');
+                  final currentExpenses = widget.getExpenses(widget.logId, widget.expensesMap);
+                  print('DEBUG: Cancel button pressed - expenses remain: $currentExpenses');
                   Navigator.pop(context);
                 },
                 child: Text('Cancel', style: TextStyle(color: primaryColor, fontSize: 16)),
@@ -616,9 +641,9 @@ Future<void> _showEditExpensesPopup() async {
                   final result = Map<String, dynamic>.from(tempExpenses);
                   print('DEBUG: About to return from dialog: $result');
                   
-                  // Update expenses immediately before closing dialog
-                  expenses = result;
-                  print('DEBUG: Expenses updated directly in dialog: $expenses');
+                  // Update expenses at parent level
+                  widget.updateExpenses(widget.logId, result);
+                  print('DEBUG: Expenses updated at parent level: $result');
                   
                   Navigator.pop(context, result);
                 },
@@ -636,8 +661,9 @@ Future<void> _showEditExpensesPopup() async {
   if (!mounted) return;
   print('DEBUG: Dialog result received: $result');
   
-  // Expenses should already be updated directly in dialog
-  print('DEBUG: Current expenses after dialog: $expenses');
+  // Expenses should already be updated at parent level
+  final currentExpenses = widget.getExpenses(widget.logId, widget.expensesMap);
+  print('DEBUG: Current expenses after dialog: $currentExpenses');
   
   setState(() {
     _dialogOpen = false;
@@ -751,12 +777,13 @@ Future<void> _showEditExpensesPopup() async {
       );
     }
 
-    final List<String> currExpenseLines = [
-      for (var entry in expenses.entries)
+            final currentExpenses = widget.getExpenses(widget.logId, widget.expensesMap);
+        final List<String> currExpenseLines = [
+      for (var entry in currentExpenses.entries)
         if (entry.key != 'Per diem')
           '${entry.key} ${(entry.value as num).toStringAsFixed(2)} CHF',
-      if (expenses.containsKey('Per diem'))
-        'Per diem ${(expenses['Per diem'] as num).toStringAsFixed(2)} CHF',
+      if (currentExpenses.containsKey('Per diem'))
+        'Per diem ${(currentExpenses['Per diem'] as num).toStringAsFixed(2)} CHF',
     ];
 
     return Column(
@@ -821,17 +848,20 @@ Future<void> _showEditExpensesPopup() async {
                 if (_saving) return;
                 setState(() => _saving = true);
                 try {
-                  print('DEBUG: About to save - expenses variable: $expenses');
-                  print('DEBUG: Saving expenses: $expenses');
+                  final currentExpenses = widget.getExpenses(widget.logId, widget.expensesMap);
+                  print('DEBUG: About to save - expenses variable: $currentExpenses');
+                  print('DEBUG: Saving expenses: $currentExpenses');
                   await widget.onSave(
                     startCtrl.text,
                     endCtrl.text,
                     noteCtrl.text,
                     selectedProjectId ?? '',
-                    expenses,
+                    currentExpenses,
                   );
                   print('DEBUG: Save completed successfully');
                   widget.setEditingState(widget.logId, false);
+                  // Clear pending expenses after successful save so database values are used
+                  widget.clearPendingExpenses(widget.logId);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Changes saved successfully!'), backgroundColor: Colors.green),
                   );
