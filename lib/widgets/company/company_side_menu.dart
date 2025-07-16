@@ -25,7 +25,7 @@ class CompanySideMenu extends StatelessWidget {
     required this.menuItems,
     this.compact = false,
     this.showBrand = true,
-    this.version = 'Stark Track v1.527b', // <-- Default is empty
+    this.version = 'Stark Track v1.528b', // <-- Default is empty
   });
 
   @override
