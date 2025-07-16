@@ -738,26 +738,50 @@ Future<void> _showEditExpensesPopup() async {
               ? '00:00h'
               : '${widget.duration.inHours.toString().padLeft(2, '0')}:${(widget.duration.inMinutes % 60).toString().padLeft(2, '0')}h'}'),
           _infoText('Project', widget.projectName),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Expenses:', style: style),
-              const SizedBox(width: 8),
+              const SizedBox(height: 4),
               if (widget.expenseLines.isEmpty)
-                Text('-', style: style.copyWith(color: Colors.grey)),
-              ...widget.expenseLines.map((line) => Text(line, style: style)),
+                Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: Text('-', style: style.copyWith(color: Colors.grey)),
+                )
+              else
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: widget.expenseLines.map((line) => Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: Colors.blue.shade200),
+                    ),
+                    child: Text(line, style: style.copyWith(fontSize: 13)),
+                  )).toList(),
+                ),
             ],
           ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Note:', style: style),
-              const SizedBox(width: 8),
-              Expanded(
+              const SizedBox(height: 4),
+              Padding(
+                padding: const EdgeInsets.only(left: 16),
                 child: Text(
-                  widget.getNote(widget.logId, widget.note),
-                  style: style,
-                  maxLines: 2,
+                  widget.getNote(widget.logId, widget.note).isNotEmpty 
+                    ? widget.getNote(widget.logId, widget.note)
+                    : 'No note',
+                  style: style.copyWith(
+                    fontSize: 14,
+                    color: widget.getNote(widget.logId, widget.note).isNotEmpty 
+                      ? widget.textColor 
+                      : Colors.grey,
+                  ),
+                  maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -826,14 +850,30 @@ Future<void> _showEditExpensesPopup() async {
         ),
         GestureDetector(
           onTap: _showEditExpensesPopup,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Expenses:', style: style),
-              const SizedBox(width: 8),
+              const SizedBox(height: 4),
               if (currExpenseLines.isEmpty)
-                Text('Tap to add', style: style.copyWith(color: Colors.grey)),
-              ...currExpenseLines.map((line) => Text(line, style: style)),
+                Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: Text('Tap to add', style: style.copyWith(color: Colors.grey)),
+                )
+              else
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: currExpenseLines.map((line) => Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: Colors.blue.shade200),
+                    ),
+                    child: Text(line, style: style.copyWith(fontSize: 13)),
+                  )).toList(),
+                ),
             ],
           ),
         ),
@@ -859,8 +899,9 @@ Future<void> _showEditExpensesPopup() async {
                       return Text(
                         displayNote.isNotEmpty ? displayNote : 'Tap to add note',
                         style: style.copyWith(
-                            color: displayNote.isNotEmpty ? widget.textColor : Colors.grey),
-                        maxLines: 2,
+                            color: displayNote.isNotEmpty ? widget.textColor : Colors.grey,
+                            fontSize: 14),
+                        maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                       );
                     },
@@ -960,6 +1001,7 @@ Future<void> _showEditExpensesPopup() async {
           icon: Icon(i, color: c),
           tooltip: i == Icons.save ? 'Save'
                  : i == Icons.cancel ? 'Cancel'
+                 : i == Icons.edit ? 'Edit'
                  : 'Delete',
           onPressed: onTap,
         ),
