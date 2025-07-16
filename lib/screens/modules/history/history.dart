@@ -71,7 +71,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
     TextStyle pillTextStyle = TextStyle(
       fontSize: kFilterFontSize,
       fontWeight: FontWeight.w500,
-      color: isDark ? Colors.white87 : Colors.black87,
+      color: isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87),
     );
 
     // From and To date pickers
@@ -101,7 +101,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                 Text(
                   fromDate == null ? "From" : dateFormat.format(fromDate!),
                   style: TextStyle(
-                    color: fromDate == null ? theme.colorScheme.primary : (isDark ? Colors.white87 : Colors.black87),
+                    color: fromDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
                     fontWeight: FontWeight.w500,
                     fontSize: kFilterFontSize,
                   ),
@@ -134,7 +134,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                 Text(
                   toDate == null ? "To" : dateFormat.format(toDate!),
                   style: TextStyle(
-                    color: toDate == null ? theme.colorScheme.primary : (isDark ? Colors.white87 : Colors.black87),
+                    color: toDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
                     fontWeight: FontWeight.w500,
                     fontSize: kFilterFontSize,
                   ),

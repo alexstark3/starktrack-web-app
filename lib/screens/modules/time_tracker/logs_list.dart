@@ -772,19 +772,19 @@ Future<void> _showEditExpensesPopup() async {
                          gradient: LinearGradient(
                            begin: Alignment.topLeft,
                            end: Alignment.bottomRight,
-                           colors: isDark 
+                           colors: Theme.of(context).brightness == Brightness.dark 
                              ? [
-                                 appColors.primaryBlue.withOpacity(0.3),
-                                 appColors.primaryBlue.withOpacity(0.1),
+                                 widget.appColors.primaryBlue.withOpacity(0.3),
+                                 widget.appColors.primaryBlue.withOpacity(0.1),
                                ]
                              : [
-                                 appColors.primaryBlue.withOpacity(0.1),
-                                 appColors.primaryBlue.withOpacity(0.05),
+                                 widget.appColors.primaryBlue.withOpacity(0.1),
+                                 widget.appColors.primaryBlue.withOpacity(0.05),
                                ],
                          ),
                          borderRadius: BorderRadius.circular(4),
                          border: Border.all(
-                           color: appColors.primaryBlue.withOpacity(0.3),
+                           color: widget.appColors.primaryBlue.withOpacity(0.3),
                          ),
                        ),
                        child: Text(line, style: style.copyWith(fontSize: 13)),
@@ -897,19 +897,19 @@ Future<void> _showEditExpensesPopup() async {
                              gradient: LinearGradient(
                                begin: Alignment.topLeft,
                                end: Alignment.bottomRight,
-                               colors: isDark 
+                               colors: Theme.of(context).brightness == Brightness.dark 
                                  ? [
-                                     appColors.primaryBlue.withOpacity(0.3),
-                                     appColors.primaryBlue.withOpacity(0.1),
+                                     widget.appColors.primaryBlue.withOpacity(0.3),
+                                     widget.appColors.primaryBlue.withOpacity(0.1),
                                    ]
                                  : [
-                                     appColors.primaryBlue.withOpacity(0.1),
-                                     appColors.primaryBlue.withOpacity(0.05),
+                                     widget.appColors.primaryBlue.withOpacity(0.1),
+                                     widget.appColors.primaryBlue.withOpacity(0.05),
                                    ],
                              ),
                              borderRadius: BorderRadius.circular(4),
                              border: Border.all(
-                               color: appColors.primaryBlue.withOpacity(0.3),
+                               color: widget.appColors.primaryBlue.withOpacity(0.3),
                              ),
                            ),
                            child: Text(line, style: style.copyWith(fontSize: 13)),
@@ -938,7 +938,7 @@ Future<void> _showEditExpensesPopup() async {
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: isDark 
+                      colors: Theme.of(context).brightness == Brightness.dark 
                         ? [
                             const Color(0xFF2A2A2A),
                             const Color(0xFF1E1E1E),
