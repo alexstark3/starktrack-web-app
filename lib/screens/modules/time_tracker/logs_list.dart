@@ -220,7 +220,7 @@ class _LogsListState extends State<LogsList> {
                 margin: const EdgeInsets.symmetric(vertical: 4),
                 shape : RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
-                elevation: 2,
+                elevation: 0,
                 child : SizedBox(
                   width: double.infinity,
                   child: Padding(

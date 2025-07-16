@@ -461,7 +461,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
 
                     return Card(
                       margin: EdgeInsets.zero,
-                      elevation: 2,
+                      elevation: 0,
                       child: Column(
                         children: [
                           ExpansionTile(

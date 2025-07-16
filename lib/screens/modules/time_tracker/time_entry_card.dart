@@ -446,18 +446,15 @@ class _TimeEntryCardState extends State<TimeEntryCard>
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final boxShadow = [
-      BoxShadow(
-        color: isDark ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.2),
-        blurRadius: 1,
-        offset: const Offset(0, 2),
-      )
-    ];
-
     BoxDecoration fieldDecoration = BoxDecoration(
-      color: theme.cardColor,
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: isDark 
+          ? [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)]
+          : [const Color(0xFFF8F8F8), const Color(0xFFF0F0F0)],
+      ),
       borderRadius: BorderRadius.circular(kEntryRadius),
-      boxShadow: boxShadow,
       border: Border.all(color: theme.dividerColor),
     );
 
@@ -548,9 +545,18 @@ class _TimeEntryCardState extends State<TimeEntryCard>
     return SizedBox(
       width: double.infinity,
       child: Container(
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), boxShadow: boxShadow),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isDark 
+              ? [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)]
+              : [const Color(0xFFF8F8F8), const Color(0xFFF0F0F0)],
+          ),
+        ),
         child: Card(
-          color: theme.cardColor,
+          color: Colors.transparent,
           elevation: 0,
           margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

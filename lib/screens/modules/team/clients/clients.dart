@@ -68,7 +68,7 @@ class _ClientsTabState extends State<ClientsTab> {
                   backgroundColor: colors.primaryBlue,
                   foregroundColor: colors.whiteTextOnBlue,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  elevation: 1,
+                  elevation: 0,
                   padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                   textStyle: const TextStyle(fontWeight: FontWeight.bold),
                 ),

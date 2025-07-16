@@ -50,14 +50,18 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                     margin: const EdgeInsets.only(right: 16),
                     padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
                     decoration: BoxDecoration(
-                      color: _selectedIndex == 0 ? Colors.white : colors.lightGray,
+                      gradient: _selectedIndex == 0 ? LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: Theme.of(context).brightness == Brightness.dark
+                          ? [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)]
+                          : [const Color(0xFFF8F8F8), const Color(0xFFF0F0F0)],
+                      ) : null,
+                      color: _selectedIndex == 0 ? null : colors.lightGray,
                       borderRadius: BorderRadius.vertical(
                         top: const Radius.circular(6),
                         bottom: Radius.circular(_selectedIndex == 0 ? 0 : 6),
                       ),
-                      boxShadow: _selectedIndex == 0
-                          ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
-                          : [],
                     ),
                     child: Row(
                       children: [
@@ -94,14 +98,18 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                     margin: const EdgeInsets.only(right: 16),
                     padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
                     decoration: BoxDecoration(
-                      color: _selectedIndex == 1 ? Colors.white : colors.lightGray,
+                      gradient: _selectedIndex == 1 ? LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: Theme.of(context).brightness == Brightness.dark
+                          ? [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)]
+                          : [const Color(0xFFF8F8F8), const Color(0xFFF0F0F0)],
+                      ) : null,
+                      color: _selectedIndex == 1 ? null : colors.lightGray,
                       borderRadius: BorderRadius.vertical(
                         top: const Radius.circular(6),
                         bottom: Radius.circular(_selectedIndex == 1 ? 0 : 6),
                       ),
-                      boxShadow: _selectedIndex == 1
-                          ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
-                          : [],
                     ),
                     child: Row(
                       children: [
@@ -138,14 +146,18 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                     margin: const EdgeInsets.only(right: 16),
                     padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
                     decoration: BoxDecoration(
-                      color: _selectedIndex == 2 ? Colors.white : colors.lightGray,
+                      gradient: _selectedIndex == 2 ? LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: Theme.of(context).brightness == Brightness.dark
+                          ? [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)]
+                          : [const Color(0xFFF8F8F8), const Color(0xFFF0F0F0)],
+                      ) : null,
+                      color: _selectedIndex == 2 ? null : colors.lightGray,
                       borderRadius: BorderRadius.vertical(
                         top: const Radius.circular(6),
                         bottom: Radius.circular(_selectedIndex == 2 ? 0 : 6),
                       ),
-                      boxShadow: _selectedIndex == 2
-                          ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
-                          : [],
                     ),
                     child: Row(
                       children: [
@@ -182,8 +194,10 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                     alignment: Alignment.topCenter,
                     child: _NoTopShadowMaterial(
                       borderRadius: const BorderRadius.all(Radius.circular(10)),
-                      color: Colors.white,
-                      elevation: 10,
+                      color: Theme.of(context).brightness == Brightness.dark 
+                        ? const Color(0xFF2A2A2A) 
+                        : Colors.white,
+                      elevation: 0,
                       child: Container(
                         padding: const EdgeInsets.fromLTRB(28, 26, 28, 26),
                         margin: const EdgeInsets.only(top: 0),

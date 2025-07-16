@@ -48,7 +48,9 @@ class SettingsScreen extends StatelessWidget {
                       padding: 3,
                       activeColor: green,
                       inactiveColor: Colors.black,
-                      toggleColor: Colors.white,
+                      toggleColor: Theme.of(context).brightness == Brightness.dark 
+                        ? const Color(0xFF2A2A2A) 
+                        : Colors.white,
                       value: isDark,
                       onToggle: (_) => themeProvider.toggleTheme(),
                     ),

@@ -46,25 +46,31 @@ class LoginForm extends StatelessWidget {
           const SizedBox(height: 24),
 
           /* ───── Card ───── */
-          Card(
-            elevation: 4,
+          Container(
+            width: cardW,
             margin: const EdgeInsets.symmetric(horizontal: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            child: Container(
-              width: cardW,
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  _buildFields(),
-                  const SizedBox(height: 24),
-                  if (error != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Text(error!, style: const TextStyle(color: Colors.red)),
-                    ),
-                  _AnimatedLoginButton(loading: loading, onTap: onLogin),
-                ],
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: Theme.of(context).brightness == Brightness.dark 
+                  ? [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)]
+                  : [const Color(0xFFF8F8F8), const Color(0xFFF0F0F0)],
               ),
+            ),
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                _buildFields(),
+                const SizedBox(height: 24),
+                if (error != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(error!, style: const TextStyle(color: Colors.red)),
+                  ),
+                _AnimatedLoginButton(loading: loading, onTap: onLogin),
+              ],
             ),
           ),
 

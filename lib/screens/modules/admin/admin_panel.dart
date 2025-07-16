@@ -699,7 +699,7 @@ class _AdminPanelState extends State<AdminPanel> {
                 }
                 return Card(
                   color: appColors.lightGray,
-                  elevation: 2,
+                  elevation: 0,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8)),
                   child: SingleChildScrollView(
@@ -801,7 +801,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                             child: const Text('Delete'),
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: appColors.red,
-                                              foregroundColor: Colors.white,
+                                              foregroundColor: appColors.whiteTextOnBlue,
                                             ),
                                             onPressed: () => Navigator.of(ctx).pop(true),
                                           ),

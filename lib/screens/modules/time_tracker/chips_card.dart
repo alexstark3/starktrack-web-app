@@ -25,29 +25,10 @@ class ChipsCard extends StatelessWidget {
     final appColors = Theme.of(context).extension<AppColors>()!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Main card shadow
-    final cardShadow = [
-      BoxShadow(
-        color: isDark
-            ? Colors.white.withOpacity(0.2)
-            : Colors.black.withOpacity(0.2),
-        blurRadius: 1,
-        spreadRadius: 0,
-        offset: const Offset(0, 2),
-      ),
-    ];
-
-    // Chips shadow
-    final chipShadow = [
-      BoxShadow(
-        color: isDark
-            ? Colors.white.withOpacity(0.2)
-            : Colors.black.withOpacity(0.2),
-        blurRadius: 1,
-        spreadRadius: 0,
-        offset: const Offset(0, 2),
-      ),
-    ];
+    // Gradient colors for dark theme
+    final gradientColors = isDark 
+      ? [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)]
+      : [const Color(0xFFF8F8F8), const Color(0xFFF0F0F0)];
 
     final chipBorder = Border.all(
       color: appColors.darkGray.withOpacity(0.2),
@@ -63,9 +44,12 @@ class ChipsCard extends StatelessWidget {
     Widget buildChip(String text) {
       return Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: gradientColors,
+          ),
           borderRadius: BorderRadius.circular(8),
-          boxShadow: chipShadow,
           border: chipBorder,
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -77,8 +61,11 @@ class ChipsCard extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: Theme.of(context).cardColor,
-        boxShadow: cardShadow,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: gradientColors,
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(10),

@@ -395,16 +395,14 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                             return Container(
                               margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: Theme.of(context).brightness == Brightness.dark 
+                                    ? [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)]
+                                    : [const Color(0xFFF8F8F8), const Color(0xFFF0F0F0)],
+                                ),
                                 borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black12,
-                                    blurRadius: 6,
-                                    spreadRadius: 0,
-                                    offset: Offset(0, 3),
-                                  ),
-                                ],
                               ),
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 18.0),
@@ -553,7 +551,9 @@ class _EditProjectDialogState extends State<EditProjectDialog> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
     return Dialog(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark 
+        ? const Color(0xFF2A2A2A) 
+        : Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         padding: const EdgeInsets.all(24),

@@ -40,19 +40,16 @@ class _TodayLineState extends State<TodayLine> {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-              color: isDark
-                  ? Colors.white.withOpacity(0.2)
-                  : Colors.black.withOpacity(0.2),
-              blurRadius: 2,
-              spreadRadius: 0,
-              offset: Offset(0, 2),
-            ),
-          ],
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isDark 
+              ? [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)]
+              : [const Color(0xFFF8F8F8), const Color(0xFFF0F0F0)],
+          ),
         ),
         child: Card(
-          color: theme.cardColor,
+          color: Colors.transparent,
           elevation: 0,
           margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
