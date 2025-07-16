@@ -15,7 +15,7 @@ const double kWidthProject  = 150;
 const double kWidthExpense  = 170;
 const double kWidthIcon     = 38;
 
-class LogsList extends StatelessWidget {
+class LogsList extends StatefulWidget {
   final String companyId;
   final String userId;
   final DateTime selectedDay;
@@ -31,9 +31,24 @@ class LogsList extends StatelessWidget {
     this.showBreakCards = true,
   }) : super(key: key);
 
+  @override
+  State<LogsList> createState() => _LogsListState();
+}
+
+class _LogsListState extends State<LogsList> {
+  final Map<String, bool> _editingStates = {};
+
+  void setEditingState(String logId, bool editing) {
+    setState(() {
+      _editingStates[logId] = editing;
+    });
+  }
+
+  bool isEditing(String logId) => _editingStates[logId] ?? false;
+
   String _projectNameFromId(String id) {
     if (id.isEmpty) return '';
-    final p = projects.where((proj) => proj['id'] == id).toList();
+    final p = widget.projects.where((proj) => proj['id'] == id).toList();
     return p.isNotEmpty ? (p.first['name'] ?? '') : id;
   }
 
@@ -45,10 +60,10 @@ class LogsList extends StatelessWidget {
     final borderColor= theme.dividerColor.withOpacity(0.2);
     final isDark     = theme.brightness == Brightness.dark;
 
-    final sessionDate = DateFormat('yyyy-MM-dd').format(selectedDay);
+    final sessionDate = DateFormat('yyyy-MM-dd').format(widget.selectedDay);
     final logsRef = FirebaseFirestore.instance
-        .collection('companies').doc(companyId)
-        .collection('users').doc(userId)
+        .collection('companies').doc(widget.companyId)
+        .collection('users').doc(widget.userId)
         .collection('all_logs')
         .where('sessionDate', isEqualTo: sessionDate)
         .orderBy('begin');
@@ -126,7 +141,7 @@ class LogsList extends StatelessWidget {
             final String projectName = _projectNameFromId(projectId);
             final List<String> projectLines = [projectName];
 
-            if (showBreakCards && i > 0) {
+            if (widget.showBreakCards && i > 0) {
               final prev    = docs[i - 1].data() as Map<String, dynamic>;
               final prevEnd = (prev['end'] as Timestamp?)?.toDate();
               if (prevEnd != null && begin != null && prevEnd.isBefore(begin)) {
@@ -194,7 +209,7 @@ class LogsList extends StatelessWidget {
                         try {
                           final ns = DateFormat.Hm().parse(newStart);
                           final ne = DateFormat.Hm().parse(newEnd);
-                          final d  = selectedDay;
+                          final d  = widget.selectedDay;
                           final nb = DateTime(d.year, d.month, d.day, ns.hour, ns.minute);
                           final nn = DateTime(d.year, d.month, d.day, ne.hour, ne.minute);
                           if (!nn.isAfter(nb)) throw Exception('Invalid time');
@@ -212,8 +227,10 @@ class LogsList extends StatelessWidget {
                             .showSnackBar(SnackBar(content: Text(err.toString())));
                         }
                       },
-                      projects     : projects,
+                      projects     : widget.projects,
                       perDiemLogId : perDiemLogId,
+                      isEditing    : isEditing(logId),
+                      setEditingState: setEditingState,
                     ),
                   ),
                 ),
@@ -272,6 +289,8 @@ class _LogEditRow extends StatefulWidget {
   final Future<void> Function(String, String, String, String, Map<String, dynamic>) onSave;
   final List<ProjectInfo> projects;
   final String? perDiemLogId;
+  final bool isEditing;
+  final Function(String, bool) setEditingState;
 
   const _LogEditRow({
     Key? key,
@@ -292,6 +311,8 @@ class _LogEditRow extends StatefulWidget {
     required this.onSave,
     required this.projects,
     required this.perDiemLogId,
+    required this.isEditing,
+    required this.setEditingState,
   }) : super(key: key);
 
   @override
@@ -302,7 +323,6 @@ class _LogEditRowState extends State<_LogEditRow>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
-  bool editing = false;
   bool _dialogOpen = false;
   late TextEditingController startCtrl, endCtrl, noteCtrl;
   final FocusNode _noteFocus = FocusNode();
@@ -614,12 +634,12 @@ Future<void> _showEditExpensesPopup() async {
     super.build(context);
     
     // Prevent edit state loss when dialogs are open
-    if (_dialogOpen && !editing) {
+    if (_dialogOpen && !widget.isEditing) {
       return const SizedBox.shrink();
     }
     final style = TextStyle(color: widget.textColor, fontSize: 16);
 
-    if (!editing) {
+    if (!widget.isEditing) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -656,7 +676,7 @@ Future<void> _showEditExpensesPopup() async {
             padding: const EdgeInsets.only(top: 10),
             child: Row(
               children: [
-                _iconBtn(Icons.edit, Colors.blue[400]!, () => setState(() => editing = true)),
+                _iconBtn(Icons.edit, Colors.blue[400]!, () => widget.setEditingState(widget.logId, true)),
                 const SizedBox(width: 8),
                 _iconBtn(Icons.delete, Colors.red[300]!, () async {
                   final confirm = await showDialog<bool>(
@@ -768,13 +788,13 @@ Future<void> _showEditExpensesPopup() async {
                   expenses,
                 );
                 setState(() {
-                  editing = false;
                   _saving = false;
                 });
+                widget.setEditingState(widget.logId, false);
               }),
               const SizedBox(width: 8),
               _iconBtn(Icons.cancel, widget.appColors.orange,
-                  () => setState(() => editing = false)),
+                  () => widget.setEditingState(widget.logId, false)),
               const SizedBox(width: 8),
               _iconBtn(Icons.delete, Colors.red[300]!, () async {
                 final confirm = await showDialog<bool>(
