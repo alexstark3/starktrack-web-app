@@ -341,6 +341,9 @@ class _LogEditRowState extends State<_LogEditRow>
     super.dispose();
   }
 
+
+
+
   Future<void> _showEditExpensesPopup() async {
     final TextEditingController nameCtrl = TextEditingController();
     final TextEditingController amountCtrl = TextEditingController();
@@ -686,6 +689,7 @@ class _LogEditRowState extends State<_LogEditRow>
                 style: style,
                 minLines: 1,
                 maxLines: 3,
+                autofocus: true,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderSide: BorderSide(color: widget.borderColor),
