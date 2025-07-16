@@ -36,6 +36,9 @@ class _HistoryLogsState extends State<HistoryLogs> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     final logsRef = FirebaseFirestore.instance
         .collection('companies')
         .doc(widget.companyId)
@@ -45,15 +48,30 @@ class _HistoryLogsState extends State<HistoryLogs> {
         .orderBy('begin', descending: true);
 
     BoxDecoration pillDecoration = BoxDecoration(
-      border: Border.all(color: Colors.black26, width: 1),
-      color: Colors.white,
+      border: Border.all(
+        color: isDark ? Colors.white24 : Colors.black26, 
+        width: 1
+      ),
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: isDark 
+          ? [
+              const Color(0xFF2A2A2A),
+              const Color(0xFF1A1A1A),
+            ]
+          : [
+              const Color(0xFFFFFFFF),
+              const Color(0xFFF8F8F8),
+            ],
+      ),
       borderRadius: BorderRadius.circular(kFilterRadius),
     );
 
     TextStyle pillTextStyle = TextStyle(
       fontSize: kFilterFontSize,
       fontWeight: FontWeight.w500,
-      color: Colors.black87,
+      color: isDark ? Colors.white87 : Colors.black87,
     );
 
     // From and To date pickers
@@ -78,12 +96,12 @@ class _HistoryLogsState extends State<HistoryLogs> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.date_range, color: Colors.blue, size: 20),
+                Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
                 const SizedBox(width: 6),
                 Text(
                   fromDate == null ? "From" : dateFormat.format(fromDate!),
                   style: TextStyle(
-                    color: fromDate == null ? Colors.blue : Colors.black87,
+                    color: fromDate == null ? theme.colorScheme.primary : (isDark ? Colors.white87 : Colors.black87),
                     fontWeight: FontWeight.w500,
                     fontSize: kFilterFontSize,
                   ),
@@ -111,12 +129,12 @@ class _HistoryLogsState extends State<HistoryLogs> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.date_range, color: Colors.blue, size: 20),
+                Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
                 const SizedBox(width: 6),
                 Text(
                   toDate == null ? "To" : dateFormat.format(toDate!),
                   style: TextStyle(
-                    color: toDate == null ? Colors.blue : Colors.black87,
+                    color: toDate == null ? theme.colorScheme.primary : (isDark ? Colors.white87 : Colors.black87),
                     fontWeight: FontWeight.w500,
                     fontSize: kFilterFontSize,
                   ),
@@ -204,11 +222,23 @@ class _HistoryLogsState extends State<HistoryLogs> {
     final refreshBtn = Container(
       height: kFilterHeight,
       decoration: BoxDecoration(
-        color: Colors.blue[100],
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark 
+            ? [
+                theme.colorScheme.primary.withOpacity(0.3),
+                theme.colorScheme.primary.withOpacity(0.1),
+              ]
+            : [
+                theme.colorScheme.primary.withOpacity(0.1),
+                theme.colorScheme.primary.withOpacity(0.05),
+              ],
+        ),
         borderRadius: BorderRadius.circular(kFilterRadius),
       ),
       child: IconButton(
-        icon: const Icon(Icons.refresh, color: Colors.blue, size: 24),
+        icon: Icon(Icons.refresh, color: theme.colorScheme.primary, size: 24),
         tooltip: 'Clear filters',
         onPressed: () {
           setState(() {
@@ -231,16 +261,24 @@ class _HistoryLogsState extends State<HistoryLogs> {
           Container(
   width: double.infinity, // stretch to full width!
   decoration: BoxDecoration(
-    color: Colors.white,
-    border: Border.all(color: Colors.grey.shade300, width: 1),
+    gradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: isDark 
+        ? [
+            const Color(0xFF2A2A2A),
+            const Color(0xFF1A1A1A),
+          ]
+        : [
+            const Color(0xFFFFFFFF),
+            const Color(0xFFF8F8F8),
+          ],
+    ),
+    border: Border.all(
+      color: isDark ? Colors.white12 : Colors.grey.shade300, 
+      width: 1
+    ),
     borderRadius: BorderRadius.circular(kFilterRadius + 2),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black.withOpacity(0.03),
-        blurRadius: 4,
-        offset: Offset(0, 2),
-      ),
-    ],
   ),
   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
   alignment: Alignment.centerLeft, // keep fields left-aligned
@@ -465,7 +503,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                                       Text('Duration: ${_formatDuration(entry.duration)}'),
                                     if (entry.note != '') Text('Note: ${entry.note}'),
                                     if (entry.perDiem == true)
-                                      const Text('Per diem: Yes', style: TextStyle(color: Colors.blue)),
+                                      Text('Per diem: Yes', style: TextStyle(color: theme.colorScheme.primary)),
                                     if (entry.expensesMap.isNotEmpty)
                                       Padding(
                                         padding: const EdgeInsets.only(top: 2.0),
@@ -473,7 +511,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: entry.expensesMap.entries.map((e) =>
                                             Text('${e.key}: ${expenseFormat.format((e.value as num).toDouble())}',
-                                              style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600, fontSize: 15),
+                                              style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.w600, fontSize: 15),
                                             )).toList(),
                                         ),
                                       ),
@@ -485,23 +523,23 @@ class _HistoryLogsState extends State<HistoryLogs> {
                           // Blue bar with group totals
                           Container(
                             width: double.infinity,
-                            color: Colors.blue.shade50,
+                            color: isDark ? theme.colorScheme.primary.withOpacity(0.2) : theme.colorScheme.primary.withOpacity(0.1),
                             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
                                   'Total Time: ${_formatDuration(groupTotal)}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.w700,
-                                    color: Colors.blue,
+                                    color: theme.colorScheme.primary,
                                   ),
                                 ),
                                 Text(
                                   'Total Expenses: ${expenseFormat.format(groupExpense)}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.w700,
-                                    color: Colors.blue,
+                                    color: theme.colorScheme.primary,
                                   ),
                                 ),
                               ],

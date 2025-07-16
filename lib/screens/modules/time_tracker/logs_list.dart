@@ -105,15 +105,19 @@ class _LogsListState extends State<LogsList> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: isDark
-                ? Colors.white.withOpacity(0.2)
-                : Colors.black.withOpacity(0.2),
-            blurRadius: 1,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark 
+            ? [
+                const Color(0xFF2A2A2A),
+                const Color(0xFF1A1A1A),
+              ]
+            : [
+                const Color(0xFFFFFFFF),
+                const Color(0xFFF8F8F8),
+              ],
+        ),
       ),
       child: StreamBuilder<QuerySnapshot>(
         stream: logsRef.snapshots(),
@@ -186,7 +190,7 @@ class _LogsListState extends State<LogsList> {
                   Card(
                     key  : ValueKey('break_$i'),
                     margin: const EdgeInsets.symmetric(vertical: 4),
-                    color : Colors.grey[200],
+                    color : isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF5F5F5),
                     elevation: 0,
                     shape : RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)),
@@ -762,15 +766,29 @@ Future<void> _showEditExpensesPopup() async {
                   child: Wrap(
                     spacing: 8,
                     runSpacing: 4,
-                    children: widget.expenseLines.map((line) => Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: Colors.blue.shade200),
-                      ),
-                      child: Text(line, style: style.copyWith(fontSize: 13)),
-                    )).toList(),
+                                         children: widget.expenseLines.map((line) => Container(
+                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                       decoration: BoxDecoration(
+                         gradient: LinearGradient(
+                           begin: Alignment.topLeft,
+                           end: Alignment.bottomRight,
+                           colors: isDark 
+                             ? [
+                                 appColors.primaryBlue.withOpacity(0.3),
+                                 appColors.primaryBlue.withOpacity(0.1),
+                               ]
+                             : [
+                                 appColors.primaryBlue.withOpacity(0.1),
+                                 appColors.primaryBlue.withOpacity(0.05),
+                               ],
+                         ),
+                         borderRadius: BorderRadius.circular(4),
+                         border: Border.all(
+                           color: appColors.primaryBlue.withOpacity(0.3),
+                         ),
+                       ),
+                       child: Text(line, style: style.copyWith(fontSize: 13)),
+                     )).toList(),
                   ),
                 ),
             ],
@@ -873,15 +891,29 @@ Future<void> _showEditExpensesPopup() async {
                       child: Wrap(
                         spacing: 8,
                         runSpacing: 4,
-                        children: currExpenseLines.map((line) => Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(color: Colors.blue.shade200),
-                          ),
-                          child: Text(line, style: style.copyWith(fontSize: 13)),
-                        )).toList(),
+                                                 children: currExpenseLines.map((line) => Container(
+                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                           decoration: BoxDecoration(
+                             gradient: LinearGradient(
+                               begin: Alignment.topLeft,
+                               end: Alignment.bottomRight,
+                               colors: isDark 
+                                 ? [
+                                     appColors.primaryBlue.withOpacity(0.3),
+                                     appColors.primaryBlue.withOpacity(0.1),
+                                   ]
+                                 : [
+                                     appColors.primaryBlue.withOpacity(0.1),
+                                     appColors.primaryBlue.withOpacity(0.05),
+                                   ],
+                             ),
+                             borderRadius: BorderRadius.circular(4),
+                             border: Border.all(
+                               color: appColors.primaryBlue.withOpacity(0.3),
+                             ),
+                           ),
+                           child: Text(line, style: style.copyWith(fontSize: 13)),
+                         )).toList(),
                       ),
                     ),
                 ],
@@ -903,7 +935,19 @@ Future<void> _showEditExpensesPopup() async {
                   decoration: BoxDecoration(
                     border: Border.all(color: widget.borderColor),
                     borderRadius: BorderRadius.circular(8),
-                    color: Colors.grey[100],
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: isDark 
+                        ? [
+                            const Color(0xFF2A2A2A),
+                            const Color(0xFF1E1E1E),
+                          ]
+                        : [
+                            const Color(0xFFF8F8F8),
+                            const Color(0xFFF0F0F0),
+                          ],
+                    ),
                   ),
                   child: Builder(
                     builder: (context) {
