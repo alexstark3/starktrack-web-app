@@ -380,7 +380,7 @@ Future<void> _showEditExpensesPopup() async {
   final bool perDiemUsedElsewhere = widget.perDiemLogId != null && widget.perDiemLogId != widget.logId;
   final bool perDiemAvailableHere = widget.perDiemLogId == null || widget.perDiemLogId == widget.logId;
 
-  await showDialog(
+  final result = await showDialog<Map<String, dynamic>>(
     context: context,
     barrierDismissible: true,            // Allow tap-away to close
     useRootNavigator: true,              // Always use root navigator
@@ -552,7 +552,7 @@ Future<void> _showEditExpensesPopup() async {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(dialogCtx).pop();  // Always close with correct dialogCtx
+                  Navigator.of(dialogCtx).pop(null);  // Return null on cancel
                 },
                 child: Text('Cancel', style: TextStyle(color: primaryColor, fontSize: 16)),
               ),
@@ -565,10 +565,7 @@ Future<void> _showEditExpensesPopup() async {
                   textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 onPressed: () {
-                  setState(() {
-                    expenses = Map<String, dynamic>.from(tempExpenses);
-                  });
-                  Navigator.of(dialogCtx).pop(); // Always close with correct dialogCtx
+                  Navigator.of(dialogCtx).pop(Map<String, dynamic>.from(tempExpenses));
                 },
                 child: const Text('Save'),
               ),
@@ -578,6 +575,13 @@ Future<void> _showEditExpensesPopup() async {
       );
     },
   );
+  
+  if (!mounted) return;
+  if (result != null) {
+    setState(() {
+      expenses = result;
+    });
+  }
 }
 
 

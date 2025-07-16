@@ -137,9 +137,9 @@ class _TimeEntryCardState extends State<TimeEntryCard>
 
     await showDialog(
       context: context,
-      useRootNavigator: true,
+      useRootNavigator: false,
       barrierDismissible: false,
-      builder: (dialogCtx) => StatefulBuilder(
+      builder: (_) => StatefulBuilder(
         builder: (context, setStateDialog) {
           bool canAddExpense() {
             final name = nameCtrl.text.trim();
@@ -308,7 +308,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
             actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             actions: [
               TextButton(
-                onPressed: () => Navigator.of(dialogCtx).pop(),
+                onPressed: () => Navigator.pop(context),
                 child: Text('Cancel', style: TextStyle(color: primaryColor, fontSize: 16)),
               ),
               ElevatedButton(
@@ -323,7 +323,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                   setState(() {
                     _expenses = Map<String, dynamic>.from(tempExpenses);
                   });
-                  Navigator.of(dialogCtx).pop();
+                  Navigator.pop(context);
                 },
                 child: const Text('Save'),
               ),
