@@ -348,6 +348,7 @@ class _LogEditRowState extends State<_LogEditRow>
       selectedProjectId = null;
     }
     expenses = Map<String, dynamic>.from(widget.expensesMap);
+    print('DEBUG: Widget initialized with expenses: $expenses');
   }
 
   @override
@@ -391,6 +392,7 @@ class _LogEditRowState extends State<_LogEditRow>
   // ---- Expenses Popup (WORKS FOR ALL DEVICES!) ----
 Future<void> _showEditExpensesPopup() async {
   setState(() => _dialogOpen = true);
+  print('DEBUG: Current expenses before dialog: $expenses');
   final TextEditingController nameCtrl = TextEditingController();
   final TextEditingController amountCtrl = TextEditingController();
 
@@ -604,6 +606,7 @@ Future<void> _showEditExpensesPopup() async {
   );
   
   if (!mounted) return;
+  print('DEBUG: Dialog result received: $result');
   setState(() {
     _dialogOpen = false;
     if (result != null) {
@@ -792,6 +795,7 @@ Future<void> _showEditExpensesPopup() async {
                 if (_saving) return;
                 setState(() => _saving = true);
                 try {
+                  print('DEBUG: About to save - expenses variable: $expenses');
                   print('DEBUG: Saving expenses: $expenses');
                   await widget.onSave(
                     startCtrl.text,
