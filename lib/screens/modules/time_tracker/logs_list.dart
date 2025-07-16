@@ -326,11 +326,20 @@ class _LogEditRowState extends State<_LogEditRow>
     endCtrl = TextEditingController(
       text: widget.end != null ? DateFormat.Hm().format(widget.end!) : '');
     noteCtrl    = TextEditingController(text: widget.note);
-    selectedProjectId = widget.projectId.isNotEmpty
-        ? widget.projectId
-        : (widget.projects.isNotEmpty ? widget.projects.first['id'] : null);
-    expenses = Map<String, dynamic>.from(widget.expensesMap);
+
+
+// THIS PART IS IMPORTANT:
+  // If projectId is found in the project list, select it; else, default to the first.
+  final projectListIds = widget.projects.map((p) => p['id']).toList();
+  if (projectListIds.contains(widget.projectId)) {
+    selectedProjectId = widget.projectId;
+  } else if (widget.projects.isNotEmpty) {
+    selectedProjectId = widget.projects.first['id'];
+  } else {
+    selectedProjectId = null;
   }
+  expenses = Map<String, dynamic>.from(widget.expensesMap);
+}
 
   @override
   void dispose() {
@@ -341,201 +350,244 @@ class _LogEditRowState extends State<_LogEditRow>
     super.dispose();
   }
 
+Future<void> _showNotePopup() async {
+  final ctrl = TextEditingController(text: noteCtrl.text);
+  final res = await showDialog<String>(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text('Note'),
+      content: TextField(controller: ctrl, maxLines: 3, autofocus: true),
+      actions: [
+        TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel')),
+        TextButton(
+            onPressed: () => Navigator.pop(context, ctrl.text),
+            child: const Text('Save')),
+      ],
+    ),
+  );
+
+  
+  if (res != null) {
+    setState(() {
+      noteCtrl.text = res.trim();
+    });
+  }
+}
 
 
+Future<void> _showEditExpensesPopup() async {
+  final TextEditingController nameCtrl = TextEditingController();
+  final TextEditingController amountCtrl = TextEditingController();
 
-  Future<void> _showEditExpensesPopup() async {
-    final TextEditingController nameCtrl = TextEditingController();
-    final TextEditingController amountCtrl = TextEditingController();
+  Map<String, dynamic> tempExpenses = Map<String, dynamic>.from(expenses);
 
-    Map<String, dynamic> tempExpenses = Map<String, dynamic>.from(expenses);
+  bool tempPerDiem = tempExpenses.containsKey('Per diem');
+  String? errorMsg;
 
-    bool tempPerDiem = tempExpenses.containsKey('Per diem');
-    String? errorMsg;
+  Color primaryColor = Colors.blue;
 
-    Color primaryColor = Colors.blue;
+  final bool perDiemUsedElsewhere = widget.perDiemLogId != null && widget.perDiemLogId != widget.logId;
+  final bool perDiemAvailableHere = widget.perDiemLogId == null || widget.perDiemLogId == widget.logId;
 
-    final bool perDiemUsedElsewhere = widget.perDiemLogId != null && widget.perDiemLogId != widget.logId;
-    final bool perDiemAvailableHere = widget.perDiemLogId == null || widget.perDiemLogId == widget.logId;
+  await showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => StatefulBuilder(
+      builder: (context, setStateDialog) {
+        bool canAddExpense() {
+          final name = nameCtrl.text.trim();
+          final amountStr = amountCtrl.text.trim();
+          final amount = double.tryParse(amountStr.replaceAll(',', '.'));
+          return name.isNotEmpty &&
+              amountStr.isNotEmpty &&
+              amount != null &&
+              amount > 0 &&
+              !tempExpenses.containsKey(name) &&
+              name != 'Per diem';
+        }
 
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => StatefulBuilder(
-        builder: (context, setStateDialog) {
-          bool canAddExpense() {
-            final name = nameCtrl.text.trim();
-            final amountStr = amountCtrl.text.trim();
-            final amount = double.tryParse(amountStr.replaceAll(',', '.'));
-            return name.isNotEmpty &&
-                amountStr.isNotEmpty &&
-                amount != null &&
-                amount > 0 &&
-                !tempExpenses.containsKey(name) &&
-                name != 'Per diem';
-          }
+        void addExpense() {
+          final name = nameCtrl.text.trim();
+          final amountStr = amountCtrl.text.trim();
+          if (!canAddExpense()) return;
+          setStateDialog(() {
+            tempExpenses[name] = double.parse(amountStr.replaceAll(',', '.'));
+            nameCtrl.clear();
+            amountCtrl.clear();
+            errorMsg = null;
+          });
+        }
 
-          void addExpense() {
-            final name = nameCtrl.text.trim();
-            final amountStr = amountCtrl.text.trim();
-            if (!canAddExpense()) return;
-            setStateDialog(() {
-              tempExpenses[name] = double.parse(amountStr.replaceAll(',', '.'));
-              nameCtrl.clear();
-              amountCtrl.clear();
-              errorMsg = null;
-            });
-          }
-
-          void handlePerDiemChange(bool? checked) {
-            setStateDialog(() {
-              tempPerDiem = checked ?? false;
-              if (tempPerDiem) {
-                tempExpenses['Per diem'] = 16.00;
-              } else {
-                tempExpenses.remove('Per diem');
-              }
-            });
-          }
-
-          void handleExpenseChange(String key, bool? checked) {
-            if (checked == false) {
-              setStateDialog(() => tempExpenses.remove(key));
+        void handlePerDiemChange(bool? checked) {
+          setStateDialog(() {
+            tempPerDiem = checked ?? false;
+            if (tempPerDiem) {
+              tempExpenses['Per diem'] = 16.00;
+            } else {
+              tempExpenses.remove('Per diem');
             }
-          }
+          });
+        }
 
-          final List<String> otherExpenseKeys =
-              tempExpenses.keys.where((k) => k != 'Per diem').toList();
-          final List<Widget> expenseWidgets = [
-            for (final key in otherExpenseKeys)
-              Row(
-                children: [
-                  Checkbox(
-                    value: true,
-                    onChanged: (checked) => handleExpenseChange(key, checked),
-                    activeColor: primaryColor,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4)),
-                  ),
-                  Text(
-                    key,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.normal, fontSize: 16),
-                  ),
-                  const Spacer(),
-                  Text(
-                    '${(tempExpenses[key] as num).toStringAsFixed(2)} CHF',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.normal, fontSize: 16),
-                  ),
-                ],
-              ),
+        void handleExpenseChange(String key, bool? checked) {
+          if (checked == false) {
+            setStateDialog(() => tempExpenses.remove(key));
+          }
+        }
+
+        final List<String> otherExpenseKeys =
+            tempExpenses.keys.where((k) => k != 'Per diem').toList();
+        final List<Widget> expenseWidgets = [
+          for (final key in otherExpenseKeys)
             Row(
               children: [
                 Checkbox(
-                  value: tempPerDiem,
-                  onChanged: perDiemAvailableHere ? handlePerDiemChange : null,
+                  value: true,
+                  onChanged: (checked) => handleExpenseChange(key, checked),
                   activeColor: primaryColor,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4)),
                 ),
-                const Text('Per Diem'),
-                if (perDiemUsedElsewhere)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 6),
-                    child: Tooltip(
-                      message: "Per diem already used in another session today",
-                      child: Icon(Icons.info_outline, color: Colors.grey, size: 18),
-                    ),
-                  ),
+                Text(
+                  key,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.normal, fontSize: 16),
+                ),
                 const Spacer(),
-                const Text('16.00 CHF',
-                    style: TextStyle(
-                        fontWeight: FontWeight.normal, fontSize: 16)),
+                Text(
+                  '${(tempExpenses[key] as num).toStringAsFixed(2)} CHF',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.normal, fontSize: 16),
+                ),
               ],
             ),
-          ];
-
-          return AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-            title: const Text('Expenses'),
-            content: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ...expenseWidgets,
-                  const SizedBox(height: 14),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: TextField(
-                          controller: nameCtrl,
-                          decoration: const InputDecoration(
-                            hintText: 'Name',
-                            border: UnderlineInputBorder(),
-                            isDense: true,
-                            contentPadding: EdgeInsets.symmetric(vertical: 4),
-                          ),
-                          onChanged: (_) => setStateDialog(() {}),
-                          onSubmitted: (_) => canAddExpense() ? addExpense() : null,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        flex: 1,
-                        child: TextField(
-                          controller: amountCtrl,
-                          decoration: const InputDecoration(
-                            hintText: 'Amount',
-                            border: UnderlineInputBorder(),
-                            isDense: true,
-                            contentPadding: EdgeInsets.symmetric(vertical: 4),
-                          ),
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          onChanged: (_) => setStateDialog(() {}),
-                          onSubmitted: (_) => canAddExpense() ? addExpense() : null,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                    ],
+          Row(
+            children: [
+              Checkbox(
+                value: tempPerDiem,
+                onChanged: perDiemAvailableHere ? handlePerDiemChange : null,
+                activeColor: primaryColor,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4)),
+              ),
+              const Text('Per Diem'),
+              if (perDiemUsedElsewhere)
+                Padding(
+                  padding: const EdgeInsets.only(left: 6),
+                  child: Tooltip(
+                    message: "Per diem already used in another session today",
+                    child: Icon(Icons.info_outline, color: Colors.grey, size: 18),
                   ),
-                  if (errorMsg != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4.0, bottom: 2.0),
-                      child: Text(errorMsg!, style: const TextStyle(color: Colors.red)),
-                    ),
-                ],
-              ),
-            ),
-            actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('Cancel', style: TextStyle(color: primaryColor, fontSize: 16)),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
-                  textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-                onPressed: () {
-                  setState(() {
-                    expenses = Map<String, dynamic>.from(tempExpenses);
-                  });
-                  Navigator.pop(context);
-                },
-                child: const Text('Save'),
-              ),
+              const Spacer(),
+              const Text('16.00 CHF',
+                  style: TextStyle(
+                      fontWeight: FontWeight.normal, fontSize: 16)),
             ],
-          );
-        },
-      ),
-    );
-  }
+          ),
+        ];
+
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          title: const Text('Expenses'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ...expenseWidgets,
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: TextField(
+                        controller: nameCtrl,
+                        decoration: const InputDecoration(
+                          hintText: 'Name',
+                          border: UnderlineInputBorder(),
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(vertical: 4),
+                        ),
+                        onChanged: (_) => setStateDialog(() {}),
+                        onSubmitted: (_) => canAddExpense() ? addExpense() : null,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      flex: 1,
+                      child: TextField(
+                        controller: amountCtrl,
+                        decoration: const InputDecoration(
+                          hintText: 'Amount',
+                          border: UnderlineInputBorder(),
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(vertical: 4),
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        onChanged: (_) => setStateDialog(() {}),
+                        onSubmitted: (_) => canAddExpense() ? addExpense() : null,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    SizedBox(
+                      height: 32,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          backgroundColor: Colors.grey.shade200,
+                          foregroundColor: primaryColor,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        onPressed: canAddExpense() ? addExpense : null,
+                        child: const Text('Add'),
+                      ),
+                    ),
+                  ],
+                ),
+                if (errorMsg != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4.0, bottom: 2.0),
+                    child: Text(errorMsg!, style: const TextStyle(color: Colors.red)),
+                  ),
+              ],
+            ),
+          ),
+          actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel', style: TextStyle(color: primaryColor, fontSize: 16)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
+                textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              onPressed: () {
+                setState(() {
+                  expenses = Map<String, dynamic>.from(tempExpenses);
+                });
+                Navigator.pop(context);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+}
+
+
+
 
   Widget _projectDropdown(TextStyle s) {
     return DropdownButtonHideUnderline(
@@ -677,31 +729,37 @@ class _LogEditRowState extends State<_LogEditRow>
 
         const SizedBox(height: 20), //gap between note and exp
 
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text('Note:', style: style),
-            const SizedBox(width: 8),
-            Expanded(
-              child: TextField(
-                focusNode: _noteFocus, 
-                controller: noteCtrl,
-                style: style,
-                minLines: 1,
-                maxLines: 3,
-                autofocus: true,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(color: widget.borderColor),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                ),
-              ),
-            ),
-          ],
+
+
+        GestureDetector(
+  onTap: _showNotePopup,
+  child: Row(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      Text('Note:', style: style),
+      const SizedBox(width: 8),
+      Expanded(
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+          decoration: BoxDecoration(
+            border: Border.all(color: widget.borderColor),
+            borderRadius: BorderRadius.circular(8),
+            color: Colors.grey[100],
+          ),
+          child: Text(
+            noteCtrl.text.isNotEmpty ? noteCtrl.text : 'Tap to add note',
+            style: style.copyWith(
+                color: noteCtrl.text.isNotEmpty ? widget.textColor : Colors.grey),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
+      ),
+    ],
+  ),
+),
+
+
         Padding(
           padding: const EdgeInsets.only(top: 10),
           child: Row(
