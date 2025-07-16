@@ -352,6 +352,18 @@ class _LogEditRowState extends State<_LogEditRow>
   }
 
   @override
+  void didUpdateWidget(_LogEditRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Only update expenses if not currently editing or dialog is not open
+    if (!widget.isEditing && !_dialogOpen) {
+      print('DEBUG: Widget updated - updating expenses from ${expenses} to ${widget.expensesMap}');
+      expenses = Map<String, dynamic>.from(widget.expensesMap);
+    } else {
+      print('DEBUG: Widget updated - preserving current expenses: $expenses (editing: ${widget.isEditing}, dialog: $_dialogOpen)');
+    }
+  }
+
+  @override
   void dispose() {
     startCtrl.dispose();
     endCtrl.dispose();
@@ -607,15 +619,18 @@ Future<void> _showEditExpensesPopup() async {
   
   if (!mounted) return;
   print('DEBUG: Dialog result received: $result');
+  
+  // Immediately update expenses to prevent loss during StreamBuilder rebuilds
+  if (result != null) {
+    print('DEBUG: Updating expenses from dialog: $result');
+    expenses = result;
+    print('DEBUG: Expenses after update: $expenses');
+  } else {
+    print('DEBUG: No result from expense dialog');
+  }
+  
   setState(() {
     _dialogOpen = false;
-    if (result != null) {
-      print('DEBUG: Updating expenses from dialog: $result');
-      expenses = result;
-      print('DEBUG: Expenses after update: $expenses');
-    } else {
-      print('DEBUG: No result from expense dialog');
-    }
   });
 }
 
