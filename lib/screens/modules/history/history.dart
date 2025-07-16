@@ -274,10 +274,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
             const Color(0xFFF8F8F8),
           ],
     ),
-    border: Border.all(
-      color: isDark ? Colors.white12 : Colors.grey.shade300, 
-      width: 1
-    ),
+
     borderRadius: BorderRadius.circular(kFilterRadius + 2),
   ),
   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -523,7 +520,21 @@ class _HistoryLogsState extends State<HistoryLogs> {
                           // Blue bar with group totals
                           Container(
                             width: double.infinity,
-                            color: isDark ? theme.colorScheme.primary.withOpacity(0.2) : theme.colorScheme.primary.withOpacity(0.1),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: isDark 
+                                  ? [
+                                      theme.colorScheme.primary.withOpacity(0.25),
+                                      theme.colorScheme.primary.withOpacity(0.15),
+                                    ]
+                                  : [
+                                      theme.colorScheme.primary.withOpacity(0.12),
+                                      theme.colorScheme.primary.withOpacity(0.08),
+                                    ],
+                              ),
+                            ),
                             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -20,7 +20,6 @@ class TeamModuleTabScreen extends StatefulWidget {
 
 class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
   int _selectedIndex = 0;
-  int _hoveredTab = -1;
 
   DocumentSnapshot? _selectedMemberDoc;
   Map<String, dynamic>? _selectedProject;
@@ -38,191 +37,47 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
             padding: const EdgeInsets.only(top: 12, left: 54, right: 24),
             child: Row(
               children: [
-                // Members tab
-                MouseRegion(
-                  onEnter: (_) => setState(() => _hoveredTab = 0),
-                  onExit: (_) => setState(() => _hoveredTab = -1),
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = 0;
-                        _selectedMemberDoc = null;
-                      });
-                    },
-                    child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 140),
-                    margin: const EdgeInsets.only(right: 16),
-                    padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
-                    decoration: BoxDecoration(
-                      gradient: _selectedIndex == 0 ? LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: Theme.of(context).brightness == Brightness.dark
-                          ? [const Color(0xFF404040), const Color(0xFF2D2D2D)]
-                          : [const Color(0xFFF8F8F8), const Color(0xFFF0F0F0)],
-                      ) : (_hoveredTab == 0 && Theme.of(context).brightness == Brightness.dark ? LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)],
-                      ) : null),
-                      color: _selectedIndex == 0 ? null : (_hoveredTab == 0 ? null : (Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E1E1E) : colors.lightGray)),
-                      borderRadius: BorderRadius.vertical(
-                        top: const Radius.circular(6),
-                        bottom: Radius.circular(_selectedIndex == 0 ? 0 : 6),
-                      ),
-                      boxShadow: Theme.of(context).brightness == Brightness.light && _selectedIndex == 0
-                          ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
-                          : null,
-                      border: Theme.of(context).brightness == Brightness.dark
-                          ? Border.all(color: _selectedIndex == 0 ? const Color(0xFF505050) : const Color(0xFF2A2A2A), width: 1)
-                          : null,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.group,
-                            size: 20,
-                            color: _selectedIndex == 0
-                                ? (_selectedMemberDoc == null ? colors.primaryBlue : colors.darkGray)
-                                : colors.darkGray),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Members',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: _selectedIndex == 0 ? FontWeight.bold : FontWeight.w600,
-                            color: _selectedIndex == 0
-                                ? (_selectedMemberDoc == null ? colors.primaryBlue : colors.darkGray)
-                                : colors.darkGray,
-                          ),
-                        ),
-                      ],
-                    ),
-                    ),
-                  ),
+                                // Members tab
+                _TeamTab(
+                  icon: Icons.group,
+                  title: 'Members',
+                  isSelected: _selectedIndex == 0,
+                  colors: colors,
+                  selectedMemberDoc: _selectedMemberDoc,
+                  onTap: () {
+                    setState(() {
+                      _selectedIndex = 0;
+                      _selectedMemberDoc = null;
+                    });
+                  },
                 ),
-                // Projects tab
-                MouseRegion(
-                  onEnter: (_) => setState(() => _hoveredTab = 1),
-                  onExit: (_) => setState(() => _hoveredTab = -1),
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = 1;
-                        _selectedProject = null;
-                      });
-                    },
-                    child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 140),
-                    margin: const EdgeInsets.only(right: 16),
-                    padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
-                    decoration: BoxDecoration(
-                      gradient: _selectedIndex == 1 ? LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: Theme.of(context).brightness == Brightness.dark
-                          ? [const Color(0xFF404040), const Color(0xFF2D2D2D)]
-                          : [const Color(0xFFF8F8F8), const Color(0xFFF0F0F0)],
-                      ) : (_hoveredTab == 1 && Theme.of(context).brightness == Brightness.dark ? LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)],
-                      ) : null),
-                      color: _selectedIndex == 1 ? null : (_hoveredTab == 1 ? null : (Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E1E1E) : colors.lightGray)),
-                      borderRadius: BorderRadius.vertical(
-                        top: const Radius.circular(6),
-                        bottom: Radius.circular(_selectedIndex == 1 ? 0 : 6),
-                      ),
-                      boxShadow: Theme.of(context).brightness == Brightness.light && _selectedIndex == 1
-                          ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
-                          : null,
-                      border: Theme.of(context).brightness == Brightness.dark
-                          ? Border.all(color: _selectedIndex == 1 ? const Color(0xFF505050) : const Color(0xFF2A2A2A), width: 1)
-                          : null,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.folder_copy_rounded,
-                            size: 20,
-                            color: _selectedIndex == 1
-                                ? (_selectedProject == null ? colors.primaryBlue : colors.darkGray)
-                                : colors.darkGray),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Projects',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: _selectedIndex == 1 ? FontWeight.bold : FontWeight.w600,
-                            color: _selectedIndex == 1
-                                ? (_selectedProject == null ? colors.primaryBlue : colors.darkGray)
-                                : colors.darkGray,
-                          ),
-                        ),
-                      ],
-                    ),
-                    ),
-                  ),
+                                // Projects tab
+                _TeamTab(
+                  icon: Icons.folder_copy_rounded,
+                  title: 'Projects',
+                  isSelected: _selectedIndex == 1,
+                  colors: colors,
+                  selectedProject: _selectedProject,
+                  onTap: () {
+                    setState(() {
+                      _selectedIndex = 1;
+                      _selectedProject = null;
+                    });
+                  },
                 ),
-                // Clients tab
-                MouseRegion(
-                  onEnter: (_) => setState(() => _hoveredTab = 2),
-                  onExit: (_) => setState(() => _hoveredTab = -1),
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = 2;
-                        _selectedClient = null;
-                      });
-                    },
-                    child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 140),
-                    margin: const EdgeInsets.only(right: 16),
-                    padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
-                    decoration: BoxDecoration(
-                      gradient: _selectedIndex == 2 ? LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: Theme.of(context).brightness == Brightness.dark
-                          ? [const Color(0xFF404040), const Color(0xFF2D2D2D)]
-                          : [const Color(0xFFF8F8F8), const Color(0xFFF0F0F0)],
-                      ) : (_hoveredTab == 2 && Theme.of(context).brightness == Brightness.dark ? LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)],
-                      ) : null),
-                      color: _selectedIndex == 2 ? null : (_hoveredTab == 2 ? null : (Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E1E1E) : colors.lightGray)),
-                      borderRadius: BorderRadius.vertical(
-                        top: const Radius.circular(6),
-                        bottom: Radius.circular(_selectedIndex == 2 ? 0 : 6),
-                      ),
-                      boxShadow: Theme.of(context).brightness == Brightness.light && _selectedIndex == 2
-                          ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
-                          : null,
-                      border: Theme.of(context).brightness == Brightness.dark
-                          ? Border.all(color: _selectedIndex == 2 ? const Color(0xFF505050) : const Color(0xFF2A2A2A), width: 1)
-                          : null,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.people_alt_rounded,
-                            size: 20,
-                            color: _selectedIndex == 2
-                                ? (_selectedClient == null ? colors.primaryBlue : colors.darkGray)
-                                : colors.darkGray),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Clients',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: _selectedIndex == 2 ? FontWeight.bold : FontWeight.w600,
-                            color: _selectedIndex == 2
-                                ? (_selectedClient == null ? colors.primaryBlue : colors.darkGray)
-                                : colors.darkGray,
-                          ),
-                        ),
-                      ],
-                    ),
-                    ),
-                  ),
+                                // Clients tab
+                _TeamTab(
+                  icon: Icons.people_alt_rounded,
+                  title: 'Clients',
+                  isSelected: _selectedIndex == 2,
+                  colors: colors,
+                  selectedClient: _selectedClient,
+                  onTap: () {
+                    setState(() {
+                      _selectedIndex = 2;
+                      _selectedClient = null;
+                    });
+                  },
                 ),
               ],
             ),
@@ -340,4 +195,104 @@ class _BottomOnlyClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(_BottomOnlyClipper oldClipper) => false;
+}
+
+// --- Team Tab Widget with isolated hover state ---
+class _TeamTab extends StatefulWidget {
+  final IconData icon;
+  final String title;
+  final bool isSelected;
+  final AppColors colors;
+  final VoidCallback onTap;
+  final DocumentSnapshot? selectedMemberDoc;
+  final Map<String, dynamic>? selectedProject;
+  final Map<String, dynamic>? selectedClient;
+
+  const _TeamTab({
+    Key? key,
+    required this.icon,
+    required this.title,
+    required this.isSelected,
+    required this.colors,
+    required this.onTap,
+    this.selectedMemberDoc,
+    this.selectedProject,
+    this.selectedClient,
+  }) : super(key: key);
+
+  @override
+  State<_TeamTab> createState() => _TeamTabState();
+}
+
+class _TeamTabState extends State<_TeamTab> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    // Determine if tab has selected content
+    final hasSelectedContent = widget.selectedMemberDoc != null || 
+                              widget.selectedProject != null || 
+                              widget.selectedClient != null;
+    
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 140),
+          margin: const EdgeInsets.only(right: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
+          decoration: BoxDecoration(
+            gradient: widget.isSelected ? LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isDark
+                ? [const Color(0xFF404040), const Color(0xFF2D2D2D)]
+                : [const Color(0xFFF8F8F8), const Color(0xFFF0F0F0)],
+            ) : (_isHovered && isDark ? LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [const Color(0xFF2A2A2A), const Color(0xFF1E1E1E)],
+            ) : null),
+            color: widget.isSelected ? null : (_isHovered ? null : (isDark ? const Color(0xFF1E1E1E) : widget.colors.lightGray)),
+            borderRadius: BorderRadius.vertical(
+              top: const Radius.circular(6),
+              bottom: Radius.circular(widget.isSelected ? 0 : 6),
+            ),
+            boxShadow: !isDark && widget.isSelected
+                ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
+                : null,
+            border: isDark
+                ? Border.all(color: widget.isSelected ? const Color(0xFF505050) : const Color(0xFF2A2A2A), width: 1)
+                : null,
+          ),
+          child: Row(
+            children: [
+              Icon(
+                widget.icon,
+                size: 20,
+                color: widget.isSelected
+                    ? (hasSelectedContent ? widget.colors.darkGray : widget.colors.primaryBlue)
+                    : widget.colors.darkGray,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                widget.title,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: widget.isSelected ? FontWeight.bold : FontWeight.w600,
+                  color: widget.isSelected
+                      ? (hasSelectedContent ? widget.colors.darkGray : widget.colors.primaryBlue)
+                      : widget.colors.darkGray,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
