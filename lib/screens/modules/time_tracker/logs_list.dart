@@ -518,6 +518,8 @@ Future<void> _showEditExpensesPopup() async {
     builder: (dialogCtx) {
       return StatefulBuilder(
         builder: (context, setStateDialog) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          
           bool canAddExpense() {
             final name = nameCtrl.text.trim();
             final amountStr = amountCtrl.text.trim();
