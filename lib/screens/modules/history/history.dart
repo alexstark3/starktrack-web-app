@@ -453,6 +453,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                       ),
                       child: Container(
                         decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF2D2D30) : Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: isDark ? null : [
                             BoxShadow(
