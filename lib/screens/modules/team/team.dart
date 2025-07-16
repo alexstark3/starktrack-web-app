@@ -35,9 +35,8 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
       child: Column(
         children: [
           // --- Tab bar ---
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.only(left: 13, right: 24, top: 12),
+          Padding(
+            padding: const EdgeInsets.only(top: 12, left: 24, right: 24),
             child: LayoutBuilder(
               builder: (context, constraints) {
                 // Check if we have enough space for horizontal layout
@@ -262,7 +261,7 @@ class _TeamTabState extends State<_TeamTab> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           decoration: BoxDecoration(
             color: widget.isSelected 
-              ? (isDark ? widget.colors.lightGray : const Color(0xFFF0F0F0))
+              ? (isDark ? const Color(0xFF252526) : Colors.white)
               : (_isHovered && isDark ? const Color(0xFF252526) : (isDark ? widget.colors.dashboardBackground : widget.colors.lightGray)),
             borderRadius: BorderRadius.vertical(
               top: const Radius.circular(6),
@@ -273,7 +272,7 @@ class _TeamTabState extends State<_TeamTab> {
                 : null,
             border: isDark
                 ? Border.all(color: widget.isSelected ? const Color(0xFF404040) : const Color(0xFF2A2A2A), width: 1)
-                : null,
+                : (widget.isSelected ? null : Border.all(color: Colors.black26, width: 1)),
           ),
           child: Row(
             children: [
