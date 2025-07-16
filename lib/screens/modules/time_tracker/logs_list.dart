@@ -597,7 +597,10 @@ Future<void> _showEditExpensesPopup() async {
             actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () {
+                  print('DEBUG: Cancel button pressed - expenses remain: $expenses');
+                  Navigator.pop(context);
+                },
                 child: Text('Cancel', style: TextStyle(color: primaryColor, fontSize: 16)),
               ),
               ElevatedButton(
@@ -612,6 +615,11 @@ Future<void> _showEditExpensesPopup() async {
                   print('DEBUG: Final tempExpenses before dialog close: $tempExpenses');
                   final result = Map<String, dynamic>.from(tempExpenses);
                   print('DEBUG: About to return from dialog: $result');
+                  
+                  // Update expenses immediately before closing dialog
+                  expenses = result;
+                  print('DEBUG: Expenses updated directly in dialog: $expenses');
+                  
                   Navigator.pop(context, result);
                 },
                 child: const Text('Save'),
@@ -628,14 +636,8 @@ Future<void> _showEditExpensesPopup() async {
   if (!mounted) return;
   print('DEBUG: Dialog result received: $result');
   
-  // Immediately update expenses to prevent loss during StreamBuilder rebuilds
-  if (result != null) {
-    print('DEBUG: Updating expenses from dialog: $result');
-    expenses = Map<String, dynamic>.from(result);
-    print('DEBUG: Expenses after update: $expenses');
-  } else {
-    print('DEBUG: No result from expense dialog - result is null');
-  }
+  // Expenses should already be updated directly in dialog
+  print('DEBUG: Current expenses after dialog: $expenses');
   
   setState(() {
     _dialogOpen = false;
