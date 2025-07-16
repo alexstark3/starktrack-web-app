@@ -366,30 +366,26 @@ class _LogEditRowState extends State<_LogEditRow>
   }
 
   // ---- Expenses Popup (WORKS FOR ALL DEVICES!) ----
-  Future<void> _showEditExpensesPopup() async {
-    final TextEditingController nameCtrl = TextEditingController();
-    final TextEditingController amountCtrl = TextEditingController();
+Future<void> _showEditExpensesPopup() async {
+  final TextEditingController nameCtrl = TextEditingController();
+  final TextEditingController amountCtrl = TextEditingController();
 
-    Map<String, dynamic> tempExpenses = Map<String, dynamic>.from(expenses);
+  Map<String, dynamic> tempExpenses = Map<String, dynamic>.from(expenses);
 
-    bool tempPerDiem = tempExpenses.containsKey('Per diem');
-    String? errorMsg;
+  bool tempPerDiem = tempExpenses.containsKey('Per diem');
+  String? errorMsg;
 
-    Color primaryColor = Colors.blue;
+  Color primaryColor = Colors.blue;
 
-    final bool perDiemUsedElsewhere = widget.perDiemLogId != null && widget.perDiemLogId != widget.logId;
-    final bool perDiemAvailableHere = widget.perDiemLogId == null || widget.perDiemLogId == widget.logId;
+  final bool perDiemUsedElsewhere = widget.perDiemLogId != null && widget.perDiemLogId != widget.logId;
+  final bool perDiemAvailableHere = widget.perDiemLogId == null || widget.perDiemLogId == widget.logId;
 
-    Future<void> closeDialog() async {
-      // Always use rootNavigator for cross-platform safety!
-      Navigator.of(context, rootNavigator: true).pop();
-    }
-
-    await showDialog(
-      context: context,
-      useRootNavigator: true,
-      barrierDismissible: false,
-      builder: (ctx) => StatefulBuilder(
+  await showDialog(
+    context: context,
+    barrierDismissible: true,            // Allow tap-away to close
+    useRootNavigator: true,              // Always use root navigator
+    builder: (dialogCtx) {
+      return StatefulBuilder(
         builder: (context, setStateDialog) {
           bool canAddExpense() {
             final name = nameCtrl.text.trim();
@@ -555,7 +551,9 @@ class _LogEditRowState extends State<_LogEditRow>
             actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             actions: [
               TextButton(
-                onPressed: () => closeDialog(),
+                onPressed: () {
+                  Navigator.of(dialogCtx).pop();  // Always close with correct dialogCtx
+                },
                 child: Text('Cancel', style: TextStyle(color: primaryColor, fontSize: 16)),
               ),
               ElevatedButton(
@@ -567,20 +565,21 @@ class _LogEditRowState extends State<_LogEditRow>
                   textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 onPressed: () {
-                  if (!mounted) return;
                   setState(() {
                     expenses = Map<String, dynamic>.from(tempExpenses);
                   });
-                  closeDialog();
+                  Navigator.of(dialogCtx).pop(); // Always close with correct dialogCtx
                 },
                 child: const Text('Save'),
               ),
             ],
           );
         },
-      ),
-    );
-  }
+      );
+    },
+  );
+}
+
 
   Widget _projectDropdown(TextStyle s) {
     return DropdownButtonHideUnderline(
