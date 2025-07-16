@@ -38,6 +38,7 @@ class LogsList extends StatefulWidget {
 class _LogsListState extends State<LogsList> {
   final Map<String, bool> _editingStates = {};
   final Map<String, Map<String, dynamic>> _pendingExpenses = {};
+  final Map<String, String> _pendingNotes = {};
 
   void setEditingState(String logId, bool editing) {
     setState(() {
@@ -61,6 +62,22 @@ class _LogsListState extends State<LogsList> {
   
   Map<String, dynamic> getExpenses(String logId, Map<String, dynamic> originalExpenses) {
     return _pendingExpenses[logId] ?? originalExpenses;
+  }
+  
+  void updateNote(String logId, String note) {
+    setState(() {
+      _pendingNotes[logId] = note;
+    });
+  }
+  
+  void clearPendingNote(String logId) {
+    setState(() {
+      _pendingNotes.remove(logId);
+    });
+  }
+  
+  String getNote(String logId, String originalNote) {
+    return _pendingNotes[logId] ?? originalNote;
   }
 
   String _projectNameFromId(String id) {
@@ -251,6 +268,9 @@ class _LogsListState extends State<LogsList> {
                       updateExpenses: updateExpenses,
                       getExpenses: getExpenses,
                       clearPendingExpenses: clearPendingExpenses,
+                      updateNote: updateNote,
+                      getNote: getNote,
+                      clearPendingNote: clearPendingNote,
                     ),
                   ),
                 ),
@@ -314,6 +334,9 @@ class _LogEditRow extends StatefulWidget {
   final Function(String, Map<String, dynamic>) updateExpenses;
   final Function(String, Map<String, dynamic>) getExpenses;
   final Function(String) clearPendingExpenses;
+  final Function(String, String) updateNote;
+  final Function(String, String) getNote;
+  final Function(String) clearPendingNote;
 
   const _LogEditRow({
     Key? key,
@@ -339,6 +362,9 @@ class _LogEditRow extends StatefulWidget {
     required this.updateExpenses,
     required this.getExpenses,
     required this.clearPendingExpenses,
+    required this.updateNote,
+    required this.getNote,
+    required this.clearPendingNote,
   }) : super(key: key);
 
   @override
@@ -351,7 +377,7 @@ class _LogEditRowState extends State<_LogEditRow>
   bool get wantKeepAlive => true;
   bool _dialogOpen = false;
   bool _expenseDialogOpen = false;
-  late TextEditingController startCtrl, endCtrl, noteCtrl;
+  late TextEditingController startCtrl, endCtrl;
   final FocusNode _noteFocus = FocusNode();
   bool _saving = false;
   String? selectedProjectId;
@@ -363,7 +389,6 @@ class _LogEditRowState extends State<_LogEditRow>
       text: widget.begin != null ? DateFormat.Hm().format(widget.begin!) : '');
     endCtrl = TextEditingController(
       text: widget.end != null ? DateFormat.Hm().format(widget.end!) : '');
-    noteCtrl    = TextEditingController(text: widget.note);
 
     final projectListIds = widget.projects.map((p) => p['id']).toList();
     if (projectListIds.contains(widget.projectId)) {
@@ -389,7 +414,6 @@ class _LogEditRowState extends State<_LogEditRow>
   void dispose() {
     startCtrl.dispose();
     endCtrl.dispose();
-    noteCtrl.dispose();
     _noteFocus.dispose();
     super.dispose();
   }
@@ -397,7 +421,10 @@ class _LogEditRowState extends State<_LogEditRow>
   // ---- Note Popup (WORKS FOR ALL DEVICES!) ----
   Future<void> _showNotePopup() async {
     setState(() => _dialogOpen = true);
-    final ctrl = TextEditingController(text: noteCtrl.text);
+    
+    final currentNote = widget.getNote(widget.logId, widget.note);
+    final ctrl = TextEditingController(text: currentNote);
+    
     final res = await showDialog<String>(
       context: context,
       useRootNavigator: false,  // <-- Use local navigator for mobile compatibility
@@ -409,17 +436,20 @@ class _LogEditRowState extends State<_LogEditRow>
               onPressed: () => Navigator.of(ctx).pop(),
               child: const Text('Cancel')),
           TextButton(
-              onPressed: () => Navigator.of(ctx).pop(ctrl.text),
+              onPressed: () {
+                final newNote = ctrl.text.trim();
+                // Update note at parent level
+                widget.updateNote(widget.logId, newNote);
+                Navigator.of(ctx).pop(newNote);
+              },
               child: const Text('Save')),
         ],
       ),
     );
+    
     if (!mounted) return;
     setState(() {
       _dialogOpen = false;
-      if (res != null) {
-        noteCtrl.text = res.trim();
-      }
     });
   }
 
@@ -727,7 +757,7 @@ Future<void> _showEditExpensesPopup() async {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  noteCtrl.text,
+                  widget.getNote(widget.logId, widget.note),
                   style: style,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -825,12 +855,17 @@ Future<void> _showEditExpensesPopup() async {
                     borderRadius: BorderRadius.circular(8),
                     color: Colors.grey[100],
                   ),
-                  child: Text(
-                    noteCtrl.text.isNotEmpty ? noteCtrl.text : 'Tap to add note',
-                    style: style.copyWith(
-                        color: noteCtrl.text.isNotEmpty ? widget.textColor : Colors.grey),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                  child: Builder(
+                    builder: (context) {
+                      final displayNote = widget.getNote(widget.logId, widget.note);
+                      return Text(
+                        displayNote.isNotEmpty ? displayNote : 'Tap to add note',
+                        style: style.copyWith(
+                            color: displayNote.isNotEmpty ? widget.textColor : Colors.grey),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      );
+                    },
                   ),
                 ),
               ),
@@ -848,17 +883,19 @@ Future<void> _showEditExpensesPopup() async {
                   final expensesToSave = widget.getExpenses(widget.logId, widget.expensesMap);
                   print('DEBUG: About to save - expenses variable: $expensesToSave');
                   print('DEBUG: Saving expenses: $expensesToSave');
+                  final noteToSave = widget.getNote(widget.logId, widget.note);
                   await widget.onSave(
                     startCtrl.text,
                     endCtrl.text,
-                    noteCtrl.text,
+                    noteToSave,
                     selectedProjectId ?? '',
                     expensesToSave,
                   );
                   print('DEBUG: Save completed successfully');
                   widget.setEditingState(widget.logId, false);
-                  // Clear pending expenses after successful save so database values are used
+                  // Clear pending data after successful save so database values are used
                   widget.clearPendingExpenses(widget.logId);
+                  widget.clearPendingNote(widget.logId);
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Changes saved successfully!'), backgroundColor: Colors.green),
