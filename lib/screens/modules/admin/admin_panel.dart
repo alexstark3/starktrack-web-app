@@ -581,42 +581,7 @@ class _AdminPanelState extends State<AdminPanel> {
     );
   }
 
-  String _roleLabel(dynamic v) {
-    switch (v) {
-      case 'company_admin':
-        return 'Company Admin';
-      case 'admin':
-        return 'Admin';
-      case 'team_leader':
-        return 'Team Leader';
-      case 'worker':
-        return 'Worker';
-      default:
-        return v.toString();
-    }
-  }
 
-  String _moduleLabel(dynamic v) {
-    switch (v) {
-      case 'time_tracker':
-        return 'Time Tracker';
-      case 'admin':
-        return 'Admin';
-      default:
-        return v.toString();
-    }
-  }
-
-  String _teamLeaderName(dynamic id) {
-    if (id == null || id == '') return '-';
-    try {
-      final match = _teamLeaders.firstWhere((tl) => tl['id'] == id, orElse: () => {});
-      if (match.isEmpty) return '-';
-      return '${match['firstName']} ${match['surname']}';
-    } catch (_) {
-      return '-';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
