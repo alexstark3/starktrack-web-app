@@ -777,8 +777,8 @@ Future<void> _showEditExpensesPopup() async {
       );
     }
 
-            final currentExpenses = widget.getExpenses(widget.logId, widget.expensesMap);
-        final List<String> currExpenseLines = [
+    final currentExpenses = widget.getExpenses(widget.logId, widget.expensesMap);
+    final List<String> currExpenseLines = [
       for (var entry in currentExpenses.entries)
         if (entry.key != 'Per diem')
           '${entry.key} ${(entry.value as num).toStringAsFixed(2)} CHF',
