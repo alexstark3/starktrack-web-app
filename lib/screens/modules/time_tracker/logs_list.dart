@@ -109,7 +109,6 @@ class _LogsListState extends State<LogsList> {
           ? const Color(0xFF1E1E1E) 
           : const Color(0xFFFFFFFF),
       ),
-      ),
       child: StreamBuilder<QuerySnapshot>(
         stream: logsRef.snapshots(),
         builder: (context, snap) {
@@ -209,7 +208,7 @@ class _LogsListState extends State<LogsList> {
               Container(
                 key  : ValueKey(logId),
                 margin: const EdgeInsets.symmetric(vertical: 4),
-                                  decoration: BoxDecoration(
+                decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     color: isDark ? const Color(0xFF2D2D30) : theme.cardColor,
                     border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : null,
