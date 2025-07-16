@@ -375,7 +375,6 @@ class _LogEditRowState extends State<_LogEditRow>
     }
     
     final initExpenses = widget.getExpenses(widget.logId, widget.expensesMap);
-    print('DEBUG: Widget initialized with expenses: $initExpenses');
   }
 
   @override
@@ -860,16 +859,22 @@ Future<void> _showEditExpensesPopup() async {
                   widget.setEditingState(widget.logId, false);
                   // Clear pending expenses after successful save so database values are used
                   widget.clearPendingExpenses(widget.logId);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Changes saved successfully!'), backgroundColor: Colors.green),
-                  );
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Changes saved successfully!'), backgroundColor: Colors.green),
+                    );
+                  }
                 } catch (e) {
                   print('DEBUG: Save failed with error: $e');
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Save failed: $e'), backgroundColor: Colors.red),
-                  );
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Save failed: $e'), backgroundColor: Colors.red),
+                    );
+                  }
                 } finally {
-                  setState(() => _saving = false);
+                  if (mounted) {
+                    setState(() => _saving = false);
+                  }
                 }
               }),
               const SizedBox(width: 8),
