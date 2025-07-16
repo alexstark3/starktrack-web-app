@@ -438,9 +438,30 @@ class _LogEditRowState extends State<_LogEditRow>
             maxLines: null, 
             minLines: 3,
             autofocus: true,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               hintText: 'Enter your note here...',
-              border: OutlineInputBorder(),
+              hintStyle: TextStyle(
+                color: Theme.of(context).brightness == Brightness.dark 
+                  ? const Color(0xFF969696) 
+                  : const Color(0xFF6A6A6A),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark 
+                    ? const Color(0xFF404040) 
+                    : const Color(0xFFD0D0D0),
+                ),
+              ),
+              filled: true,
+              fillColor: Theme.of(context).brightness == Brightness.dark 
+                ? const Color(0xFF2D2D30) 
+                : const Color(0xFFF8F8F8),
+            ),
+            style: TextStyle(
+              color: Theme.of(context).brightness == Brightness.dark 
+                ? const Color(0xFFCCCCCC) 
+                : Colors.black87,
             ),
           ),
         ),
@@ -608,11 +629,24 @@ Future<void> _showEditExpensesPopup() async {
                         flex: 2,
                         child: TextField(
                           controller: nameCtrl,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             hintText: 'Name',
-                            border: UnderlineInputBorder(),
+                            hintStyle: TextStyle(
+                              color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? const Color(0xFF404040) : const Color(0xFFD0D0D0),
+                              ),
+                            ),
+                            filled: true,
+                            fillColor: isDark ? const Color(0xFF2D2D30) : const Color(0xFFF8F8F8),
                             isDense: true,
-                            contentPadding: EdgeInsets.symmetric(vertical: 4),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                          ),
+                          style: TextStyle(
+                            color: isDark ? const Color(0xFFCCCCCC) : Colors.black87,
                           ),
                           onChanged: (_) => setStateDialog(() {}),
                           onSubmitted: (_) => canAddExpense() ? addExpense() : null,
@@ -623,11 +657,24 @@ Future<void> _showEditExpensesPopup() async {
                         flex: 1,
                         child: TextField(
                           controller: amountCtrl,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             hintText: 'Amount',
-                            border: UnderlineInputBorder(),
+                            hintStyle: TextStyle(
+                              color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? const Color(0xFF404040) : const Color(0xFFD0D0D0),
+                              ),
+                            ),
+                            filled: true,
+                            fillColor: isDark ? const Color(0xFF2D2D30) : const Color(0xFFF8F8F8),
                             isDense: true,
-                            contentPadding: EdgeInsets.symmetric(vertical: 4),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                          ),
+                          style: TextStyle(
+                            color: isDark ? const Color(0xFFCCCCCC) : Colors.black87,
                           ),
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           onChanged: (_) => setStateDialog(() {}),
