@@ -112,7 +112,8 @@ class _TimeEntryCardState extends State<TimeEntryCard>
 
     Map<String, dynamic> tempExpenses = Map<String, dynamic>.from(_expenses);
     bool tempPerDiem = tempExpenses.containsKey('Per diem');
-    Color primaryColor = Colors.blue;
+    final appColors = Theme.of(context).extension<AppColors>()!;
+    Color primaryColor = appColors.primaryBlue;
 
     // CHECK for Per Diem in any log for this day!
     final d = DateFormat('yyyy-MM-dd').format(widget.selectedDay);
@@ -289,7 +290,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
-                            backgroundColor: app.primaryBlue,
+                            backgroundColor: primaryColor,
                             foregroundColor: Colors.white,
                             elevation: 0,
                             shape: RoundedRectangleBorder(

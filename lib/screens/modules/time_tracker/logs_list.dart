@@ -499,7 +499,8 @@ Future<void> _showEditExpensesPopup() async {
   bool tempPerDiem = tempExpenses.containsKey('Per diem');
   String? errorMsg;
 
-  Color primaryColor = Colors.blue;
+  final dialogAppColors = Theme.of(context).extension<AppColors>()!;
+  Color primaryColor = dialogAppColors.primaryBlue;
 
   final bool perDiemUsedElsewhere = widget.perDiemLogId != null && widget.perDiemLogId != widget.logId;
   final bool perDiemAvailableHere = widget.perDiemLogId == null || widget.perDiemLogId == widget.logId;
@@ -654,7 +655,7 @@ Future<void> _showEditExpensesPopup() async {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
-                            backgroundColor: appColors.primaryBlue,
+                            backgroundColor: primaryColor,
                             foregroundColor: Colors.white,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
