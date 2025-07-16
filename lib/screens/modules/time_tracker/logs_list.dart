@@ -600,7 +600,11 @@ Future<void> _showEditExpensesPopup() async {
   setState(() {
     _dialogOpen = false;
     if (result != null) {
+      print('DEBUG: Updating expenses from dialog: $result');
       expenses = result;
+      print('DEBUG: Expenses after update: $expenses');
+    } else {
+      print('DEBUG: No result from expense dialog');
     }
   });
 }
@@ -780,17 +784,28 @@ Future<void> _showEditExpensesPopup() async {
               _iconBtn(Icons.save, widget.appColors.green, () async {
                 if (_saving) return;
                 setState(() => _saving = true);
-                await widget.onSave(
-                  startCtrl.text,
-                  endCtrl.text,
-                  noteCtrl.text,
-                  selectedProjectId ?? '',
-                  expenses,
-                );
-                setState(() {
-                  _saving = false;
-                });
-                widget.setEditingState(widget.logId, false);
+                try {
+                  print('DEBUG: Saving expenses: $expenses');
+                  await widget.onSave(
+                    startCtrl.text,
+                    endCtrl.text,
+                    noteCtrl.text,
+                    selectedProjectId ?? '',
+                    expenses,
+                  );
+                  print('DEBUG: Save completed successfully');
+                  widget.setEditingState(widget.logId, false);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Changes saved successfully!'), backgroundColor: Colors.green),
+                  );
+                } catch (e) {
+                  print('DEBUG: Save failed with error: $e');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Save failed: $e'), backgroundColor: Colors.red),
+                  );
+                } finally {
+                  setState(() => _saving = false);
+                }
               }),
               const SizedBox(width: 8),
               _iconBtn(Icons.cancel, widget.appColors.orange,
