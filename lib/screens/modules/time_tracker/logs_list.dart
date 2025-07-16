@@ -374,16 +374,16 @@ class _LogEditRowState extends State<_LogEditRow>
       selectedProjectId = null;
     }
     
-    final currentExpenses = widget.getExpenses(widget.logId, widget.expensesMap);
-    print('DEBUG: Widget initialized with expenses: $currentExpenses');
+    final initExpenses = widget.getExpenses(widget.logId, widget.expensesMap);
+    print('DEBUG: Widget initialized with expenses: $initExpenses');
   }
 
   @override
   void didUpdateWidget(_LogEditRow oldWidget) {
     super.didUpdateWidget(oldWidget);
     // Expenses are now managed at parent level, no need to update here
-    final currentExpenses = widget.getExpenses(widget.logId, widget.expensesMap);
-    print('DEBUG: Widget updated - current expenses: $currentExpenses');
+    final updatedExpenses = widget.getExpenses(widget.logId, widget.expensesMap);
+    print('DEBUG: Widget updated - current expenses: $updatedExpenses');
   }
 
   @override
@@ -622,8 +622,7 @@ Future<void> _showEditExpensesPopup() async {
             actions: [
               TextButton(
                 onPressed: () {
-                  final currentExpenses = widget.getExpenses(widget.logId, widget.expensesMap);
-                  print('DEBUG: Cancel button pressed - expenses remain: $currentExpenses');
+                  print('DEBUG: Cancel button pressed - expenses remain: ${widget.getExpenses(widget.logId, widget.expensesMap)}');
                   Navigator.pop(context);
                 },
                 child: Text('Cancel', style: TextStyle(color: primaryColor, fontSize: 16)),
@@ -662,8 +661,7 @@ Future<void> _showEditExpensesPopup() async {
   print('DEBUG: Dialog result received: $result');
   
   // Expenses should already be updated at parent level
-  final currentExpenses = widget.getExpenses(widget.logId, widget.expensesMap);
-  print('DEBUG: Current expenses after dialog: $currentExpenses');
+  print('DEBUG: Current expenses after dialog: ${widget.getExpenses(widget.logId, widget.expensesMap)}');
   
   setState(() {
     _dialogOpen = false;
@@ -777,13 +775,13 @@ Future<void> _showEditExpensesPopup() async {
       );
     }
 
-    final currentExpenses = widget.getExpenses(widget.logId, widget.expensesMap);
+    final expensesToDisplay = widget.getExpenses(widget.logId, widget.expensesMap);
     final List<String> currExpenseLines = [
-      for (var entry in currentExpenses.entries)
+      for (var entry in expensesToDisplay.entries)
         if (entry.key != 'Per diem')
           '${entry.key} ${(entry.value as num).toStringAsFixed(2)} CHF',
-      if (currentExpenses.containsKey('Per diem'))
-        'Per diem ${(currentExpenses['Per diem'] as num).toStringAsFixed(2)} CHF',
+      if (expensesToDisplay.containsKey('Per diem'))
+        'Per diem ${(expensesToDisplay['Per diem'] as num).toStringAsFixed(2)} CHF',
     ];
 
     return Column(
@@ -848,15 +846,15 @@ Future<void> _showEditExpensesPopup() async {
                 if (_saving) return;
                 setState(() => _saving = true);
                 try {
-                  final currentExpenses = widget.getExpenses(widget.logId, widget.expensesMap);
-                  print('DEBUG: About to save - expenses variable: $currentExpenses');
-                  print('DEBUG: Saving expenses: $currentExpenses');
+                  final expensesToSave = widget.getExpenses(widget.logId, widget.expensesMap);
+                  print('DEBUG: About to save - expenses variable: $expensesToSave');
+                  print('DEBUG: Saving expenses: $expensesToSave');
                   await widget.onSave(
                     startCtrl.text,
                     endCtrl.text,
                     noteCtrl.text,
                     selectedProjectId ?? '',
-                    currentExpenses,
+                    expensesToSave,
                   );
                   print('DEBUG: Save completed successfully');
                   widget.setEditingState(widget.logId, false);
