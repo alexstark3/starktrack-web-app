@@ -398,8 +398,6 @@ class _LogEditRowState extends State<_LogEditRow>
     } else {
       selectedProjectId = null;
     }
-    
-    final initExpenses = widget.getExpenses(widget.logId, widget.expensesMap);
   }
 
   @override
@@ -425,7 +423,7 @@ class _LogEditRowState extends State<_LogEditRow>
     final currentNote = widget.getNote(widget.logId, widget.note);
     final ctrl = TextEditingController(text: currentNote);
     
-    final res = await showDialog<String>(
+    await showDialog<String>(
       context: context,
       useRootNavigator: false,  // <-- Use local navigator for mobile compatibility
       builder: (ctx) => AlertDialog(
