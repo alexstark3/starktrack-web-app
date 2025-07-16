@@ -382,7 +382,7 @@ Future<void> _showEditExpensesPopup() async {
 
   final result = await showDialog<Map<String, dynamic>>(
     context: context,
-    barrierDismissible: true,            // Allow tap-away to close
+    barrierDismissible: false,           // Disable tap-away to close for mobile
     useRootNavigator: true,              // Always use root navigator
     builder: (dialogCtx) {
       return StatefulBuilder(
@@ -551,9 +551,7 @@ Future<void> _showEditExpensesPopup() async {
             actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             actions: [
               TextButton(
-                onPressed: () {
-                  Navigator.of(dialogCtx).pop(null);  // Return null on cancel
-                },
+                onPressed: () => Navigator.pop(context),
                 child: Text('Cancel', style: TextStyle(color: primaryColor, fontSize: 16)),
               ),
               ElevatedButton(
@@ -564,9 +562,7 @@ Future<void> _showEditExpensesPopup() async {
                   padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
                   textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-                onPressed: () {
-                  Navigator.of(dialogCtx).pop(Map<String, dynamic>.from(tempExpenses));
-                },
+                onPressed: () => Navigator.pop(context, Map<String, dynamic>.from(tempExpenses)),
                 child: const Text('Save'),
               ),
             ],
