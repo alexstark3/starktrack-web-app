@@ -674,7 +674,7 @@ class _AdminPanelState extends State<AdminPanel> {
               ),
               const SizedBox(height: 24),
               Expanded(
-            child: StreamBuilder<QuerySnapshot>(
+                child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('companies')
                   .doc(widget.companyId)
@@ -839,7 +839,7 @@ class _AdminPanelState extends State<AdminPanel> {
           ),
         ],
       ),
+      ),
     ),
   );
-}
 }
