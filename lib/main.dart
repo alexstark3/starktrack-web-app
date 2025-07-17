@@ -8,18 +8,17 @@ import 'theme/light_theme.dart';
 import 'theme/dark_theme.dart';
 import 'screens/auth/company_login_screen.dart';
 import 'screens/dashboard/company_dashboard_screen.dart';
-import 'config/firebase_config.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: const FirebaseOptions(
-      apiKey: FirebaseConfig.apiKey,
-      appId: FirebaseConfig.appId,
-      messagingSenderId: FirebaseConfig.messagingSenderId,
-      projectId: FirebaseConfig.projectId,
-      authDomain: FirebaseConfig.authDomain,
-      storageBucket: FirebaseConfig.storageBucket,
+      apiKey: 'AIzaSyC5zsqzKMp7v4MzlwzGTNQRD2T61ZS4FO0',
+      appId: '1:831761597377:web:86fdc3b4268b4e3944e540',
+      messagingSenderId: '831761597377',
+      projectId: 'starktracklog',
+      authDomain: 'starktracklog.firebaseapp.com',
+      storageBucket: 'starktracklog.appspot.com',
     ),
   );
 
