@@ -76,7 +76,6 @@ class CompanyTopBar extends StatelessWidget {
                   ),
                   PopupMenuDivider(
                     height: 1,
-                    color: theme.colorScheme.outlineVariant.withOpacity(0.30),
                   ),
                   PopupMenuItem(
                     value: 'settings',
