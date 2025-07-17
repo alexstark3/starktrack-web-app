@@ -181,7 +181,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
     // Project and Note filters, same style
     final projectBox = Container(
       height: kFilterHeight,
-      width: 150,
+      width: 120, // Smaller fixed width
       alignment: Alignment.centerLeft,
       decoration: pillDecoration,
       padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -199,7 +199,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
 
     final noteBox = Container(
       height: kFilterHeight,
-      width: 150,
+      width: 120, // Smaller fixed width
       alignment: Alignment.centerLeft,
       decoration: pillDecoration,
       padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -263,21 +263,18 @@ class _HistoryLogsState extends State<HistoryLogs> {
               ],
             ),
             padding: const EdgeInsets.all(16),
-            child: Column(
+            child: Wrap(
+              spacing: kFilterSpacing,
+              runSpacing: 8, // Vertical spacing between wrapped rows
               children: [
-                Row(
-                  children: [
-                    dateGroup,
-                    const SizedBox(width: kFilterSpacing),
-                    groupDropdown,
-                    const SizedBox(width: kFilterSpacing),
-                    projectBox,
-                    const SizedBox(width: kFilterSpacing),
-                    noteBox,
-                    const SizedBox(width: kFilterSpacing),
-                    refreshBtn,
-                  ],
+                dateGroup,
+                SizedBox(
+                  width: 80, // Make dropdown smaller
+                  child: groupDropdown,
                 ),
+                projectBox,
+                noteBox,
+                refreshBtn,
               ],
             ),
           ),
