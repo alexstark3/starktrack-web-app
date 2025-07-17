@@ -184,12 +184,12 @@ class _TotalsHeader extends StatelessWidget {
             }
           }
         }
-        return Row(
+        return Wrap(
+          spacing: 18,
+          runSpacing: 8,
           children: [
             Text('Total Work: ${_fmtH(totalWork)}', style: const TextStyle(fontWeight: FontWeight.w600)),
-            const SizedBox(width: 18),
             Text('Total Expenses: ${totalExpenses.toStringAsFixed(2)} CHF', style: const TextStyle(fontWeight: FontWeight.w600)),
-            const SizedBox(width: 18),
             Text('Approved: $approvedCount | Not Approved: $notApprovedCount', style: const TextStyle(fontSize: 13, color: Colors.grey)),
           ],
         );
