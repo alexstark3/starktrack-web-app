@@ -28,7 +28,6 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Container(
       color: colors.dashboardBackground,
@@ -36,19 +35,14 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
         children: [
           // --- Tab bar ---
           Padding(
-            padding: const EdgeInsets.only(top: 12, left: 24, right: 24), // Keep original left padding
+            padding: const EdgeInsets.only(top: 12, left: 52, right: 24), // Align with white card content (24 + 28 = 52)
             child: LayoutBuilder(
               builder: (context, constraints) {
-                // Check if we have enough space for horizontal layout
-                final tabWidth = 120.0; // Approximate width per tab
-                final totalTabWidth = tabWidth * 3 + 16; // 3 tabs + spacing
-                final useHorizontalLayout = constraints.maxWidth > totalTabWidth;
-                
                 return SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      const SizedBox(width: 28), // Align with white card content
                       // Members tab
                       _TeamTab(
                         icon: Icons.group,
@@ -113,21 +107,10 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                           : Colors.white,
                         borderRadius: const BorderRadius.all(Radius.circular(12)),
                         boxShadow: Theme.of(context).brightness == Brightness.light ? [
-                          // Only bottom and side shadows, no top shadow
                           const BoxShadow(
                             color: Colors.black12,
                             blurRadius: 6,
-                            offset: Offset(0, 4), // Only downward shadow
-                          ),
-                          const BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 6,
-                            offset: Offset(-2, 0), // Left shadow
-                          ),
-                          const BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 6,
-                            offset: Offset(2, 0), // Right shadow
+                            offset: Offset(0, 2),
                           ),
                         ] : null,
                       ),
