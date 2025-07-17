@@ -279,9 +279,9 @@ class _HistoryLogsState extends State<HistoryLogs> {
                         width: 80,
                         child: groupDropdown,
                       ),
+                      refreshBtn,
                       projectBox,
                       noteBox,
-                      refreshBtn,
                     ],
                   );
                 } else {
@@ -290,13 +290,16 @@ class _HistoryLogsState extends State<HistoryLogs> {
                     children: [
                       dateGroup,
                       const SizedBox(width: kFilterSpacing),
-                      groupDropdown,
+                      SizedBox(
+                        width: 80,
+                        child: groupDropdown,
+                      ),
+                      const SizedBox(width: kFilterSpacing),
+                      refreshBtn,
                       const SizedBox(width: kFilterSpacing),
                       projectBox,
                       const SizedBox(width: kFilterSpacing),
                       noteBox,
-                      const SizedBox(width: kFilterSpacing),
-                      refreshBtn,
                     ],
                   );
                 }
