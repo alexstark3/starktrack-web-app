@@ -181,7 +181,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
     // Project and Note filters, same style
     final projectBox = Container(
       height: kFilterHeight,
-      width: 120, // Smaller fixed width
+      width: 150, // Original width for desktop
       alignment: Alignment.centerLeft,
       decoration: pillDecoration,
       padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -199,7 +199,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
 
     final noteBox = Container(
       height: kFilterHeight,
-      width: 120, // Smaller fixed width
+      width: 150, // Original width for desktop
       alignment: Alignment.centerLeft,
       decoration: pillDecoration,
       padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -263,19 +263,44 @@ class _HistoryLogsState extends State<HistoryLogs> {
               ],
             ),
             padding: const EdgeInsets.all(16),
-            child: Wrap(
-              spacing: kFilterSpacing,
-              runSpacing: 8, // Vertical spacing between wrapped rows
-              children: [
-                dateGroup,
-                SizedBox(
-                  width: 80, // Make dropdown smaller
-                  child: groupDropdown,
-                ),
-                projectBox,
-                noteBox,
-                refreshBtn,
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Check if we need to wrap (when screen is too narrow)
+                final needsWrap = constraints.maxWidth < 800;
+                
+                if (needsWrap) {
+                  // Wrap layout for small screens
+                  return Wrap(
+                    spacing: kFilterSpacing,
+                    runSpacing: 8,
+                    children: [
+                      dateGroup,
+                      SizedBox(
+                        width: 80,
+                        child: groupDropdown,
+                      ),
+                      projectBox,
+                      noteBox,
+                      refreshBtn,
+                    ],
+                  );
+                } else {
+                  // Original single row layout for larger screens
+                  return Row(
+                    children: [
+                      dateGroup,
+                      const SizedBox(width: kFilterSpacing),
+                      groupDropdown,
+                      const SizedBox(width: kFilterSpacing),
+                      projectBox,
+                      const SizedBox(width: kFilterSpacing),
+                      noteBox,
+                      const SizedBox(width: kFilterSpacing),
+                      refreshBtn,
+                    ],
+                  );
+                }
+              },
             ),
           ),
           const SizedBox(height: 20), // Add spacing between search card and list
