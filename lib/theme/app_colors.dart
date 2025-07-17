@@ -9,11 +9,14 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color red;
   final Color dashboardBackground;
   final Color textColor;
-  final Color backgroundLight;
+  final Color backgroundDark;
   final Color success;
   final Color error;
   final Color whiteTextOnBlue;
   final Color orange;
+  final Color sideMenuLight;
+  final Color sideMenuDark;
+  final Color cardColorDark;
 
   const AppColors({
     required this.primaryBlue,
@@ -24,11 +27,14 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.red,
     required this.dashboardBackground,
     required this.textColor,
-    required this.backgroundLight,
+    required this.backgroundDark,
     required this.success,
     required this.error,
     required this.whiteTextOnBlue,
     required this.orange,
+    required this.sideMenuLight,
+    required this.sideMenuDark,
+    required this.cardColorDark,
   });
 
   @override
@@ -41,11 +47,14 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? red,
     Color? dashboardBackground,
     Color? textColor,
-    Color? backgroundLight,
+    Color? backgroundDark,
     Color? success,
     Color? error,
     Color? whiteTextOnBlue,
     Color? orange,
+    Color? sideMenuLight,
+    Color? sideMenuDark,
+    Color? cardColorDark,
   }) {
     return AppColors(
       primaryBlue: primaryBlue ?? this.primaryBlue,
@@ -56,11 +65,14 @@ class AppColors extends ThemeExtension<AppColors> {
       red: red ?? this.red,
       dashboardBackground: dashboardBackground ?? this.dashboardBackground,
       textColor: textColor ?? this.textColor,
-      backgroundLight: backgroundLight ?? this.backgroundLight,
+      backgroundDark: backgroundDark ?? this.backgroundDark,
       success: success ?? this.success,
       error: error ?? this.error,
       whiteTextOnBlue: whiteTextOnBlue ?? this.whiteTextOnBlue,
       orange: orange ?? this.orange,
+      sideMenuLight: sideMenuLight ?? this.sideMenuLight,
+      sideMenuDark: sideMenuDark ?? this.sideMenuDark,
+      cardColorDark: cardColorDark ?? this.cardColorDark,
     );
   }
 
@@ -76,11 +88,14 @@ class AppColors extends ThemeExtension<AppColors> {
       red: Color.lerp(red, other.red, t)!,
       dashboardBackground: Color.lerp(dashboardBackground, other.dashboardBackground, t)!,
       textColor: Color.lerp(textColor, other.textColor, t)!,
-      backgroundLight: Color.lerp(backgroundLight, other.backgroundLight, t)!,
+      backgroundDark: Color.lerp(backgroundDark, other.backgroundDark, t)!,
       success: Color.lerp(success, other.success, t)!,
       error: Color.lerp(error, other.error, t)!,
       whiteTextOnBlue: Color.lerp(whiteTextOnBlue, other.whiteTextOnBlue, t)!,
       orange: Color.lerp(orange, other.orange, t)!,
+      sideMenuLight: Color.lerp(sideMenuLight, other.sideMenuLight, t)!,
+      sideMenuDark: Color.lerp(sideMenuDark, other.sideMenuDark, t)!,
+      cardColorDark: Color.lerp(cardColorDark, other.cardColorDark, t)!,
     );
   }
 
@@ -94,11 +109,14 @@ class AppColors extends ThemeExtension<AppColors> {
     red: Color(0xFFD76C6C),
     dashboardBackground: Color(0xFFF3F3F7),
     textColor: Color.fromRGBO(0, 0, 0, 1),
-    backgroundLight: Color(0xFFEAEAEB),
+    backgroundDark: Color(0xFFEAEAEB),
     success: Color(0xFF67C187),
     error: Color(0xFFD76C6C),
     whiteTextOnBlue: Colors.white,
     orange: Color(0xFFFF9800),
+    sideMenuLight: Color(0xFFFFFFFF), // Light theme side menu - white
+    sideMenuDark: Color(0xFFF3F3F7),  // Not used in light theme but required
+    cardColorDark: Color(0xFFFFFFFF), // Light theme uses white cards
   );
 
   static const AppColors dark = AppColors(
@@ -110,10 +128,13 @@ class AppColors extends ThemeExtension<AppColors> {
     red: Color(0xFFD76C6C),
     dashboardBackground: Color(0xFF1E1E1E),  // VS Code background
     textColor: Color(0xFFCCCCCC),    // VS Code primary text (off-white)
-    backgroundLight: Color(0xFF252526),      // VS Code sidebar
+    backgroundDark: Color(0xFF252526),      // VS Code sidebar
     success: Color(0xFF67C187),
     error: Color(0xFFD76C6C),
     whiteTextOnBlue: Color(0xFFCCCCCC),      // Consistent with textColor
     orange: Color(0xFFFF9800),
+    sideMenuLight: Color(0xFF252526), // Not used in dark theme but required
+    sideMenuDark: Color(0xFF1E1E1E),  // VS Code side menu color
+    cardColorDark: Color(0xFF191919), // Dark card color matching logs
   );
 }

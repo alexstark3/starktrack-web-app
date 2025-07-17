@@ -40,7 +40,7 @@ class _TodayLineState extends State<TodayLine> {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          color: isDark ? const Color(0xFF2D2D30) : theme.cardColor,
+          color: isDark ? appColors.cardColorDark : theme.cardColor,
           border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : null,
           boxShadow: isDark ? null : [
             BoxShadow(

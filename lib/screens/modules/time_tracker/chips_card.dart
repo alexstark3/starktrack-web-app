@@ -27,7 +27,7 @@ class ChipsCard extends StatelessWidget {
 
     // Solid colors for dark theme
     final cardColor = isDark 
-      ? const Color(0xFF2D2D30)
+      ? appColors.cardColorDark
       : Theme.of(context).cardColor;
 
     final chipBorder = Border.all(

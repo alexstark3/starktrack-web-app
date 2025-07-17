@@ -144,78 +144,19 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
         children: [
           // --- Top section: Project details
           Padding(
-            padding: const EdgeInsets.only(left: 40, right: 40, top: 38, bottom: 10),
-            child: Row(
+            padding: const EdgeInsets.only(left: 0, right: 0, top: 38, bottom: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        projectName.isNotEmpty ? projectName : 'No Project Name',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: colors.primaryBlue,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      if (projectId.isNotEmpty)
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Project ID: ',
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                            Expanded(child: Text(projectId, maxLines: null, softWrap: true)),
-                          ],
-                        ),
-                      if (addressString.isNotEmpty)
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Address: ',
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                            Expanded(child: Text(addressString, maxLines: null, softWrap: true)),
-                          ],
-                        ),
-                      if (clientName.toString().isNotEmpty) ...[
-                        const SizedBox(height: 10),
-                        Text('Client Details', style: TextStyle(fontWeight: FontWeight.bold, color: colors.primaryBlue)),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Client: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                            Expanded(child: Text(clientName.toString(), maxLines: null, softWrap: true)),
-                          ],
-                        ),
-                        if (contactPerson.isNotEmpty)
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Contact Person: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                              Expanded(child: Text(contactPerson, maxLines: null, softWrap: true)),
-                            ],
-                          ),
-                        if (phone.toString().isNotEmpty)
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Phone: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                              Expanded(child: Text(phone.toString(), maxLines: null, softWrap: true)),
-                            ],
-                          ),
-                        if (email.toString().isNotEmpty)
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Email: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                              Expanded(child: Text(email.toString(), maxLines: null, softWrap: true)),
-                            ],
-                          ),
-                      ]
-                    ],
+                Text(
+                  projectName.isNotEmpty ? projectName : 'No Project Name',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: colors.primaryBlue,
                   ),
                 ),
+                const SizedBox(height: 10),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colors.primaryBlue,
@@ -225,14 +166,68 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                   onPressed: _showEditDialog,
                   child: const Text('Edit'),
                 ),
+                const SizedBox(height: 10),
+                if (projectId.isNotEmpty)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Project ID: ',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      Expanded(child: Text(projectId, maxLines: null, softWrap: true)),
+                    ],
+                  ),
+                if (addressString.isNotEmpty)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Address: ',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      Expanded(child: Text(addressString, maxLines: null, softWrap: true)),
+                    ],
+                  ),
+                if (clientName.toString().isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Text('Client Details', style: TextStyle(fontWeight: FontWeight.bold, color: colors.primaryBlue)),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Client: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                      Expanded(child: Text(clientName.toString(), maxLines: null, softWrap: true)),
+                    ],
+                  ),
+                  if (contactPerson.isNotEmpty)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Contact Person: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                        Expanded(child: Text(contactPerson, maxLines: null, softWrap: true)),
+                      ],
+                    ),
+                  if (phone.toString().isNotEmpty)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Phone: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                        Expanded(child: Text(phone.toString(), maxLines: null, softWrap: true)),
+                      ],
+                    ),
+                  if (email.toString().isNotEmpty)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Email: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                        Expanded(child: Text(email.toString(), maxLines: null, softWrap: true)),
+                      ],
+                    ),
+                ]
               ],
             ),
           ),
           // --- Sessions and totals
           Expanded(
             child: Padding(
-              // Make enough space for shadow to be visible
-              padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 0),
+              // Remove horizontal padding to match other lists
+              padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
               child: FutureBuilder<List<Map<String, dynamic>>>(
                 future: _logsFuture,
                 builder: (context, snapshot) {
@@ -340,19 +335,30 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                       // Totals
                       Padding(
                         padding: const EdgeInsets.only(bottom: 10),
-                        child: Row(
+                        child: Wrap(
+                          spacing: 24,
+                          runSpacing: 8,
                           children: [
-                            Text(
-                              'Total work: ',
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Total work: ',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                Text('${(totalMinutes / 60).floor()}h ${(totalMinutes % 60).toString().padLeft(2, '0')}min'),
+                              ],
                             ),
-                            Text('${(totalMinutes / 60).floor()}h ${(totalMinutes % 60).toString().padLeft(2, '0')}min'),
-                            const SizedBox(width: 24),
-                            Text(
-                              'Total expenses: ',
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Total expenses: ',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                Text('${totalExpenses.toStringAsFixed(2)} CHF'),
+                              ],
                             ),
-                            Text('${totalExpenses.toStringAsFixed(2)} CHF'),
                           ],
                         ),
                       ),
@@ -396,7 +402,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                               margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
                               decoration: BoxDecoration(
                                 color: Theme.of(context).brightness == Brightness.dark 
-                                  ? const Color(0xFF2D2D30) 
+                                  ? colors.cardColorDark 
                                   : Colors.white,
                                 borderRadius: BorderRadius.circular(10),
                                 border: Theme.of(context).brightness == Brightness.dark 
@@ -416,29 +422,32 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // First row: Name
+                                    // Worker name with wrapping
                                     Text(
                                       'Worker: $userName',
                                       style: TextStyle(fontWeight: FontWeight.bold),
+                                      maxLines: null,
+                                      softWrap: true,
                                     ),
-                                    // Second row: Date on left, then Start, End, Minutes
-                                    Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                    const SizedBox(height: 4),
+                                    // Date on its own line, left aligned
+                                    Text(
+                                      formattedDate,
+                                      style: TextStyle(
+                                        color: colors.primaryBlue,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    // Time line starting with Start
+                                    Wrap(
+                                      spacing: 12,
+                                      runSpacing: 4,
                                       children: [
-                                        Text(
-                                          formattedDate,
-                                          style: TextStyle(
-                                            color: colors.primaryBlue,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 18),
                                         Text('Start: ', style: TextStyle(fontWeight: FontWeight.bold)),
                                         Text(start),
-                                        const SizedBox(width: 12),
                                         Text('End: ', style: TextStyle(fontWeight: FontWeight.bold)),
                                         Text(finish),
-                                        const SizedBox(width: 12),
                                         Text('Minutes: ', style: TextStyle(fontWeight: FontWeight.bold)),
                                         Text('${duration ?? ''}'),
                                       ],
@@ -446,17 +455,16 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                                     if (expenseStr.isNotEmpty)
                                       Padding(
                                         padding: const EdgeInsets.only(top: 4.0),
-                                        child: Row(
+                                        child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text('Expenses: ',
                                                 style: TextStyle(fontWeight: FontWeight.bold)),
-                                            Expanded(
-                                              child: Text(
-                                                expenseStr,
-                                                maxLines: null,
-                                                softWrap: true,
-                                              ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              expenseStr,
+                                              maxLines: null,
+                                              softWrap: true,
                                             ),
                                           ],
                                         ),
@@ -559,7 +567,7 @@ class _EditProjectDialogState extends State<EditProjectDialog> {
     final colors = Theme.of(context).extension<AppColors>()!;
     return Dialog(
       backgroundColor: Theme.of(context).brightness == Brightness.dark 
-        ? const Color(0xFF2D2D30) 
+        ? colors.cardColorDark 
         : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),

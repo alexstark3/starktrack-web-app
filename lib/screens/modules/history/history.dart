@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import '../../../theme/app_colors.dart';
 
 const double kFilterHeight = 38;
 const double kFilterRadius = 9;
@@ -47,13 +48,15 @@ class _HistoryLogsState extends State<HistoryLogs> {
         .collection('all_logs')
         .orderBy('begin', descending: true);
 
+    final appColors = Theme.of(context).extension<AppColors>()!;
+    
     BoxDecoration pillDecoration = BoxDecoration(
       border: Border.all(
         color: isDark ? Colors.white24 : Colors.black26, 
         width: 1
       ),
       color: isDark 
-        ? const Color(0xFF2D2D30)
+        ? appColors.cardColorDark
         : Colors.white,
       borderRadius: BorderRadius.circular(10),
       boxShadow: isDark ? null : [
@@ -245,14 +248,17 @@ class _HistoryLogsState extends State<HistoryLogs> {
       ),
     );
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: Column(
+    return Container(
+      color: appColors.backgroundDark,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        child: Column(
         children: [
           // Search filters
           Container(
+            width: double.infinity, // Make it stretch full width like the list
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF2D2D30) : Colors.white,
+              color: isDark ? appColors.cardColorDark : Colors.white,
               borderRadius: BorderRadius.circular(12),
               boxShadow: isDark ? null : [
                 BoxShadow(
@@ -467,13 +473,13 @@ class _HistoryLogsState extends State<HistoryLogs> {
                     return Card(
                       margin: EdgeInsets.zero,
                       elevation: isDark ? 0 : 4,
-                      color: isDark ? const Color(0xFF2D2D30) : Colors.white,
+                      color: isDark ? appColors.cardColorDark : Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF2D2D30) : Colors.white,
+                          color: isDark ? appColors.cardColorDark : Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: isDark ? null : [
                             BoxShadow(
@@ -575,9 +581,15 @@ class _HistoryLogsState extends State<HistoryLogs> {
                             // Blue bar with group totals
                             Container(
                               width: double.infinity,
-                              color: isDark 
-                                ? theme.colorScheme.primary.withOpacity(0.2)
-                                : theme.colorScheme.primary.withOpacity(0.1),
+                              decoration: BoxDecoration(
+                                color: isDark 
+                                  ? theme.colorScheme.primary.withOpacity(0.2)
+                                  : theme.colorScheme.primary.withOpacity(0.1),
+                                borderRadius: const BorderRadius.only(
+                                  bottomLeft: Radius.circular(12),
+                                  bottomRight: Radius.circular(12),
+                                ),
+                              ),
                               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -610,7 +622,8 @@ class _HistoryLogsState extends State<HistoryLogs> {
           ),
         ],
       ),
-    );
+    ),
+  );
   }
 }
 

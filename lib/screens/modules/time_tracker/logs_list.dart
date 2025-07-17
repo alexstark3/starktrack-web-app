@@ -102,14 +102,7 @@ class _LogsListState extends State<LogsList> {
         .where('sessionDate', isEqualTo: sessionDate)
         .orderBy('begin');
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: isDark 
-          ? const Color(0xFF1E1E1E) 
-          : const Color(0xFFFFFFFF),
-      ),
-      child: StreamBuilder<QuerySnapshot>(
+    return StreamBuilder<QuerySnapshot>(
         stream: logsRef.snapshots(),
         builder: (context, snap) {
           if (snap.connectionState == ConnectionState.waiting) {
@@ -210,7 +203,7 @@ class _LogsListState extends State<LogsList> {
                 margin: const EdgeInsets.symmetric(vertical: 4),
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    color: isDark ? const Color(0xFF2D2D30) : theme.cardColor,
+                    color: isDark ? appColors.cardColorDark : Colors.white,
                     border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : null,
                     boxShadow: isDark ? null : [
                       BoxShadow(
@@ -293,8 +286,7 @@ class _LogsListState extends State<LogsList> {
             ),
           );
         },
-      ),
-    );
+      );
   }
 
   String _formatBreak(DateTime from, DateTime to, Duration d) {
@@ -519,6 +511,7 @@ Future<void> _showEditExpensesPopup() async {
       return StatefulBuilder(
         builder: (context, setStateDialog) {
           final isDark = Theme.of(context).brightness == Brightness.dark;
+          final appColors = Theme.of(context).extension<AppColors>()!;
           
           bool canAddExpense() {
             final name = nameCtrl.text.trim();
@@ -643,7 +636,7 @@ Future<void> _showEditExpensesPopup() async {
                               ),
                             ),
                             filled: true,
-                            fillColor: isDark ? const Color(0xFF2D2D30) : const Color(0xFFF8F8F8),
+                            fillColor: isDark ? appColors.cardColorDark : const Color(0xFFF8F8F8),
                             isDense: true,
                             contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                           ),
@@ -671,7 +664,7 @@ Future<void> _showEditExpensesPopup() async {
                               ),
                             ),
                             filled: true,
-                            fillColor: isDark ? const Color(0xFF2D2D30) : const Color(0xFFF8F8F8),
+                            fillColor: isDark ? appColors.cardColorDark : const Color(0xFFF8F8F8),
                             isDense: true,
                             contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                           ),
@@ -965,7 +958,7 @@ Future<void> _showEditExpensesPopup() async {
                     border: Border.all(color: widget.borderColor),
                     borderRadius: BorderRadius.circular(8),
                     color: Theme.of(context).brightness == Brightness.dark 
-                      ? const Color(0xFF2D2D30)
+                      ? widget.appColors.cardColorDark
                       : const Color(0xFFF0F0F0),
                   ),
                   child: Builder(

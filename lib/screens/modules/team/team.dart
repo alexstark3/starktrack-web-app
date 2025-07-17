@@ -30,7 +30,7 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
     final colors = Theme.of(context).extension<AppColors>()!;
     
     return Container(
-      color: colors.dashboardBackground,
+      color: colors.backgroundDark,
       child: Column(
         children: [
           // --- Tab bar ---
@@ -105,7 +105,7 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                     child: Container(
                       decoration: BoxDecoration(
                         color: Theme.of(context).brightness == Brightness.dark 
-                          ? const Color(0xFF252526) 
+                          ? colors.cardColorDark 
                           : Colors.white,
                         borderRadius: const BorderRadius.all(Radius.circular(12)),
                         boxShadow: Theme.of(context).brightness == Brightness.light ? [
@@ -224,8 +224,8 @@ class _TeamTabState extends State<_TeamTab> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           decoration: BoxDecoration(
             color: widget.isSelected 
-              ? (isDark ? const Color(0xFF252526) : Colors.white)
-              : (_isHovered && isDark ? const Color(0xFF252526) : (isDark ? widget.colors.dashboardBackground : widget.colors.lightGray)),
+              ? (isDark ? widget.colors.cardColorDark : Colors.white)
+              : (_isHovered && isDark ? widget.colors.cardColorDark : (isDark ? widget.colors.dashboardBackground : widget.colors.lightGray)),
             borderRadius: BorderRadius.vertical(
               top: const Radius.circular(6),
               bottom: Radius.circular(widget.isSelected ? 0 : 6),

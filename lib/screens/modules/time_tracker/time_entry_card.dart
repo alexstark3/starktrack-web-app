@@ -448,7 +448,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
     final isDark = theme.brightness == Brightness.dark;
 
     BoxDecoration fieldDecoration = BoxDecoration(
-      color: isDark ? const Color(0xFF2D2D30) : theme.cardColor,
+      color: isDark ? app.cardColorDark : theme.cardColor,
       borderRadius: BorderRadius.circular(12),
       border: Border.all(color: isDark ? const Color(0xFF404040) : theme.dividerColor),
       boxShadow: isDark ? null : [
@@ -546,10 +546,10 @@ class _TimeEntryCardState extends State<TimeEntryCard>
 
     return SizedBox(
       width: double.infinity,
-      child: Container(
+              child: Container(
                   decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            color: isDark ? const Color(0xFF2D2D30) : theme.cardColor,
+            color: isDark ? app.cardColorDark : theme.cardColor,
             border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : null,
             boxShadow: isDark ? null : [
               BoxShadow(
@@ -599,7 +599,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: app.primaryBlue,
-                          foregroundColor: theme.colorScheme.onPrimary,
+                          foregroundColor: Colors.white,
                           textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kEntryRadius)),
                           minimumSize: const Size(60, kEntryHeight),

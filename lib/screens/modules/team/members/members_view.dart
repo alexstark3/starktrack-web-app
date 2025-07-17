@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../../../../theme/app_colors.dart';
+import 'add_new_session.dart';
 
 class MemberHistoryScreen extends StatefulWidget {
   final String companyId;
@@ -37,7 +38,8 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
         // Main header with name and working status icon
         Padding(
           padding: const EdgeInsets.only(bottom: 8, top: 10, left: 0),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 userName,
@@ -47,13 +49,43 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                   fontSize: 22,
                 ),
               ),
-              const SizedBox(width: 18),
+              const SizedBox(height: 4),
               _StatusIcon(companyId: widget.companyId, userId: userId),
             ],
           ),
         ),
         _TotalsHeader(companyId: widget.companyId, userId: userId),
         const SizedBox(height: 10),
+
+        // Add New Session button
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            ElevatedButton.icon(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AddNewSessionDialog(
+                    companyId: widget.companyId,
+                    userId: userId,
+                    userName: userName,
+                    onSessionAdded: () => setState(() {}),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.add_circle_outline),
+              label: const Text('Add New Session'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colors.primaryBlue,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
 
         // -- Two separate search fields --
         Row(
@@ -237,6 +269,85 @@ class _LogsTableState extends State<_LogsTable> {
     });
   }
 
+  Future<bool?> _showDeleteConfirmation(BuildContext context, Map<String, dynamic> sessionData) async {
+    final colors = Theme.of(context).extension<AppColors>()!;
+    final begin = (sessionData['begin'] as Timestamp?)?.toDate();
+    final end = (sessionData['end'] as Timestamp?)?.toDate();
+    final project = sessionData['project'] ?? '';
+    final sessionDate = begin != null ? DateFormat('yyyy-MM-dd').format(begin) : '';
+    final timeRange = begin != null && end != null 
+        ? '${DateFormat('HH:mm').format(begin)} - ${DateFormat('HH:mm').format(end)}'
+        : '';
+
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: colors.backgroundDark,
+        title: Text(
+          'Delete Session',
+          style: TextStyle(
+            color: colors.textColor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Are you sure you want to delete this session?',
+              style: TextStyle(color: colors.textColor),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: colors.lightGray,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (sessionDate.isNotEmpty)
+                    Text('Date: $sessionDate', style: TextStyle(color: colors.textColor)),
+                  if (timeRange.isNotEmpty)
+                    Text('Time: $timeRange', style: TextStyle(color: colors.textColor)),
+                  if (project.isNotEmpty)
+                    Text('Project: $project', style: TextStyle(color: colors.textColor)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'This action cannot be undone.',
+              style: TextStyle(
+                color: colors.red,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: colors.textColor),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colors.red,
+              foregroundColor: colors.whiteTextOnBlue,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
@@ -287,6 +398,7 @@ class _LogsTableState extends State<_LogsTable> {
             columns: const [
               DataColumn(label: Text('Approve')),
               DataColumn(label: Text('Edit')),
+              DataColumn(label: Text('Delete')),
               DataColumn(label: Text('Date')),
               DataColumn(label: Text('Start')),
               DataColumn(label: Text('End')),
@@ -359,6 +471,28 @@ class _LogsTableState extends State<_LogsTable> {
                             onSaved: widget.onAction,
                           ),
                         );
+                      },
+                    ),
+                  ),
+                  // Delete
+                  DataCell(
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      tooltip: 'Delete',
+                      onPressed: () async {
+                        final confirmed = await _showDeleteConfirmation(context, data);
+                        if (confirmed == true) {
+                          await doc.reference.delete();
+                          widget.onAction();
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Session deleted successfully'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          }
+                        }
                       },
                     ),
                   ),
