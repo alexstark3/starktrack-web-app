@@ -36,13 +36,9 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
           // --- Tab bar ---
           Padding(
             padding: const EdgeInsets.only(top: 12, left: 52, right: 24), // Align with white card content (24 + 28 = 52)
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
                       // Members tab
                       _TeamTab(
                         icon: Icons.group,
@@ -87,9 +83,6 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                       ),
                     ],
                   ),
-                );
-              },
-            ),
           ),
           
           // --- Main white area ---
