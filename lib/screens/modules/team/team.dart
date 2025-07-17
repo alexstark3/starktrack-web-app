@@ -35,54 +35,63 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
         children: [
           // --- Tab bar ---
           Padding(
-            padding: const EdgeInsets.only(top: 12, left: 52, right: 24), // Align with white card content (24 + 28 = 52)
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                      // Members tab
-                      _TeamTab(
-                        icon: Icons.group,
-                        title: 'Members',
-                        isSelected: _selectedIndex == 0,
-                        colors: colors,
-                        selectedMemberDoc: _selectedMemberDoc,
-                        onTap: () {
-                          setState(() {
-                            _selectedIndex = 0;
-                            _selectedMemberDoc = null;
-                          });
-                        },
-                      ),
-                      // Projects tab
-                      _TeamTab(
-                        icon: Icons.folder_copy_rounded,
-                        title: 'Projects',
-                        isSelected: _selectedIndex == 1,
-                        colors: colors,
-                        selectedProject: _selectedProject,
-                        onTap: () {
-                          setState(() {
-                            _selectedIndex = 1;
-                            _selectedProject = null;
-                          });
-                        },
-                      ),
-                      // Clients tab
-                      _TeamTab(
-                        icon: Icons.people_alt_rounded,
-                        title: 'Clients',
-                        isSelected: _selectedIndex == 2,
-                        colors: colors,
-                        selectedClient: _selectedClient,
-                        onTap: () {
-                          setState(() {
-                            _selectedIndex = 2;
-                            _selectedClient = null;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
+            padding: const EdgeInsets.only(top: 12, left: 40, right: 24), // Move tabs more to the left
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final showOnlyIcons = constraints.maxWidth < 600; // Show only icons on small screens
+                
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    // Members tab
+                    _TeamTab(
+                      icon: Icons.group,
+                      title: 'Members',
+                      isSelected: _selectedIndex == 0,
+                      colors: colors,
+                      selectedMemberDoc: _selectedMemberDoc,
+                      showOnlyIcon: showOnlyIcons,
+                      onTap: () {
+                        setState(() {
+                          _selectedIndex = 0;
+                          _selectedMemberDoc = null;
+                        });
+                      },
+                    ),
+                    // Projects tab
+                    _TeamTab(
+                      icon: Icons.folder_copy_rounded,
+                      title: 'Projects',
+                      isSelected: _selectedIndex == 1,
+                      colors: colors,
+                      selectedProject: _selectedProject,
+                      showOnlyIcon: showOnlyIcons,
+                      onTap: () {
+                        setState(() {
+                          _selectedIndex = 1;
+                          _selectedProject = null;
+                        });
+                      },
+                    ),
+                    // Clients tab
+                    _TeamTab(
+                      icon: Icons.people_alt_rounded,
+                      title: 'Clients',
+                      isSelected: _selectedIndex == 2,
+                      colors: colors,
+                      selectedClient: _selectedClient,
+                      showOnlyIcon: showOnlyIcons,
+                      onTap: () {
+                        setState(() {
+                          _selectedIndex = 2;
+                          _selectedClient = null;
+                        });
+                      },
+                    ),
+                                     ],
+                 );
+               },
+            ),
           ),
           
           // --- Main white area ---
@@ -174,6 +183,7 @@ class _TeamTab extends StatefulWidget {
   final DocumentSnapshot? selectedMemberDoc;
   final Map<String, dynamic>? selectedProject;
   final Map<String, dynamic>? selectedClient;
+  final bool showOnlyIcon;
   const _TeamTab({
     Key? key,
     required this.icon,
@@ -184,6 +194,7 @@ class _TeamTab extends StatefulWidget {
     this.selectedMemberDoc,
     this.selectedProject,
     this.selectedClient,
+    this.showOnlyIcon = false,
   }) : super(key: key);
 
   @override
@@ -227,6 +238,7 @@ class _TeamTabState extends State<_TeamTab> {
                 : (widget.isSelected ? null : Border.all(color: Colors.black26, width: 1)),
           ),
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 widget.icon,
@@ -235,17 +247,19 @@ class _TeamTabState extends State<_TeamTab> {
                     ? (hasSelectedContent ? widget.colors.darkGray : widget.colors.primaryBlue)
                     : widget.colors.darkGray,
               ),
-              const SizedBox(width: 8),
-              Text(
-                widget.title,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: widget.isSelected ? FontWeight.bold : FontWeight.w600,
-                  color: widget.isSelected
-                      ? (hasSelectedContent ? widget.colors.darkGray : widget.colors.primaryBlue)
-                      : widget.colors.darkGray,
+              if (!widget.showOnlyIcon) ...[
+                const SizedBox(width: 8),
+                Text(
+                  widget.title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: widget.isSelected ? FontWeight.bold : FontWeight.w600,
+                    color: widget.isSelected
+                        ? (hasSelectedContent ? widget.colors.darkGray : widget.colors.primaryBlue)
+                        : widget.colors.darkGray,
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ),
