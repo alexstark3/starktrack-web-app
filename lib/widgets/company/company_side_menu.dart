@@ -1,5 +1,6 @@
 // lib/widgets/company/company_side_menu.dart
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class SideMenuItem {
   final String label;
@@ -14,24 +15,42 @@ class SideMenuItem {
   });
 }
 
-class CompanySideMenu extends StatelessWidget {
+class CompanySideMenu extends StatefulWidget {
   final List<SideMenuItem> menuItems;
   final bool compact;
   final bool showBrand;
-  final String version; // <-- Added version param
 
   const CompanySideMenu({
     super.key,
     required this.menuItems,
     this.compact = false,
     this.showBrand = true,
-    this.version = 'Stark Track v1.528b', // <-- Default is empty
   });
+
+  @override
+  State<CompanySideMenu> createState() => _CompanySideMenuState();
+}
+
+class _CompanySideMenuState extends State<CompanySideMenu> {
+  String _appInfo = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAppInfo();
+  }
+
+  Future<void> _loadAppInfo() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    setState(() {
+      _appInfo = 'Stark Track v${packageInfo.version}';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme  = Theme.of(context);
-    final width  = compact ? 72.0 : 220.0;
+    final width  = widget.compact ? 72.0 : 220.0;
 
     return Material(
       elevation: 8,
@@ -42,12 +61,12 @@ class CompanySideMenu extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (showBrand) ...[
+            if (widget.showBrand) ...[
               const SizedBox(height: 12),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25),
                 child: Text(
-                  compact ? 'ST' : 'Stark Track',
+                  widget.compact ? 'ST' : 'Stark Track',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -65,21 +84,35 @@ class CompanySideMenu extends StatelessWidget {
             Expanded(
               child: ListView(
                 padding: EdgeInsets.zero,
-                children: menuItems
-                    .map((m) => _AnimatedMenuItem(item: m, compact: compact))
+                children: widget.menuItems
+                    .map((m) => _AnimatedMenuItem(item: m, compact: widget.compact))
                     .toList(),
               ),
             ),
-            // Version label at the bottom
-            if (version.isNotEmpty)
+            // Version and copyright at the bottom
+            if (_appInfo.isNotEmpty && !widget.compact)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Text(
-                  version,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: theme.colorScheme.onSurface.withOpacity(0.4),
-                  ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _appInfo,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '© 2025 starktrack.ch © All rights reserved.',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: theme.colorScheme.onSurface.withOpacity(0.4),
+                      ),
+                    ),
+                  ],
                 ),
               ),
           ],
