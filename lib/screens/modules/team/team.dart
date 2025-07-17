@@ -36,7 +36,7 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
         children: [
           // --- Tab bar ---
           Padding(
-            padding: const EdgeInsets.only(top: 12, left: 52, right: 24), // Align with white card content (24 + 28 = 52)
+            padding: const EdgeInsets.only(top: 12, left: 24, right: 24), // Keep original left padding
             child: LayoutBuilder(
               builder: (context, constraints) {
                 // Check if we have enough space for horizontal layout
@@ -48,6 +48,7 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
+                      const SizedBox(width: 28), // Align with white card content
                       // Members tab
                       _TeamTab(
                         icon: Icons.group,
@@ -105,17 +106,33 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                 children: [
                   Align(
                     alignment: Alignment.topCenter,
-                    child: _NoTopShadowMaterial(
-                      borderRadius: const BorderRadius.all(Radius.circular(12)),
-                      color: Theme.of(context).brightness == Brightness.dark 
-                        ? const Color(0xFF252526) 
-                        : Colors.white,
-                      elevation: Theme.of(context).brightness == Brightness.light ? 8 : 0,
-                      child: Container(
-                        padding: const EdgeInsets.fromLTRB(28, 26, 28, 26),
-                        margin: const EdgeInsets.only(top: 0),
-                        child: _buildTabContent(),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).brightness == Brightness.dark 
+                          ? const Color(0xFF252526) 
+                          : Colors.white,
+                        borderRadius: const BorderRadius.all(Radius.circular(12)),
+                        boxShadow: Theme.of(context).brightness == Brightness.light ? [
+                          // Only bottom and side shadows, no top shadow
+                          const BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 6,
+                            offset: Offset(0, 4), // Only downward shadow
+                          ),
+                          const BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 6,
+                            offset: Offset(-2, 0), // Left shadow
+                          ),
+                          const BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 6,
+                            offset: Offset(2, 0), // Right shadow
+                          ),
+                        ] : null,
                       ),
+                      padding: const EdgeInsets.fromLTRB(28, 26, 28, 26),
+                      child: _buildTabContent(),
                     ),
                   ),
                 ],
@@ -169,48 +186,7 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
   }
 }
 
-// --- Helper for shadowed white card, no shadow on top ---
-class _NoTopShadowMaterial extends StatelessWidget {
-  final Widget child;
-  final Color color;
-  final BorderRadius borderRadius;
-  final double elevation;
 
-  const _NoTopShadowMaterial({
-    required this.child,
-    required this.color,
-    required this.borderRadius,
-    this.elevation = 6,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return PhysicalShape(
-      elevation: elevation,
-      clipper: _BottomOnlyClipper(borderRadius),
-      color: color,
-      shadowColor: Colors.black12,
-      child: ClipRRect(
-        borderRadius: borderRadius,
-        child: child,
-      ),
-    );
-  }
-}
-
-class _BottomOnlyClipper extends CustomClipper<Path> {
-  final BorderRadius borderRadius;
-  _BottomOnlyClipper(this.borderRadius);
-
-  @override
-  Path getClip(Size size) {
-    return Path()
-      ..addRRect(borderRadius.toRRect(Rect.fromLTWH(0, 0, size.width, size.height)));
-  }
-
-  @override
-  bool shouldReclip(_BottomOnlyClipper oldClipper) => false;
-}
 
 // --- Team Tab Widget with isolated hover state ---
 class _TeamTab extends StatefulWidget {
