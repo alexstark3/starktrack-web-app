@@ -1,11 +1,11 @@
 {
-    "name": "starktrack",
-    "short_name": "starktrack",
+    "name": "Stark Track",
+    "short_name": "ST",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "A professional time tracking application for teams and individuals",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
