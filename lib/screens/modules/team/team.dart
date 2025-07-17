@@ -36,7 +36,7 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
         children: [
           // --- Tab bar ---
           Padding(
-            padding: const EdgeInsets.only(top: 12, left: 24, right: 24),
+            padding: const EdgeInsets.only(top: 12, left: 52, right: 24), // Align with white card content (24 + 28 = 52)
             child: LayoutBuilder(
               builder: (context, constraints) {
                 // Check if we have enough space for horizontal layout
@@ -271,7 +271,7 @@ class _TeamTabState extends State<_TeamTab> {
                 ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
                 : null,
             border: isDark
-                ? Border.all(color: widget.isSelected ? const Color(0xFF404040) : const Color(0xFF2A2A2A), width: 1)
+                ? (widget.isSelected ? null : Border.all(color: const Color(0xFF2A2A2A), width: 1))
                 : (widget.isSelected ? null : Border.all(color: Colors.black26, width: 1)),
           ),
           child: Row(
