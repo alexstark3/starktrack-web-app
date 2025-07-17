@@ -234,6 +234,9 @@ class _LogsListState extends State<LogsList> {
                       duration     : (begin != null && end != null)
                                       ? end.difference(begin)
                                       : Duration.zero,
+                      isApproved   : (log['approved'] ?? false) == true,
+                      isRejected   : (log['rejected'] ?? false) == true,
+                      isApprovedAfterEdit: (log['approvedAfterEdit'] ?? false) == true,
                       onDelete     : () => doc.reference.delete(),
                       onSave       : (newStart, newEnd, newNote, newProjId, newExpenses) async {
                         try {
@@ -332,6 +335,9 @@ class _LogEditRow extends StatefulWidget {
   final Function(String, String) updateNote;
   final Function(String, String) getNote;
   final Function(String) clearPendingNote;
+  final bool isApproved;
+  final bool isRejected;
+  final bool isApprovedAfterEdit;
 
   const _LogEditRow({
     Key? key,
@@ -360,6 +366,9 @@ class _LogEditRow extends StatefulWidget {
     required this.updateNote,
     required this.getNote,
     required this.clearPendingNote,
+    required this.isApproved,
+    required this.isRejected,
+    required this.isApprovedAfterEdit,
   }) : super(key: key);
 
   @override
@@ -849,9 +858,21 @@ Future<void> _showEditExpensesPopup() async {
             padding: const EdgeInsets.only(top: 10),
             child: Row(
               children: [
-                _iconBtn(Icons.edit, Colors.blue[400]!, () => widget.setEditingState(widget.logId, true)),
+                widget.isApprovedAfterEdit
+                    ? _iconBtn(Icons.verified, Colors.orange, () {}, 'Edited')
+                    : widget.isApproved
+                        ? _iconBtn(Icons.verified, Colors.green, () {}, 'Approved')
+                        : widget.isRejected
+                            ? _iconBtn(Icons.cancel, Colors.red, () {}, 'Rejected')
+                            : _iconBtn(Icons.edit, Colors.blue[400]!, () => widget.setEditingState(widget.logId, true)),
                 const SizedBox(width: 8),
-                _iconBtn(Icons.delete, Colors.red[300]!, () async {
+                widget.isApprovedAfterEdit
+                    ? _iconBtn(Icons.verified, Colors.orange, () {}, 'Edited')
+                    : widget.isApproved
+                        ? _iconBtn(Icons.verified, Colors.green, () {}, 'Approved')
+                        : widget.isRejected
+                            ? _iconBtn(Icons.cancel, Colors.red, () {}, 'Rejected')
+                            : _iconBtn(Icons.delete, Colors.red[300]!, () async {
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder: (ctx) => AlertDialog(
@@ -899,6 +920,44 @@ Future<void> _showEditExpensesPopup() async {
         _infoText('Work', '${startCtrl.text.isNotEmpty ? startCtrl.text : '--'} - ${endCtrl.text.isNotEmpty ? endCtrl.text : '--'} = ${widget.duration.inMinutes == 0
             ? '00:00h'
             : '${widget.duration.inHours.toString().padLeft(2, '0')}:${(widget.duration.inMinutes % 60).toString().padLeft(2, '0')}h'}'),
+        if (widget.isApprovedAfterEdit || widget.isApproved || widget.isRejected)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Row(
+              children: [
+                Icon(
+                  widget.isApprovedAfterEdit
+                      ? Icons.verified
+                      : widget.isApproved
+                          ? Icons.verified
+                          : Icons.cancel,
+                  color: widget.isApprovedAfterEdit
+                      ? Colors.orange
+                      : widget.isApproved
+                          ? Colors.green
+                          : Colors.red,
+                  size: 16,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  widget.isApprovedAfterEdit
+                      ? 'Approved After Edit'
+                      : widget.isApproved
+                          ? 'Approved'
+                          : 'Rejected',
+                  style: TextStyle(
+                    color: widget.isApprovedAfterEdit
+                        ? Colors.orange
+                        : widget.isApproved
+                            ? Colors.green
+                            : Colors.red,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -1061,14 +1120,14 @@ Future<void> _showEditExpensesPopup() async {
         child: Text('$label: $value', style: TextStyle(color: widget.textColor, fontSize: 16)),
       );
 
-  Widget _iconBtn(IconData i, Color c, VoidCallback? onTap) => SizedBox(
+  Widget _iconBtn(IconData i, Color c, VoidCallback? onTap, [String? tooltip]) => SizedBox(
         width: kWidthIcon,
         child: IconButton(
           icon: Icon(i, color: c),
-          tooltip: i == Icons.save ? 'Save'
+          tooltip: tooltip ?? (i == Icons.save ? 'Save'
                  : i == Icons.cancel ? 'Cancel'
                  : i == Icons.edit ? 'Edit'
-                 : 'Delete',
+                 : 'Delete'),
           onPressed: onTap,
         ),
       );

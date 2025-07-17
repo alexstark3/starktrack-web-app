@@ -87,9 +87,18 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
     final time = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(DateTime.now()),
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+          child: child!,
+        );
+      },
     );
     if (time != null) {
-      controller.text = time.format(context);
+      // Format as 24-hour time
+      final hour = time.hour.toString().padLeft(2, '0');
+      final minute = time.minute.toString().padLeft(2, '0');
+      controller.text = '$hour:$minute';
     }
   }
 

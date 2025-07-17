@@ -30,4 +30,4 @@ else
 fi
 
 echo "📦 Updated version to: $VERSION+$BUILD_NUMBER"
-echo "   (Commit count: $COMMIT_COUNT + offset: 521)" 
+echo "   (Commit count: $COMMIT_COUNT + offset: 528)" 

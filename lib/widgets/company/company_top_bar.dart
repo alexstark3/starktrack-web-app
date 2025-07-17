@@ -74,17 +74,37 @@ class CompanyTopBar extends StatelessWidget {
                       ],
                     ),
                   ),
-                  PopupMenuDivider(
+                  const PopupMenuDivider(
                     height: 1,
                   ),
                   PopupMenuItem(
                     value: 'settings',
-                    child: const Text('Settings'),
+                    child: const Row(
+                      children: [
+                        Icon(
+                          Icons.settings,
+                          color: Colors.grey,
+                          size: 20,
+                        ),
+                        SizedBox(width: 12),
+                        Text('Settings'),
+                      ],
+                    ),
                     onTap: onSettings,
                   ),
                   PopupMenuItem(
                     value: 'logout',
-                    child: const Text('Logout'),
+                    child: const Row(
+                      children: [
+                        Icon(
+                          Icons.logout,
+                          color: Colors.grey,
+                          size: 20,
+                        ),
+                        SizedBox(width: 12),
+                        Text('Log out'),
+                      ],
+                    ),
                     onTap: onLogout,
                   ),
                 ],

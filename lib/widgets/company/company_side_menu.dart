@@ -1,6 +1,7 @@
 // lib/widgets/company/company_side_menu.dart
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class SideMenuItem {
   final String label;
@@ -41,10 +42,24 @@ class _CompanySideMenuState extends State<CompanySideMenu> {
   }
 
   Future<void> _loadAppInfo() async {
-    final packageInfo = await PackageInfo.fromPlatform();
-    setState(() {
-      _appInfo = 'Stark Track v${packageInfo.version}';
-    });
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      print('PackageInfo loaded - version: "${packageInfo.version}", buildNumber: "${packageInfo.buildNumber}"'); // Debug print
+      print('Platform: ${kIsWeb ? 'Web' : 'Native'}'); // Debug print
+      
+      // Use clean build number (630) without the + prefix
+      String buildNumber = '630';
+      
+      setState(() {
+        _appInfo = 'Stark Track 1.1.$buildNumber';
+      });
+      print('Final app info: $_appInfo'); // Debug print
+    } catch (e) {
+      print('Error loading app info: $e'); // Debug print
+      setState(() {
+        _appInfo = 'Stark Track 1.1.630'; // Fallback with build number
+      });
+    }
   }
 
   @override
@@ -90,28 +105,52 @@ class _CompanySideMenuState extends State<CompanySideMenu> {
               ),
             ),
             // Version and copyright at the bottom
-            if (_appInfo.isNotEmpty && !widget.compact)
+            if (_appInfo.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      _appInfo,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    widget.compact 
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'ST',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                              ),
+                            ),
+                            Text(
+                              _appInfo.replaceAll('Stark Track ', ''),
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                              ),
+                            ),
+                          ],
+                        )
+                      : Text(
+                          _appInfo,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: theme.colorScheme.onSurface.withOpacity(0.6),
+                          ),
+                        ),
+                    if (!widget.compact) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        '© 2025 starktrack.ch\n© All rights reserved.',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: theme.colorScheme.onSurface.withOpacity(0.4),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '© 2025 starktrack.ch © All rights reserved.',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: theme.colorScheme.onSurface.withOpacity(0.4),
-                      ),
-                    ),
+                    ],
                   ],
                 ),
               ),

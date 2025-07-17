@@ -248,11 +248,9 @@ class _HistoryLogsState extends State<HistoryLogs> {
       ),
     );
 
-    return Container(
-      color: appColors.backgroundDark,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        child: Column(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: Column(
         children: [
           // Search filters
           Container(
@@ -591,24 +589,58 @@ class _HistoryLogsState extends State<HistoryLogs> {
                                 ),
                               ),
                               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Total Time: ${_formatDuration(groupTotal)}',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      color: theme.colorScheme.primary,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Total Expenses: ${expenseFormat.format(groupExpense)}',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      color: theme.colorScheme.primary,
-                                    ),
-                                  ),
-                                ],
+                              child: LayoutBuilder(
+                                builder: (context, constraints) {
+                                  // Check if we need to wrap the totals on small screens
+                                  final needsWrap = constraints.maxWidth < 400;
+                                  
+                                  if (needsWrap) {
+                                    return Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Total Time: ${_formatDuration(groupTotal)}',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                            color: theme.colorScheme.primary,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'Total Expenses: ${expenseFormat.format(groupExpense)}',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                            color: theme.colorScheme.primary,
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  } else {
+                                    return Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            'Total Time: ${_formatDuration(groupTotal)}',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                              color: theme.colorScheme.primary,
+                                            ),
+                                          ),
+                                        ),
+                                        Flexible(
+                                          child: Text(
+                                            'Total Expenses: ${expenseFormat.format(groupExpense)}',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                              color: theme.colorScheme.primary,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  }
+                                },
                               ),
                             ),
                           ],
@@ -622,8 +654,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
           ),
         ],
       ),
-    ),
-  );
+    );
   }
 }
 
