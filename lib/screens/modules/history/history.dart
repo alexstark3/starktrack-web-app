@@ -275,10 +275,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                     runSpacing: 8,
                     children: [
                       dateGroup,
-                      SizedBox(
-                        width: 80,
-                        child: groupDropdown,
-                      ),
+                      groupDropdown,
                       refreshBtn,
                       projectBox,
                       noteBox,
@@ -290,10 +287,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                     children: [
                       dateGroup,
                       const SizedBox(width: kFilterSpacing),
-                      SizedBox(
-                        width: 80,
-                        child: groupDropdown,
-                      ),
+                      groupDropdown,
                       const SizedBox(width: kFilterSpacing),
                       refreshBtn,
                       const SizedBox(width: kFilterSpacing),
