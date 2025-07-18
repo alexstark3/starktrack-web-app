@@ -72,7 +72,9 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
       final userData = userDoc.data();
       final userFirstName = userData['firstName'] ?? '';
       final userSurname = userData['surname'] ?? '';
-      final logsSnapshot = await FirebaseFirestore.instance
+      
+      // Query for sessions with projectId matching projectId or projectName
+      final logsSnapshot1 = await FirebaseFirestore.instance
           .collection('companies')
           .doc(widget.companyId)
           .collection('users')
@@ -80,15 +82,33 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
           .collection('all_logs')
           .where('projectId', isEqualTo: projectId.isNotEmpty ? projectId : projectName)
           .get();
-      for (final logDoc in logsSnapshot.docs) {
-        final logData = logDoc.data();
-        allLogs.add({
-          ...logData,
-          'userFirstName': userFirstName,
-          'userSurname': userSurname,
-          'userId': userId,
-          'logId': logDoc.id,
-        });
+      
+      // Also query for sessions with project field matching projectName (for backward compatibility)
+      final logsSnapshot2 = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(widget.companyId)
+          .collection('users')
+          .doc(userId)
+          .collection('all_logs')
+          .where('project', isEqualTo: projectName)
+          .get();
+      
+      // Combine and deduplicate results
+      final allDocs = [...logsSnapshot1.docs, ...logsSnapshot2.docs];
+      final seenIds = <String>{};
+      
+      for (final logDoc in allDocs) {
+        if (!seenIds.contains(logDoc.id)) {
+          seenIds.add(logDoc.id);
+          final logData = logDoc.data();
+          allLogs.add({
+            ...logData,
+            'userFirstName': userFirstName,
+            'userSurname': userSurname,
+            'userId': userId,
+            'logId': logDoc.id,
+          });
+        }
       }
     }
     return allLogs;

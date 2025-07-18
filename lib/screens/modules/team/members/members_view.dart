@@ -1269,6 +1269,7 @@ class _EditLogDialogState extends State<_EditLogDialog> {
               'note': _noteCtrl.text.trim(),
               'expenses': _expenses,
               'project': _projectValue,
+              'projectId': _projectValue, // Add projectId field
               'approvalNote': _approvalNote,
               'approved': false, // Set to false since this is approvedAfterEdit
               'approvedAt': FieldValue.serverTimestamp(),

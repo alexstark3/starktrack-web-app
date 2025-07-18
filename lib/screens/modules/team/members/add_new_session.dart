@@ -404,6 +404,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
         'end': Timestamp.fromDate(endDateTime),
         'duration_minutes': durationMinutes,
         'project': _projectController.text.trim(),
+        'projectId': _projectController.text.trim(), // Add projectId field
         'note': _noteController.text.trim(),
         'expenses': _expenses,
         'perDiem': hasPerDiem,
