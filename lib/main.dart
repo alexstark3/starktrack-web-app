@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'firebase_options.dart';
 import 'providers/theme_provider.dart';
 import 'theme/light_theme.dart';
 import 'theme/dark_theme.dart';
@@ -12,14 +13,7 @@ import 'screens/dashboard/company_dashboard_screen.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    options: const FirebaseOptions(
-      apiKey: 'AIzaSyC5zsqzKMp7v4MzlwzGTNQRD2T61ZS4FO0',
-      appId: '1:831761597377:web:86fdc3b4268b4e3944e540',
-      messagingSenderId: '831761597377',
-      projectId: 'starktracklog',
-      authDomain: 'starktracklog.firebaseapp.com',
-      storageBucket: 'starktracklog.appspot.com',
-    ),
+    options: DefaultFirebaseOptions.currentPlatform,
   );
 
  // print('FIREBASE PROJECT ID: ${Firebase.app().options.projectId}'); // Print the actual projectId being used

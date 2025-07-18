@@ -102,22 +102,19 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                 children: [
                   Align(
                     alignment: Alignment.topCenter,
-                    child: Container(
-                      decoration: BoxDecoration(
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.all(Radius.circular(12)),
+                      child: Material(
+                        elevation: Theme.of(context).brightness == Brightness.light ? 2 : 0,
+                        borderRadius: BorderRadius.circular(12),
                         color: Theme.of(context).brightness == Brightness.dark 
                           ? colors.cardColorDark 
                           : Colors.white,
-                        borderRadius: const BorderRadius.all(Radius.circular(12)),
-                        boxShadow: Theme.of(context).brightness == Brightness.light ? [
-                          const BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 6,
-                            offset: Offset(0, 2),
-                          ),
-                        ] : null,
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(28, 26, 28, 26),
+                          child: _buildTabContent(),
+                        ),
                       ),
-                      padding: const EdgeInsets.fromLTRB(28, 26, 28, 26),
-                      child: _buildTabContent(),
                     ),
                   ),
                 ],
@@ -225,17 +222,17 @@ class _TeamTabState extends State<_TeamTab> {
           decoration: BoxDecoration(
             color: widget.isSelected 
               ? (isDark ? widget.colors.cardColorDark : Colors.white)
-              : (_isHovered && isDark ? widget.colors.cardColorDark : (isDark ? widget.colors.dashboardBackground : widget.colors.lightGray)),
+              : (_isHovered && isDark ? widget.colors.cardColorDark : (isDark ? widget.colors.dashboardBackground : widget.colors.dashboardBackground)),
             borderRadius: BorderRadius.vertical(
               top: const Radius.circular(6),
-              bottom: Radius.circular(widget.isSelected ? 0 : 6),
+              bottom: Radius.circular(widget.isSelected ? 0 : 0),
             ),
-            boxShadow: !isDark && widget.isSelected
+/*            boxShadow: !isDark && widget.isSelected
                 ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
                 : null,
             border: isDark
                 ? (widget.isSelected ? null : Border.all(color: const Color(0xFF2A2A2A), width: 1))
-                : (widget.isSelected ? null : Border.all(color: Colors.black26, width: 1)),
+                : (widget.isSelected ? null : Border.all(color: Colors.black26, width: 1)),*/
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,

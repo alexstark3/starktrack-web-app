@@ -1,5 +1,5 @@
 #!/bin/bash
-
+#./scripts/deploy.sh
 echo "🚀 Starting deployment..."
 
 # Check if we're in a git repository

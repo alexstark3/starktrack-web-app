@@ -131,7 +131,7 @@ class AppColors extends ThemeExtension<AppColors> {
     backgroundDark: Color(0xFF252526),      // VS Code sidebar
     success: Color(0xFF67C187),
     error: Color(0xFFD76C6C),
-    whiteTextOnBlue: Color(0xFFCCCCCC),      // Consistent with textColor
+    whiteTextOnBlue: Colors.white,      // Pure white for better contrast on blue buttons
     orange: Color(0xFFFF9800),
     sideMenuLight: Color(0xFF252526), // Not used in dark theme but required
     sideMenuDark: Color(0xFF1E1E1E),  // VS Code side menu color

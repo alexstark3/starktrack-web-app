@@ -9,6 +9,8 @@ const double kFilterRadius = 9;
 const double kFilterSpacing = 8;
 const double kFilterFontSize = 16;
 
+enum GroupType { day, week, month, year }
+
 class MemberHistoryScreen extends StatefulWidget {
   final String companyId;
   final DocumentSnapshot memberDoc;
@@ -30,6 +32,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
   DateTime? toDate;
   String searchProject = '';
   String searchNote = '';
+  GroupType groupType = GroupType.day;
 
   final dateFormat = DateFormat('yyyy-MM-dd');
   final TextEditingController _projectController = TextEditingController();
@@ -62,7 +65,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
       borderRadius: BorderRadius.circular(10),
       boxShadow: isDark ? null : [
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.08),
+                      color: Colors.black.withOpacity(0.08),
           blurRadius: 4,
           offset: const Offset(0, 2),
         ),
@@ -72,7 +75,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
     TextStyle pillTextStyle = TextStyle(
       fontSize: kFilterFontSize,
       fontWeight: FontWeight.w500,
-      color: isDark ? Colors.white.withValues(alpha:0.87) : Colors.black.withValues(alpha:0.87),
+                  color: isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87),
     );
 
     return Column(
@@ -139,7 +142,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: isDark ? null : [
               BoxShadow(
-                color: Colors.black.withValues(alpha:0.08),
+                color: Colors.black.withOpacity(0.08),
                 blurRadius: 6,
                 offset: const Offset(0, 2),
               ),
@@ -175,7 +178,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                           Text(
                             fromDate == null ? "From" : dateFormat.format(fromDate!),
                             style: TextStyle(
-                              color: fromDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withValues(alpha:0.87) : Colors.black.withValues(alpha:0.87)),
+                              color: fromDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
                               fontWeight: FontWeight.w500,
                               fontSize: kFilterFontSize,
                             ),
@@ -208,7 +211,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                           Text(
                             toDate == null ? "To" : dateFormat.format(toDate!),
                             style: TextStyle(
-                              color: toDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withValues(alpha:0.87) : Colors.black.withValues(alpha:0.87)),
+                              color: toDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
                               fontWeight: FontWeight.w500,
                               fontSize: kFilterFontSize,
                             ),
@@ -218,6 +221,41 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                     ),
                   ),
                 ],
+              );
+
+              // Group type dropdown
+              final groupDropdown = Container(
+                height: kFilterHeight,
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                decoration: pillDecoration,
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<GroupType>(
+                    value: groupType,
+                    style: pillTextStyle,
+                    icon: const Icon(Icons.keyboard_arrow_down, size: 22),
+                    items: const [
+                      DropdownMenuItem(
+                        value: GroupType.day,
+                        child: Text('Day'),
+                      ),
+                      DropdownMenuItem(
+                        value: GroupType.week,
+                        child: Text('Week'),
+                      ),
+                      DropdownMenuItem(
+                        value: GroupType.month,
+                        child: Text('Month'),
+                      ),
+                      DropdownMenuItem(
+                        value: GroupType.year,
+                        child: Text('Year'),
+                      ),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) setState(() => groupType = val);
+                    },
+                  ),
+                ),
               );
 
               // Project and Note filters
@@ -262,11 +300,11 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
               // Refresh button
               final refreshBtn = Container(
                 height: kFilterHeight,
-                decoration: BoxDecoration(
-                  color: isDark 
-                    ? theme.colorScheme.primary.withValues(alpha:0.2)
-                    : theme.colorScheme.primary.withValues(alpha:0.1),
-                  borderRadius: BorderRadius.circular(10),
+                                    decoration: BoxDecoration(
+                      color: isDark 
+                        ? theme.colorScheme.primary.withOpacity(0.2)
+                        : theme.colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
                   boxShadow: isDark ? null : [
                     BoxShadow(
                       color: Colors.black.withValues(alpha:0.08),
@@ -284,6 +322,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                       toDate = null;
                       searchProject = '';
                       searchNote = '';
+                      groupType = GroupType.day;
                       _projectController.clear();
                       _noteController.clear();
                     });
@@ -301,6 +340,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                   runSpacing: 8,
                   children: [
                     dateGroup,
+                    groupDropdown,
                     refreshBtn,
                     projectBox,
                     noteBox,
@@ -311,6 +351,8 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                 return Row(
                   children: [
                     dateGroup,
+                    const SizedBox(width: kFilterSpacing),
+                    groupDropdown,
                     const SizedBox(width: kFilterSpacing),
                     refreshBtn,
                     const SizedBox(width: kFilterSpacing),
@@ -333,6 +375,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
             toDate: toDate,
             searchProject: searchProject,
             searchNote: searchNote,
+            groupType: groupType,
             onAction: () => setState(() {}),
           ),
         ),
@@ -422,9 +465,13 @@ class _TotalsHeader extends StatelessWidget {
             final expenses = (data['expenses'] ?? {}) as Map<String, dynamic>;
             totalExpenses += expenses.values.fold<double>(0, (sum, e) => sum + (e is num ? e : 0));
             
-            final isApproved = (data['approved'] ?? false) == true;
-            final isRejected = (data['rejected'] ?? false) == true;
-            final isApprovedAfterEdit = (data['approvedAfterEdit'] ?? false) == true;
+            final approvedRaw = data['approved'];
+            final rejectedRaw = data['rejected'];
+            final approvedAfterEditRaw = data['approvedAfterEdit'];
+            
+            final isApproved = approvedRaw == true || approvedRaw == 1 || approvedRaw == '1';
+            final isRejected = rejectedRaw == true || rejectedRaw == 1 || rejectedRaw == '1';
+            final isApprovedAfterEdit = approvedAfterEditRaw == true || approvedAfterEditRaw == 1 || approvedAfterEditRaw == '1';
             
             if (isApprovedAfterEdit || isApproved) {
               approvedCount++;
@@ -491,6 +538,7 @@ class _LogsTable extends StatefulWidget {
   final DateTime? toDate;
   final String searchProject;
   final String searchNote;
+  final GroupType groupType;
   final VoidCallback onAction;
 
   const _LogsTable({
@@ -500,6 +548,7 @@ class _LogsTable extends StatefulWidget {
     this.toDate,
     required this.searchProject,
     required this.searchNote,
+    required this.groupType,
     required this.onAction,
   });
 
@@ -606,6 +655,25 @@ class _LogsTableState extends State<_LogsTable> {
     );
   }
 
+  // Helper for formatting Duration as HH:MMh
+  String _formatDuration(Duration d) {
+    if (d == Duration.zero) return '';
+    final h = d.inHours;
+    final m = d.inMinutes % 60;
+    if (h > 0) return '${h}h ${m.toString().padLeft(2, '0')}m';
+    return '${m}m';
+  }
+
+  // Calculate ISO 8601 week number
+  int _weekNumber(DateTime date) {
+    // ISO 8601: Week 1 is the week containing January 4th
+    final jan4 = DateTime(date.year, 1, 4);
+    final startOfWeek = date.subtract(Duration(days: date.weekday - 1));
+    final jan4StartOfWeek = jan4.subtract(Duration(days: jan4.weekday - 1));
+    final weekNumber = ((startOfWeek.difference(jan4StartOfWeek).inDays) / 7).floor() + 1;
+    return weekNumber;
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
@@ -656,158 +724,369 @@ class _LogsTableState extends State<_LogsTable> {
           return const Center(child: Text('No time logs found for this worker.'));
         }
 
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: DataTable(
-            columns: const [
-              DataColumn(label: Text('Approve')),
-              DataColumn(label: Text('Reject')),
-              DataColumn(label: Text('Edit')),
-              DataColumn(label: Text('Delete')),
-              DataColumn(label: Text('Date')),
-              DataColumn(label: Text('Start')),
-              DataColumn(label: Text('End')),
-              DataColumn(label: Text('Project')),
-              DataColumn(label: Text('Work (h)')),
-              DataColumn(label: Text('Expenses')),
-              DataColumn(label: Text('Note')),
-            ],
-            rows: docs.map((doc) {
-              final data = doc.data() as Map<String, dynamic>;
-              final isApproved = (data['approved'] ?? false) == true;
-              final isRejected = (data['rejected'] ?? false) == true;
-              final isApprovedAfterEdit = (data['approvedAfterEdit'] ?? false) == true;
-              final begin = (data['begin'] as Timestamp?)?.toDate();
-              final end = (data['end'] as Timestamp?)?.toDate();
-              final workMins = (data['duration_minutes'] ?? 0) as int;
-              final project = data['project'];
-              final expenses = (data['expenses'] ?? {}) as Map<String, dynamic>;
-              final note = data['note'] ?? '';
-              
-              // Status icon logic (removed unused variable)
+        // ==== GROUPING LOGIC STARTS HERE ====
+        // Convert to models for easier handling
+        List<_HistoryEntry> entries = docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final begin = (data['begin'] is Timestamp)
+              ? (data['begin'] as Timestamp).toDate()
+              : null;
+          final end = (data['end'] is Timestamp)
+              ? (data['end'] as Timestamp).toDate()
+              : null;
+          final duration = (begin != null && end != null)
+              ? end.difference(begin)
+              : Duration.zero;
+          final project = data['project'] ?? '';
+          final note = data['note'] ?? '';
+          final sessionDate = data['sessionDate'] ?? '';
+          final perDiemRaw = data['perDiem'];
+          final perDiem = perDiemRaw == true || perDiemRaw == 1 || perDiemRaw == '1';
+          final expensesMap = Map<String, dynamic>.from(data['expenses'] ?? {});
+          double totalExpense = 0.0;
+          for (var v in expensesMap.values) {
+            if (v is num) totalExpense += v.toDouble();
+          }
 
-              // ---- PROJECT CELL with RED FLAG if empty ----
-              Widget projectCell;
-              if (project == null || (project is String && project.trim().isEmpty)) {
-                projectCell = Row(
-                  children: [
-                    Icon(Icons.flag, color: Colors.red, size: 16),
-                    const SizedBox(width: 4),
-                    Text('No Project!', style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          return _HistoryEntry(
+            doc: doc,
+            begin: begin,
+            end: end,
+            duration: duration,
+            project: project,
+            note: note,
+            sessionDate: sessionDate,
+            perDiem: perDiem,
+            expense: totalExpense,
+            expensesMap: expensesMap,
+          );
+        }).toList();
+
+        // Sort by begin date descending
+        entries.sort((a, b) {
+          if (a.begin == null) return 1;
+          if (b.begin == null) return -1;
+          return b.begin!.compareTo(a.begin!);
+        });
+
+        // Grouping map
+        Map<String, List<_HistoryEntry>> grouped = {};
+
+        for (var entry in entries) {
+          String key = '';
+          if (entry.begin == null) key = 'Unknown';
+          else {
+            switch (widget.groupType) {
+              case GroupType.day:
+                key = DateFormat('yyyy-MM-dd').format(entry.begin!);
+                break;
+              case GroupType.week:
+                final week = _weekNumber(entry.begin!);
+                key = 'Week $week, ${entry.begin!.year}';
+                break;
+              case GroupType.month:
+                key = DateFormat('MMMM yyyy').format(entry.begin!);
+                break;
+              case GroupType.year:
+                key = '${entry.begin!.year}';
+                break;
+            }
+          }
+          grouped.putIfAbsent(key, () => []).add(entry);
+        }
+
+        // Sorted group keys (desc by date)
+        final sortedKeys = grouped.keys.toList()
+          ..sort((a, b) {
+            if (widget.groupType == GroupType.day) {
+              try {
+                return DateTime.parse(b).compareTo(DateTime.parse(a));
+              } catch (_) {}
+            } else if (widget.groupType == GroupType.year) {
+              return int.parse(b).compareTo(int.parse(a));
+            } else if (widget.groupType == GroupType.month) {
+              try {
+                final fa = DateFormat('MMMM yyyy').parse(a);
+                final fb = DateFormat('MMMM yyyy').parse(b);
+                return fb.compareTo(fa);
+              } catch (_) {}
+            } else if (widget.groupType == GroupType.week) {
+              final wa = int.tryParse(a.split(' ')[1].replaceAll(',', '')) ?? 0;
+              final wb = int.tryParse(b.split(' ')[1].replaceAll(',', '')) ?? 0;
+              final ya = int.tryParse(a.split(',').last.trim()) ?? 0;
+              final yb = int.tryParse(b.split(',').last.trim()) ?? 0;
+              return yb != ya ? yb.compareTo(ya) : wb.compareTo(wa);
+            }
+            return a.compareTo(b);
+          });
+
+        // ==== UI GROUPS ====
+        final theme = Theme.of(context);
+        final isDark = theme.brightness == Brightness.dark;
+        final appColors = Theme.of(context).extension<AppColors>()!;
+        final expenseFormat = NumberFormat.currency(symbol: "CHF ", decimalDigits: 2);
+
+        return ListView.builder(
+          itemCount: sortedKeys.length,
+          itemBuilder: (context, groupIdx) {
+            final groupKey = sortedKeys[groupIdx];
+            final groupList = grouped[groupKey]!;
+
+            final groupTotal = groupList.fold<Duration>(
+                Duration.zero, (sum, e) => sum + e.duration);
+                      final groupExpense = groupList.fold<double>(
+              0.0, (sum, e) => sum + (e.expense.isNaN ? 0.0 : e.expense));
+
+            return Card(
+              margin: EdgeInsets.zero,
+              elevation: isDark ? 0 : 4,
+              color: isDark ? appColors.cardColorDark : Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isDark ? appColors.cardColorDark : Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: isDark ? null : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha:0.08),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
                   ],
-                );
-              } else {
-                projectCell = Text(project.toString());
-              }
-
-              return DataRow(
-                color: isApprovedAfterEdit
-                    ? MaterialStateProperty.all(Colors.orange.withValues(alpha:0.05))
-                    : isApproved
-                        ? MaterialStateProperty.all(Colors.green.withValues(alpha:0.05))
-                        : isRejected
-                            ? MaterialStateProperty.all(Colors.red.withValues(alpha:0.07))
-                            : null,
-                cells: [
-                  // Approve
-                  DataCell(
-                    isApprovedAfterEdit
-                        ? const Icon(Icons.lock, color: Colors.grey)
-                        : isApproved
-                            ? const Icon(Icons.verified, color: Colors.green)
-                            : isRejected
-                                ? const Icon(Icons.lock, color: Colors.grey)
-                                : IconButton(
-                                    icon: const Icon(Icons.check, color: Colors.green),
-                                    tooltip: 'Approve',
-                                    onPressed: () async {
-                                      await doc.reference.update({
-                                        'approved': true,
-                                        'approvedBy': widget.userId,
-                                        'approvedAt': FieldValue.serverTimestamp(),
-                                      });
-                                      widget.onAction();
-                                    },
-                                  ),
-                  ),
-                  // Reject
-                  DataCell(
-                    isRejected
-                        ? const Icon(Icons.cancel, color: Colors.red)
-                        : (isApproved || isApprovedAfterEdit)
-                            ? const Icon(Icons.lock, color: Colors.grey)
-                            : IconButton(
-                                icon: const Icon(Icons.close, color: Colors.red),
-                                tooltip: 'Reject',
-                                onPressed: () async {
-                                  await doc.reference.update({
-                                    'rejected': true,
-                                    'rejectedBy': widget.userId,
-                                    'rejectedAt': FieldValue.serverTimestamp(),
-                                  });
-                                  widget.onAction();
-                                },
-                              ),
-                  ),
-                  // Edit
-                  DataCell(
-                    isApprovedAfterEdit
-                        ? const Icon(Icons.verified, color: Colors.orange)
-                        : (isApproved || isRejected)
-                            ? const Icon(Icons.lock, color: Colors.grey)
-                            : IconButton(
-                                icon: const Icon(Icons.edit, color: Colors.blue),
-                                tooltip: 'Edit',
-                                onPressed: () async {
-                                  await showDialog(
-                                    context: context,
-                                    builder: (_) => _EditLogDialog(
-                                      logDoc: doc,
-                                      projects: _allProjects,
-                                      onSaved: widget.onAction,
-                                    ),
-                                  );
-                                },
-                              ),
-                  ),
-                  // Delete
-                  DataCell(
-                    (isApproved || isRejected || isApprovedAfterEdit)
-                        ? const Icon(Icons.lock, color: Colors.grey)
-                        : IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            tooltip: 'Delete',
-                            onPressed: () async {
-                              final confirmed = await _showDeleteConfirmation(context, data);
-                              if (confirmed == true) {
-                                await doc.reference.delete();
-                                widget.onAction();
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Session deleted successfully'),
-                                      backgroundColor: Colors.green,
-                                    ),
-                                  );
-                                }
-                              }
-                            },
+                ),
+                child: Column(
+                  children: [
+                    ExpansionTile(
+                      key: ValueKey('group_${groupIdx}_$groupKey'),
+                      initiallyExpanded: groupIdx == 0,
+                      title: Text(
+                        groupKey,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? const Color(0xFFCCCCCC) : Colors.black87,
+                        ),
+                      ),
+                      children: groupList.map((entry) {
+                        final data = entry.doc.data() as Map<String, dynamic>;
+                        final approvedRaw = data['approved'];
+                        final rejectedRaw = data['rejected'];
+                        final approvedAfterEditRaw = data['approvedAfterEdit'];
+                        
+                        final isApproved = approvedRaw == true || approvedRaw == 1 || approvedRaw == '1';
+                        final isRejected = rejectedRaw == true || rejectedRaw == 1 || rejectedRaw == '1';
+                        final isApprovedAfterEdit = approvedAfterEditRaw == true || approvedAfterEditRaw == 1 || approvedAfterEditRaw == '1';
+                        
+                        return ListTile(
+                          title: Text(
+                            (entry.begin != null && entry.end != null)
+                                ? '${DateFormat('yyyy-MM-dd').format(entry.begin!)}  ${DateFormat('HH:mm').format(entry.begin!)} - ${DateFormat('HH:mm').format(entry.end!)}'
+                                : entry.sessionDate,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? const Color(0xFFCCCCCC) : Colors.black87,
+                            ),
                           ),
-                  ),
-                  DataCell(Text(begin != null ? DateFormat('yyyy-MM-dd').format(begin) : '')),
-                  DataCell(Text(begin != null ? DateFormat('HH:mm').format(begin) : '')),
-                  DataCell(Text(end != null ? DateFormat('HH:mm').format(end) : '')),
-                  DataCell(projectCell),
-                  DataCell(Text(_fmtH(workMins))),
-                  DataCell(Text(
-                    expenses.entries.map((e) => '${e.key}: ${e.value}').join(', '),
-                    style: const TextStyle(fontSize: 13),
-                  )),
-                  DataCell(Text(note, style: TextStyle(fontSize: 13))),
-                ],
-              );
-            }).toList(),
-          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (entry.project != '') 
+                                Text(
+                                  'Project: ${entry.project}',
+                                  style: TextStyle(
+                                    color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
+                                  ),
+                                ),
+                              if (entry.duration != Duration.zero)
+                                Text(
+                                  'Duration: ${_formatDuration(entry.duration)}',
+                                  style: TextStyle(
+                                    color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
+                                  ),
+                                ),
+                              if (entry.note != '') 
+                                Text(
+                                  'Note: ${entry.note}',
+                                  style: TextStyle(
+                                    color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
+                                  ),
+                                ),
+                              if (entry.perDiem)
+                                Text(
+                                  'Per diem: Yes', 
+                                  style: TextStyle(
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                ),
+                              if (entry.expensesMap.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: entry.expensesMap.entries.map((e) =>
+                                      Text('${e.key}: ${expenseFormat.format((e.value as num?)?.toDouble() ?? 0.0)}',
+                                        style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.w600, fontSize: 15),
+                                      )).toList(),
+                                  ),
+                                ),
+                              const SizedBox(height: 8),
+                              // Approval icons for this specific session
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // Approve
+                                  if (!isApproved && !isRejected && !isApprovedAfterEdit)
+                                    IconButton(
+                                      icon: const Icon(Icons.check, color: Colors.green, size: 20),
+                                      tooltip: 'Approve',
+                                      onPressed: () async {
+                                        await entry.doc.reference.update({
+                                          'approved': true,
+                                          'approvedBy': widget.userId,
+                                          'approvedAt': FieldValue.serverTimestamp(),
+                                        });
+                                        widget.onAction();
+                                      },
+                                    ),
+                                  // Reject
+                                  if (!isApproved && !isRejected && !isApprovedAfterEdit)
+                                    IconButton(
+                                      icon: const Icon(Icons.close, color: Colors.red, size: 20),
+                                      tooltip: 'Reject',
+                                      onPressed: () async {
+                                        await entry.doc.reference.update({
+                                          'rejected': true,
+                                          'rejectedBy': widget.userId,
+                                          'rejectedAt': FieldValue.serverTimestamp(),
+                                        });
+                                        widget.onAction();
+                                      },
+                                    ),
+                                  // Edit
+                                  if (!isApproved && !isRejected && !isApprovedAfterEdit)
+                                    IconButton(
+                                      icon: const Icon(Icons.edit, color: Colors.blue, size: 20),
+                                      tooltip: 'Edit',
+                                      onPressed: () async {
+                                        await showDialog(
+                                          context: context,
+                                          builder: (_) => _EditLogDialog(
+                                            logDoc: entry.doc,
+                                            projects: _allProjects,
+                                            onSaved: widget.onAction,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  // Delete
+                                  if (!isApproved && !isRejected && !isApprovedAfterEdit)
+                                    IconButton(
+                                      icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                                      tooltip: 'Delete',
+                                      onPressed: () async {
+                                        final confirmed = await _showDeleteConfirmation(context, data);
+                                        if (confirmed == true) {
+                                          await entry.doc.reference.delete();
+                                          widget.onAction();
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(
+                                                content: Text('Session deleted successfully'),
+                                                backgroundColor: Colors.green,
+                                              ),
+                                            );
+                                          }
+                                        }
+                                      },
+                                    ),
+                                  // Status indicators
+                                  if (isApprovedAfterEdit)
+                                    const Icon(Icons.verified, color: Colors.orange, size: 20)
+                                  else if (isApproved)
+                                    const Icon(Icons.verified, color: Colors.green, size: 20)
+                                  else if (isRejected)
+                                    const Icon(Icons.cancel, color: Colors.red, size: 20),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+
+                    // Blue bar with group totals
+                    Container(
+                      width: double.infinity,
+                                              decoration: BoxDecoration(
+                          color: isDark 
+                            ? theme.colorScheme.primary.withOpacity(0.2)
+                            : theme.colorScheme.primary.withOpacity(0.1),
+                          borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(12),
+                          bottomRight: Radius.circular(12),
+                        ),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          // Check if we need to wrap the totals on small screens
+                          final needsWrap = constraints.maxWidth < 400;
+                          
+                          if (needsWrap) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Total Time: ${_formatDuration(groupTotal)}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Total Expenses: ${expenseFormat.format(groupExpense.isNaN ? 0.0 : groupExpense)}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                ),
+                              ],
+                            );
+                          } else {
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    'Total Time: ${_formatDuration(groupTotal)}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                  ),
+                                ),
+                                Flexible(
+                                  child: Text(
+                                    'Total Expenses: ${expenseFormat.format(groupExpense.isNaN ? 0.0 : groupExpense)}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         );
       },
     );
@@ -1193,11 +1472,11 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                     decoration: BoxDecoration(
                                       color: Theme.of(context).brightness == Brightness.dark 
-                                        ? Colors.blue.withValues(alpha:0.2)
-                                        : Colors.blue.withValues(alpha:0.1),
+                                        ? Colors.blue.withOpacity(0.2)
+                                        : Colors.blue.withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(4),
                                       border: Border.all(
-                                        color: Colors.blue.withValues(alpha:0.3),
+                                        color: Colors.blue.withOpacity(0.3),
                                       ),
                                     ),
                                     child: Text('${entry.key} ${(entry.value as num).toStringAsFixed(2)} CHF', 
@@ -1208,11 +1487,11 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(
                                     color: Theme.of(context).brightness == Brightness.dark 
-                                      ? Colors.blue.withValues(alpha:0.2)
-                                      : Colors.blue.withValues(alpha:0.1),
+                                      ? Colors.blue.withOpacity(0.2)
+                                      : Colors.blue.withOpacity(0.1),
                                     borderRadius: BorderRadius.circular(4),
                                     border: Border.all(
-                                      color: Colors.blue.withValues(alpha:0.3),
+                                      color: Colors.blue.withOpacity(0.3),
                                     ),
                                   ),
                                   child: Text('Per diem ${(_expenses['Per diem'] as num).toStringAsFixed(2)} CHF', 
@@ -1289,4 +1568,31 @@ String _fmtH(num mins) {
   final h = (mins ~/ 60).toString().padLeft(2, '0');
   final m = (mins % 60).toString().padLeft(2, '0');
   return '$h:$m';
+}
+
+// Helper class for history entry
+class _HistoryEntry {
+  final DocumentSnapshot doc;
+  final DateTime? begin;
+  final DateTime? end;
+  final Duration duration;
+  final String project;
+  final String note;
+  final String sessionDate;
+  final bool perDiem;
+  final double expense; // total
+  final Map<String, dynamic> expensesMap;
+
+  _HistoryEntry({
+    required this.doc,
+    required this.begin,
+    required this.end,
+    required this.duration,
+    required this.project,
+    required this.note,
+    required this.sessionDate,
+    required this.perDiem,
+    required this.expense,
+    required this.expensesMap,
+  });
 }
