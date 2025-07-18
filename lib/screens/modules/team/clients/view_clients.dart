@@ -165,7 +165,7 @@ class _ViewClientsState extends State<ViewClients> {
       margin: const EdgeInsets.only(bottom: 2),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: colors.lightGray, width: 1)),
-        color: colors.lightGray.withOpacity(0.35),
+        color: colors.lightGray.withValues(alpha:0.35),
       ),
       child: Row(
         children: const [

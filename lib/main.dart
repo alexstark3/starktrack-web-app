@@ -22,7 +22,7 @@ Future<void> main() async {
     ),
   );
 
-  print('FIREBASE PROJECT ID: ${Firebase.app().options.projectId}'); // Print the actual projectId being used
+ // print('FIREBASE PROJECT ID: ${Firebase.app().options.projectId}'); // Print the actual projectId being used
 
   runApp(
     ChangeNotifierProvider(create: (_) => ThemeProvider(), child: const MyApp()),

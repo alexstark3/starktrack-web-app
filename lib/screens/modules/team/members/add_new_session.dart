@@ -65,7 +65,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
             .toList();
       });
     } catch (e) {
-      print('Error loading projects: $e');
+    //  print('Error loading projects: $e');
     }
   }
 

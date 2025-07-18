@@ -44,7 +44,7 @@ class _TodayLineState extends State<TodayLine> {
           border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : null,
           boxShadow: isDark ? null : [
             BoxShadow(
-              color: Colors.black.withOpacity(0.15),
+              color: Colors.black.withValues(alpha:0.15),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),

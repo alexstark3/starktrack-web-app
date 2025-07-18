@@ -61,7 +61,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
       borderRadius: BorderRadius.circular(10),
       boxShadow: isDark ? null : [
         BoxShadow(
-          color: Colors.black.withOpacity(0.08),
+          color: Colors.black.withValues(alpha:0.08),
           blurRadius: 4,
           offset: const Offset(0, 2),
         ),
@@ -71,7 +71,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
     TextStyle pillTextStyle = TextStyle(
       fontSize: kFilterFontSize,
       fontWeight: FontWeight.w500,
-      color: isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87),
+      color: isDark ? Colors.white.withValues(alpha:0.87) : Colors.black.withValues(alpha:0.87),
     );
 
     // From and To date pickers
@@ -101,7 +101,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                 Text(
                   fromDate == null ? "From" : dateFormat.format(fromDate!),
                   style: TextStyle(
-                    color: fromDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
+                    color: fromDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withValues(alpha:0.87) : Colors.black.withValues(alpha:0.87)),
                     fontWeight: FontWeight.w500,
                     fontSize: kFilterFontSize,
                   ),
@@ -134,7 +134,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                 Text(
                   toDate == null ? "To" : dateFormat.format(toDate!),
                   style: TextStyle(
-                    color: toDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
+                    color: toDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withValues(alpha:0.87) : Colors.black.withValues(alpha:0.87)),
                     fontWeight: FontWeight.w500,
                     fontSize: kFilterFontSize,
                   ),
@@ -223,12 +223,12 @@ class _HistoryLogsState extends State<HistoryLogs> {
       height: kFilterHeight,
       decoration: BoxDecoration(
         color: isDark 
-          ? theme.colorScheme.primary.withOpacity(0.2)
-          : theme.colorScheme.primary.withOpacity(0.1),
+          ? theme.colorScheme.primary.withValues(alpha:0.2)
+          : theme.colorScheme.primary.withValues(alpha:0.1),
         borderRadius: BorderRadius.circular(10),
         boxShadow: isDark ? null : [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha:0.08),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -260,7 +260,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
               borderRadius: BorderRadius.circular(12),
               boxShadow: isDark ? null : [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: Colors.black.withValues(alpha:0.08),
                   blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),
@@ -481,7 +481,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: isDark ? null : [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
+                              color: Colors.black.withValues(alpha:0.08),
                               blurRadius: 6,
                               offset: const Offset(0, 2),
                             ),
@@ -581,8 +581,8 @@ class _HistoryLogsState extends State<HistoryLogs> {
                               width: double.infinity,
                               decoration: BoxDecoration(
                                 color: isDark 
-                                  ? theme.colorScheme.primary.withOpacity(0.2)
-                                  : theme.colorScheme.primary.withOpacity(0.1),
+                                  ? theme.colorScheme.primary.withValues(alpha:0.2)
+                                  : theme.colorScheme.primary.withValues(alpha:0.1),
                                 borderRadius: const BorderRadius.only(
                                   bottomLeft: Radius.circular(12),
                                   bottomRight: Radius.circular(12),

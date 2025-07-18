@@ -69,7 +69,7 @@ class _CompanySideMenuState extends State<CompanySideMenu> {
 
     return Material(
       elevation: 8,
-      shadowColor: Colors.black.withOpacity(0.80),
+      shadowColor: Colors.black.withValues(alpha:0.80),
       clipBehavior: Clip.none,
       child: SizedBox(
         width: width,
@@ -92,7 +92,7 @@ class _CompanySideMenuState extends State<CompanySideMenu> {
               Divider(
                 height: 1,
                 thickness: 1,
-                color: theme.colorScheme.outlineVariant.withOpacity(0.30),
+                color: theme.colorScheme.outlineVariant.withValues(alpha:0.30),
               ),
             ],
             // Use Expanded to push the version label to the bottom
@@ -120,7 +120,7 @@ class _CompanySideMenuState extends State<CompanySideMenu> {
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w500,
-                                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                color: theme.colorScheme.onSurface.withValues(alpha:0.6),
                               ),
                             ),
                             Text(
@@ -128,7 +128,7 @@ class _CompanySideMenuState extends State<CompanySideMenu> {
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w500,
-                                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                color: theme.colorScheme.onSurface.withValues(alpha:0.6),
                               ),
                             ),
                           ],
@@ -138,7 +138,7 @@ class _CompanySideMenuState extends State<CompanySideMenu> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
-                            color: theme.colorScheme.onSurface.withOpacity(0.6),
+                            color: theme.colorScheme.onSurface.withValues(alpha:0.6),
                           ),
                         ),
                     if (!widget.compact) ...[
@@ -147,7 +147,7 @@ class _CompanySideMenuState extends State<CompanySideMenu> {
                         '© 2025 starktrack.ch\n© All rights reserved.',
                         style: TextStyle(
                           fontSize: 10,
-                          color: theme.colorScheme.onSurface.withOpacity(0.4),
+                          color: theme.colorScheme.onSurface.withValues(alpha:0.4),
                         ),
                       ),
                     ],
@@ -179,7 +179,7 @@ class _AnimatedMenuItemState extends State<_AnimatedMenuItem> {
     final isHL  = widget.item.selected || _hovered;
     final color = widget.item.selected
         ? theme.colorScheme.primary
-        : theme.colorScheme.onSurface.withOpacity(0.7);
+        : theme.colorScheme.onSurface.withValues(alpha:0.7);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
@@ -193,7 +193,7 @@ class _AnimatedMenuItemState extends State<_AnimatedMenuItem> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
             color: isHL
-                ? theme.colorScheme.primary.withOpacity(0.20)
+                ? theme.colorScheme.primary.withValues(alpha:0.20)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),

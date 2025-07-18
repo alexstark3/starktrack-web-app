@@ -4,7 +4,7 @@ import 'app_colors.dart';
 final ThemeData lightTheme = ThemeData(
   brightness: Brightness.light,
   colorScheme: const ColorScheme.light(
-    background: Colors.white,
+    surface: Colors.white,
     primary: Color(0xFF65AAEA),
     secondary: Color(0xFF67C187),
     error: Color(0xFFD76C6C),

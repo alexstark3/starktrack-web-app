@@ -62,7 +62,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
       borderRadius: BorderRadius.circular(10),
       boxShadow: isDark ? null : [
         BoxShadow(
-          color: Colors.black.withOpacity(0.08),
+          color: Colors.black.withValues(alpha: 0.08),
           blurRadius: 4,
           offset: const Offset(0, 2),
         ),
@@ -72,7 +72,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
     TextStyle pillTextStyle = TextStyle(
       fontSize: kFilterFontSize,
       fontWeight: FontWeight.w500,
-      color: isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87),
+      color: isDark ? Colors.white.withValues(alpha:0.87) : Colors.black.withValues(alpha:0.87),
     );
 
     return Column(
@@ -139,7 +139,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: isDark ? null : [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withValues(alpha:0.08),
                 blurRadius: 6,
                 offset: const Offset(0, 2),
               ),
@@ -175,7 +175,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                           Text(
                             fromDate == null ? "From" : dateFormat.format(fromDate!),
                             style: TextStyle(
-                              color: fromDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
+                              color: fromDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withValues(alpha:0.87) : Colors.black.withValues(alpha:0.87)),
                               fontWeight: FontWeight.w500,
                               fontSize: kFilterFontSize,
                             ),
@@ -208,7 +208,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                           Text(
                             toDate == null ? "To" : dateFormat.format(toDate!),
                             style: TextStyle(
-                              color: toDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
+                              color: toDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withValues(alpha:0.87) : Colors.black.withValues(alpha:0.87)),
                               fontWeight: FontWeight.w500,
                               fontSize: kFilterFontSize,
                             ),
@@ -264,12 +264,12 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                 height: kFilterHeight,
                 decoration: BoxDecoration(
                   color: isDark 
-                    ? theme.colorScheme.primary.withOpacity(0.2)
-                    : theme.colorScheme.primary.withOpacity(0.1),
+                    ? theme.colorScheme.primary.withValues(alpha:0.2)
+                    : theme.colorScheme.primary.withValues(alpha:0.1),
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: isDark ? null : [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
+                      color: Colors.black.withValues(alpha:0.08),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
@@ -702,11 +702,11 @@ class _LogsTableState extends State<_LogsTable> {
 
               return DataRow(
                 color: isApprovedAfterEdit
-                    ? MaterialStateProperty.all(Colors.orange.withOpacity(0.05))
+                    ? MaterialStateProperty.all(Colors.orange.withValues(alpha:0.05))
                     : isApproved
-                        ? MaterialStateProperty.all(Colors.green.withOpacity(0.05))
+                        ? MaterialStateProperty.all(Colors.green.withValues(alpha:0.05))
                         : isRejected
-                            ? MaterialStateProperty.all(Colors.red.withOpacity(0.07))
+                            ? MaterialStateProperty.all(Colors.red.withValues(alpha:0.07))
                             : null,
                 cells: [
                   // Approve
@@ -1193,11 +1193,11 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                     decoration: BoxDecoration(
                                       color: Theme.of(context).brightness == Brightness.dark 
-                                        ? Colors.blue.withOpacity(0.2)
-                                        : Colors.blue.withOpacity(0.1),
+                                        ? Colors.blue.withValues(alpha:0.2)
+                                        : Colors.blue.withValues(alpha:0.1),
                                       borderRadius: BorderRadius.circular(4),
                                       border: Border.all(
-                                        color: Colors.blue.withOpacity(0.3),
+                                        color: Colors.blue.withValues(alpha:0.3),
                                       ),
                                     ),
                                     child: Text('${entry.key} ${(entry.value as num).toStringAsFixed(2)} CHF', 
@@ -1208,11 +1208,11 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(
                                     color: Theme.of(context).brightness == Brightness.dark 
-                                      ? Colors.blue.withOpacity(0.2)
-                                      : Colors.blue.withOpacity(0.1),
+                                      ? Colors.blue.withValues(alpha:0.2)
+                                      : Colors.blue.withValues(alpha:0.1),
                                     borderRadius: BorderRadius.circular(4),
                                     border: Border.all(
-                                      color: Colors.blue.withOpacity(0.3),
+                                      color: Colors.blue.withValues(alpha:0.3),
                                     ),
                                   ),
                                   child: Text('Per diem ${(_expenses['Per diem'] as num).toStringAsFixed(2)} CHF', 

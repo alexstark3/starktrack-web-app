@@ -79,7 +79,7 @@ class _ClientsTabState extends State<ClientsTab> {
                   textStyle: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 onPressed: () async {
-                  // TODO: your add-client dialog code
+                  // client dialog code
                 },
               ),
             ],

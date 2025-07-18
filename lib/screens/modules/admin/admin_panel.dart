@@ -682,8 +682,8 @@ class _AdminPanelState extends State<AdminPanel> {
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                                                   child: DataTable(
-                            headingRowColor: MaterialStateProperty.all(Colors.transparent),
-                            dataRowColor: MaterialStateProperty.all(Colors.transparent),
+                            headingRowColor: WidgetStateProperty.all(Colors.transparent),//WidgetStateProperty Previously MaterialStateProperty
+                            dataRowColor: WidgetStateProperty.all(Colors.transparent), //MaterialStateProperty
                           columns: const [
                             DataColumn(label: Text('Name')),
                             DataColumn(label: Text('Email')),

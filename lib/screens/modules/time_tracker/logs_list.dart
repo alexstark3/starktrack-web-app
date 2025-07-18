@@ -91,7 +91,7 @@ class _LogsListState extends State<LogsList> {
     final theme      = Theme.of(context);
     final appColors  = theme.extension<AppColors>()!;
     final textColor  = appColors.textColor;
-    final borderColor= theme.dividerColor.withOpacity(0.2);
+    final borderColor= theme.dividerColor.withValues(alpha:0.2);
     final isDark     = theme.brightness == Brightness.dark;
 
     final sessionDate = DateFormat('yyyy-MM-dd').format(widget.selectedDay);
@@ -207,7 +207,7 @@ class _LogsListState extends State<LogsList> {
                     border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : null,
                     boxShadow: isDark ? null : [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
+                        color: Colors.black.withValues(alpha:0.15),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -821,11 +821,11 @@ Future<void> _showEditExpensesPopup() async {
                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                        decoration: BoxDecoration(
                          color: Theme.of(context).brightness == Brightness.dark 
-                           ? widget.appColors.primaryBlue.withOpacity(0.2)
-                           : widget.appColors.primaryBlue.withOpacity(0.1),
+                           ? widget.appColors.primaryBlue.withValues(alpha:0.2)
+                           : widget.appColors.primaryBlue.withValues(alpha:0.1),
                          borderRadius: BorderRadius.circular(4),
                          border: Border.all(
-                           color: widget.appColors.primaryBlue.withOpacity(0.3),
+                           color: widget.appColors.primaryBlue.withValues(alpha:0.3),
                          ),
                        ),
                        child: Text(line, style: style.copyWith(fontSize: 13)),
@@ -986,11 +986,11 @@ Future<void> _showEditExpensesPopup() async {
                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                            decoration: BoxDecoration(
                              color: Theme.of(context).brightness == Brightness.dark 
-                               ? widget.appColors.primaryBlue.withOpacity(0.2)
-                               : widget.appColors.primaryBlue.withOpacity(0.1),
+                               ? widget.appColors.primaryBlue.withValues(alpha:0.2)
+                               : widget.appColors.primaryBlue.withValues(alpha:0.1),
                              borderRadius: BorderRadius.circular(4),
                              border: Border.all(
-                               color: widget.appColors.primaryBlue.withOpacity(0.3),
+                               color: widget.appColors.primaryBlue.withValues(alpha:0.3),
                              ),
                            ),
                            child: Text(line, style: style.copyWith(fontSize: 13)),

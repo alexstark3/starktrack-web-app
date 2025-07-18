@@ -31,7 +31,7 @@ class ChipsCard extends StatelessWidget {
       : Theme.of(context).cardColor;
 
     final chipBorder = Border.all(
-      color: appColors.darkGray.withOpacity(0.2),
+      color: appColors.darkGray.withValues(alpha:0.2),
       width: 1,
     );
 
@@ -49,7 +49,7 @@ class ChipsCard extends StatelessWidget {
           border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : chipBorder,
           boxShadow: isDark ? null : [
             BoxShadow(
-              color: Colors.black.withOpacity(0.12),
+              color: Colors.black.withValues(alpha:0.12),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -68,7 +68,7 @@ class ChipsCard extends StatelessWidget {
           border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : null,
           boxShadow: isDark ? null : [
             BoxShadow(
-              color: Colors.black.withOpacity(0.15),
+              color: Colors.black.withValues(alpha:0.15),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),

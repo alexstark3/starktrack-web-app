@@ -55,7 +55,7 @@ class LoginForm extends StatelessWidget {
                   ? const Color(0xFF2D2D30)
                   : const Color(0xFFF0F0F0),
                 boxShadow: Theme.of(context).brightness == Brightness.light 
-                  ? [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: Offset(0, 4))]
+                  ? [BoxShadow(color: Colors.black.withValues(alpha:0.1), blurRadius: 10, offset: Offset(0, 4))]
                   : null,
                 border: Theme.of(context).brightness == Brightness.dark 
                   ? Border.all(color: const Color(0xFF404040), width: 1)

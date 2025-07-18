@@ -28,9 +28,9 @@ class CompanyTopBar extends StatelessWidget {
 
     return Material(                       // separate layer ⇒ guaranteed shadow
       elevation: 6,                        // ← try 3-4 dp: clearly visible
-      color: theme.colorScheme.background, // bar colour
+      color: theme.colorScheme.surface, // bar colour
       shadowColor:
-          Colors.black.withOpacity(0.4),  // subtle but visible on white
+          Colors.black.withValues(alpha:0.4),  // subtle but visible on white
       child: SizedBox(
         height: kHeight,
         child: Row(

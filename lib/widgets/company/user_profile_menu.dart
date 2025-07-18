@@ -40,7 +40,7 @@ class _UserProfileMenuState extends State<UserProfileMenu> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: const Color(0xFF1490DE).withOpacity(0.7),
+              color: const Color(0xFF1490DE).withValues(alpha:0.7),
               borderRadius: BorderRadius.circular(4),
             ),
             alignment: Alignment.center,

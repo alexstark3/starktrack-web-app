@@ -453,7 +453,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
       border: Border.all(color: isDark ? const Color(0xFF404040) : theme.dividerColor),
       boxShadow: isDark ? null : [
         BoxShadow(
-          color: Colors.black.withOpacity(0.12),
+          color: Colors.black.withValues(alpha:0.12),
           blurRadius: 4,
           offset: const Offset(0, 2),
         ),
@@ -553,7 +553,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
             border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : null,
             boxShadow: isDark ? null : [
               BoxShadow(
-                color: Colors.black.withOpacity(0.15),
+                color: Colors.black.withValues(alpha:0.15),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
