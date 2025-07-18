@@ -41,12 +41,12 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: String.fromEnvironment('FIREBASE_WEB_API_KEY', defaultValue: ''),
-    appId: String.fromEnvironment('FIREBASE_WEB_APP_ID', defaultValue: '1:831761597377:web:86fdc3b4268b4e3944e540'),
-    messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID', defaultValue: '831761597377'),
-    projectId: String.fromEnvironment('FIREBASE_PROJECT_ID', defaultValue: 'starktracklog'),
-    authDomain: String.fromEnvironment('FIREBASE_AUTH_DOMAIN', defaultValue: 'starktracklog.firebaseapp.com'),
-    storageBucket: String.fromEnvironment('FIREBASE_STORAGE_BUCKET', defaultValue: 'starktracklog.firebasestorage.app'),
+    apiKey: 'AIzaSyA-Ny4FsFciXKC-jh7_SdexQi36_bewNEM',
+    appId: '1:831761597377:web:86fdc3b4268b4e3944e540',
+    messagingSenderId: '831761597377',
+    projectId: 'starktracklog',
+    authDomain: 'starktracklog.firebaseapp.com',
+    storageBucket: 'starktracklog.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
