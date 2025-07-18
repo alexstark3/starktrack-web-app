@@ -860,7 +860,7 @@ class _LogsTableState extends State<_LogsTable> {
                   children: [
                     ExpansionTile(
                       key: ValueKey('group_${groupIdx}_$groupKey'),
-                      initiallyExpanded: groupIdx == 0,
+                      initiallyExpanded: (groupIdx == 0) as bool,
                       title: Text(
                         groupKey,
                         style: TextStyle(

@@ -97,13 +97,13 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
      // print('LOGIN: User found! Navigating to dashboard for company $companyId');
 
     } on FirebaseAuthException catch (e) {
-//      print('LOGIN: FirebaseAuthException: ${e.message}');
+      print('LOGIN: FirebaseAuthException: ${e.message}');
       if (!mounted) return;
       setState(() {
-        _error = e.message;
+        _error = e.message ?? 'Authentication failed';
       });
     } catch (e) {
-   //   print('LOGIN: Unknown error: $e');
+      print('LOGIN: Unknown error: $e');
       if (!mounted) return;
       setState(() {
         _error = 'Unknown error: $e';
