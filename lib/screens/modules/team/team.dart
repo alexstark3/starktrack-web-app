@@ -28,150 +28,72 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
+    
     return Container(
-      color: colors.dashboardBackground,
+      color: colors.backgroundDark,
       child: Column(
         children: [
           // --- Tab bar ---
           Padding(
-            padding: const EdgeInsets.only(top: 12, left: 54, right: 24),
-            child: Row(
-              children: [
-                // Members tab
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = 0;
-                      _selectedMemberDoc = null;
-                    });
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 140),
-                    margin: const EdgeInsets.only(right: 16),
-                    padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: _selectedIndex == 0 ? Colors.white : colors.lightGray,
-                      borderRadius: BorderRadius.vertical(
-                        top: const Radius.circular(6),
-                        bottom: Radius.circular(_selectedIndex == 0 ? 0 : 6),
-                      ),
-                      boxShadow: _selectedIndex == 0
-                          ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
-                          : [],
+            padding: const EdgeInsets.only(top: 12, left: 40, right: 24), // Move tabs more to the left
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final showOnlyIcons = constraints.maxWidth < 600; // Show only icons on small screens
+                
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    // Members tab
+                    _TeamTab(
+                      icon: Icons.group,
+                      title: 'Members',
+                      isSelected: _selectedIndex == 0,
+                      colors: colors,
+                      selectedMemberDoc: _selectedMemberDoc,
+                      showOnlyIcon: showOnlyIcons,
+                      onTap: () {
+                        setState(() {
+                          _selectedIndex = 0;
+                          _selectedMemberDoc = null;
+                        });
+                      },
                     ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.group,
-                            size: 20,
-                            color: _selectedIndex == 0
-                                ? (_selectedMemberDoc == null ? colors.primaryBlue : colors.darkGray)
-                                : colors.darkGray),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Members',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: _selectedIndex == 0 ? FontWeight.bold : FontWeight.w600,
-                            color: _selectedIndex == 0
-                                ? (_selectedMemberDoc == null ? colors.primaryBlue : colors.darkGray)
-                                : colors.darkGray,
-                          ),
-                        ),
-                      ],
+                    // Projects tab
+                    _TeamTab(
+                      icon: Icons.folder_copy_rounded,
+                      title: 'Projects',
+                      isSelected: _selectedIndex == 1,
+                      colors: colors,
+                      selectedProject: _selectedProject,
+                      showOnlyIcon: showOnlyIcons,
+                      onTap: () {
+                        setState(() {
+                          _selectedIndex = 1;
+                          _selectedProject = null;
+                        });
+                      },
                     ),
-                  ),
-                ),
-                // Projects tab
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = 1;
-                      _selectedProject = null;
-                    });
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 140),
-                    margin: const EdgeInsets.only(right: 16),
-                    padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: _selectedIndex == 1 ? Colors.white : colors.lightGray,
-                      borderRadius: BorderRadius.vertical(
-                        top: const Radius.circular(6),
-                        bottom: Radius.circular(_selectedIndex == 1 ? 0 : 6),
-                      ),
-                      boxShadow: _selectedIndex == 1
-                          ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
-                          : [],
+                    // Clients tab
+                    _TeamTab(
+                      icon: Icons.people_alt_rounded,
+                      title: 'Clients',
+                      isSelected: _selectedIndex == 2,
+                      colors: colors,
+                      selectedClient: _selectedClient,
+                      showOnlyIcon: showOnlyIcons,
+                      onTap: () {
+                        setState(() {
+                          _selectedIndex = 2;
+                          _selectedClient = null;
+                        });
+                      },
                     ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.folder_copy_rounded,
-                            size: 20,
-                            color: _selectedIndex == 1
-                                ? (_selectedProject == null ? colors.primaryBlue : colors.darkGray)
-                                : colors.darkGray),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Projects',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: _selectedIndex == 1 ? FontWeight.bold : FontWeight.w600,
-                            color: _selectedIndex == 1
-                                ? (_selectedProject == null ? colors.primaryBlue : colors.darkGray)
-                                : colors.darkGray,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                // Clients tab
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = 2;
-                      _selectedClient = null;
-                    });
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 140),
-                    margin: const EdgeInsets.only(right: 16),
-                    padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: _selectedIndex == 2 ? Colors.white : colors.lightGray,
-                      borderRadius: BorderRadius.vertical(
-                        top: const Radius.circular(6),
-                        bottom: Radius.circular(_selectedIndex == 2 ? 0 : 6),
-                      ),
-                      boxShadow: _selectedIndex == 2
-                          ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
-                          : [],
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.people_alt_rounded,
-                            size: 20,
-                            color: _selectedIndex == 2
-                                ? (_selectedClient == null ? colors.primaryBlue : colors.darkGray)
-                                : colors.darkGray),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Clients',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: _selectedIndex == 2 ? FontWeight.bold : FontWeight.w600,
-                            color: _selectedIndex == 2
-                                ? (_selectedClient == null ? colors.primaryBlue : colors.darkGray)
-                                : colors.darkGray,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+                                     ],
+                 );
+               },
             ),
           ),
+          
           // --- Main white area ---
           Expanded(
             child: Padding(
@@ -180,14 +102,18 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                 children: [
                   Align(
                     alignment: Alignment.topCenter,
-                    child: _NoTopShadowMaterial(
-                      borderRadius: const BorderRadius.all(Radius.circular(10)),
-                      color: Colors.white,
-                      elevation: 10,
-                      child: Container(
-                        padding: const EdgeInsets.fromLTRB(28, 26, 28, 26),
-                        margin: const EdgeInsets.only(top: 0),
-                        child: _buildTabContent(),
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.all(Radius.circular(12)),
+                      child: Material(
+                        elevation: Theme.of(context).brightness == Brightness.light ? 2 : 0,
+                        borderRadius: BorderRadius.circular(12),
+                        color: Theme.of(context).brightness == Brightness.dark 
+                          ? colors.cardColorDark 
+                          : Colors.white,
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(28, 26, 28, 26),
+                          child: _buildTabContent(),
+                        ),
                       ),
                     ),
                   ),
@@ -242,45 +168,99 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
   }
 }
 
-// --- Helper for shadowed white card, no shadow on top ---
-class _NoTopShadowMaterial extends StatelessWidget {
-  final Widget child;
-  final Color color;
-  final BorderRadius borderRadius;
-  final double elevation;
 
-  const _NoTopShadowMaterial({
-    required this.child,
-    required this.color,
-    required this.borderRadius,
-    this.elevation = 6,
-  });
+
+// --- Team Tab Widget with isolated hover state ---
+class _TeamTab extends StatefulWidget {
+  final IconData icon;
+  final String title;
+  final bool isSelected;
+  final AppColors colors;
+  final VoidCallback onTap;
+  final DocumentSnapshot? selectedMemberDoc;
+  final Map<String, dynamic>? selectedProject;
+  final Map<String, dynamic>? selectedClient;
+  final bool showOnlyIcon;
+  const _TeamTab({
+    Key? key,
+    required this.icon,
+    required this.title,
+    required this.isSelected,
+    required this.colors,
+    required this.onTap,
+    this.selectedMemberDoc,
+    this.selectedProject,
+    this.selectedClient,
+    this.showOnlyIcon = false,
+  }) : super(key: key);
+
+  @override
+  State<_TeamTab> createState() => _TeamTabState();
+}
+
+class _TeamTabState extends State<_TeamTab> {
+  bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {
-    return PhysicalShape(
-      elevation: elevation,
-      clipper: _BottomOnlyClipper(borderRadius),
-      color: color,
-      shadowColor: Colors.black12,
-      child: ClipRRect(
-        borderRadius: borderRadius,
-        child: child,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    // Determine if tab has selected content
+    final hasSelectedContent = widget.selectedMemberDoc != null || 
+                              widget.selectedProject != null || 
+                              widget.selectedClient != null;
+    
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 140),
+          margin: const EdgeInsets.only(right: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          decoration: BoxDecoration(
+            color: widget.isSelected 
+              ? (isDark ? widget.colors.cardColorDark : Colors.white)
+              : (_isHovered && isDark ? widget.colors.cardColorDark : (isDark ? widget.colors.dashboardBackground : widget.colors.dashboardBackground)),
+            borderRadius: BorderRadius.vertical(
+              top: const Radius.circular(6),
+              bottom: Radius.circular(widget.isSelected ? 0 : 0),
+            ),
+/*            boxShadow: !isDark && widget.isSelected
+                ? [BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 1))]
+                : null,
+            border: isDark
+                ? (widget.isSelected ? null : Border.all(color: const Color(0xFF2A2A2A), width: 1))
+                : (widget.isSelected ? null : Border.all(color: Colors.black26, width: 1)),*/
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                widget.icon,
+                size: 20,
+                color: widget.isSelected
+                    ? (hasSelectedContent ? widget.colors.darkGray : widget.colors.primaryBlue)
+                    : widget.colors.darkGray,
+              ),
+              if (!widget.showOnlyIcon) ...[
+                const SizedBox(width: 8),
+                Text(
+                  widget.title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: widget.isSelected ? FontWeight.bold : FontWeight.w600,
+                    color: widget.isSelected
+                        ? (hasSelectedContent ? widget.colors.darkGray : widget.colors.primaryBlue)
+                        : widget.colors.darkGray,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }
-}
-
-class _BottomOnlyClipper extends CustomClipper<Path> {
-  final BorderRadius borderRadius;
-  _BottomOnlyClipper(this.borderRadius);
-
-  @override
-  Path getClip(Size size) {
-    return Path()
-      ..addRRect(borderRadius.toRRect(Rect.fromLTWH(0, 0, size.width, size.height)));
-  }
-
-  @override
-  bool shouldReclip(_BottomOnlyClipper oldClipper) => false;
 }

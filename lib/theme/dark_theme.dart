@@ -4,7 +4,7 @@ import 'app_colors.dart';
 final ThemeData darkTheme = ThemeData(
   brightness: Brightness.dark,
   colorScheme: ColorScheme.dark(
-    background: const Color.fromARGB(255, 25, 25, 25),
+    surface: const Color.fromARGB(255, 25, 25, 25),
     primary: Color(0xFF65AAEA),
     secondary: Color(0xFF67C187),
     

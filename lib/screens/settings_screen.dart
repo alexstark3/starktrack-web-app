@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:provider/provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../theme/app_colors.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -10,7 +11,7 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final appColors = Theme.of(context).extension<AppColors>()!;
     final isDark = themeProvider.themeMode == ThemeMode.dark;
     final currentLang = themeProvider.language;
 
@@ -22,7 +23,7 @@ class SettingsScreen extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      color: colorScheme.surfaceVariant.withOpacity(0.15),
+      color: appColors.backgroundDark,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 48.0, vertical: 40),
         child: Column(
@@ -48,7 +49,9 @@ class SettingsScreen extends StatelessWidget {
                       padding: 3,
                       activeColor: green,
                       inactiveColor: Colors.black,
-                      toggleColor: Colors.white,
+                      toggleColor: Theme.of(context).brightness == Brightness.dark 
+                        ? const Color(0xFF2A2A2A) 
+                        : Colors.white,
                       value: isDark,
                       onToggle: (_) => themeProvider.toggleTheme(),
                     ),

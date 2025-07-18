@@ -40,7 +40,7 @@ class _UserProfileMenuState extends State<UserProfileMenu> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: const Color(0xFF1490DE).withOpacity(0.7),
+              color: const Color(0xFF1490DE).withValues(alpha:0.7),
               borderRadius: BorderRadius.circular(4),
             ),
             alignment: Alignment.center,
@@ -54,44 +54,83 @@ class _UserProfileMenuState extends State<UserProfileMenu> {
           ),
         ),
         if (_showMenu)
-          Positioned(
-            top: 48,
-            right: 0,
-            child: Material(
-              elevation: 6,
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                width: 220,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.fullName,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _showMenu = false;
+              });
+            },
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              color: Colors.transparent,
+              child: Stack(
+                children: [
+                  Positioned(
+                    top: 48,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: () {}, // Prevent closing when tapping on the menu itself
+                      child: Material(
+                        elevation: 6,
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          width: 220,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.fullName,
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                widget.email,
+                                style: const TextStyle(color: Colors.grey),
+                              ),
+                              const Divider(height: 24),
+                              ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                leading: const Icon(
+                                  Icons.settings,
+                                  color: Colors.grey,
+                                  size: 20,
+                                ),
+                                title: const Text('Settings'),
+                                onTap: () {
+                                  setState(() {
+                                    _showMenu = false;
+                                  });
+                                  widget.onSettings();
+                                },
+                              ),
+                              ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                leading: const Icon(
+                                  Icons.logout,
+                                  color: Colors.grey,
+                                  size: 20,
+                                ),
+                                title: const Text('Log out'),
+                                onTap: () {
+                                  setState(() {
+                                    _showMenu = false;
+                                  });
+                                  widget.onLogout();
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.email,
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                    const Divider(height: 24),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('Settings'),
-                      onTap: widget.onSettings,
-                    ),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('Log out'),
-                      onTap: widget.onLogout,
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),

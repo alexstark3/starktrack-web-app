@@ -96,7 +96,7 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
     );
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).extension<AppColors>()!.backgroundDark,
       body: Stack(
         children: [
           // ── Layer 1: body + padding for rail & bar ──

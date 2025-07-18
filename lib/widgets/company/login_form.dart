@@ -46,25 +46,33 @@ class LoginForm extends StatelessWidget {
           const SizedBox(height: 24),
 
           /* ───── Card ───── */
-          Card(
-            elevation: 4,
+          Container(
+            width: cardW,
             margin: const EdgeInsets.symmetric(horizontal: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            child: Container(
-              width: cardW,
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  _buildFields(),
-                  const SizedBox(height: 24),
-                  if (error != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Text(error!, style: const TextStyle(color: Colors.red)),
-                    ),
-                  _AnimatedLoginButton(loading: loading, onTap: onLogin),
-                ],
+                          decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Theme.of(context).brightness == Brightness.dark 
+                  ? const Color(0xFF2D2D30)
+                  : const Color(0xFFF0F0F0),
+                boxShadow: Theme.of(context).brightness == Brightness.light 
+                  ? [BoxShadow(color: Colors.black.withValues(alpha:0.1), blurRadius: 10, offset: Offset(0, 4))]
+                  : null,
+                border: Theme.of(context).brightness == Brightness.dark 
+                  ? Border.all(color: const Color(0xFF404040), width: 1)
+                  : null,
               ),
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                _buildFields(),
+                const SizedBox(height: 24),
+                if (error != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(error!, style: const TextStyle(color: Colors.red)),
+                  ),
+                _AnimatedLoginButton(loading: loading, onTap: onLogin),
+              ],
             ),
           ),
 

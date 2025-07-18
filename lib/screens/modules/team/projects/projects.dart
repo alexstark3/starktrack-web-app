@@ -83,20 +83,26 @@ class _ProjectsListState extends State<_ProjectsList> {
         Row(
           children: [
             Expanded(
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search by project name',
-                  prefixIcon: const Icon(Icons.search),
-                  isDense: true,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: colors.midGray),
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Theme.of(context).brightness == Brightness.dark ? Colors.white24 : Colors.black26,
+                    width: 1,
                   ),
-                  filled: true,
-                  fillColor: colors.lightGray,
+                  color: colors.lightGray,
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                style: TextStyle(color: colors.textColor),
-                onChanged: (val) => setState(() => _searchProject = val.trim().toLowerCase()),
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Search by project name',
+                    prefixIcon: const Icon(Icons.search),
+                    isDense: true,
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                  style: TextStyle(color: colors.textColor),
+                  onChanged: (val) => setState(() => _searchProject = val.trim().toLowerCase()),
+                ),
               ),
             ),
             const SizedBox(width: 16),

@@ -5,6 +5,7 @@ import 'today_line.dart';
 import 'time_entry_card.dart';
 import 'chips_card.dart';
 import 'package:starktrack/screens/modules/time_tracker/logs_list.dart';
+import '../../../theme/app_colors.dart';
 
 class TimeTrackerScreen extends StatefulWidget {
   final String companyId;
@@ -69,7 +70,7 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
         .orderBy('begin');
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).extension<AppColors>()!.backgroundDark,
       resizeToAvoidBottomInset: false,
       body: FutureBuilder<List<Map<String, String>>>(
         future: _projectsFuture,

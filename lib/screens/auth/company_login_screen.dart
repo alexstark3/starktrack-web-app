@@ -33,7 +33,7 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
         password: _passwordController.text,
       );
       final userId = authResult.user!.uid;
-      print('LOGIN: Authenticated with UID=$userId');
+      // print('LOGIN: Authenticated with UID=$userId');
 
       // 2. Find the company the user belongs to (no hardcoding)
       final companiesSnapshot = await FirebaseFirestore.instance
@@ -56,7 +56,7 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
       }
 
       if (companyId == null || userDocSnap == null) {
-        print('LOGIN: No company assigned for this user.');
+      //  print('LOGIN: No company assigned for this user.');
         setState(() {
           _error = 'You are not assigned to any company. Contact your administrator.';
         });
@@ -94,13 +94,13 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
           ),
         ),
       );
-      print('LOGIN: User found! Navigating to dashboard for company $companyId');
+     // print('LOGIN: User found! Navigating to dashboard for company $companyId');
 
     } on FirebaseAuthException catch (e) {
       print('LOGIN: FirebaseAuthException: ${e.message}');
       if (!mounted) return;
       setState(() {
-        _error = e.message;
+        _error = e.message ?? 'Authentication failed';
       });
     } catch (e) {
       print('LOGIN: Unknown error: $e');

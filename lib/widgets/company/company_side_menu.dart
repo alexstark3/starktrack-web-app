@@ -1,5 +1,7 @@
 // lib/widgets/company/company_side_menu.dart
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class SideMenuItem {
   final String label;
@@ -14,40 +16,72 @@ class SideMenuItem {
   });
 }
 
-class CompanySideMenu extends StatelessWidget {
+class CompanySideMenu extends StatefulWidget {
   final List<SideMenuItem> menuItems;
   final bool compact;
   final bool showBrand;
-  final String version; // <-- Added version param
 
   const CompanySideMenu({
     super.key,
     required this.menuItems,
     this.compact = false,
     this.showBrand = true,
-    this.version = 'Stark Track v1.521b', // <-- Default is empty
   });
+
+  @override
+  State<CompanySideMenu> createState() => _CompanySideMenuState();
+}
+
+class _CompanySideMenuState extends State<CompanySideMenu> {
+  String _appInfo = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAppInfo();
+  }
+
+  Future<void> _loadAppInfo() async {
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      print('PackageInfo loaded - version: "${packageInfo.version}", buildNumber: "${packageInfo.buildNumber}"'); // Debug print
+      print('Platform: ${kIsWeb ? 'Web' : 'Native'}'); // Debug print
+      
+      // Use clean build number (630) without the + prefix
+      String buildNumber = '630';
+      
+      setState(() {
+        _appInfo = 'Stark Track 1.1.$buildNumber';
+      });
+      print('Final app info: $_appInfo'); // Debug print
+    } catch (e) {
+      print('Error loading app info: $e'); // Debug print
+      setState(() {
+        _appInfo = 'Stark Track 1.1.630'; // Fallback with build number
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme  = Theme.of(context);
-    final width  = compact ? 72.0 : 220.0;
+    final width  = widget.compact ? 72.0 : 220.0;
 
     return Material(
       elevation: 8,
-      shadowColor: Colors.black.withOpacity(0.80),
+      shadowColor: Colors.black.withValues(alpha:0.80),
       clipBehavior: Clip.none,
       child: SizedBox(
         width: width,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (showBrand) ...[
+            if (widget.showBrand) ...[
               const SizedBox(height: 12),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25),
                 child: Text(
-                  compact ? 'ST' : 'Stark Track',
+                  widget.compact ? 'ST' : 'Stark Track',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -58,28 +92,66 @@ class CompanySideMenu extends StatelessWidget {
               Divider(
                 height: 1,
                 thickness: 1,
-                color: theme.colorScheme.outlineVariant.withOpacity(0.30),
+                color: theme.colorScheme.outlineVariant.withValues(alpha:0.30),
               ),
             ],
             // Use Expanded to push the version label to the bottom
             Expanded(
               child: ListView(
                 padding: EdgeInsets.zero,
-                children: menuItems
-                    .map((m) => _AnimatedMenuItem(item: m, compact: compact))
+                children: widget.menuItems
+                    .map((m) => _AnimatedMenuItem(item: m, compact: widget.compact))
                     .toList(),
               ),
             ),
-            // Version label at the bottom
-            if (version.isNotEmpty)
+            // Version and copyright at the bottom
+            if (_appInfo.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Text(
-                  version,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: theme.colorScheme.onSurface.withOpacity(0.4),
-                  ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    widget.compact 
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'ST',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                color: theme.colorScheme.onSurface.withValues(alpha:0.6),
+                              ),
+                            ),
+                            Text(
+                              _appInfo.replaceAll('Stark Track ', ''),
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                color: theme.colorScheme.onSurface.withValues(alpha:0.6),
+                              ),
+                            ),
+                          ],
+                        )
+                      : Text(
+                          _appInfo,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: theme.colorScheme.onSurface.withValues(alpha:0.6),
+                          ),
+                        ),
+                    if (!widget.compact) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        '© 2025 starktrack.ch\n© All rights reserved.',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: theme.colorScheme.onSurface.withValues(alpha:0.4),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
           ],
@@ -107,7 +179,7 @@ class _AnimatedMenuItemState extends State<_AnimatedMenuItem> {
     final isHL  = widget.item.selected || _hovered;
     final color = widget.item.selected
         ? theme.colorScheme.primary
-        : theme.colorScheme.onSurface.withOpacity(0.7);
+        : theme.colorScheme.onSurface.withValues(alpha:0.7);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
@@ -121,7 +193,7 @@ class _AnimatedMenuItemState extends State<_AnimatedMenuItem> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
             color: isHL
-                ? theme.colorScheme.primary.withOpacity(0.20)
+                ? theme.colorScheme.primary.withValues(alpha:0.20)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),

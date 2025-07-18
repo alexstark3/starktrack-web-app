@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../theme/app_colors.dart';
+import 'add_client_dialog.dart';
 
 class ViewClients extends StatefulWidget {
   final String companyId;
@@ -32,7 +33,7 @@ class _ViewClientsState extends State<ViewClients> {
         .collection('companies')
         .doc(widget.companyId)
         .collection('projects')
-        .where('clientId', isEqualTo: widget.client['id'])
+        .where('client', isEqualTo: widget.client['id'])
         .get();
     return snap.docs.map((d) {
       final data = d.data();
@@ -61,44 +62,49 @@ class _ViewClientsState extends State<ViewClients> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header row: Client name + Edit
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: Text(
-                client['name'] ?? '',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: colors.primaryBlue,
-                ),
+        // Client name
+        Text(
+          client['name'] ?? '',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: colors.primaryBlue,
+          ),
+        ),
+        const SizedBox(height: 10),
+        // Edit button - left aligned under name
+        ElevatedButton.icon(
+          onPressed: () async {
+            final result = await showDialog<bool>(
+              context: context,
+              builder: (ctx) => EditClientDialog(
+                companyId: widget.companyId,
+                client: widget.client,
               ),
-            ),
-            ElevatedButton.icon(
-              onPressed: widget.onEdit,
-              icon: const Icon(Icons.edit, size: 20),
-              label: const Text('Edit'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colors.primaryBlue,
-                foregroundColor: colors.whiteTextOnBlue,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-            ),
-          ],
+            );
+            if (result == true) {
+              widget.onEdit(); // Call the callback to refresh the parent
+            }
+          },
+          icon: const Icon(Icons.edit, size: 20),
+          label: const Text('Edit'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: colors.primaryBlue,
+            foregroundColor: colors.whiteTextOnBlue,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
         ),
         const SizedBox(height: 14),
-        // Info fields (Address, Contact, Email, Phone, Country)
-        Wrap(
-          runSpacing: 10,
-          spacing: 32,
+        // Info fields - left aligned in column
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _infoRow('Address', address),
-            _infoRow('Contact Person', person),
-            _infoRow('Email', email),
-            _infoRow('Phone', phone),
-            _infoRow('City', client['city'] ?? ''),
-            _infoRow('Country', country),
+            if (address.isNotEmpty) _infoRow('Address', address),
+            if (person.isNotEmpty) _infoRow('Contact Person', person),
+            if (email.isNotEmpty) _infoRow('Email', email),
+            if (phone.isNotEmpty) _infoRow('Phone', phone),
+            if ((client['city'] ?? '').isNotEmpty) _infoRow('City', client['city'] ?? ''),
+            if (country.isNotEmpty) _infoRow('Country', country),
           ],
         ),
         const SizedBox(height: 24),
@@ -136,13 +142,21 @@ class _ViewClientsState extends State<ViewClients> {
     );
   }
 
-  Widget _infoRow(String label, String value) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Text('$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
-      Flexible(child: Text(value, overflow: TextOverflow.ellipsis, maxLines: 1)),
-      const SizedBox(width: 30),
-    ],
+  Widget _infoRow(String label, String value) => Padding(
+    padding: const EdgeInsets.only(bottom: 8.0),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
+        Expanded(
+          child: Text(
+            value,
+            maxLines: null,
+            softWrap: true,
+          ),
+        ),
+      ],
+    ),
   );
 
   Widget _projectTableHeader(AppColors colors) {
@@ -151,7 +165,7 @@ class _ViewClientsState extends State<ViewClients> {
       margin: const EdgeInsets.only(bottom: 2),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: colors.lightGray, width: 1)),
-        color: colors.lightGray.withOpacity(0.35),
+        color: colors.lightGray.withValues(alpha:0.35),
       ),
       child: Row(
         children: const [
@@ -230,7 +244,7 @@ class _ProjectRow extends StatelessWidget {
           child: Row(
             children: [
               Expanded(flex: 2, child: Text(project['name'] ?? '')),
-              Expanded(flex: 2, child: Text(project['id'] ?? '')),
+              Expanded(flex: 2, child: Text(project['project_id'] ?? '')),
               Expanded(flex: 3, child: Text(address)),
               Expanded(flex: 2, child: Text(hoursText)),
               Expanded(flex: 2, child: Text(expensesText)),

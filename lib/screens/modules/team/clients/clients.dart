@@ -44,20 +44,26 @@ class _ClientsTabState extends State<ClientsTab> {
             children: [
               Expanded(
                 flex: 2,
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Search by client name, person, or email',
-                    prefixIcon: const Icon(Icons.search),
-                    isDense: true,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: colors.midGray),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Theme.of(context).brightness == Brightness.dark ? Colors.white24 : Colors.black26,
+                      width: 1,
                     ),
-                    filled: true,
-                    fillColor: colors.lightGray,
+                    color: colors.lightGray,
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  style: TextStyle(color: colors.textColor),
-                  onChanged: (val) => setState(() => _search = val.trim().toLowerCase()),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Search by client name, person, or email',
+                      prefixIcon: const Icon(Icons.search),
+                      isDense: true,
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                    style: TextStyle(color: colors.textColor),
+                    onChanged: (val) => setState(() => _search = val.trim().toLowerCase()),
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -68,12 +74,12 @@ class _ClientsTabState extends State<ClientsTab> {
                   backgroundColor: colors.primaryBlue,
                   foregroundColor: colors.whiteTextOnBlue,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  elevation: 1,
+                  elevation: 0,
                   padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                   textStyle: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 onPressed: () async {
-                  // TODO: your add-client dialog code
+                  // client dialog code
                 },
               ),
             ],

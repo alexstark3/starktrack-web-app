@@ -84,7 +84,7 @@ class _AdminPanelState extends State<AdminPanel> {
         final appColors = Theme.of(ctx).extension<AppColors>()!;
         return StatefulBuilder(builder: (ctx, setState) {
           return Dialog(
-            backgroundColor: appColors.backgroundLight,
+            backgroundColor: appColors.backgroundDark,
             child: Padding(
               padding: const EdgeInsets.all(24.0),
               child: SizedBox(
@@ -581,234 +581,224 @@ class _AdminPanelState extends State<AdminPanel> {
     );
   }
 
-  String _roleLabel(dynamic v) {
-    switch (v) {
-      case 'company_admin':
-        return 'Company Admin';
-      case 'admin':
-        return 'Admin';
-      case 'team_leader':
-        return 'Team Leader';
-      case 'worker':
-        return 'Worker';
-      default:
-        return v.toString();
-    }
-  }
 
-  String _moduleLabel(dynamic v) {
-    switch (v) {
-      case 'time_tracker':
-        return 'Time Tracker';
-      case 'admin':
-        return 'Admin';
-      default:
-        return v.toString();
-    }
-  }
-
-  String _teamLeaderName(dynamic id) {
-    if (id == null || id == '') return '-';
-    try {
-      final match = _teamLeaders.firstWhere((tl) => tl['id'] == id, orElse: () => {});
-      if (match.isEmpty) return '-';
-      return '${match['firstName']} ${match['surname']}';
-    } catch (_) {
-      return '-';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     final appColors = Theme.of(context).extension<AppColors>()!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
-      color: appColors.dashboardBackground,
+      color: appColors.backgroundDark,
       padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          Row(
+      child: Card(
+        elevation: isDark ? 0 : 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
             children: [
-              Expanded(
-                child: TextField(
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.search, color: appColors.darkGray),
-                    hintText: 'Search by name, email, or role',
-                    hintStyle: TextStyle(color: appColors.darkGray),
-                    filled: true,
-                    fillColor: appColors.lightGray,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: appColors.darkGray),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: isDark ? Colors.white24 : Colors.black26,
+                          width: 1,
+                        ),
+                        color: appColors.lightGray,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.search),
+                          hintText: 'Search by name, email, or role',
+                          isDense: true,
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        ),
+                        style: TextStyle(color: appColors.textColor),
+                        onChanged: (v) => setState(() => _searchText = v.trim()),
+                      ),
                     ),
                   ),
-                  style: TextStyle(color: appColors.textColor),
-                  onChanged: (v) => setState(() => _searchText = v.trim()),
-                ),
+                  const SizedBox(width: 18),
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.person_add, color: appColors.whiteTextOnBlue),
+                    label: Text('Add New User',
+                        style: TextStyle(
+                            color: appColors.whiteTextOnBlue,
+                            fontWeight: FontWeight.bold)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: appColors.primaryBlue,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 14, horizontal: 18),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: () => _showUserDialog(),
+                  ),
+                ],
               ),
-              const SizedBox(width: 18),
-              ElevatedButton.icon(
-                icon: Icon(Icons.person_add, color: appColors.whiteTextOnBlue),
-                label: Text('Add New User',
-                    style: TextStyle(
-                        color: appColors.whiteTextOnBlue,
-                        fontWeight: FontWeight.bold)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: appColors.primaryBlue,
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 14, horizontal: 18),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                ),
-                onPressed: () => _showUserDialog(),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('companies')
-                  .doc(widget.companyId)
-                  .collection('users')
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData)
-                  return Center(child: CircularProgressIndicator());
-                var docs = snapshot.data!.docs;
-                if (_searchText.isNotEmpty) {
-                  docs = docs.where((doc) {
-                    final d = doc.data() as Map<String, dynamic>;
-                    final s = _searchText.toLowerCase();
-                    return (d['firstName'] ?? '')
-                            .toString()
-                            .toLowerCase()
-                            .contains(s) ||
-                        (d['surname'] ?? '')
-                            .toString()
-                            .toLowerCase()
-                            .contains(s) ||
-                        (d['email'] ?? '')
-                            .toString()
-                            .toLowerCase()
-                            .contains(s) ||
-                        (d['roles'] ?? [])
-                            .toString()
-                            .toLowerCase()
-                            .contains(s);
-                  }).toList();
-                }
-                return Card(
-                  color: appColors.lightGray,
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: DataTable(
-                      headingRowColor:
-                          MaterialStateProperty.all(appColors.primaryBlue.withOpacity(0.14)),
-                      dataRowColor: MaterialStateProperty.all(appColors.lightGray),
-                      columns: const [
-                        DataColumn(label: Text('Name')),
-                        DataColumn(label: Text('Email')),
-                        DataColumn(label: Text('Roles')),
-                        DataColumn(label: Text('Modules')),
-                        DataColumn(label: Text('Active')),
-                        DataColumn(label: Text('Team Leader')),
-                        DataColumn(label: Text('Workload')),
-                        DataColumn(label: Text('Weekly Hours')),
-                        DataColumn(label: Text('Edit')),
-                        DataColumn(label: Text('Delete')),
-                      ],
-                      rows: docs.map((doc) {
-                        final data = doc.data() as Map<String, dynamic>;
-                        final bool isCompanyAdmin = (data['roles'] as List<dynamic>?)?.contains('company_admin') == true;
+              const SizedBox(height: 24),
+              Expanded(
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('companies')
+                      .doc(widget.companyId)
+                      .collection('users')
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    var docs = snapshot.data!.docs;
+                    if (_searchText.isNotEmpty) {
+                      docs = docs.where((doc) {
+                        final d = doc.data() as Map<String, dynamic>;
+                        final s = _searchText.toLowerCase();
+                        return (d['firstName'] ?? '')
+                                .toString()
+                                .toLowerCase()
+                                .contains(s) ||
+                            (d['surname'] ?? '')
+                                .toString()
+                                .toLowerCase()
+                                .contains(s) ||
+                            (d['email'] ?? '')
+                                .toString()
+                                .toLowerCase()
+                                .contains(s) ||
+                            (d['roles'] ?? [])
+                                .toString()
+                                .toLowerCase()
+                                .contains(s);
+                      }).toList();
+                    }
+                    return SingleChildScrollView(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                                                  child: DataTable(
+                            headingRowColor: WidgetStateProperty.all(Colors.transparent),//WidgetStateProperty Previously MaterialStateProperty
+                            dataRowColor: WidgetStateProperty.all(Colors.transparent), //MaterialStateProperty
+                          columns: const [
+                            DataColumn(label: Text('Name')),
+                            DataColumn(label: Text('Email')),
+                            DataColumn(label: Text('Roles')),
+                            DataColumn(label: Text('Modules')),
+                            DataColumn(label: Text('Active')),
+                            DataColumn(label: Text('Team Leader')),
+                            DataColumn(label: Text('Workload')),
+                            DataColumn(label: Text('Weekly Hours')),
+                            DataColumn(label: Text('Edit')),
+                            DataColumn(label: Text('Delete')),
+                          ],
+                          rows: docs.map((doc) {
+                            final data = doc.data() as Map<String, dynamic>;
+                            final bool isCompanyAdmin = (data['roles'] as List<dynamic>?)?.contains('company_admin') == true;
 
-                        return DataRow(cells: [
-                          DataCell(Text(
-                            '${data['firstName'] ?? ''} ${data['surname'] ?? ''}',
-                            style: TextStyle(color: appColors.textColor),
-                          )),
-                          DataCell(Text(
-                            data['email'] ?? '',
-                            style: TextStyle(color: appColors.textColor),
-                          )),
-                          DataCell(Text(
-                            (data['roles'] as List<dynamic>? ?? [])
-                                .map((e) => _roleLabel(e))
-                                .join(', '),
-                            style: TextStyle(color: appColors.textColor),
-                          )),
-                          DataCell(Text(
-                            (data['modules'] as List<dynamic>? ?? [])
-                                .map((e) => _moduleLabel(e))
-                                .join(', '),
-                            style: TextStyle(color: appColors.textColor),
-                          )),
-                          DataCell(Switch(
-                            value: data['active'] ?? true,
-                            activeColor: appColors.primaryBlue,
-                            inactiveThumbColor: appColors.lightGray,
-                            onChanged: (v) {
-                              FirebaseFirestore.instance
-                                  .collection('companies')
-                                  .doc(widget.companyId)
-                                  .collection('users')
-                                  .doc(doc.id)
-                                  .update({'active': v});
-                            },
-                          )),
-                          DataCell(Text(
-                            _teamLeaderName(data['teamLeaderId']),
-                            style: TextStyle(color: appColors.textColor),
-                          )),
-                          DataCell(Text(
-                            '${data['workPercent'] ?? 100}%',
-                            style: TextStyle(color: appColors.textColor),
-                          )),
-                          DataCell(Text(
-                            '${data['weeklyHours'] ?? 40}h',
-                            style: TextStyle(color: appColors.textColor),
-                          )),
-                          // EDIT
-                          DataCell(
-                            isCompanyAdmin && !isSuperAdmin
-                              ? Icon(Icons.lock, color: appColors.darkGray)
-                              : IconButton(
-                                  icon: Icon(Icons.edit, color: appColors.primaryBlue),
+                            return DataRow(cells: [
+                              DataCell(Text(
+                                '${data['firstName'] ?? ''} ${data['surname'] ?? ''}',
+                                style: TextStyle(color: appColors.textColor),
+                              )),
+                              DataCell(Text(
+                                data['email'] ?? '',
+                                style: TextStyle(color: appColors.textColor),
+                              )),
+                              DataCell(Text(
+                                (data['roles'] as List<dynamic>?)?.join(', ') ?? '',
+                                style: TextStyle(color: appColors.textColor),
+                              )),
+                              DataCell(Text(
+                                (data['modules'] as List<dynamic>?)?.join(', ') ?? '',
+                                style: TextStyle(color: appColors.textColor),
+                              )),
+                              DataCell(
+                                Checkbox(
+                                  value: data['active'] == true,
+                                  onChanged: (checked) => _toggleActive(doc.id, checked ?? false),
+                                  activeColor: appColors.primaryBlue,
+                                  checkColor: Colors.white,
+                                ),
+                              ),
+                              DataCell(
+                                DropdownButton<String>(
+                                  value: data['teamLeader'] ?? 'none',
+                                  items: [
+                                    const DropdownMenuItem(value: 'none', child: Text('None')),
+                                    ..._teamLeaders.map((tl) => DropdownMenuItem(
+                                          value: tl['id'],
+                                          child: Text('${tl['firstName']} ${tl['surname']}'),
+                                        )),
+                                  ],
+                                  onChanged: (val) => _updateTeamLeader(doc.id, val),
+                                ),
+                              ),
+                              DataCell(
+                                SizedBox(
+                                  width: 80,
+                                  child: TextField(
+                                    controller: TextEditingController(text: '${data['workPercent'] ?? 100}'),
+                                    keyboardType: TextInputType.number,
+                                    onSubmitted: (val) => _updateWorkPercent(doc.id, int.tryParse(val) ?? 100),
+                                    style: TextStyle(color: appColors.textColor),
+                                    decoration: InputDecoration(
+                                      suffixText: '%',
+                                      isDense: true,
+                                      contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                SizedBox(
+                                  width: 80,
+                                  child: TextField(
+                                    controller: TextEditingController(text: data['weeklyHours']?.toString() ?? '40'),
+                                    keyboardType: TextInputType.number,
+                                    onSubmitted: (val) => _updateWeeklyHours(doc.id, int.tryParse(val) ?? 40),
+                                    style: TextStyle(color: appColors.textColor),
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                IconButton(
+                                  icon: const Icon(Icons.edit),
+                                  color: appColors.primaryBlue,
                                   onPressed: () => _showUserDialog(editUser: doc),
                                 ),
-                          ),
-                          // DELETE
-                          DataCell(
-                            isCompanyAdmin && !isSuperAdmin
-                              ? Icon(Icons.lock, color: appColors.darkGray)
-                              : IconButton(
-                                  icon: Icon(Icons.delete, color: appColors.red),
-                                  tooltip: 'Delete',
-                                  onPressed: () async {
-                                    final confirm = await showDialog<bool>(
+                              ),
+                              DataCell(
+                                IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  color: appColors.red,
+                                  onPressed: isCompanyAdmin ? null : () async {
+                                    final confirmed = await showDialog<bool>(
                                       context: context,
                                       builder: (ctx) => AlertDialog(
-                                        title: const Text('Delete User'),
-                                        content: const Text('Are you sure you want to delete this user? This cannot be undone.'),
+                                        title: const Text('Confirm Delete'),
+                                        content: const Text('Are you sure you want to delete this user?'),
                                         actions: [
                                           TextButton(
-                                            child: const Text('Cancel'),
                                             onPressed: () => Navigator.of(ctx).pop(false),
+                                            child: const Text('Cancel'),
                                           ),
                                           ElevatedButton(
                                             child: const Text('Delete'),
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: appColors.red,
-                                              foregroundColor: Colors.white,
+                                              foregroundColor: appColors.whiteTextOnBlue,
                                             ),
                                             onPressed: () => Navigator.of(ctx).pop(true),
                                           ),
                                         ],
                                       ),
                                     );
-                                    if (confirm == true) {
+                                    if (confirmed == true) {
                                       await FirebaseFirestore.instance
                                           .collection('companies')
                                           .doc(widget.companyId)
@@ -818,17 +808,57 @@ class _AdminPanelState extends State<AdminPanel> {
                                     }
                                   },
                                 ),
-                          ),
-                        ]);
-                      }).toList(),
-                    ),
-                  ),
-                );
-              },
-            ),
+                              ),
+                            ]);
+                          }).toList(),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  void _toggleActive(String userId, bool active) async {
+    await FirebaseFirestore.instance
+        .collection('companies')
+        .doc(widget.companyId)
+        .collection('users')
+        .doc(userId)
+        .update({'active': active});
+  }
+
+  void _updateTeamLeader(String userId, String? teamLeaderId) async {
+    await FirebaseFirestore.instance
+        .collection('companies')
+        .doc(widget.companyId)
+        .collection('users')
+        .doc(userId)
+        .update({'teamLeader': teamLeaderId ?? 'none'});
+  }
+
+  void _updateWeeklyHours(String userId, int hours) async {
+    await FirebaseFirestore.instance
+        .collection('companies')
+        .doc(widget.companyId)
+        .collection('users')
+        .doc(userId)
+        .update({'weeklyHours': hours});
+  }
+
+  void _updateWorkPercent(String userId, int workPercent) async {
+    // Ensure workPercent is between 0 and 100
+    int clampedPercent = workPercent.clamp(0, 100);
+    await FirebaseFirestore.instance
+        .collection('companies')
+        .doc(widget.companyId)
+        .collection('users')
+        .doc(userId)
+        .update({'workPercent': clampedPercent});
   }
 }

@@ -112,7 +112,8 @@ class _TimeEntryCardState extends State<TimeEntryCard>
 
     Map<String, dynamic> tempExpenses = Map<String, dynamic>.from(_expenses);
     bool tempPerDiem = tempExpenses.containsKey('Per diem');
-    Color primaryColor = Colors.blue;
+    final appColors = Theme.of(context).extension<AppColors>()!;
+    Color primaryColor = appColors.primaryBlue;
 
     // CHECK for Per Diem in any log for this day!
     final d = DateFormat('yyyy-MM-dd').format(widget.selectedDay);
@@ -289,8 +290,8 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
-                            backgroundColor: Colors.grey.shade200,
-                            foregroundColor: primaryColor,
+                            backgroundColor: primaryColor,
+                            foregroundColor: Colors.white,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
@@ -446,19 +447,17 @@ class _TimeEntryCardState extends State<TimeEntryCard>
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final boxShadow = [
-      BoxShadow(
-        color: isDark ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.2),
-        blurRadius: 1,
-        offset: const Offset(0, 2),
-      )
-    ];
-
     BoxDecoration fieldDecoration = BoxDecoration(
-      color: theme.cardColor,
-      borderRadius: BorderRadius.circular(kEntryRadius),
-      boxShadow: boxShadow,
-      border: Border.all(color: theme.dividerColor),
+      color: isDark ? app.cardColorDark : theme.cardColor,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: isDark ? const Color(0xFF404040) : theme.dividerColor),
+      boxShadow: isDark ? null : [
+        BoxShadow(
+          color: Colors.black.withValues(alpha:0.12),
+          blurRadius: 4,
+          offset: const Offset(0, 2),
+        ),
+      ],
     );
 
     TextStyle fieldStyle = TextStyle(
@@ -547,10 +546,21 @@ class _TimeEntryCardState extends State<TimeEntryCard>
 
     return SizedBox(
       width: double.infinity,
-      child: Container(
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), boxShadow: boxShadow),
+              child: Container(
+                  decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: isDark ? app.cardColorDark : theme.cardColor,
+            border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : null,
+            boxShadow: isDark ? null : [
+              BoxShadow(
+                color: Colors.black.withValues(alpha:0.15),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
         child: Card(
-          color: theme.cardColor,
+          color: Colors.transparent,
           elevation: 0,
           margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -589,7 +599,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: app.primaryBlue,
-                          foregroundColor: theme.colorScheme.onPrimary,
+                          foregroundColor: Colors.white,
                           textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kEntryRadius)),
                           minimumSize: const Size(60, kEntryHeight),

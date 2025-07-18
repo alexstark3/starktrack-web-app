@@ -28,9 +28,9 @@ class CompanyTopBar extends StatelessWidget {
 
     return Material(                       // separate layer ⇒ guaranteed shadow
       elevation: 6,                        // ← try 3-4 dp: clearly visible
-      color: theme.colorScheme.background, // bar colour
+      color: theme.colorScheme.surface, // bar colour
       shadowColor:
-          Colors.black.withOpacity(0.4),  // subtle but visible on white
+          Colors.black.withValues(alpha:0.4),  // subtle but visible on white
       child: SizedBox(
         height: kHeight,
         child: Row(
@@ -74,18 +74,37 @@ class CompanyTopBar extends StatelessWidget {
                       ],
                     ),
                   ),
-                  PopupMenuDivider(
+                  const PopupMenuDivider(
                     height: 1,
-                    color: theme.colorScheme.outlineVariant.withOpacity(0.30),
                   ),
                   PopupMenuItem(
                     value: 'settings',
-                    child: const Text('Settings'),
+                    child: const Row(
+                      children: [
+                        Icon(
+                          Icons.settings,
+                          color: Colors.grey,
+                          size: 20,
+                        ),
+                        SizedBox(width: 12),
+                        Text('Settings'),
+                      ],
+                    ),
                     onTap: onSettings,
                   ),
                   PopupMenuItem(
                     value: 'logout',
-                    child: const Text('Logout'),
+                    child: const Row(
+                      children: [
+                        Icon(
+                          Icons.logout,
+                          color: Colors.grey,
+                          size: 20,
+                        ),
+                        SizedBox(width: 12),
+                        Text('Log out'),
+                      ],
+                    ),
                     onTap: onLogout,
                   ),
                 ],

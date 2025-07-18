@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import '../../../theme/app_colors.dart';
 
 const double kFilterHeight = 38;
 const double kFilterRadius = 9;
@@ -36,6 +37,9 @@ class _HistoryLogsState extends State<HistoryLogs> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     final logsRef = FirebaseFirestore.instance
         .collection('companies')
         .doc(widget.companyId)
@@ -44,16 +48,30 @@ class _HistoryLogsState extends State<HistoryLogs> {
         .collection('all_logs')
         .orderBy('begin', descending: true);
 
+    final appColors = Theme.of(context).extension<AppColors>()!;
+    
     BoxDecoration pillDecoration = BoxDecoration(
-      border: Border.all(color: Colors.black26, width: 1),
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(kFilterRadius),
+      border: Border.all(
+        color: isDark ? Colors.white24 : Colors.black26, 
+        width: 1
+      ),
+      color: isDark 
+        ? appColors.cardColorDark
+        : Colors.white,
+      borderRadius: BorderRadius.circular(10),
+      boxShadow: isDark ? null : [
+        BoxShadow(
+          color: Colors.black.withValues(alpha:0.08),
+          blurRadius: 4,
+          offset: const Offset(0, 2),
+        ),
+      ],
     );
 
     TextStyle pillTextStyle = TextStyle(
       fontSize: kFilterFontSize,
       fontWeight: FontWeight.w500,
-      color: Colors.black87,
+      color: isDark ? Colors.white.withValues(alpha:0.87) : Colors.black.withValues(alpha:0.87),
     );
 
     // From and To date pickers
@@ -78,12 +96,12 @@ class _HistoryLogsState extends State<HistoryLogs> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.date_range, color: Colors.blue, size: 20),
+                Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
                 const SizedBox(width: 6),
                 Text(
                   fromDate == null ? "From" : dateFormat.format(fromDate!),
                   style: TextStyle(
-                    color: fromDate == null ? Colors.blue : Colors.black87,
+                    color: fromDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withValues(alpha:0.87) : Colors.black.withValues(alpha:0.87)),
                     fontWeight: FontWeight.w500,
                     fontSize: kFilterFontSize,
                   ),
@@ -111,12 +129,12 @@ class _HistoryLogsState extends State<HistoryLogs> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.date_range, color: Colors.blue, size: 20),
+                Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
                 const SizedBox(width: 6),
                 Text(
                   toDate == null ? "To" : dateFormat.format(toDate!),
                   style: TextStyle(
-                    color: toDate == null ? Colors.blue : Colors.black87,
+                    color: toDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withValues(alpha:0.87) : Colors.black.withValues(alpha:0.87)),
                     fontWeight: FontWeight.w500,
                     fontSize: kFilterFontSize,
                   ),
@@ -166,7 +184,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
     // Project and Note filters, same style
     final projectBox = Container(
       height: kFilterHeight,
-      width: 150,
+      width: 150, // Original width for desktop
       alignment: Alignment.centerLeft,
       decoration: pillDecoration,
       padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -184,7 +202,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
 
     final noteBox = Container(
       height: kFilterHeight,
-      width: 150,
+      width: 150, // Original width for desktop
       alignment: Alignment.centerLeft,
       decoration: pillDecoration,
       padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -204,11 +222,20 @@ class _HistoryLogsState extends State<HistoryLogs> {
     final refreshBtn = Container(
       height: kFilterHeight,
       decoration: BoxDecoration(
-        color: Colors.blue[100],
-        borderRadius: BorderRadius.circular(kFilterRadius),
+        color: isDark 
+          ? theme.colorScheme.primary.withValues(alpha:0.2)
+          : theme.colorScheme.primary.withValues(alpha:0.1),
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: isDark ? null : [
+          BoxShadow(
+            color: Colors.black.withValues(alpha:0.08),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: IconButton(
-        icon: const Icon(Icons.refresh, color: Colors.blue, size: 24),
+        icon: Icon(Icons.refresh, color: theme.colorScheme.primary, size: 24),
         tooltip: 'Clear filters',
         onPressed: () {
           setState(() {
@@ -225,63 +252,82 @@ class _HistoryLogsState extends State<HistoryLogs> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Column(
         children: [
-          // FILTER & GROUP BAR
-
-
+          // Search filters
           Container(
-  width: double.infinity, // stretch to full width!
-  decoration: BoxDecoration(
-    color: Colors.white,
-    border: Border.all(color: Colors.grey.shade300, width: 1),
-    borderRadius: BorderRadius.circular(kFilterRadius + 2),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black.withOpacity(0.03),
-        blurRadius: 4,
-        offset: Offset(0, 2),
-      ),
-    ],
-  ),
-  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-  alignment: Alignment.centerLeft, // keep fields left-aligned
-  child: Wrap(
-    alignment: WrapAlignment.start, // aligns all children left!
-    spacing: kFilterSpacing,
-    runSpacing: kFilterSpacing,
-    crossAxisAlignment: WrapCrossAlignment.center,
-    children: [
-      Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          dateGroup,
-          const SizedBox(width: kFilterSpacing),
-          groupDropdown,
-        ],
-      ),
-      projectBox,
-      noteBox,
-      refreshBtn,
-    ],
-  ),
-),
-
-
-
+            width: double.infinity, // Make it stretch full width like the list
+            decoration: BoxDecoration(
+              color: isDark ? appColors.cardColorDark : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: isDark ? null : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha:0.08),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.all(16),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Check if we need to wrap (when screen is too narrow)
+                final needsWrap = constraints.maxWidth < 800;
+                
+                if (needsWrap) {
+                  // Wrap layout for small screens
+                  return Wrap(
+                    spacing: kFilterSpacing,
+                    runSpacing: 8,
+                    children: [
+                      dateGroup,
+                      groupDropdown,
+                      refreshBtn,
+                      projectBox,
+                      noteBox,
+                    ],
+                  );
+                } else {
+                  // Original single row layout for larger screens
+                  return Row(
+                    children: [
+                      dateGroup,
+                      const SizedBox(width: kFilterSpacing),
+                      groupDropdown,
+                      const SizedBox(width: kFilterSpacing),
+                      refreshBtn,
+                      const SizedBox(width: kFilterSpacing),
+                      projectBox,
+                      const SizedBox(width: kFilterSpacing),
+                      noteBox,
+                    ],
+                  );
+                }
+              },
+            ),
+          ),
+          const SizedBox(height: 20), // Add spacing between search card and list
           
-          // DATA LIST
+          // Results
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: logsRef.snapshots(),
-              builder: (context, snap) {
-                if (snap.connectionState == ConnectionState.waiting) {
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                if (!snap.hasData || snap.data!.docs.isEmpty) {
-                  return const Center(child: Text('No entries found.'));
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No logs found.',
+                      style: TextStyle(
+                        color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
+                        fontSize: 16,
+                      ),
+                    ),
+                  );
                 }
 
                 // Get logs and filter on client
-                var logs = snap.data!.docs;
+                var logs = snapshot.data!.docs;
 
                 List<QueryDocumentSnapshot> filteredLogs = logs.where((doc) {
                   final data = doc.data() as Map<String, dynamic>;
@@ -330,7 +376,8 @@ class _HistoryLogsState extends State<HistoryLogs> {
                   final project = data['project'] ?? '';
                   final note = data['note'] ?? '';
                   final sessionDate = data['sessionDate'] ?? '';
-                  final perDiem = data['perDiem'] ?? false;
+                  final perDiemRaw = data['perDiem'];
+                  final perDiem = perDiemRaw == true || perDiemRaw == 1;
                   final expensesMap = Map<String, dynamic>.from(data['expenses'] ?? {});
                   double totalExpense = 0.0;
                   for (var v in expensesMap.values) {
@@ -423,91 +470,181 @@ class _HistoryLogsState extends State<HistoryLogs> {
 
                     return Card(
                       margin: EdgeInsets.zero,
-                      elevation: 2,
-                      child: Column(
-                        children: [
-                          ExpansionTile(
-                            initiallyExpanded: groupIdx == 0,
-                            title: Text(
-                              groupKey,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                      elevation: isDark ? 0 : 4,
+                      color: isDark ? appColors.cardColorDark : Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isDark ? appColors.cardColorDark : Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: isDark ? null : [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha:0.08),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
                             ),
-                            children: groupList.map((entry) {
-                              return ListTile(
-                                leading: const Icon(Icons.access_time),
-                                title: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        (entry.begin != null && entry.end != null)
-                                            ? '${dateFormat.format(entry.begin!)}  ${timeFormat.format(entry.begin!)} - ${timeFormat.format(entry.end!)}'
-                                            : entry.sessionDate,
-                                        style: const TextStyle(fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                    if (entry.expense > 0)
-                                      Text(
-                                        expenseFormat.format(entry.expense),
-                                        style: const TextStyle(
-                                            color: Colors.red,
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 15),
-                                      ),
-                                  ],
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            ExpansionTile(
+                              initiallyExpanded: groupIdx == 0,
+                              title: Text(
+                                groupKey,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? const Color(0xFFCCCCCC) : Colors.black87,
                                 ),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (entry.project != '') Text('Project: ${entry.project}'),
-                                    if (entry.duration != Duration.zero)
-                                      Text('Duration: ${_formatDuration(entry.duration)}'),
-                                    if (entry.note != '') Text('Note: ${entry.note}'),
-                                    if (entry.perDiem == true)
-                                      const Text('Per diem: Yes', style: TextStyle(color: Colors.blue)),
-                                    if (entry.expensesMap.isNotEmpty)
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 2.0),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: entry.expensesMap.entries.map((e) =>
-                                            Text('${e.key}: ${expenseFormat.format((e.value as num).toDouble())}',
-                                              style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600, fontSize: 15),
-                                            )).toList(),
+                              ),
+                              children: groupList.map((entry) {
+                                return ListTile(
+                                  leading: Icon(
+                                    Icons.access_time,
+                                    color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
+                                  ),
+                                  title: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          (entry.begin != null && entry.end != null)
+                                              ? '${dateFormat.format(entry.begin!)}  ${timeFormat.format(entry.begin!)} - ${timeFormat.format(entry.end!)}'
+                                              : entry.sessionDate,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: isDark ? const Color(0xFFCCCCCC) : Colors.black87,
+                                          ),
                                         ),
                                       ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                          // Blue bar with group totals
-                          Container(
-                            width: double.infinity,
-                            color: Colors.blue.shade50,
-                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Total Time: ${_formatDuration(groupTotal)}',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.blue,
+                                      if (entry.expense > 0)
+                                        Text(
+                                          expenseFormat.format(entry.expense),
+                                          style: const TextStyle(
+                                              color: Colors.red,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 15),
+                                        ),
+                                    ],
                                   ),
-                                ),
-                                Text(
-                                  'Total Expenses: ${expenseFormat.format(groupExpense)}',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.blue,
+                                  subtitle: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      if (entry.project != '') 
+                                        Text(
+                                          'Project: ${entry.project}',
+                                          style: TextStyle(
+                                            color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
+                                          ),
+                                        ),
+                                      if (entry.duration != Duration.zero)
+                                        Text(
+                                          'Duration: ${_formatDuration(entry.duration)}',
+                                          style: TextStyle(
+                                            color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
+                                          ),
+                                        ),
+                                      if (entry.note != '') 
+                                        Text(
+                                          'Note: ${entry.note}',
+                                          style: TextStyle(
+                                            color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
+                                          ),
+                                        ),
+                                      if (entry.perDiem == true)
+                                        Text(
+                                          'Per diem: Yes', 
+                                          style: TextStyle(
+                                            color: theme.colorScheme.primary,
+                                          ),
+                                        ),
+                                      if (entry.expensesMap.isNotEmpty)
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 2.0),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: entry.expensesMap.entries.map((e) =>
+                                              Text('${e.key}: ${expenseFormat.format((e.value as num).toDouble())}',
+                                                style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.w600, fontSize: 15),
+                                              )).toList(),
+                                          ),
+                                        ),
+                                    ],
                                   ),
-                                ),
-                              ],
+                                );
+                              }).toList(),
                             ),
-                          ),
-                        ],
+                            // Blue bar with group totals
+                            Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: isDark 
+                                  ? theme.colorScheme.primary.withValues(alpha:0.2)
+                                  : theme.colorScheme.primary.withValues(alpha:0.1),
+                                borderRadius: const BorderRadius.only(
+                                  bottomLeft: Radius.circular(12),
+                                  bottomRight: Radius.circular(12),
+                                ),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
+                              child: LayoutBuilder(
+                                builder: (context, constraints) {
+                                  // Check if we need to wrap the totals on small screens
+                                  final needsWrap = constraints.maxWidth < 400;
+                                  
+                                  if (needsWrap) {
+                                    return Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Total Time: ${_formatDuration(groupTotal)}',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                            color: theme.colorScheme.primary,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'Total Expenses: ${expenseFormat.format(groupExpense)}',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                            color: theme.colorScheme.primary,
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  } else {
+                                    return Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            'Total Time: ${_formatDuration(groupTotal)}',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                              color: theme.colorScheme.primary,
+                                            ),
+                                          ),
+                                        ),
+                                        Flexible(
+                                          child: Text(
+                                            'Total Expenses: ${expenseFormat.format(groupExpense)}',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                              color: theme.colorScheme.primary,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },

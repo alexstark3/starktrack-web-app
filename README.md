@@ -1,8 +1,35 @@
-# starktrack
+# StarkTrack
 
-A new Flutter project.
+A Flutter-based time tracking and project management application. ✅
 
-## Getting Started
+## 🚨 SECURITY NOTICE
+
+**IMPORTANT**: This project has been updated to use environment variables for Firebase configuration. The previous hardcoded API keys have been removed for security.
+
+### Setup Instructions
+
+1. **Copy the environment template:**
+   ```bash
+   cp env.template .env
+   ```
+
+2. **Fill in your Firebase credentials in `.env`:**
+   - Get your API keys from [Firebase Console](https://console.firebase.google.com/)
+   - Replace the placeholder values in `.env` with your actual keys
+
+3. **Run the app with environment variables:**
+   ```bash
+   flutter run --dart-define-from-file=.env
+   ```
+
+### Firebase Configuration
+
+The app uses Firebase for:
+- Authentication
+- Firestore database
+- Real-time data synchronization
+
+### Development
 
 This project is a starting point for a Flutter application.
 

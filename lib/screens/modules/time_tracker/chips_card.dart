@@ -25,32 +25,13 @@ class ChipsCard extends StatelessWidget {
     final appColors = Theme.of(context).extension<AppColors>()!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Main card shadow
-    final cardShadow = [
-      BoxShadow(
-        color: isDark
-            ? Colors.white.withOpacity(0.2)
-            : Colors.black.withOpacity(0.2),
-        blurRadius: 1,
-        spreadRadius: 0,
-        offset: const Offset(0, 2),
-      ),
-    ];
-
-    // Chips shadow
-    final chipShadow = [
-      BoxShadow(
-        color: isDark
-            ? Colors.white.withOpacity(0.2)
-            : Colors.black.withOpacity(0.2),
-        blurRadius: 1,
-        spreadRadius: 0,
-        offset: const Offset(0, 2),
-      ),
-    ];
+    // Solid colors for dark theme
+    final cardColor = isDark 
+      ? appColors.cardColorDark
+      : Theme.of(context).cardColor;
 
     final chipBorder = Border.all(
-      color: appColors.darkGray.withOpacity(0.2),
+      color: appColors.darkGray.withValues(alpha:0.2),
       width: 1,
     );
 
@@ -63,10 +44,16 @@ class ChipsCard extends StatelessWidget {
     Widget buildChip(String text) {
       return Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: chipShadow,
-          border: chipBorder,
+          color: cardColor,
+          borderRadius: BorderRadius.circular(10),
+          border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : chipBorder,
+          boxShadow: isDark ? null : [
+            BoxShadow(
+              color: Colors.black.withValues(alpha:0.12),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Text(text, style: chipStyle),
@@ -75,10 +62,17 @@ class ChipsCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Theme.of(context).cardColor,
-        boxShadow: cardShadow,
+              decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+                  color: cardColor,
+          border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : null,
+          boxShadow: isDark ? null : [
+            BoxShadow(
+              color: Colors.black.withValues(alpha:0.15),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(10),
