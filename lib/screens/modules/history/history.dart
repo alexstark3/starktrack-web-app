@@ -377,7 +377,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                   final note = data['note'] ?? '';
                   final sessionDate = data['sessionDate'] ?? '';
                   final perDiemRaw = data['perDiem'];
-                  final perDiem = perDiemRaw == true || perDiemRaw == 1;
+                  final perDiem = perDiemRaw == true || perDiemRaw == 1 || perDiemRaw == '1';
                   final expensesMap = Map<String, dynamic>.from(data['expenses'] ?? {});
                   double totalExpense = 0.0;
                   for (var v in expensesMap.values) {
