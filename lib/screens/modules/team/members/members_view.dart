@@ -124,7 +124,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
               label: const Text('Add New Session'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: colors.primaryBlue,
-                foregroundColor: Colors.white,
+                foregroundColor: colors.whiteTextOnBlue,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -1141,6 +1141,7 @@ class _EditLogDialogState extends State<_EditLogDialog> {
 
 
   Future<void> _showExpensePopup() async {
+    final colors = Theme.of(context).extension<AppColors>()!;
     final TextEditingController nameCtrl = TextEditingController();
     final TextEditingController amountCtrl = TextEditingController();
 
@@ -1341,7 +1342,7 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                           onPressed: canAddExpense() ? addExpense : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue,
-                            foregroundColor: Colors.white,
+                            foregroundColor: colors.whiteTextOnBlue,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           ),
@@ -1360,7 +1361,7 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
+                    foregroundColor: colors.whiteTextOnBlue,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                     padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
                     textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),

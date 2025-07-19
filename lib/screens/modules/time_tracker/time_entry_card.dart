@@ -599,7 +599,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: app.primaryBlue,
-                          foregroundColor: Colors.white,
+                          foregroundColor: app.whiteTextOnBlue,
                           textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kEntryRadius)),
                           minimumSize: const Size(60, kEntryHeight),

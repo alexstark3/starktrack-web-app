@@ -692,7 +692,7 @@ Future<void> _showEditExpensesPopup() async {
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             backgroundColor: primaryColor,
-                            foregroundColor: Colors.white,
+                            foregroundColor: appColors.whiteTextOnBlue,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
@@ -724,7 +724,7 @@ Future<void> _showEditExpensesPopup() async {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
-                  foregroundColor: Colors.white,
+                  foregroundColor: appColors.whiteTextOnBlue,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                   padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
                   textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -887,7 +887,7 @@ Future<void> _showEditExpensesPopup() async {
                           child: const Text('Delete'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
+                            foregroundColor: widget.appColors.whiteTextOnBlue,
                           ),
                           onPressed: () => Navigator.of(ctx).pop(true),
                         ),
@@ -1097,7 +1097,7 @@ Future<void> _showEditExpensesPopup() async {
                         child: const Text('Delete'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
+                          foregroundColor: widget.appColors.whiteTextOnBlue,
                         ),
                         onPressed: () => Navigator.of(ctx).pop(true),
                       ),

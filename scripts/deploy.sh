@@ -8,6 +8,12 @@ if ! git rev-parse --git-dir > /dev/null 2>&1; then
     exit 1
 fi
 
+# Check if there are uncommitted changes
+if [ -n "$(git status --porcelain)" ]; then
+    echo "⚠️  Warning: There are uncommitted changes in your repository"
+    echo "   The script will commit all changes with the version update"
+fi
+
 # Get current version (without build number)
 VERSION=$(grep 'version:' pubspec.yaml | cut -d' ' -f2 | cut -d'+' -f1)
 
@@ -45,6 +51,23 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Commit changes and push to GitHub
+echo "📝 Committing changes..."
+git add .
+git commit -m "🚀 Deploy version $VERSION+$BUILD_NUMBER
+
+- Updated build number to $BUILD_NUMBER
+- Deployed to Firebase"
+
+echo "📤 Pushing to GitHub..."
+git push
+
+if [ $? -ne 0 ]; then
+    echo "⚠️  Warning: Git push failed. You may need to pull changes first."
+    echo "   Run: git pull origin main"
+    exit 1
+fi
+
 # Deploy to Firebase
 echo "🚀 Deploying to Firebase..."
 firebase deploy
@@ -56,3 +79,4 @@ fi
 
 echo "✅ Deployment complete!"
 echo "🌐 Your app is live with version $VERSION+$BUILD_NUMBER"
+echo "📝 Changes committed and pushed to GitHub"

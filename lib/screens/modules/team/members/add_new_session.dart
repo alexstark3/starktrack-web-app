@@ -321,8 +321,8 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colors.primaryBlue,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    foregroundColor: colors.whiteTextOnBlue,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
                     textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
