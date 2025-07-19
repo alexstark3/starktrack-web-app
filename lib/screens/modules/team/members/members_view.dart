@@ -152,75 +152,70 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
           child: LayoutBuilder(
             builder: (context, constraints) {
               // From and To date pickers
-              final dateGroup = Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  InkWell(
-                    borderRadius: BorderRadius.circular(kFilterRadius),
-                    onTap: () async {
-                      DateTime? picked = await showDatePicker(
-                        context: context,
-                        initialDate: fromDate ?? DateTime.now(),
-                        firstDate: DateTime(2023),
-                        lastDate: DateTime(2100),
-                      );
-                      if (picked != null) setState(() => fromDate = picked);
-                    },
-                    child: Container(
-                      height: kFilterHeight,
-                      padding: const EdgeInsets.symmetric(horizontal: 18),
-                      decoration: pillDecoration,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
-                          const SizedBox(width: 6),
-                          Text(
-                            fromDate == null ? "From" : dateFormat.format(fromDate!),
-                            style: TextStyle(
-                              color: fromDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
-                              fontWeight: FontWeight.w500,
-                              fontSize: kFilterFontSize,
-                            ),
-                          ),
-                        ],
+              final fromDatePicker = InkWell(
+                borderRadius: BorderRadius.circular(kFilterRadius),
+                onTap: () async {
+                  DateTime? picked = await showDatePicker(
+                    context: context,
+                    initialDate: fromDate ?? DateTime.now(),
+                    firstDate: DateTime(2023),
+                    lastDate: DateTime(2100),
+                  );
+                  if (picked != null) setState(() => fromDate = picked);
+                },
+                child: Container(
+                  height: kFilterHeight,
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  decoration: pillDecoration,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
+                      const SizedBox(width: 6),
+                      Text(
+                        fromDate == null ? "From" : dateFormat.format(fromDate!),
+                        style: TextStyle(
+                          color: fromDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
+                          fontWeight: FontWeight.w500,
+                          fontSize: kFilterFontSize,
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                  const SizedBox(width: kFilterSpacing),
-                  InkWell(
-                    borderRadius: BorderRadius.circular(kFilterRadius),
-                    onTap: () async {
-                      DateTime? picked = await showDatePicker(
-                        context: context,
-                        initialDate: toDate ?? DateTime.now(),
-                        firstDate: DateTime(2023),
-                        lastDate: DateTime(2100),
-                      );
-                      if (picked != null) setState(() => toDate = picked);
-                    },
-                    child: Container(
-                      height: kFilterHeight,
-                      padding: const EdgeInsets.symmetric(horizontal: 18),
-                      decoration: pillDecoration,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
-                          const SizedBox(width: 6),
-                          Text(
-                            toDate == null ? "To" : dateFormat.format(toDate!),
-                            style: TextStyle(
-                              color: toDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
-                              fontWeight: FontWeight.w500,
-                              fontSize: kFilterFontSize,
-                            ),
-                          ),
-                        ],
+                ),
+              );
+
+              final toDatePicker = InkWell(
+                borderRadius: BorderRadius.circular(kFilterRadius),
+                onTap: () async {
+                  DateTime? picked = await showDatePicker(
+                    context: context,
+                    initialDate: toDate ?? DateTime.now(),
+                    firstDate: DateTime(2023),
+                    lastDate: DateTime(2100),
+                  );
+                  if (picked != null) setState(() => toDate = picked);
+                },
+                child: Container(
+                  height: kFilterHeight,
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  decoration: pillDecoration,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
+                      const SizedBox(width: 6),
+                      Text(
+                        toDate == null ? "To" : dateFormat.format(toDate!),
+                        style: TextStyle(
+                          color: toDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
+                          fontWeight: FontWeight.w500,
+                          fontSize: kFilterFontSize,
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               );
 
               // Group type dropdown
@@ -339,7 +334,8 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                   spacing: kFilterSpacing,
                   runSpacing: 8,
                   children: [
-                    dateGroup,
+                    fromDatePicker,
+                    toDatePicker,
                     groupDropdown,
                     refreshBtn,
                     projectBox,
@@ -350,7 +346,9 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                 // Original single row layout for larger screens
                 return Row(
                   children: [
-                    dateGroup,
+                    fromDatePicker,
+                    const SizedBox(width: kFilterSpacing),
+                    toDatePicker,
                     const SizedBox(width: kFilterSpacing),
                     groupDropdown,
                     const SizedBox(width: kFilterSpacing),
@@ -664,15 +662,7 @@ class _LogsTableState extends State<_LogsTable> {
     return '${m}m';
   }
 
-  // Calculate ISO 8601 week number
-  int _weekNumber(DateTime date) {
-    // ISO 8601: Week 1 is the week containing January 4th
-    final jan4 = DateTime(date.year, 1, 4);
-    final startOfWeek = date.subtract(Duration(days: date.weekday - 1));
-    final jan4StartOfWeek = jan4.subtract(Duration(days: jan4.weekday - 1));
-    final weekNumber = ((startOfWeek.difference(jan4StartOfWeek).inDays) / 7).floor() + 1;
-    return weekNumber;
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -745,7 +735,15 @@ class _LogsTableState extends State<_LogsTable> {
           final expensesMap = Map<String, dynamic>.from(data['expenses'] ?? {});
           double totalExpense = 0.0;
           for (var v in expensesMap.values) {
-            if (v is num) totalExpense += v.toDouble();
+            if (v is num) {
+              totalExpense += v.toDouble();
+            } else if (v is String) {
+              final parsed = double.tryParse(v);
+              if (parsed != null) totalExpense += parsed;
+            } else if (v is bool) {
+              // Skip boolean values
+              continue;
+            }
           }
 
           return _HistoryEntry(
@@ -769,116 +767,25 @@ class _LogsTableState extends State<_LogsTable> {
           return b.begin!.compareTo(a.begin!);
         });
 
-        // Grouping map
-        Map<String, List<_HistoryEntry>> grouped = {};
-
-        for (var entry in entries) {
-          String key = '';
-          if (entry.begin == null) key = 'Unknown';
-          else {
-            switch (widget.groupType) {
-              case GroupType.day:
-                key = DateFormat('yyyy-MM-dd').format(entry.begin!);
-                break;
-              case GroupType.week:
-                final week = _weekNumber(entry.begin!);
-                key = 'Week $week, ${entry.begin!.year}';
-                break;
-              case GroupType.month:
-                key = DateFormat('MMMM yyyy').format(entry.begin!);
-                break;
-              case GroupType.year:
-                key = '${entry.begin!.year}';
-                break;
-            }
-          }
-          grouped.putIfAbsent(key, () => []).add(entry);
-        }
-
-        // Sorted group keys (desc by date)
-        final sortedKeys = grouped.keys.toList()
-          ..sort((a, b) {
-            if (widget.groupType == GroupType.day) {
-              try {
-                return DateTime.parse(b).compareTo(DateTime.parse(a));
-              } catch (_) {}
-            } else if (widget.groupType == GroupType.year) {
-              return int.parse(b).compareTo(int.parse(a));
-            } else if (widget.groupType == GroupType.month) {
-              try {
-                final fa = DateFormat('MMMM yyyy').parse(a);
-                final fb = DateFormat('MMMM yyyy').parse(b);
-                return fb.compareTo(fa);
-              } catch (_) {}
-            } else if (widget.groupType == GroupType.week) {
-              final wa = int.tryParse(a.split(' ')[1].replaceAll(',', '')) ?? 0;
-              final wb = int.tryParse(b.split(' ')[1].replaceAll(',', '')) ?? 0;
-              final ya = int.tryParse(a.split(',').last.trim()) ?? 0;
-              final yb = int.tryParse(b.split(',').last.trim()) ?? 0;
-              return yb != ya ? yb.compareTo(ya) : wb.compareTo(wa);
-            }
-            return a.compareTo(b);
-          });
-
-        // ==== UI GROUPS ====
+        // ==== UI ====
         final theme = Theme.of(context);
         final isDark = theme.brightness == Brightness.dark;
-        final appColors = Theme.of(context).extension<AppColors>()!;
         final expenseFormat = NumberFormat.currency(symbol: "CHF ", decimalDigits: 2);
 
         return ListView.builder(
-          itemCount: sortedKeys.length,
-          itemBuilder: (context, groupIdx) {
-            final groupKey = sortedKeys[groupIdx];
-            final groupList = grouped[groupKey]!;
-
-            final groupTotal = groupList.fold<Duration>(
-                Duration.zero, (sum, e) => sum + e.duration);
-                      final groupExpense = groupList.fold<double>(
-              0.0, (sum, e) => sum + (e.expense.isNaN ? 0.0 : e.expense));
-
-            return Card(
-              margin: EdgeInsets.zero,
-              elevation: isDark ? 0 : 4,
-              color: isDark ? appColors.cardColorDark : Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: isDark ? appColors.cardColorDark : Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: isDark ? null : [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha:0.08),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    ExpansionTile(
-                      key: ValueKey('group_${groupIdx}_$groupKey'),
-                      initiallyExpanded: groupIdx == 0,
-                      title: Text(
-                        groupKey,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? const Color(0xFFCCCCCC) : Colors.black87,
-                        ),
-                      ),
-                      children: groupList.map((entry) {
-                        final data = entry.doc.data() as Map<String, dynamic>;
-                        final approvedRaw = data['approved'];
-                        final rejectedRaw = data['rejected'];
-                        final approvedAfterEditRaw = data['approvedAfterEdit'];
-                        
-                        final isApproved = approvedRaw == true || approvedRaw == 1 || approvedRaw == '1';
-                        final isRejected = rejectedRaw == true || rejectedRaw == 1 || rejectedRaw == '1';
-                        final isApprovedAfterEdit = approvedAfterEditRaw == true || approvedAfterEditRaw == 1 || approvedAfterEditRaw == '1';
-                        
-                        return ListTile(
+          itemCount: entries.length,
+          itemBuilder: (context, index) {
+            final entry = entries[index];
+            final data = entry.doc.data() as Map<String, dynamic>;
+            final approvedRaw = data['approved'];
+            final rejectedRaw = data['rejected'];
+            final approvedAfterEditRaw = data['approvedAfterEdit'];
+            
+            final isApproved = approvedRaw == true || approvedRaw == 1 || approvedRaw == '1';
+            final isRejected = rejectedRaw == true || rejectedRaw == 1 || rejectedRaw == '1';
+            final isApprovedAfterEdit = approvedAfterEditRaw == true || approvedAfterEditRaw == 1 || approvedAfterEditRaw == '1';
+            
+            return ListTile(
                           title: Text(
                             (entry.begin != null && entry.end != null)
                                 ? '${DateFormat('yyyy-MM-dd').format(entry.begin!)}  ${DateFormat('HH:mm').format(entry.begin!)} - ${DateFormat('HH:mm').format(entry.end!)}'
@@ -924,10 +831,20 @@ class _LogsTableState extends State<_LogsTable> {
                                   padding: const EdgeInsets.only(top: 2.0),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: entry.expensesMap.entries.map((e) =>
-                                      Text('${e.key}: ${expenseFormat.format((e.value as num?)?.toDouble() ?? 0.0)}',
-                                        style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.w600, fontSize: 15),
-                                      )).toList(),
+                                                                      children: entry.expensesMap.entries.map((e) {
+                                    double expenseValue = 0.0;
+                                    if (e.value is num) {
+                                      expenseValue = (e.value as num).toDouble();
+                                    } else if (e.value is String) {
+                                      expenseValue = double.tryParse(e.value as String) ?? 0.0;
+                                    } else if (e.value is bool) {
+                                      // Skip boolean values
+                                      return const SizedBox.shrink();
+                                    }
+                                    return Text('${e.key}: ${expenseFormat.format(expenseValue)}',
+                                      style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.w600, fontSize: 15),
+                                    );
+                                  }).toList(),
                                   ),
                                 ),
                               const SizedBox(height: 8),
@@ -1012,80 +929,6 @@ class _LogsTableState extends State<_LogsTable> {
                             ],
                           ),
                         );
-                      }).toList(),
-                    ),
-
-                    // Blue bar with group totals
-                    Container(
-                      width: double.infinity,
-                                              decoration: BoxDecoration(
-                          color: isDark 
-                            ? theme.colorScheme.primary.withOpacity(0.2)
-                            : theme.colorScheme.primary.withOpacity(0.1),
-                          borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(12),
-                          bottomRight: Radius.circular(12),
-                        ),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          // Check if we need to wrap the totals on small screens
-                          final needsWrap = constraints.maxWidth < 400;
-                          
-                          if (needsWrap) {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Total Time: ${_formatDuration(groupTotal)}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    color: theme.colorScheme.primary,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Total Expenses: ${expenseFormat.format(groupExpense.isNaN ? 0.0 : groupExpense)}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    color: theme.colorScheme.primary,
-                                  ),
-                                ),
-                              ],
-                            );
-                          } else {
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Flexible(
-                                  child: Text(
-                                    'Total Time: ${_formatDuration(groupTotal)}',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      color: theme.colorScheme.primary,
-                                    ),
-                                  ),
-                                ),
-                                Flexible(
-                                  child: Text(
-                                    'Total Expenses: ${expenseFormat.format(groupExpense.isNaN ? 0.0 : groupExpense)}',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      color: theme.colorScheme.primary,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
           },
         );
       },

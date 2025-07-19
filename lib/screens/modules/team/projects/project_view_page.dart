@@ -3,6 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../theme/app_colors.dart';
 
+// Filter styling constants
+const double kFilterHeight = 40.0;
+const double kFilterRadius = 10.0;
+const double kFilterSpacing = 12.0;
+const double kFilterFontSize = 14.0;
+
+// Helper function to format minutes to HH:mm
+String _formatTimeFromMinutes(int totalMinutes) {
+  final hours = totalMinutes ~/ 60;
+  final minutes = totalMinutes % 60;
+  return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+}
+
 class ProjectViewPage extends StatefulWidget {
   final String companyId;
   final Map<String, dynamic> project;
@@ -302,54 +315,147 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                       // --- DATE FILTER UI (NEW) ---
                       Padding(
                         padding: const EdgeInsets.only(bottom: 8.0, top: 0),
-                        child: Row(
-                          children: [
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final theme = Theme.of(context);
+                            final isDark = theme.brightness == Brightness.dark;
+                            final dateFormat = DateFormat('yyyy-MM-dd');
+                            
+                            // Pill decoration
+                            final pillDecoration = BoxDecoration(
+                              color: isDark ? const Color(0xFF2A2A2A) : Colors.white,
+                              borderRadius: BorderRadius.circular(kFilterRadius),
+                              border: Border.all(
+                                color: isDark ? Colors.white24 : Colors.black26,
+                                width: 1,
+                              ),
+                            );
+                            
+
+
                             // Start date picker
-                            TextButton.icon(
-                              icon: const Icon(Icons.calendar_today, size: 18),
-                              label: Text(_filterStart == null
-                                  ? "Start"
-                                  : DateFormat('dd.MM.yyyy').format(_filterStart!)),
-                              onPressed: () async {
-                                final picked = await showDatePicker(
+                            final startDatePicker = InkWell(
+                              borderRadius: BorderRadius.circular(kFilterRadius),
+                              onTap: () async {
+                                DateTime? picked = await showDatePicker(
                                   context: context,
                                   initialDate: _filterStart ?? DateTime.now(),
-                                  firstDate: DateTime(2020),
+                                  firstDate: DateTime(2023),
                                   lastDate: DateTime(2100),
                                 );
                                 if (picked != null) setState(() => _filterStart = picked);
                               },
-                            ),
-                            const SizedBox(width: 10),
-                            Text("to"),
-                            const SizedBox(width: 10),
+                              child: Container(
+                                height: kFilterHeight,
+                                padding: const EdgeInsets.symmetric(horizontal: 18),
+                                decoration: pillDecoration,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      _filterStart == null ? "Start" : dateFormat.format(_filterStart!),
+                                      style: TextStyle(
+                                        color: _filterStart == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: kFilterFontSize,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+
                             // End date picker
-                            TextButton.icon(
-                              icon: const Icon(Icons.calendar_today, size: 18),
-                              label: Text(_filterEnd == null
-                                  ? "End"
-                                  : DateFormat('dd.MM.yyyy').format(_filterEnd!)),
-                              onPressed: () async {
-                                final picked = await showDatePicker(
+                            final endDatePicker = InkWell(
+                              borderRadius: BorderRadius.circular(kFilterRadius),
+                              onTap: () async {
+                                DateTime? picked = await showDatePicker(
                                   context: context,
                                   initialDate: _filterEnd ?? DateTime.now(),
-                                  firstDate: DateTime(2020),
+                                  firstDate: DateTime(2023),
                                   lastDate: DateTime(2100),
                                 );
                                 if (picked != null) setState(() => _filterEnd = picked);
                               },
-                            ),
-                            const SizedBox(width: 10),
-                            if (_filterStart != null || _filterEnd != null)
-                              IconButton(
-                                icon: Icon(Icons.clear, color: Colors.redAccent),
-                                onPressed: () => setState(() {
-                                  _filterStart = null;
-                                  _filterEnd = null;
-                                }),
-                                tooltip: "Clear filter",
+                              child: Container(
+                                height: kFilterHeight,
+                                padding: const EdgeInsets.symmetric(horizontal: 18),
+                                decoration: pillDecoration,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      _filterEnd == null ? "End" : dateFormat.format(_filterEnd!),
+                                      style: TextStyle(
+                                        color: _filterEnd == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: kFilterFontSize,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                          ],
+                            );
+
+                            // Clear filter button
+                            final clearButton = Container(
+                              height: kFilterHeight,
+                              decoration: BoxDecoration(
+                                color: isDark 
+                                  ? theme.colorScheme.primary.withOpacity(0.2)
+                                  : theme.colorScheme.primary.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: isDark ? null : [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha:0.08),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: IconButton(
+                                icon: Icon(Icons.refresh, color: theme.colorScheme.primary, size: 24),
+                                tooltip: 'Clear filters',
+                                onPressed: () {
+                                  setState(() {
+                                    _filterStart = null;
+                                    _filterEnd = null;
+                                  });
+                                },
+                              ),
+                            );
+
+                            // Check if we need to wrap (when screen is too narrow)
+                            final needsWrap = constraints.maxWidth < 600;
+                            
+                            if (needsWrap) {
+                              // Wrap layout for small screens
+                              return Wrap(
+                                spacing: kFilterSpacing,
+                                runSpacing: 8,
+                                children: [
+                                  startDatePicker,
+                                  endDatePicker,
+                                  if (_filterStart != null || _filterEnd != null) clearButton,
+                                ],
+                              );
+                            } else {
+                              // Single row layout for larger screens
+                              return Row(
+                                children: [
+                                  startDatePicker,
+                                  const SizedBox(width: kFilterSpacing),
+                                  endDatePicker,
+                                  const SizedBox(width: kFilterSpacing),
+                                  if (_filterStart != null || _filterEnd != null) clearButton,
+                                ],
+                              );
+                            }
+                          },
                         ),
                       ),
                       // Totals
@@ -363,10 +469,10 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  'Total work: ',
+                                  'Total: ',
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                                Text('${(totalMinutes / 60).floor()}h ${(totalMinutes % 60).toString().padLeft(2, '0')}min'),
+                                Text('${_formatTimeFromMinutes(totalMinutes.toInt())} h'),
                               ],
                             ),
                             Row(
@@ -464,12 +570,27 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                                       spacing: 12,
                                       runSpacing: 4,
                                       children: [
-                                        Text('Start: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                        Text(start),
-                                        Text('End: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                        Text(finish),
-                                        Text('Minutes: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                        Text('${duration ?? ''}'),
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text('Start: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                            Text(start),
+                                          ],
+                                        ),
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text('End: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                            Text(finish),
+                                          ],
+                                        ),
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text('Total: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                            Text('${_formatTimeFromMinutes(duration ?? 0)} h'),
+                                          ],
+                                        ),
                                       ],
                                     ),
                                     if (expenseStr.isNotEmpty)

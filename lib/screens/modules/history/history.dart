@@ -198,10 +198,10 @@ class _HistoryLogsState extends State<HistoryLogs> {
       ),
     );
 
-    // Project and Note filters, same style
+    // Project and Note filters
     final projectBox = Container(
       height: kFilterHeight,
-      width: 150, // Original width for desktop
+      width: 150,
       alignment: Alignment.centerLeft,
       decoration: pillDecoration,
       padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -220,7 +220,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
 
     final noteBox = Container(
       height: kFilterHeight,
-      width: 150, // Original width for desktop
+      width: 150,
       alignment: Alignment.centerLeft,
       decoration: pillDecoration,
       padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -237,7 +237,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
       ),
     );
 
-    // Refresh icon styled to match, but filled
+    // Refresh button
     final refreshBtn = Container(
       height: kFilterHeight,
       decoration: BoxDecoration(
@@ -264,7 +264,6 @@ class _HistoryLogsState extends State<HistoryLogs> {
             searchNote = '';
             groupType = GroupType.day;
           });
-          // Clear the text controllers to update the UI
           projectController.clear();
           noteController.clear();
         },
@@ -277,7 +276,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
         children: [
           // Search filters
           Container(
-            width: double.infinity, // Make it stretch full width like the list
+            width: double.infinity,
             decoration: BoxDecoration(
               color: isDark ? appColors.cardColorDark : Colors.white,
               borderRadius: BorderRadius.circular(12),
@@ -292,11 +291,9 @@ class _HistoryLogsState extends State<HistoryLogs> {
             padding: const EdgeInsets.all(16),
             child: LayoutBuilder(
               builder: (context, constraints) {
-                // Check if we need to wrap (when screen is too narrow)
                 final needsWrap = constraints.maxWidth < 800;
                 
                 if (needsWrap) {
-                  // Wrap layout for small screens
                   return Wrap(
                     spacing: kFilterSpacing,
                     runSpacing: 8,
@@ -309,7 +306,6 @@ class _HistoryLogsState extends State<HistoryLogs> {
                     ],
                   );
                 } else {
-                  // Original single row layout for larger screens
                   return Row(
                     children: [
                       dateGroup,
@@ -327,7 +323,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
               },
             ),
           ),
-          const SizedBox(height: 20), // Add spacing between search card and list
+          const SizedBox(height: 20),
           
           // Results
           Expanded(
@@ -349,7 +345,6 @@ class _HistoryLogsState extends State<HistoryLogs> {
                   );
                 }
 
-                // Get logs and filter on client
                 var logs = snapshot.data!.docs;
 
                 List<QueryDocumentSnapshot> filteredLogs = logs.where((doc) {
@@ -360,17 +355,14 @@ class _HistoryLogsState extends State<HistoryLogs> {
                   final project = (data['project'] ?? '').toString();
                   final note = (data['note'] ?? '').toString();
 
-                  // Date range filter
                   if (fromDate != null && begin != null && begin.isBefore(fromDate!)) return false;
                   if (toDate != null && begin != null && begin.isAfter(toDate!)) return false;
 
-                  // Project filter
                   if (searchProject.isNotEmpty &&
                       !project.toLowerCase().contains(searchProject.toLowerCase())) {
                     return false;
                   }
 
-                  // Note filter
                   if (searchNote.isNotEmpty &&
                       !note.toLowerCase().contains(searchNote.toLowerCase())) {
                     return false;
@@ -383,54 +375,81 @@ class _HistoryLogsState extends State<HistoryLogs> {
                   return const Center(child: Text('No entries match your filters.'));
                 }
 
-                // ==== GROUPING LOGIC STARTS HERE ====
-                // Convert to models for easier handling
-                List<_HistoryEntry> entries = filteredLogs.map((doc) {
-                  final data = doc.data() as Map<String, dynamic>;
-                  final begin = (data['begin'] is Timestamp)
-                      ? (data['begin'] as Timestamp).toDate()
-                      : null;
-                  final end = (data['end'] is Timestamp)
-                      ? (data['end'] as Timestamp).toDate()
-                      : null;
-                  final duration = (begin != null && end != null)
-                      ? end.difference(begin)
-                      : Duration.zero;
-                  final project = data['project'] ?? '';
-                  final note = data['note'] ?? '';
-                  final sessionDate = data['sessionDate'] ?? '';
-                  final perDiemRaw = data['perDiem'];
-                  bool perDiem = false;
-                  if (perDiemRaw is bool) {
-                    perDiem = perDiemRaw;
-                  } else if (perDiemRaw is int) {
-                    perDiem = perDiemRaw == 1;
-                  } else if (perDiemRaw is String) {
-                    perDiem = perDiemRaw == '1' || perDiemRaw.toLowerCase() == 'true';
-                  }
-                  final expensesMap = Map<String, dynamic>.from(data['expenses'] ?? {});
-                  double totalExpense = 0.0;
-                  for (var v in expensesMap.values) {
-                    if (v is num) {
-                      totalExpense += v.toDouble();
-                    } else if (v is String) {
-                      final parsed = double.tryParse(v);
-                      if (parsed != null) totalExpense += parsed;
+                // Process all logs into entries
+                List<_HistoryEntry> entries = [];
+                for (var doc in filteredLogs) {
+                  try {
+                    final data = doc.data() as Map<String, dynamic>;
+                    
+                    // Safe data extraction
+                    DateTime? begin;
+                    DateTime? end;
+                    String project = '';
+                    String note = '';
+                    String sessionDate = '';
+                    bool perDiem = false;
+                    Duration duration = Duration.zero;
+                    double totalExpense = 0.0;
+                    Map<String, dynamic> expensesMap = {};
+                    
+                    try {
+                      begin = (data['begin'] is Timestamp) ? (data['begin'] as Timestamp).toDate() : null;
+                      end = (data['end'] is Timestamp) ? (data['end'] as Timestamp).toDate() : null;
+                      project = (data['project'] ?? '').toString();
+                      note = (data['note'] ?? '').toString();
+                      sessionDate = (data['sessionDate'] ?? '').toString();
+                      
+                      final perDiemRaw = data['perDiem'];
+                      perDiem = perDiemRaw == true || perDiemRaw == 1 || perDiemRaw == '1';
+                      
+                      // Calculate duration
+                      if (begin != null && end != null) {
+                        duration = end.difference(begin);
+                      }
+                      
+                      // Process expenses safely
+                      final rawExpenses = data['expenses'];
+                      if (rawExpenses is Map) {
+                        expensesMap = Map<String, dynamic>.from(rawExpenses);
+                        
+                        for (var entry in expensesMap.entries) {
+                          try {
+                            final v = entry.value;
+                            if (v is num) {
+                              totalExpense += v.toDouble();
+                            } else if (v is String) {
+                              final parsed = double.tryParse(v);
+                              if (parsed != null) totalExpense += parsed;
+                            } else if (v is bool) {
+                              // Skip boolean values
+                              continue;
+                            }
+                          } catch (e) {
+                            print('Error processing expense entry ${entry.key}: $e');
+                            continue;
+                          }
+                        }
+                      }
+                    } catch (e) {
+                      print('Error processing log data: $e');
                     }
-                  }
 
-                  return _HistoryEntry(
-                    begin: begin,
-                    end: end,
-                    duration: duration,
-                    project: project,
-                    note: note,
-                    sessionDate: sessionDate,
-                    perDiem: perDiem,
-                    expense: totalExpense,
-                    expensesMap: expensesMap,
-                  );
-                }).toList();
+                    entries.add(_HistoryEntry(
+                      begin: begin,
+                      end: end,
+                      duration: duration,
+                      project: project,
+                      note: note,
+                      sessionDate: sessionDate,
+                      perDiem: perDiem,
+                      expense: totalExpense,
+                      expensesMap: expensesMap,
+                    ));
+                  } catch (e) {
+                    print('Error creating history entry: $e');
+                    continue;
+                  }
+                }
 
                 // Sort by begin date descending
                 entries.sort((a, b) {
@@ -439,13 +458,13 @@ class _HistoryLogsState extends State<HistoryLogs> {
                   return b.begin!.compareTo(a.begin!);
                 });
 
-                // Grouping map
+                // Group entries
                 Map<String, List<_HistoryEntry>> grouped = {};
-
                 for (var entry in entries) {
                   String key = '';
-                  if (entry.begin == null) key = 'Unknown';
-                  else {
+                  if (entry.begin == null) {
+                    key = 'Unknown';
+                  } else {
                     switch (groupType) {
                       case GroupType.day:
                         key = dateFormat.format(entry.begin!);
@@ -465,240 +484,231 @@ class _HistoryLogsState extends State<HistoryLogs> {
                   grouped.putIfAbsent(key, () => []).add(entry);
                 }
 
-                // Sorted group keys (desc by date)
-                final sortedKeys = grouped.keys.toList()
-                  ..sort((a, b) {
-                    if (groupType == GroupType.day) {
-                      try {
-                        return DateTime.parse(b).compareTo(DateTime.parse(a));
-                      } catch (_) {}
-                    } else if (groupType == GroupType.year) {
-                      return int.parse(b).compareTo(int.parse(a));
-                    } else if (groupType == GroupType.month) {
-                      try {
-                        final fa = DateFormat('MMMM yyyy').parse(a);
-                        final fb = DateFormat('MMMM yyyy').parse(b);
-                        return fb.compareTo(fa);
-                      } catch (_) {}
-                    } else if (groupType == GroupType.week) {
-                      final wa = int.tryParse(a.split(' ')[1].replaceAll(',', '')) ?? 0;
-                      final wb = int.tryParse(b.split(' ')[1].replaceAll(',', '')) ?? 0;
-                      final ya = int.tryParse(a.split(',').last.trim()) ?? 0;
-                      final yb = int.tryParse(b.split(',').last.trim()) ?? 0;
-                      return yb != ya ? yb.compareTo(ya) : wb.compareTo(wa);
-                    }
-                    return a.compareTo(b);
-                  });
+                // Sort group keys
+                final sortedKeys = grouped.keys.toList()..sort((a, b) {
+                  if (groupType == GroupType.day) {
+                    try {
+                      return DateTime.parse(b).compareTo(DateTime.parse(a));
+                    } catch (_) {}
+                  } else if (groupType == GroupType.year) {
+                    return int.parse(b).compareTo(int.parse(a));
+                  } else if (groupType == GroupType.month) {
+                    try {
+                      final fa = DateFormat('MMMM yyyy').parse(a);
+                      final fb = DateFormat('MMMM yyyy').parse(b);
+                      return fb.compareTo(fa);
+                    } catch (_) {}
+                  } else if (groupType == GroupType.week) {
+                    final wa = int.tryParse(a.split(' ')[1].replaceAll(',', '')) ?? 0;
+                    final wb = int.tryParse(b.split(' ')[1].replaceAll(',', '')) ?? 0;
+                    final ya = int.tryParse(a.split(',').last.trim()) ?? 0;
+                    final yb = int.tryParse(b.split(',').last.trim()) ?? 0;
+                    return yb != ya ? yb.compareTo(ya) : wb.compareTo(wa);
+                  }
+                  return a.compareTo(b);
+                });
 
-                // ==== UI GROUPS ====
-                return ListView.separated(
+                // Grouped list view
+                return ListView.builder(
                   itemCount: sortedKeys.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
                   itemBuilder: (context, groupIdx) {
                     final groupKey = sortedKeys[groupIdx];
                     final groupList = grouped[groupKey]!;
 
-                    final groupTotal = groupList.fold<Duration>(
-                        Duration.zero, (sum, e) => sum + e.duration);
-                    final groupExpense = groupList.fold<double>(
-                        0.0, (sum, e) => sum + e.expense);
-
-                    return Card(
-                      margin: EdgeInsets.zero,
-                      elevation: isDark ? 0 : 4,
-                      color: isDark ? appColors.cardColorDark : Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: isDark ? appColors.cardColorDark : Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: isDark ? null : [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha:0.08),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            ExpansionTile(
-                              initiallyExpanded: groupIdx == 0,
-                              title: Text(
-                                groupKey,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark ? const Color(0xFFCCCCCC) : Colors.black87,
-                                ),
-                              ),
-                              children: groupList.map((entry) {
-                                return ListTile(
-                                  leading: Icon(
-                                    Icons.access_time,
-                                    color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
-                                  ),
-                                  title: Text(
-                                    (entry.begin != null && entry.end != null)
-                                        ? '${dateFormat.format(entry.begin!)}  ${timeFormat.format(entry.begin!)} - ${timeFormat.format(entry.end!)}'
-                                        : entry.sessionDate,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: isDark ? const Color(0xFFCCCCCC) : Colors.black87,
-                                    ),
-                                  ),
-                                  subtitle: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      if (entry.project != '') 
-                                        Text(
-                                          'Project: ${entry.project}',
-                                          style: TextStyle(
-                                            color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
-                                          ),
-                                        ),
-                                      if (entry.duration != Duration.zero)
-                                        Text(
-                                          'Duration: ${_formatDuration(entry.duration)}',
-                                          style: TextStyle(
-                                            color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
-                                          ),
-                                        ),
-                                      if (entry.note != '') 
-                                        Text(
-                                          'Note: ${entry.note}',
-                                          style: TextStyle(
-                                            color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
-                                          ),
-                                        ),
-                                      if (entry.perDiem)
-                                        Text(
-                                          'Per diem: Yes', 
-                                          style: TextStyle(
-                                            color: theme.colorScheme.primary,
-                                          ),
-                                        ),
-                                      if (entry.expensesMap.isNotEmpty)
-                                        Padding(
-                                          padding: const EdgeInsets.only(top: 2.0),
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              ...entry.expensesMap.entries.map((e) {
-                                                double expenseValue = 0.0;
-                                                if (e.value is num) {
-                                                  expenseValue = (e.value as num).toDouble();
-                                                } else if (e.value is String) {
-                                                  expenseValue = double.tryParse(e.value as String) ?? 0.0;
-                                                }
-                                                return Text('${e.key}: ${expenseFormat.format(expenseValue)}',
-                                                  style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.w600, fontSize: 15),
-                                                );
-                                              }).toList(),
-                                              if (entry.expense > 0)
-                                                Padding(
-                                                  padding: const EdgeInsets.only(top: 4.0),
-                                                  child: Text(
-                                                    'Total Expenses: ${expenseFormat.format(entry.expense)}',
-                                                    style: const TextStyle(
-                                                      color: Colors.red,
-                                                      fontWeight: FontWeight.w600,
-                                                      fontSize: 15,
-                                                    ),
-                                                  ),
-                                                ),
-                                            ],
-                                          ),
-                                        )
-                                      else if (entry.expense > 0)
-                                        Padding(
-                                          padding: const EdgeInsets.only(top: 2.0),
-                                          child: Text(
-                                            'Total Expenses: ${expenseFormat.format(entry.expense)}',
-                                            style: const TextStyle(
-                                              color: Colors.red,
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 15,
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                            // Blue bar with group totals
-                            Container(
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: isDark 
-                                  ? theme.colorScheme.primary.withValues(alpha:0.2)
-                                  : theme.colorScheme.primary.withValues(alpha:0.1),
-                                borderRadius: const BorderRadius.only(
-                                  bottomLeft: Radius.circular(12),
-                                  bottomRight: Radius.circular(12),
-                                ),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
-                              child: LayoutBuilder(
-                                builder: (context, constraints) {
-                                  // Check if we need to wrap the totals on small screens
-                                  final needsWrap = constraints.maxWidth < 400;
-                                  
-                                  if (needsWrap) {
-                                    return Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Total Time: ${_formatDuration(groupTotal)}',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w700,
-                                            color: theme.colorScheme.primary,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          'Total Expenses: ${expenseFormat.format(groupExpense)}',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w700,
-                                            color: theme.colorScheme.primary,
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                                  } else {
-                                    return Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            'Total Time: ${_formatDuration(groupTotal)}',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w700,
-                                              color: theme.colorScheme.primary,
-                                            ),
-                                          ),
-                                        ),
-                                        Flexible(
-                                          child: Text(
-                                            'Total Expenses: ${expenseFormat.format(groupExpense)}',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w700,
-                                              color: theme.colorScheme.primary,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                                  }
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
+                    // Calculate group totals
+                    Duration groupTotal = Duration.zero;
+                    double groupExpense = 0.0;
+                    
+                    for (var e in groupList) {
+                      try {
+                        groupTotal += e.duration;
+                        if (e.expense.isFinite && !e.expense.isNaN) {
+                          groupExpense += e.expense;
+                        }
+                      } catch (error) {
+                        print('Error in group calculation: $error');
+                      }
+                    }
+                    
+                                                              return Container(
+                       margin: const EdgeInsets.only(bottom: 8),
+                       decoration: BoxDecoration(
+                         color: isDark ? appColors.cardColorDark : Colors.white,
+                         borderRadius: BorderRadius.circular(12),
+                         boxShadow: isDark ? null : [
+                           BoxShadow(
+                             color: Colors.black.withValues(alpha:0.08),
+                             blurRadius: 6,
+                             offset: const Offset(0, 2),
+                           ),
+                         ],
+                       ),
+                       child: Column(
+                         children: [
+                           // Group header
+                           Container(
+                             width: double.infinity,
+                             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                             decoration: BoxDecoration(
+                               color: isDark 
+                                 ? theme.colorScheme.primary.withValues(alpha:0.1)
+                                 : theme.colorScheme.primary.withValues(alpha:0.05),
+                               borderRadius: const BorderRadius.only(
+                                 topLeft: Radius.circular(12),
+                                 topRight: Radius.circular(12),
+                               ),
+                             ),
+                             child: Row(
+                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                               children: [
+                                 Text(
+                                   groupKey,
+                                   style: TextStyle(
+                                     fontWeight: FontWeight.bold,
+                                     color: theme.colorScheme.primary,
+                                   ),
+                                 ),
+                                 Text(
+                                   'Total: ${_formatDuration(groupTotal)}',
+                                   style: TextStyle(
+                                     fontWeight: FontWeight.w600,
+                                     color: theme.colorScheme.primary,
+                                   ),
+                                 ),
+                               ],
+                             ),
+                           ),
+                           // Group entries
+                           ...groupList.map((entry) => ListTile(
+                             title: Text(
+                               (entry.begin != null && entry.end != null)
+                                   ? '${dateFormat.format(entry.begin!)}  ${timeFormat.format(entry.begin!)} - ${timeFormat.format(entry.end!)}'
+                                   : entry.sessionDate,
+                               style: TextStyle(
+                                 fontWeight: FontWeight.bold,
+                                 color: isDark ? const Color(0xFFCCCCCC) : Colors.black87,
+                               ),
+                             ),
+                             subtitle: Column(
+                               crossAxisAlignment: CrossAxisAlignment.start,
+                               children: [
+                                 if (entry.project.isNotEmpty) 
+                                   Text(
+                                     'Project: ${entry.project}',
+                                     style: TextStyle(
+                                       color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
+                                     ),
+                                   ),
+                                 if (entry.duration != Duration.zero)
+                                   Text(
+                                     'Duration: ${_formatDuration(entry.duration)}',
+                                     style: TextStyle(
+                                       color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
+                                     ),
+                                   ),
+                                 if (entry.note.isNotEmpty) 
+                                   Text(
+                                     'Note: ${entry.note}',
+                                     style: TextStyle(
+                                       color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
+                                     ),
+                                   ),
+                                 if (entry.perDiem)
+                                   Text(
+                                     'Per diem: Yes', 
+                                     style: TextStyle(
+                                       color: theme.colorScheme.primary,
+                                     ),
+                                   ),
+                                 if (entry.expensesMap.isNotEmpty)
+                                   Padding(
+                                     padding: const EdgeInsets.only(top: 2.0),
+                                     child: Column(
+                                       crossAxisAlignment: CrossAxisAlignment.start,
+                                       children: [
+                                         ...entry.expensesMap.entries.map((e) {
+                                           if (e.value is bool) {
+                                             return Text('${e.key}: ${e.value ? "Yes" : "No"}',
+                                               style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w600, fontSize: 15),
+                                             );
+                                           } else {
+                                             double expenseValue = 0.0;
+                                             if (e.value is num) {
+                                               expenseValue = (e.value as num).toDouble();
+                                             } else if (e.value is String) {
+                                               expenseValue = double.tryParse(e.value as String) ?? 0.0;
+                                             }
+                                             return Text('${e.key}: ${expenseFormat.format(expenseValue)}',
+                                               style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.w600, fontSize: 15),
+                                             );
+                                           }
+                                         }).toList(),
+                                         if (entry.expense > 0)
+                                           Padding(
+                                             padding: const EdgeInsets.only(top: 4.0),
+                                             child: Text(
+                                               'Total Expenses: ${expenseFormat.format(entry.expense)}',
+                                               style: const TextStyle(
+                                                 color: Colors.red,
+                                                 fontWeight: FontWeight.w600,
+                                                 fontSize: 15,
+                                               ),
+                                             ),
+                                           ),
+                                       ],
+                                     ),
+                                   )
+                                 else if (entry.expense > 0)
+                                   Padding(
+                                     padding: const EdgeInsets.only(top: 2.0),
+                                     child: Text(
+                                       'Total Expenses: ${expenseFormat.format(entry.expense)}',
+                                       style: const TextStyle(
+                                         color: Colors.red,
+                                         fontWeight: FontWeight.w600,
+                                         fontSize: 15,
+                                       ),
+                                     ),
+                                   ),
+                               ],
+                             ),
+                           )).toList(),
+                           // Group totals footer
+                           Container(
+                             width: double.infinity,
+                             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                             decoration: BoxDecoration(
+                               color: isDark 
+                                 ? theme.colorScheme.primary.withValues(alpha:0.1)
+                                 : theme.colorScheme.primary.withValues(alpha:0.05),
+                               borderRadius: const BorderRadius.only(
+                                 bottomLeft: Radius.circular(12),
+                                 bottomRight: Radius.circular(12),
+                               ),
+                             ),
+                             child: Row(
+                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                               children: [
+                                 Text(
+                                   'Total Time: ${_formatDuration(groupTotal)}',
+                                   style: TextStyle(
+                                     fontWeight: FontWeight.w700,
+                                     color: theme.colorScheme.primary,
+                                   ),
+                                 ),
+                                 Text(
+                                   'Total Expenses: ${expenseFormat.format(groupExpense)}',
+                                   style: TextStyle(
+                                     fontWeight: FontWeight.w700,
+                                     color: theme.colorScheme.primary,
+                                   ),
+                                 ),
+                               ],
+                             ),
+                           ),
+                         ],
+                       ),
+                     );
                   },
                 );
               },
@@ -719,7 +729,7 @@ class _HistoryEntry {
   final String note;
   final String sessionDate;
   final bool perDiem;
-  final double expense; // total
+  final double expense;
   final Map<String, dynamic> expensesMap;
 
   _HistoryEntry({

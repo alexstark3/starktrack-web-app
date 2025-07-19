@@ -123,9 +123,7 @@ class _MembersTable extends StatelessWidget {
           final firstName = (data['firstName'] ?? '').toString().toLowerCase();
           final surname = (data['surname'] ?? '').toString().toLowerCase();
           final email = (data['email'] ?? '').toString().toLowerCase();
-          final isNotTeamLeader = teamLeaderId == null || doc.id != teamLeaderId;
-          return isNotTeamLeader &&
-              (firstName.contains(search) ||
+          return (firstName.contains(search) ||
                surname.contains(search) ||
                email.contains(search));
         }).toList();
