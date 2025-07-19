@@ -33,6 +33,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
   String searchProject = '';
   String searchNote = '';
   GroupType groupType = GroupType.day;
+  bool _isCardExpanded = false; // New state for card expansion
 
   final dateFormat = DateFormat('yyyy-MM-dd');
   final TextEditingController _projectController = TextEditingController();
@@ -81,60 +82,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // --- Tabs remain visible at the top, let parent handle color changes/press logic ---
-        // Main header with name and working status icon
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8, top: 10, left: 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                userName,
-                style: TextStyle(
-                  color: colors.primaryBlue,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 22,
-                ),
-              ),
-              const SizedBox(height: 4),
-              _StatusIcon(companyId: widget.companyId, userId: userId),
-            ],
-          ),
-        ),
-        _TotalsHeader(companyId: widget.companyId, userId: userId),
-        const SizedBox(height: 10),
-
-        // Add New Session button
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            ElevatedButton.icon(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => AddNewSessionDialog(
-                    companyId: widget.companyId,
-                    userId: userId,
-                    userName: userName,
-                    onSessionAdded: () => setState(() {}),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.add_circle_outline),
-              label: const Text('Add New Session'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colors.primaryBlue,
-                foregroundColor: colors.whiteTextOnBlue,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-
-        // Search/Filter line (same as history module)
+        // Collapsible User Info and Filter Card
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
@@ -148,219 +96,375 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
               ),
             ],
           ),
-          padding: const EdgeInsets.all(16),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              // From and To date pickers
-              final fromDatePicker = InkWell(
-                borderRadius: BorderRadius.circular(kFilterRadius),
-                onTap: () async {
-                  DateTime? picked = await showDatePicker(
-                    context: context,
-                    initialDate: fromDate ?? DateTime.now(),
-                    firstDate: DateTime(2023),
-                    lastDate: DateTime(2100),
-                  );
-                  if (picked != null) setState(() => fromDate = picked);
-                },
-                child: Container(
-                  height: kFilterHeight,
-                  padding: const EdgeInsets.symmetric(horizontal: 18),
-                  decoration: pillDecoration,
+          child: Column(
+            children: [
+              // Header with name and expand/collapse button
+              InkWell(
+                onTap: () => setState(() => _isCardExpanded = !_isCardExpanded),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8, bottom: 8, left: 16, right: 16), // Reduced top padding
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
-                      const SizedBox(width: 6),
-                      Text(
-                        fromDate == null ? "From" : dateFormat.format(fromDate!),
-                        style: TextStyle(
-                          color: fromDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
-                          fontWeight: FontWeight.w500,
-                          fontSize: kFilterFontSize,
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Text(
+                              userName,
+                              style: TextStyle(
+                                color: colors.primaryBlue,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 22,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            _StatusIcon(companyId: widget.companyId, userId: userId),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              );
-
-              final toDatePicker = InkWell(
-                borderRadius: BorderRadius.circular(kFilterRadius),
-                onTap: () async {
-                  DateTime? picked = await showDatePicker(
-                    context: context,
-                    initialDate: toDate ?? DateTime.now(),
-                    firstDate: DateTime(2023),
-                    lastDate: DateTime(2100),
-                  );
-                  if (picked != null) setState(() => toDate = picked);
-                },
-                child: Container(
-                  height: kFilterHeight,
-                  padding: const EdgeInsets.symmetric(horizontal: 18),
-                  decoration: pillDecoration,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
-                      const SizedBox(width: 6),
-                      Text(
-                        toDate == null ? "To" : dateFormat.format(toDate!),
-                        style: TextStyle(
-                          color: toDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
-                          fontWeight: FontWeight.w500,
-                          fontSize: kFilterFontSize,
-                        ),
+                      Icon(
+                        _isCardExpanded ? Icons.expand_less : Icons.expand_more,
+                        color: colors.primaryBlue,
+                        size: 24,
                       ),
                     ],
                   ),
                 ),
-              );
-
-              // Group type dropdown
-              final groupDropdown = Container(
-                height: kFilterHeight,
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                decoration: pillDecoration,
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<GroupType>(
-                    value: groupType,
-                    style: pillTextStyle,
-                    icon: const Icon(Icons.keyboard_arrow_down, size: 22),
-                    items: const [
-                      DropdownMenuItem(
-                        value: GroupType.day,
-                        child: Text('Day'),
-                      ),
-                      DropdownMenuItem(
-                        value: GroupType.week,
-                        child: Text('Week'),
-                      ),
-                      DropdownMenuItem(
-                        value: GroupType.month,
-                        child: Text('Month'),
-                      ),
-                      DropdownMenuItem(
-                        value: GroupType.year,
-                        child: Text('Year'),
-                      ),
-                    ],
-                    onChanged: (val) {
-                      if (val != null) setState(() => groupType = val);
-                    },
-                  ),
-                ),
-              );
-
-              // Project and Note filters
-              final projectBox = Container(
-                height: kFilterHeight,
-                width: 150,
-                alignment: Alignment.centerLeft,
-                decoration: pillDecoration,
-                padding: const EdgeInsets.symmetric(horizontal: 18),
-                child: TextField(
-                  controller: _projectController,
-                  decoration: InputDecoration(
-                    hintText: 'Project',
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                  style: pillTextStyle,
-                  onChanged: (v) => setState(() => searchProject = v.trim()),
-                ),
-              );
-
-              final noteBox = Container(
-                height: kFilterHeight,
-                width: 150,
-                alignment: Alignment.centerLeft,
-                decoration: pillDecoration,
-                padding: const EdgeInsets.symmetric(horizontal: 18),
-                child: TextField(
-                  controller: _noteController,
-                  decoration: InputDecoration(
-                    hintText: 'Note',
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                  style: pillTextStyle,
-                  onChanged: (v) => setState(() => searchNote = v.trim()),
-                ),
-              );
-
-              // Refresh button
-              final refreshBtn = Container(
-                height: kFilterHeight,
-                                    decoration: BoxDecoration(
-                      color: isDark 
-                        ? theme.colorScheme.primary.withOpacity(0.2)
-                        : theme.colorScheme.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
-                  boxShadow: isDark ? null : [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha:0.08),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: IconButton(
-                  icon: Icon(Icons.refresh, color: theme.colorScheme.primary, size: 24),
-                  tooltip: 'Clear filters',
-                  onPressed: () {
-                    setState(() {
-                      fromDate = null;
-                      toDate = null;
-                      searchProject = '';
-                      searchNote = '';
-                      groupType = GroupType.day;
-                      _projectController.clear();
-                      _noteController.clear();
-                    });
-                  },
-                ),
-              );
-
-              // Check if we need to wrap (when screen is too narrow)
-              final needsWrap = constraints.maxWidth < 800;
+              ),
               
-              if (needsWrap) {
-                // Wrap layout for small screens
-                return Wrap(
-                  spacing: kFilterSpacing,
-                  runSpacing: 8,
-                  children: [
-                    fromDatePicker,
-                    toDatePicker,
-                    groupDropdown,
-                    refreshBtn,
-                    projectBox,
-                    noteBox,
-                  ],
-                );
-              } else {
-                // Original single row layout for larger screens
-                return Row(
-                  children: [
-                    fromDatePicker,
-                    const SizedBox(width: kFilterSpacing),
-                    toDatePicker,
-                    const SizedBox(width: kFilterSpacing),
-                    groupDropdown,
-                    const SizedBox(width: kFilterSpacing),
-                    refreshBtn,
-                    const SizedBox(width: kFilterSpacing),
-                    projectBox,
-                    const SizedBox(width: kFilterSpacing),
-                    noteBox,
-                  ],
-                );
-              }
-            },
+              // Expanded content
+              if (_isCardExpanded) ...[
+                // Subtle divider
+                Container(
+                  height: 1,
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  color: isDark ? Colors.white12 : Colors.black12,
+                ),
+                
+                // User details and filters
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      // User status and totals
+                      Row(
+                        children: [
+                          Expanded(child: _TotalsHeader(companyId: widget.companyId, userId: userId)),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      // Add New Session button
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AddNewSessionDialog(
+                                  companyId: widget.companyId,
+                                  userId: userId,
+                                  userName: userName,
+                                  onSessionAdded: () => setState(() {}),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.add_circle_outline),
+                            label: const Text('Add New Session'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: colors.primaryBlue,
+                              foregroundColor: colors.whiteTextOnBlue,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      // Filter controls
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          // From and To date pickers
+                          final fromDatePicker = InkWell(
+                            borderRadius: BorderRadius.circular(kFilterRadius),
+                            onTap: () async {
+                              DateTime? picked = await showDatePicker(
+                                context: context,
+                                initialDate: fromDate ?? DateTime.now(),
+                                firstDate: DateTime(2023),
+                                lastDate: DateTime(2100),
+                              );
+                              if (picked != null) setState(() => fromDate = picked);
+                            },
+                            child: Container(
+                              height: kFilterHeight,
+                              padding: const EdgeInsets.symmetric(horizontal: 18),
+                              decoration: pillDecoration,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    fromDate == null ? "From" : dateFormat.format(fromDate!),
+                                    style: TextStyle(
+                                      color: fromDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: kFilterFontSize,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+
+                          final toDatePicker = InkWell(
+                            borderRadius: BorderRadius.circular(kFilterRadius),
+                            onTap: () async {
+                              DateTime? picked = await showDatePicker(
+                                context: context,
+                                initialDate: toDate ?? DateTime.now(),
+                                firstDate: DateTime(2023),
+                                lastDate: DateTime(2100),
+                              );
+                              if (picked != null) setState(() => toDate = picked);
+                            },
+                            child: Container(
+                              height: kFilterHeight,
+                              padding: const EdgeInsets.symmetric(horizontal: 18),
+                              decoration: pillDecoration,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    toDate == null ? "To" : dateFormat.format(toDate!),
+                                    style: TextStyle(
+                                      color: toDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: kFilterFontSize,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+
+                          // Group type dropdown
+                          final groupDropdown = Container(
+                            height: kFilterHeight,
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                            decoration: pillDecoration,
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<GroupType>(
+                                value: groupType,
+                                style: pillTextStyle,
+                                icon: const Icon(Icons.keyboard_arrow_down, size: 22),
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: GroupType.day,
+                                    child: Text('Day'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: GroupType.week,
+                                    child: Text('Week'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: GroupType.month,
+                                    child: Text('Month'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: GroupType.year,
+                                    child: Text('Year'),
+                                  ),
+                                ],
+                                onChanged: (val) {
+                                  if (val != null) setState(() => groupType = val);
+                                },
+                              ),
+                            ),
+                          );
+
+                          // Project and Note filters
+                          final projectBox = Container(
+                            height: kFilterHeight,
+                            width: 150,
+                            alignment: Alignment.centerLeft,
+                            decoration: pillDecoration,
+                            padding: const EdgeInsets.symmetric(horizontal: 18),
+                            child: TextField(
+                              controller: _projectController,
+                              decoration: InputDecoration(
+                                hintText: 'Project',
+                                border: InputBorder.none,
+                                isDense: true,
+                                contentPadding: EdgeInsets.zero,
+                              ),
+                              style: pillTextStyle,
+                              onChanged: (v) => setState(() => searchProject = v.trim()),
+                            ),
+                          );
+
+                          final noteBox = Container(
+                            height: kFilterHeight,
+                            width: 150,
+                            alignment: Alignment.centerLeft,
+                            decoration: pillDecoration,
+                            padding: const EdgeInsets.symmetric(horizontal: 18),
+                            child: TextField(
+                              controller: _noteController,
+                              decoration: InputDecoration(
+                                hintText: 'Note',
+                                border: InputBorder.none,
+                                isDense: true,
+                                contentPadding: EdgeInsets.zero,
+                              ),
+                              style: pillTextStyle,
+                              onChanged: (v) => setState(() => searchNote = v.trim()),
+                            ),
+                          );
+
+                          // Refresh button
+                          final refreshBtn = Container(
+                            height: kFilterHeight,
+                            decoration: BoxDecoration(
+                              color: isDark 
+                                ? theme.colorScheme.primary.withOpacity(0.2)
+                                : theme.colorScheme.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: isDark ? null : [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha:0.08),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: IconButton(
+                              icon: Icon(Icons.refresh, color: theme.colorScheme.primary, size: 24),
+                              tooltip: 'Clear filters',
+                              onPressed: () {
+                                setState(() {
+                                  fromDate = null;
+                                  toDate = null;
+                                  searchProject = '';
+                                  searchNote = '';
+                                  groupType = GroupType.day;
+                                  _projectController.clear();
+                                  _noteController.clear();
+                                });
+                              },
+                            ),
+                          );
+
+                          // Check if we need to wrap (when screen is too narrow)
+                          final needsWrap = constraints.maxWidth < 800;
+                          
+                          if (needsWrap) {
+                            // Simple responsive layout with guaranteed left alignment
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Date pickers - allow wrapping when needed
+                                LayoutBuilder(
+                                  builder: (context, innerConstraints) {
+                                    if (innerConstraints.maxWidth < 300) {
+                                      // Stack vertically if too narrow
+                                      return Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          fromDatePicker,
+                                          const SizedBox(height: 8),
+                                          toDatePicker,
+                                        ],
+                                      );
+                                    } else {
+                                      // Side by side if enough space
+                                      return Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          fromDatePicker,
+                                          const SizedBox(width: kFilterSpacing),
+                                          toDatePicker,
+                                        ],
+                                      );
+                                    }
+                                  },
+                                ),
+                                const SizedBox(height: 8),
+                                // Controls row
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    groupDropdown,
+                                    const SizedBox(width: kFilterSpacing),
+                                    refreshBtn,
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                // Search fields - use Wrap only for these if needed
+                                LayoutBuilder(
+                                  builder: (context, innerConstraints) {
+                                    if (innerConstraints.maxWidth < 400) {
+                                      // Stack vertically if too narrow
+                                      return Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          projectBox,
+                                          const SizedBox(height: 8),
+                                          noteBox,
+                                        ],
+                                      );
+                                    } else {
+                                      // Side by side if enough space
+                                      return Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          projectBox,
+                                          const SizedBox(width: kFilterSpacing),
+                                          noteBox,
+                                        ],
+                                      );
+                                    }
+                                  },
+                                ),
+                              ],
+                            );
+                          } else {
+                            // Single row layout for larger screens
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                fromDatePicker,
+                                const SizedBox(width: kFilterSpacing),
+                                toDatePicker,
+                                const SizedBox(width: kFilterSpacing),
+                                groupDropdown,
+                                const SizedBox(width: kFilterSpacing),
+                                refreshBtn,
+                                const SizedBox(width: kFilterSpacing),
+                                Expanded(child: projectBox),
+                                const SizedBox(width: kFilterSpacing),
+                                Expanded(child: noteBox),
+                              ],
+                            );
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
         const SizedBox(height: 10),
@@ -413,8 +517,14 @@ class _StatusIcon extends StatelessWidget {
             }
           }
         }
-        String status = isWorking ? '🟢 Working' : '🔴 Not working';
-        return Text(status, style: const TextStyle(fontSize: 18));
+        return Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: isWorking ? Colors.green : Colors.red,
+            shape: BoxShape.circle,
+          ),
+        );
       },
     );
   }

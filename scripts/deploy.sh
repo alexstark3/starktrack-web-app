@@ -1,6 +1,6 @@
 #!/bin/bash
 #./scripts/deploy.sh
-echo "🚀 Starting deployment..."
+echo "🚀 Starting version update and sync..."
 
 # Check if we're in a git repository
 if ! git rev-parse --git-dir > /dev/null 2>&1; then
@@ -42,22 +42,13 @@ echo "   (Commit count: $COMMIT_COUNT + offset: 521)"
 echo "📥 Getting Flutter dependencies..."
 flutter pub get
 
-# Build the web app
-echo "🔨 Building web app..."
-flutter build web
-
-if [ $? -ne 0 ]; then
-    echo "❌ Build failed!"
-    exit 1
-fi
-
 # Commit changes and push to GitHub
 echo "📝 Committing changes..."
 git add .
-git commit -m "🚀 Deploy version $VERSION+$BUILD_NUMBER
+git commit -m "🚀 Update version to $VERSION+$BUILD_NUMBER
 
 - Updated build number to $BUILD_NUMBER
-- Deployed to Firebase"
+- Ready for deployment"
 
 echo "📤 Pushing to GitHub..."
 git push
@@ -68,15 +59,6 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Deploy to Firebase
-echo "🚀 Deploying to Firebase..."
-firebase deploy
-
-if [ $? -ne 0 ]; then
-    echo "❌ Firebase deployment failed!"
-    exit 1
-fi
-
-echo "✅ Deployment complete!"
-echo "🌐 Your app is live with version $VERSION+$BUILD_NUMBER"
-echo "📝 Changes committed and pushed to GitHub"
+echo "✅ Version update complete!"
+echo "📦 Version $VERSION+$BUILD_NUMBER committed and pushed to GitHub"
+echo "🚀 Deployment will be triggered automatically by your CI/CD pipeline"
