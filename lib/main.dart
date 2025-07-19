@@ -16,7 +16,7 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  print('FIREBASE PROJECT ID: ${Firebase.app().options.projectId}'); // Print the actual projectId being used
+  // Firebase project ID: ${Firebase.app().options.projectId}
 
   runApp(
     ChangeNotifierProvider(create: (_) => ThemeProvider(), child: const MyApp()),

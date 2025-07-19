@@ -1,7 +1,6 @@
 // lib/widgets/company/company_side_menu.dart
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 class SideMenuItem {
   final String label;
@@ -44,20 +43,42 @@ class _CompanySideMenuState extends State<CompanySideMenu> {
   Future<void> _loadAppInfo() async {
     try {
       final packageInfo = await PackageInfo.fromPlatform();
-      print('PackageInfo loaded - version: "${packageInfo.version}", buildNumber: "${packageInfo.buildNumber}"'); // Debug print
-      print('Platform: ${kIsWeb ? 'Web' : 'Native'}'); // Debug print
+      // PackageInfo loaded - version: "${packageInfo.version}", buildNumber: "${packageInfo.buildNumber}"
+      // Platform: ${kIsWeb ? 'Web' : 'Native'}
       
-      // Use clean build number (630) without the + prefix
-      String buildNumber = '630';
+      // Create clean version format: 1.1.641 instead of 1.1.1+641
+      String cleanVersion = packageInfo.version;
+      String buildNumber = packageInfo.buildNumber;
+      
+      // If version contains + (like 1.1.1+641), extract the base version and build number
+      if (cleanVersion.contains('+')) {
+        List<String> parts = cleanVersion.split('+');
+        String baseVersion = parts[0]; // 1.1.1
+        String buildNum = parts.length > 1 ? parts[1] : buildNumber; // 641
+        
+        // Create clean format: replace last part of base version with build number
+        List<String> versionParts = baseVersion.split('.');
+        if (versionParts.length >= 3) {
+          versionParts[2] = buildNum; // Replace 1 with 641
+          cleanVersion = versionParts.join('.'); // 1.1.641
+        }
+      } else {
+        // If version doesn't contain +, combine version and build number manually
+        List<String> versionParts = cleanVersion.split('.');
+        if (versionParts.length >= 3 && buildNumber.isNotEmpty) {
+          versionParts[2] = buildNumber; // Replace last part with build number
+          cleanVersion = versionParts.join('.'); // 1.1.641
+        }
+      }
       
       setState(() {
-        _appInfo = 'Stark Track 1.1.$buildNumber';
+        _appInfo = 'Stark Track $cleanVersion';
       });
-      print('Final app info: $_appInfo'); // Debug print
+      // Final app info: $_appInfo
     } catch (e) {
-      print('Error loading app info: $e'); // Debug print
+      // Error loading app info: $e
       setState(() {
-        _appInfo = 'Stark Track 1.1.630'; // Fallback with build number
+        _appInfo = 'Stark Track 1.1.633'; // Fallback with clean version format
       });
     }
   }

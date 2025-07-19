@@ -31,9 +31,26 @@ class _HistoryLogsState extends State<HistoryLogs> {
   String searchProject = '';
   GroupType groupType = GroupType.day;
 
+  late final TextEditingController projectController;
+  late final TextEditingController noteController;
+
   final dateFormat = DateFormat('yyyy-MM-dd');
   final timeFormat = DateFormat('HH:mm');
   final expenseFormat = NumberFormat.currency(symbol: "CHF ", decimalDigits: 2);
+
+  @override
+  void initState() {
+    super.initState();
+    projectController = TextEditingController();
+    noteController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    projectController.dispose();
+    noteController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -189,6 +206,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
       decoration: pillDecoration,
       padding: const EdgeInsets.symmetric(horizontal: 18),
       child: TextField(
+        controller: projectController,
         decoration: InputDecoration(
           hintText: 'Project',
           border: InputBorder.none,
@@ -207,6 +225,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
       decoration: pillDecoration,
       padding: const EdgeInsets.symmetric(horizontal: 18),
       child: TextField(
+        controller: noteController,
         decoration: InputDecoration(
           hintText: 'Note',
           border: InputBorder.none,
@@ -243,7 +262,11 @@ class _HistoryLogsState extends State<HistoryLogs> {
             toDate = null;
             searchProject = '';
             searchNote = '';
+            groupType = GroupType.day;
           });
+          // Clear the text controllers to update the UI
+          projectController.clear();
+          noteController.clear();
         },
       ),
     );
@@ -377,11 +400,23 @@ class _HistoryLogsState extends State<HistoryLogs> {
                   final note = data['note'] ?? '';
                   final sessionDate = data['sessionDate'] ?? '';
                   final perDiemRaw = data['perDiem'];
-                  final perDiem = perDiemRaw == true || perDiemRaw == 1 || perDiemRaw == '1';
+                  bool perDiem = false;
+                  if (perDiemRaw is bool) {
+                    perDiem = perDiemRaw;
+                  } else if (perDiemRaw is int) {
+                    perDiem = perDiemRaw == 1;
+                  } else if (perDiemRaw is String) {
+                    perDiem = perDiemRaw == '1' || perDiemRaw.toLowerCase() == 'true';
+                  }
                   final expensesMap = Map<String, dynamic>.from(data['expenses'] ?? {});
                   double totalExpense = 0.0;
                   for (var v in expensesMap.values) {
-                    if (v is num) totalExpense += v.toDouble();
+                    if (v is num) {
+                      totalExpense += v.toDouble();
+                    } else if (v is String) {
+                      final parsed = double.tryParse(v);
+                      if (parsed != null) totalExpense += parsed;
+                    }
                   }
 
                   return _HistoryEntry(
@@ -504,30 +539,14 @@ class _HistoryLogsState extends State<HistoryLogs> {
                                     Icons.access_time,
                                     color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
                                   ),
-                                  title: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          (entry.begin != null && entry.end != null)
-                                              ? '${dateFormat.format(entry.begin!)}  ${timeFormat.format(entry.begin!)} - ${timeFormat.format(entry.end!)}'
-                                              : entry.sessionDate,
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: isDark ? const Color(0xFFCCCCCC) : Colors.black87,
-                                          ),
-                                        ),
-                                      ),
-                                      if (entry.expense > 0)
-                                        Text(
-                                          expenseFormat.format(entry.expense),
-                                          style: const TextStyle(
-                                              color: Colors.red,
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 15),
-                                        ),
-                                    ],
+                                  title: Text(
+                                    (entry.begin != null && entry.end != null)
+                                        ? '${dateFormat.format(entry.begin!)}  ${timeFormat.format(entry.begin!)} - ${timeFormat.format(entry.end!)}'
+                                        : entry.sessionDate,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: isDark ? const Color(0xFFCCCCCC) : Colors.black87,
+                                    ),
                                   ),
                                   subtitle: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -553,7 +572,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                                             color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
                                           ),
                                         ),
-                                      if (entry.perDiem == true)
+                                      if (entry.perDiem)
                                         Text(
                                           'Per diem: Yes', 
                                           style: TextStyle(
@@ -565,10 +584,43 @@ class _HistoryLogsState extends State<HistoryLogs> {
                                           padding: const EdgeInsets.only(top: 2.0),
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: entry.expensesMap.entries.map((e) =>
-                                              Text('${e.key}: ${expenseFormat.format((e.value as num).toDouble())}',
-                                                style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.w600, fontSize: 15),
-                                              )).toList(),
+                                            children: [
+                                              ...entry.expensesMap.entries.map((e) {
+                                                double expenseValue = 0.0;
+                                                if (e.value is num) {
+                                                  expenseValue = (e.value as num).toDouble();
+                                                } else if (e.value is String) {
+                                                  expenseValue = double.tryParse(e.value as String) ?? 0.0;
+                                                }
+                                                return Text('${e.key}: ${expenseFormat.format(expenseValue)}',
+                                                  style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.w600, fontSize: 15),
+                                                );
+                                              }).toList(),
+                                              if (entry.expense > 0)
+                                                Padding(
+                                                  padding: const EdgeInsets.only(top: 4.0),
+                                                  child: Text(
+                                                    'Total Expenses: ${expenseFormat.format(entry.expense)}',
+                                                    style: const TextStyle(
+                                                      color: Colors.red,
+                                                      fontWeight: FontWeight.w600,
+                                                      fontSize: 15,
+                                                    ),
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                        )
+                                      else if (entry.expense > 0)
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 2.0),
+                                          child: Text(
+                                            'Total Expenses: ${expenseFormat.format(entry.expense)}',
+                                            style: const TextStyle(
+                                              color: Colors.red,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 15,
+                                            ),
                                           ),
                                         ),
                                     ],
