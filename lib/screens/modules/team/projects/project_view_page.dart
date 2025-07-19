@@ -184,7 +184,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                 Text(
                   projectName.isNotEmpty ? projectName : 'No Project Name',
                   style: TextStyle(
-                    fontSize: 22,
+                    fontSize: 18, // Reduced from 22 to 18
                     fontWeight: FontWeight.bold,
                     color: colors.primaryBlue,
                   ),

@@ -590,14 +590,14 @@ class _AdminPanelState extends State<AdminPanel> {
     
     return Container(
       color: appColors.backgroundDark,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(10), // Reduced from 16 to 10
       child: Card(
         elevation: isDark ? 0 : 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(10), // Reduced from 16 to 10
           child: Column(
             children: [
               Row(
@@ -643,7 +643,7 @@ class _AdminPanelState extends State<AdminPanel> {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 10), // Reduced from 16 to 10
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance

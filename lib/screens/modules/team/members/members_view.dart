@@ -117,7 +117,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                               style: TextStyle(
                                 color: colors.primaryBlue,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 22,
+                                fontSize: 18, // Reduced from 22 to 18
                               ),
                             ),
                             const SizedBox(width: 8),

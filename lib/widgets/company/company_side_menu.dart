@@ -86,7 +86,7 @@ class _CompanySideMenuState extends State<CompanySideMenu> {
   @override
   Widget build(BuildContext context) {
     final theme  = Theme.of(context);
-    final width  = widget.compact ? 72.0 : 220.0;
+    final width  = widget.compact ? 56.0 : 220.0; // Increased from 40.0 to 56.0 to match dashboard
 
     return Material(
       elevation: 8,
@@ -98,9 +98,9 @@ class _CompanySideMenuState extends State<CompanySideMenu> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (widget.showBrand) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 12), // Restore original
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25),
+                padding: EdgeInsets.symmetric(horizontal: widget.compact ? 16 : 25), // Keep horizontal reduction
                 child: Text(
                   widget.compact ? 'ST' : 'Stark Track',
                   style: const TextStyle(
@@ -109,7 +109,7 @@ class _CompanySideMenuState extends State<CompanySideMenu> {
                   ),
                 ),
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 18), // Restore original
               Divider(
                 height: 1,
                 thickness: 1,
@@ -128,7 +128,7 @@ class _CompanySideMenuState extends State<CompanySideMenu> {
             // Version and copyright at the bottom
             if (_appInfo.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: EdgeInsets.symmetric(horizontal: widget.compact ? 8 : 16, vertical: 8), // Reduced from 16 to 8 in compact mode
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -210,8 +210,8 @@ class _AnimatedMenuItemState extends State<_AnimatedMenuItem> {
         borderRadius: BorderRadius.circular(8),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          margin: EdgeInsets.symmetric(horizontal: widget.compact ? 2 : 12, vertical: 6), // Reduced horizontal margin from 4 to 2 in compact mode
+          padding: EdgeInsets.symmetric(horizontal: widget.compact ? 2 : 12, vertical: 10), // Reduced horizontal padding from 4 to 2 in compact mode
           decoration: BoxDecoration(
             color: isHL
                 ? theme.colorScheme.primary.withValues(alpha:0.20)
@@ -219,8 +219,13 @@ class _AnimatedMenuItemState extends State<_AnimatedMenuItem> {
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.center, // Center the icons
             children: [
-              Icon(widget.item.icon, color: color),
+              SizedBox(
+                width: 32, // Increased from 24 to 32 for bigger icons
+                height: 32, // Increased from 24 to 32 for bigger icons
+                child: Icon(widget.item.icon, color: color, size: 26), // Increased from 20 to 26 for bigger icons
+              ),
               if (!widget.compact) ...[
                 const SizedBox(width: 12),
                 Text(widget.item.label,

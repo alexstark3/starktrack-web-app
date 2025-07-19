@@ -25,7 +25,7 @@ class SettingsScreen extends StatelessWidget {
       height: double.infinity,
       color: appColors.backgroundDark,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 48.0, vertical: 40),
+        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10), // Reduced from 16 to 10
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -59,7 +59,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 10), // Reduced from 16 to 10
             // Language Picker Row
             Row(
               children: [

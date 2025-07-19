@@ -35,7 +35,7 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
         children: [
           // --- Tab bar ---
           Padding(
-            padding: const EdgeInsets.only(top: 12, left: 40, right: 24), // Move tabs more to the left
+            padding: const EdgeInsets.only(top: 8, left: 25, right: 10), // Reduced right from 16 to 10
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final showOnlyIcons = constraints.maxWidth < 600; // Show only icons on small screens
@@ -97,7 +97,7 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
           // --- Main white area ---
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.only(left: 24, right: 24, bottom: 24),
+              padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10), // Reduced from 16 to 10
               child: Stack(
                 children: [
                   Align(
@@ -111,7 +111,7 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                           ? colors.cardColorDark 
                           : Colors.white,
                         child: Container(
-                          padding: const EdgeInsets.fromLTRB(28, 26, 28, 26),
+                          padding: const EdgeInsets.fromLTRB(10, 10, 10, 10), // Reduced from 16 to 10
                           child: _buildTabContent(),
                         ),
                       ),

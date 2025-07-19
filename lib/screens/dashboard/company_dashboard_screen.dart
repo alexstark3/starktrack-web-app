@@ -56,7 +56,7 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
 
     // rail width depends on compact
     final bool compact = MediaQuery.of(context).size.width < 600;
-    final double railWidth = compact ? 72 : 220;
+    final double railWidth = compact ? 56 : 220; // Increased from 40 to 56 to accommodate bigger icons
     final double barHeight = CompanyTopBar.kHeight;
 
     // --- IndexedStack for persistent tab state ---

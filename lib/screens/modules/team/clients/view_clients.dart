@@ -66,7 +66,7 @@ class _ViewClientsState extends State<ViewClients> {
         Text(
           client['name'] ?? '',
           style: TextStyle(
-            fontSize: 22,
+            fontSize: 18, // Reduced from 22 to 18
             fontWeight: FontWeight.bold,
             color: colors.primaryBlue,
           ),
