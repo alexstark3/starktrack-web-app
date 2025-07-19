@@ -662,6 +662,14 @@ class _LogsTableState extends State<_LogsTable> {
     return '${m}m';
   }
 
+  int _weekNumber(DateTime date) {
+    // ISO 8601: Week 1 is the week containing January 4th
+    final jan4 = DateTime(date.year, 1, 4);
+    final startOfWeek = date.subtract(Duration(days: date.weekday - 1));
+    final jan4StartOfWeek = jan4.subtract(Duration(days: jan4.weekday - 1));
+    final weekNumber = ((startOfWeek.difference(jan4StartOfWeek).inDays) / 7).floor() + 1;
+    return weekNumber;
+  }
 
 
   @override
@@ -767,170 +775,307 @@ class _LogsTableState extends State<_LogsTable> {
           return b.begin!.compareTo(a.begin!);
         });
 
+        // ==== GROUPING LOGIC ====
+        // Grouping map
+        Map<String, List<_HistoryEntry>> grouped = {};
+
+        for (var entry in entries) {
+          String key = '';
+          if (entry.begin == null) key = 'Unknown';
+          else {
+            switch (widget.groupType) {
+              case GroupType.day:
+                key = DateFormat('yyyy-MM-dd').format(entry.begin!);
+                break;
+              case GroupType.week:
+                final week = _weekNumber(entry.begin!);
+                key = 'Week $week, ${entry.begin!.year}';
+                break;
+              case GroupType.month:
+                key = DateFormat('MMMM yyyy').format(entry.begin!);
+                break;
+              case GroupType.year:
+                key = '${entry.begin!.year}';
+                break;
+            }
+          }
+          grouped.putIfAbsent(key, () => []).add(entry);
+        }
+
+        // Sorted group keys (desc by date)
+        final sortedKeys = grouped.keys.toList()
+          ..sort((a, b) {
+            if (widget.groupType == GroupType.day) {
+              try {
+                return DateTime.parse(b).compareTo(DateTime.parse(a));
+              } catch (_) {}
+            } else if (widget.groupType == GroupType.year) {
+              return int.parse(b).compareTo(int.parse(a));
+            } else if (widget.groupType == GroupType.month) {
+              try {
+                final fa = DateFormat('MMMM yyyy').parse(a);
+                final fb = DateFormat('MMMM yyyy').parse(b);
+                return fb.compareTo(fa);
+              } catch (_) {}
+            } else if (widget.groupType == GroupType.week) {
+              final wa = int.tryParse(a.split(' ')[1].replaceAll(',', '')) ?? 0;
+              final wb = int.tryParse(b.split(' ')[1].replaceAll(',', '')) ?? 0;
+              final ya = int.tryParse(a.split(',').last.trim()) ?? 0;
+              final yb = int.tryParse(b.split(',').last.trim()) ?? 0;
+              return yb != ya ? yb.compareTo(ya) : wb.compareTo(wa);
+            }
+            return a.compareTo(b);
+          });
+
         // ==== UI ====
         final theme = Theme.of(context);
         final isDark = theme.brightness == Brightness.dark;
+        final appColors = Theme.of(context).extension<AppColors>()!;
         final expenseFormat = NumberFormat.currency(symbol: "CHF ", decimalDigits: 2);
 
         return ListView.builder(
-          itemCount: entries.length,
-          itemBuilder: (context, index) {
-            final entry = entries[index];
-            final data = entry.doc.data() as Map<String, dynamic>;
-            final approvedRaw = data['approved'];
-            final rejectedRaw = data['rejected'];
-            final approvedAfterEditRaw = data['approvedAfterEdit'];
-            
-            final isApproved = approvedRaw == true || approvedRaw == 1 || approvedRaw == '1';
-            final isRejected = rejectedRaw == true || rejectedRaw == 1 || rejectedRaw == '1';
-            final isApprovedAfterEdit = approvedAfterEditRaw == true || approvedAfterEditRaw == 1 || approvedAfterEditRaw == '1';
-            
-            return ListTile(
-                          title: Text(
-                            (entry.begin != null && entry.end != null)
-                                ? '${DateFormat('yyyy-MM-dd').format(entry.begin!)}  ${DateFormat('HH:mm').format(entry.begin!)} - ${DateFormat('HH:mm').format(entry.end!)}'
-                                : entry.sessionDate,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? const Color(0xFFCCCCCC) : Colors.black87,
-                            ),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (entry.project != '') 
-                                Text(
-                                  'Project: ${entry.project}',
-                                  style: TextStyle(
-                                    color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
-                                  ),
-                                ),
-                              if (entry.duration != Duration.zero)
-                                Text(
-                                  'Duration: ${_formatDuration(entry.duration)}',
-                                  style: TextStyle(
-                                    color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
-                                  ),
-                                ),
-                              if (entry.note != '') 
-                                Text(
-                                  'Note: ${entry.note}',
-                                  style: TextStyle(
-                                    color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
-                                  ),
-                                ),
-                              if (entry.perDiem)
-                                Text(
-                                  'Per diem: Yes', 
-                                  style: TextStyle(
-                                    color: theme.colorScheme.primary,
-                                  ),
-                                ),
-                              if (entry.expensesMap.isNotEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 2.0),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                                      children: entry.expensesMap.entries.map((e) {
-                                    double expenseValue = 0.0;
-                                    if (e.value is num) {
-                                      expenseValue = (e.value as num).toDouble();
-                                    } else if (e.value is String) {
-                                      expenseValue = double.tryParse(e.value as String) ?? 0.0;
-                                    } else if (e.value is bool) {
-                                      // Skip boolean values
-                                      return const SizedBox.shrink();
-                                    }
-                                    return Text('${e.key}: ${expenseFormat.format(expenseValue)}',
-                                      style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.w600, fontSize: 15),
-                                    );
-                                  }).toList(),
-                                  ),
-                                ),
-                              const SizedBox(height: 8),
-                              // Approval icons for this specific session
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  // Approve
-                                  if (!isApproved && !isRejected && !isApprovedAfterEdit)
-                                    IconButton(
-                                      icon: const Icon(Icons.check, color: Colors.green, size: 20),
-                                      tooltip: 'Approve',
-                                      onPressed: () async {
-                                        await entry.doc.reference.update({
-                                          'approved': true,
-                                          'approvedBy': widget.userId,
-                                          'approvedAt': FieldValue.serverTimestamp(),
-                                        });
-                                        widget.onAction();
-                                      },
-                                    ),
-                                  // Reject
-                                  if (!isApproved && !isRejected && !isApprovedAfterEdit)
-                                    IconButton(
-                                      icon: const Icon(Icons.close, color: Colors.red, size: 20),
-                                      tooltip: 'Reject',
-                                      onPressed: () async {
-                                        await entry.doc.reference.update({
-                                          'rejected': true,
-                                          'rejectedBy': widget.userId,
-                                          'rejectedAt': FieldValue.serverTimestamp(),
-                                        });
-                                        widget.onAction();
-                                      },
-                                    ),
-                                  // Edit
-                                  if (!isApproved && !isRejected && !isApprovedAfterEdit)
-                                    IconButton(
-                                      icon: const Icon(Icons.edit, color: Colors.blue, size: 20),
-                                      tooltip: 'Edit',
-                                      onPressed: () async {
-                                        await showDialog(
-                                          context: context,
-                                          builder: (_) => _EditLogDialog(
-                                            logDoc: entry.doc,
-                                            projects: _allProjects,
-                                            onSaved: widget.onAction,
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  // Delete
-                                  if (!isApproved && !isRejected && !isApprovedAfterEdit)
-                                    IconButton(
-                                      icon: const Icon(Icons.delete, color: Colors.red, size: 20),
-                                      tooltip: 'Delete',
-                                      onPressed: () async {
-                                        final confirmed = await _showDeleteConfirmation(context, data);
-                                        if (confirmed == true) {
-                                          await entry.doc.reference.delete();
-                                          widget.onAction();
-                                          if (context.mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(
-                                                content: Text('Session deleted successfully'),
-                                                backgroundColor: Colors.green,
-                                              ),
-                                            );
-                                          }
-                                        }
-                                      },
-                                    ),
-                                  // Status indicators
-                                  if (isApprovedAfterEdit)
-                                    const Icon(Icons.verified, color: Colors.orange, size: 20)
-                                  else if (isApproved)
-                                    const Icon(Icons.verified, color: Colors.green, size: 20)
-                                  else if (isRejected)
-                                    const Icon(Icons.cancel, color: Colors.red, size: 20),
-                                ],
-                              ),
-                            ],
-                          ),
-                        );
-          },
-        );
+          physics: const AlwaysScrollableScrollPhysics(),
+          cacheExtent: 1000,
+          addAutomaticKeepAlives: false,
+          addRepaintBoundaries: false,
+          itemCount: sortedKeys.length,
+          itemBuilder: (context, groupIdx) {
+            final groupKey = sortedKeys[groupIdx];
+            final groupList = grouped[groupKey]!;
+
+            final groupTotal = groupList.fold<Duration>(
+                Duration.zero, (sum, e) => sum + e.duration);
+            final groupExpense = groupList.fold<double>(
+                0.0, (sum, e) {
+                  if (e.expense.isNaN) return sum;
+                  return sum + e.expense;
+                });
+
+            return Card(
+              margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+              elevation: isDark ? 0 : 4,
+              color: isDark ? appColors.cardColorDark : Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  // Group header
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: isDark 
+                        ? theme.colorScheme.primary.withValues(alpha:0.1)
+                        : theme.colorScheme.primary.withValues(alpha:0.05),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        topRight: Radius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      groupKey,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                                     // Group entries
+                   ...groupList.map((entry) {
+                     final data = entry.doc.data() as Map<String, dynamic>;
+                     final approvedRaw = data['approved'];
+                     final rejectedRaw = data['rejected'];
+                     final approvedAfterEditRaw = data['approvedAfterEdit'];
+                     
+                     final isApproved = approvedRaw == true || approvedRaw == 1 || approvedRaw == '1';
+                     final isRejected = rejectedRaw == true || rejectedRaw == 1 || rejectedRaw == '1';
+                     final isApprovedAfterEdit = approvedAfterEditRaw == true || approvedAfterEditRaw == 1 || approvedAfterEditRaw == '1';
+                     
+                     return ListTile(
+                       title: Text(
+                         (entry.begin != null && entry.end != null)
+                             ? '${DateFormat('yyyy-MM-dd').format(entry.begin!)}  ${DateFormat('HH:mm').format(entry.begin!)} - ${DateFormat('HH:mm').format(entry.end!)}'
+                             : entry.sessionDate,
+                         style: TextStyle(
+                           fontWeight: FontWeight.bold,
+                           color: isDark ? const Color(0xFFCCCCCC) : Colors.black87,
+                         ),
+                       ),
+                       subtitle: Column(
+                         crossAxisAlignment: CrossAxisAlignment.start,
+                         children: [
+                           if (entry.project != '') 
+                             Text(
+                               'Project: ${entry.project}',
+                               style: TextStyle(
+                                 color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
+                               ),
+                             ),
+                           if (entry.duration != Duration.zero)
+                             Text(
+                               'Duration: ${_formatDuration(entry.duration)}',
+                               style: TextStyle(
+                                 color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
+                               ),
+                             ),
+                           if (entry.note != '') 
+                             Text(
+                               'Note: ${entry.note}',
+                               style: TextStyle(
+                                 color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
+                               ),
+                             ),
+                           if (entry.perDiem)
+                             Text(
+                               'Per diem: Yes', 
+                               style: TextStyle(
+                                 color: theme.colorScheme.primary,
+                               ),
+                             ),
+                           if (entry.expensesMap.isNotEmpty)
+                             Padding(
+                               padding: const EdgeInsets.only(top: 2.0),
+                               child: Column(
+                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                 children: entry.expensesMap.entries.map((e) {
+                                   double expenseValue = 0.0;
+                                   if (e.value is num) {
+                                     expenseValue = (e.value as num).toDouble();
+                                   } else if (e.value is String) {
+                                     expenseValue = double.tryParse(e.value as String) ?? 0.0;
+                                   } else if (e.value is bool) {
+                                     // Skip boolean values
+                                     return const SizedBox.shrink();
+                                   }
+                                   return Text('${e.key}: ${expenseFormat.format(expenseValue)}',
+                                     style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.w600, fontSize: 15),
+                                   );
+                                 }).toList(),
+                               ),
+                             ),
+                           const SizedBox(height: 8),
+                           // Approval icons for this specific session
+                           Row(
+                             mainAxisSize: MainAxisSize.min,
+                             children: [
+                               // Approve
+                               if (!isApproved && !isRejected && !isApprovedAfterEdit)
+                                 IconButton(
+                                   icon: const Icon(Icons.check, color: Colors.green, size: 20),
+                                   tooltip: 'Approve',
+                                   onPressed: () async {
+                                     await entry.doc.reference.update({
+                                       'approved': true,
+                                       'approvedBy': widget.userId,
+                                       'approvedAt': FieldValue.serverTimestamp(),
+                                     });
+                                     widget.onAction();
+                                   },
+                                 ),
+                               // Reject
+                               if (!isApproved && !isRejected && !isApprovedAfterEdit)
+                                 IconButton(
+                                   icon: const Icon(Icons.close, color: Colors.red, size: 20),
+                                   tooltip: 'Reject',
+                                   onPressed: () async {
+                                     await entry.doc.reference.update({
+                                       'rejected': true,
+                                       'rejectedBy': widget.userId,
+                                       'rejectedAt': FieldValue.serverTimestamp(),
+                                     });
+                                     widget.onAction();
+                                   },
+                                 ),
+                               // Edit
+                               if (!isApproved && !isRejected && !isApprovedAfterEdit)
+                                 IconButton(
+                                   icon: const Icon(Icons.edit, color: Colors.blue, size: 20),
+                                   tooltip: 'Edit',
+                                   onPressed: () async {
+                                     await showDialog(
+                                       context: context,
+                                       builder: (_) => _EditLogDialog(
+                                         logDoc: entry.doc,
+                                         projects: _allProjects,
+                                         onSaved: widget.onAction,
+                                       ),
+                                     );
+                                   },
+                                 ),
+                               // Delete
+                               if (!isApproved && !isRejected && !isApprovedAfterEdit)
+                                 IconButton(
+                                   icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                                   tooltip: 'Delete',
+                                   onPressed: () async {
+                                     final confirmed = await _showDeleteConfirmation(context, data);
+                                     if (confirmed == true) {
+                                       await entry.doc.reference.delete();
+                                       widget.onAction();
+                                       if (context.mounted) {
+                                         ScaffoldMessenger.of(context).showSnackBar(
+                                           const SnackBar(
+                                             content: Text('Session deleted successfully'),
+                                             backgroundColor: Colors.green,
+                                           ),
+                                         );
+                                       }
+                                     }
+                                   },
+                                 ),
+                               // Status indicators
+                               if (isApprovedAfterEdit)
+                                 const Icon(Icons.verified, color: Colors.orange, size: 20)
+                               else if (isApproved)
+                                 const Icon(Icons.verified, color: Colors.green, size: 20)
+                               else if (isRejected)
+                                 const Icon(Icons.cancel, color: Colors.red, size: 20),
+                             ],
+                           ),
+                         ],
+                       ),
+                     );
+                   }).toList(),
+                   // Group totals footer
+                   Container(
+                     width: double.infinity,
+                     padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                     decoration: BoxDecoration(
+                       color: isDark 
+                         ? theme.colorScheme.primary.withValues(alpha:0.1)
+                         : theme.colorScheme.primary.withValues(alpha:0.05),
+                       borderRadius: const BorderRadius.only(
+                         bottomLeft: Radius.circular(12),
+                         bottomRight: Radius.circular(12),
+                       ),
+                     ),
+                     child: Wrap(
+                       spacing: 16,
+                       runSpacing: 4,
+                       children: [
+                         Text(
+                           'Total Time: ${_formatDuration(groupTotal)}',
+                           style: TextStyle(
+                             fontWeight: FontWeight.w700,
+                             color: theme.colorScheme.primary,
+                           ),
+                         ),
+                         Text(
+                           'Total Expenses: ${expenseFormat.format(groupExpense)}',
+                           style: TextStyle(
+                             fontWeight: FontWeight.w700,
+                             color: theme.colorScheme.primary,
+                           ),
+                         ),
+                       ],
+                     ),
+                   ),
+                 ],
+               ),
+             );
+           },
+         );
       },
     );
   }

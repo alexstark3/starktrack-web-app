@@ -510,6 +510,10 @@ class _HistoryLogsState extends State<HistoryLogs> {
 
                 // Grouped list view
                 return ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  cacheExtent: 1000,
+                  addAutomaticKeepAlives: false,
+                  addRepaintBoundaries: false,
                   itemCount: sortedKeys.length,
                   itemBuilder: (context, groupIdx) {
                     final groupKey = sortedKeys[groupIdx];
@@ -558,24 +562,12 @@ class _HistoryLogsState extends State<HistoryLogs> {
                                  topRight: Radius.circular(12),
                                ),
                              ),
-                             child: Row(
-                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                               children: [
-                                 Text(
-                                   groupKey,
-                                   style: TextStyle(
-                                     fontWeight: FontWeight.bold,
-                                     color: theme.colorScheme.primary,
-                                   ),
-                                 ),
-                                 Text(
-                                   'Total: ${_formatDuration(groupTotal)}',
-                                   style: TextStyle(
-                                     fontWeight: FontWeight.w600,
-                                     color: theme.colorScheme.primary,
-                                   ),
-                                 ),
-                               ],
+                             child: Text(
+                               groupKey,
+                               style: TextStyle(
+                                 fontWeight: FontWeight.bold,
+                                 color: theme.colorScheme.primary,
+                               ),
                              ),
                            ),
                            // Group entries
@@ -686,8 +678,9 @@ class _HistoryLogsState extends State<HistoryLogs> {
                                  bottomRight: Radius.circular(12),
                                ),
                              ),
-                             child: Row(
-                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                             child: Wrap(
+                               spacing: 16,
+                               runSpacing: 4,
                                children: [
                                  Text(
                                    'Total Time: ${_formatDuration(groupTotal)}',
@@ -756,8 +749,10 @@ String _formatDuration(Duration d) {
 
 // Calculate ISO 8601 week number
 int _weekNumber(DateTime date) {
-  final thursday = date.add(Duration(days: (4 - date.weekday) % 7));
-  final firstThursday = DateTime(thursday.year, 1, 1).add(
-      Duration(days: (4 - DateTime(thursday.year, 1, 1).weekday) % 7));
-  return 1 + ((thursday.difference(firstThursday).inDays) / 7).floor();
+  // ISO 8601: Week 1 is the week containing January 4th
+  final jan4 = DateTime(date.year, 1, 4);
+  final startOfWeek = date.subtract(Duration(days: date.weekday - 1));
+  final jan4StartOfWeek = jan4.subtract(Duration(days: jan4.weekday - 1));
+  final weekNumber = ((startOfWeek.difference(jan4StartOfWeek).inDays) / 7).floor() + 1;
+  return weekNumber;
 }

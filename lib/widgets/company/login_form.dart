@@ -1,5 +1,6 @@
 // lib/company/widgets/login_form.dart
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
 
 /// Login form with animated button.
 /// • Idle → full‑width 30 px rounded‑rect button.
@@ -49,18 +50,18 @@ class LoginForm extends StatelessWidget {
           Container(
             width: cardW,
             margin: const EdgeInsets.symmetric(horizontal: 16),
-                          decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Theme.of(context).brightness == Brightness.dark 
-                  ? const Color(0xFF2D2D30)
-                  : const Color(0xFFF0F0F0),
-                boxShadow: Theme.of(context).brightness == Brightness.light 
-                  ? [BoxShadow(color: Colors.black.withValues(alpha:0.1), blurRadius: 10, offset: Offset(0, 4))]
-                  : null,
-                border: Theme.of(context).brightness == Brightness.dark 
-                  ? Border.all(color: const Color(0xFF404040), width: 1)
-                  : null,
-              ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Theme.of(context).brightness == Brightness.dark 
+                ? Theme.of(context).extension<AppColors>()!.cardColorDark
+                : Colors.white,
+              boxShadow: Theme.of(context).brightness == Brightness.light 
+                ? [BoxShadow(color: Colors.black.withValues(alpha:0.1), blurRadius: 10, offset: Offset(0, 4))]
+                : null,
+              border: Theme.of(context).brightness == Brightness.dark 
+                ? Border.all(color: const Color(0xFF404040), width: 1)
+                : null,
+            ),
             padding: const EdgeInsets.all(24),
             child: Column(
               children: [
