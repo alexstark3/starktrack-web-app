@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../../../../theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'add_new_session.dart';
 
 const double kFilterHeight = 38;
@@ -269,22 +270,22 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                                 value: groupType,
                                 style: pillTextStyle,
                                 icon: const Icon(Icons.keyboard_arrow_down, size: 22),
-                                items: const [
+                                items: [
                                   DropdownMenuItem(
                                     value: GroupType.day,
-                                    child: Text('Day'),
+                                    child: Text(AppLocalizations.of(context)!.day),
                                   ),
                                   DropdownMenuItem(
                                     value: GroupType.week,
-                                    child: Text('Week'),
+                                    child: Text(AppLocalizations.of(context)!.week),
                                   ),
                                   DropdownMenuItem(
                                     value: GroupType.month,
-                                    child: Text('Month'),
+                                    child: Text(AppLocalizations.of(context)!.month),
                                   ),
                                   DropdownMenuItem(
                                     value: GroupType.year,
-                                    child: Text('Year'),
+                                    child: Text(AppLocalizations.of(context)!.year),
                                   ),
                                 ],
                                 onChanged: (val) {
@@ -304,7 +305,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                             child: TextField(
                               controller: _projectController,
                               decoration: InputDecoration(
-                                hintText: 'Project',
+                                hintText: AppLocalizations.of(context)!.project,
                                 border: InputBorder.none,
                                 isDense: true,
                                 contentPadding: EdgeInsets.zero,
@@ -323,7 +324,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                             child: TextField(
                               controller: _noteController,
                               decoration: InputDecoration(
-                                hintText: 'Note',
+                                hintText: AppLocalizations.of(context)!.note,
                                 border: InputBorder.none,
                                 isDense: true,
                                 contentPadding: EdgeInsets.zero,
@@ -518,8 +519,8 @@ class _StatusIcon extends StatelessWidget {
           }
         }
         return Container(
-          width: 8,
-          height: 8,
+          width: 12,
+          height: 12,
           decoration: BoxDecoration(
             color: isWorking ? Colors.green : Colors.red,
             shape: BoxShape.circle,
@@ -549,26 +550,17 @@ class _TotalsHeader extends StatelessWidget {
       builder: (context, snapshot) {
         double totalWork = 0;
         double totalExpenses = 0;
-        double currentWeekWork = 0;
         int approvedCount = 0;
         int rejectedCount = 0;
         int pendingCount = 0;
 
-        final now = DateTime.now();
-        final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-        final startOfWeekDate = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
+
 
         if (snapshot.hasData) {
           for (var doc in snapshot.data!.docs) {
             final data = doc.data() as Map<String, dynamic>;
             final workMinutes = (data['duration_minutes'] ?? 0).toDouble();
             totalWork += workMinutes;
-            
-            // Calculate current week work
-            final begin = (data['begin'] as Timestamp?)?.toDate();
-            if (begin != null && begin.isAfter(startOfWeekDate)) {
-              currentWeekWork += workMinutes;
-            }
             
             final expenses = (data['expenses'] ?? {}) as Map<String, dynamic>;
             totalExpenses += expenses.values.fold<double>(0, (sum, e) => sum + (e is num ? e : 0));
@@ -591,48 +583,14 @@ class _TotalsHeader extends StatelessWidget {
           }
         }
         
-        return FutureBuilder<DocumentSnapshot>(
-          future: FirebaseFirestore.instance
-              .collection('companies')
-              .doc(companyId)
-              .collection('users')
-              .doc(userId)
-              .get(),
-          builder: (context, userSnapshot) {
-            Widget overtimeWidget = const SizedBox.shrink();
-            
-            if (userSnapshot.hasData) {
-              final userData = userSnapshot.data!.data() as Map<String, dynamic>?;
-              final weeklyHours = (userData?['weeklyHours'] ?? 40) as int;
-              final weeklyMinutes = weeklyHours * 60;
-              final overtimeMinutes = currentWeekWork - weeklyMinutes;
-              
-              if (overtimeMinutes != 0) {
-                final isOvertime = overtimeMinutes > 0;
-                final color = isOvertime ? Colors.green : Colors.red;
-                final sign = isOvertime ? '+' : '';
-                
-                overtimeWidget = Text(
-                  'Overtime: $sign${_fmtH(overtimeMinutes.abs())}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: color,
-                  ),
-                );
-              }
-            }
-            
-            return Wrap(
-              spacing: 18,
-              runSpacing: 8,
-              children: [
-                Text('Total Work: ${_fmtH(totalWork)}', style: const TextStyle(fontWeight: FontWeight.w600)),
-                if (overtimeWidget is! SizedBox) overtimeWidget,
-                Text('Total Expenses: ${totalExpenses.toStringAsFixed(2)} CHF', style: const TextStyle(fontWeight: FontWeight.w600)),
-                Text('Approved: $approvedCount | Rejected: $rejectedCount | Pending: $pendingCount', style: const TextStyle(fontSize: 13, color: Colors.grey)),
-              ],
-            );
-          },
+        return Wrap(
+          spacing: 18,
+          runSpacing: 8,
+          children: [
+            Text('Total Work: ${_fmtH(totalWork)}', style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text('Total Expenses: ${totalExpenses.toStringAsFixed(2)} CHF', style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text('Approved: $approvedCount | Rejected: $rejectedCount | Pending: $pendingCount', style: const TextStyle(fontSize: 13, color: Colors.grey)),
+          ],
         );
       },
     );
@@ -1160,25 +1118,61 @@ class _LogsTableState extends State<_LogsTable> {
                          bottomRight: Radius.circular(12),
                        ),
                      ),
-                     child: Wrap(
-                       spacing: 16,
-                       runSpacing: 4,
-                       children: [
-                         Text(
-                           'Total Time: ${_formatDuration(groupTotal)}',
-                           style: TextStyle(
-                             fontWeight: FontWeight.w700,
-                             color: theme.colorScheme.primary,
+                     child: FutureBuilder<DocumentSnapshot>(
+                       future: FirebaseFirestore.instance
+                           .collection('companies')
+                           .doc(widget.companyId)
+                           .collection('users')
+                           .doc(widget.userId)
+                           .get(),
+                       builder: (context, userSnapshot) {
+                         List<Widget> totalWidgets = [
+                           Text(
+                             'Total Time: ${_formatDuration(groupTotal)}',
+                             style: TextStyle(
+                               fontWeight: FontWeight.w700,
+                               color: theme.colorScheme.primary,
+                             ),
                            ),
-                         ),
-                         Text(
-                           'Total Expenses: ${expenseFormat.format(groupExpense)}',
-                           style: TextStyle(
-                             fontWeight: FontWeight.w700,
-                             color: theme.colorScheme.primary,
+                           Text(
+                             'Total Expenses: ${expenseFormat.format(groupExpense)}',
+                             style: TextStyle(
+                               fontWeight: FontWeight.w700,
+                               color: theme.colorScheme.primary,
+                             ),
                            ),
-                         ),
-                       ],
+                         ];
+
+                         // Add overtime calculation for week groupings
+                         if (widget.groupType == GroupType.week && userSnapshot.hasData) {
+                           final userData = userSnapshot.data!.data() as Map<String, dynamic>?;
+                           final weeklyHours = (userData?['weeklyHours'] ?? 40) as int;
+                           final weeklyMinutes = weeklyHours * 60;
+                           final overtimeMinutes = groupTotal.inMinutes - weeklyMinutes;
+                           
+                           if (overtimeMinutes != 0) {
+                             final isOvertime = overtimeMinutes > 0;
+                             final color = isOvertime ? Colors.green : Colors.red;
+                             final sign = isOvertime ? '+' : '-';
+                             
+                             totalWidgets.add(
+                               Text(
+                                 'Overtime: $sign${_formatDuration(Duration(minutes: overtimeMinutes.abs()))}',
+                                 style: TextStyle(
+                                   fontWeight: FontWeight.w700,
+                                   color: color,
+                                 ),
+                               ),
+                             );
+                           }
+                         }
+
+                         return Wrap(
+                           spacing: 16,
+                           runSpacing: 4,
+                           children: totalWidgets,
+                         );
+                       },
                      ),
                    ),
                  ],

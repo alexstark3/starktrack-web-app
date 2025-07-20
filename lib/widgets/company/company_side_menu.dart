@@ -218,21 +218,27 @@ class _AnimatedMenuItemState extends State<_AnimatedMenuItem> {
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center, // Center the icons
-            children: [
-              SizedBox(
-                width: 32, // Increased from 24 to 32 for bigger icons
-                height: 32, // Increased from 24 to 32 for bigger icons
-                child: Icon(widget.item.icon, color: color, size: 26), // Increased from 20 to 26 for bigger icons
+          child: widget.compact 
+            ? SizedBox(
+                width: 32,
+                height: 32,
+                child: Icon(widget.item.icon, color: color, size: 26),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 32,
+                    height: 32,
+                    child: Icon(widget.item.icon, color: color, size: 26),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(widget.item.label,
+                        style: TextStyle(fontSize: 16, color: color)),
+                  ),
+                ],
               ),
-              if (!widget.compact) ...[
-                const SizedBox(width: 12),
-                Text(widget.item.label,
-                    style: TextStyle(fontSize: 16, color: color)),
-              ],
-            ],
-          ),
         ),
       ),
     );

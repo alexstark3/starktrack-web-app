@@ -449,7 +449,7 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
 
     try {
       await docRef.set({
-        'project_id': _projectRefCtrl.text.trim(),
+        'projectRef': _projectRefCtrl.text.trim(),
         'name': enteredProjectName,
         'address': {
           'street': _streetCtrl.text.trim(),

@@ -404,7 +404,20 @@ class _TimeEntryCardState extends State<TimeEntryCard>
       final mins = end.difference(begin).inMinutes;
       final sessionDate = DateFormat('yyyy-MM-dd').format(d);
 
-      // --- Save both project (name) and projectId (same value for now) ---
+      // Get the actual Firestore document ID for the selected project
+      String? actualProjectId;
+      if (_project != null && _project!.isNotEmpty) {
+        final projectQuery = await FirebaseFirestore.instance
+            .collection('companies')
+            .doc(widget.companyId)
+            .collection('projects')
+            .where('name', isEqualTo: _project)
+            .get();
+        if (projectQuery.docs.isNotEmpty) {
+          actualProjectId = projectQuery.docs.first.id;
+        }
+      }
+
       final logId = _generateLogId(begin);
 
       await FirebaseFirestore.instance
@@ -418,7 +431,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
         'end': end,
         'duration_minutes': mins,
         'project': _project ?? '',
-        'projectId': _project ?? '',
+        'projectId': actualProjectId ?? '',
         'note': _note ?? '',
         'expenses': _expenses,
         'createdAt': FieldValue.serverTimestamp(),

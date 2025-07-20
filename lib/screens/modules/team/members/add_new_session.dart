@@ -397,6 +397,20 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
       
       final logId = _generateLogId(startDateTime);
       
+      // Get the actual Firestore document ID for the selected project
+      String? actualProjectId;
+      if (_projectController.text.trim().isNotEmpty) {
+        final projectQuery = await FirebaseFirestore.instance
+            .collection('companies')
+            .doc(widget.companyId)
+            .collection('projects')
+            .where('name', isEqualTo: _projectController.text.trim())
+            .get();
+        if (projectQuery.docs.isNotEmpty) {
+          actualProjectId = projectQuery.docs.first.id;
+        }
+      }
+
       // Create session data
       final sessionData = {
         'sessionDate': DateFormat('yyyy-MM-dd').format(_selectedDate),
@@ -404,7 +418,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
         'end': Timestamp.fromDate(endDateTime),
         'duration_minutes': durationMinutes,
         'project': _projectController.text.trim(),
-        'projectId': _projectController.text.trim(), // Add projectId field
+        'projectId': actualProjectId ?? '',
         'note': _noteController.text.trim(),
         'expenses': _expenses,
         'perDiem': hasPerDiem,

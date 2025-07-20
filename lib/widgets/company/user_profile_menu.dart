@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 
 class UserProfileMenu extends StatefulWidget {
   final String initials;
@@ -101,7 +102,7 @@ class _UserProfileMenuState extends State<UserProfileMenu> {
                                   color: Colors.grey,
                                   size: 20,
                                 ),
-                                title: const Text('Settings'),
+                                title: Text(AppLocalizations.of(context)!.settings),
                                 onTap: () {
                                   setState(() {
                                     _showMenu = false;
@@ -116,7 +117,7 @@ class _UserProfileMenuState extends State<UserProfileMenu> {
                                   color: Colors.grey,
                                   size: 20,
                                 ),
-                                title: const Text('Log out'),
+                                title: Text(AppLocalizations.of(context)!.logout),
                                 onTap: () {
                                   setState(() {
                                     _showMenu = false;

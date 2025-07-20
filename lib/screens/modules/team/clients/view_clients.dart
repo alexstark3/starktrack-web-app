@@ -59,86 +59,94 @@ class _ViewClientsState extends State<ViewClients> {
     final phone = client['phone'] ?? '';
     final person = '${contact['first_name'] ?? ''} ${contact['surname'] ?? ''}'.trim();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Client name
-        Text(
-          client['name'] ?? '',
-          style: TextStyle(
-            fontSize: 18, // Reduced from 22 to 18
-            fontWeight: FontWeight.bold,
-            color: colors.primaryBlue,
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Client name
+          Text(
+            client['name'] ?? '',
+            style: TextStyle(
+              fontSize: 18, // Reduced from 22 to 18
+              fontWeight: FontWeight.bold,
+              color: colors.primaryBlue,
+            ),
           ),
-        ),
-        const SizedBox(height: 10),
-        // Edit button - left aligned under name
-        ElevatedButton.icon(
-          onPressed: () async {
-            final result = await showDialog<bool>(
-              context: context,
-              builder: (ctx) => EditClientDialog(
-                companyId: widget.companyId,
-                client: widget.client,
-              ),
-            );
-            if (result == true) {
-              widget.onEdit(); // Call the callback to refresh the parent
-            }
-          },
-          icon: const Icon(Icons.edit, size: 20),
-          label: const Text('Edit'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: colors.primaryBlue,
-            foregroundColor: colors.whiteTextOnBlue,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          ),
-        ),
-        const SizedBox(height: 14),
-        // Info fields - left aligned in column
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (address.isNotEmpty) _infoRow('Address', address),
-            if (person.isNotEmpty) _infoRow('Contact Person', person),
-            if (email.isNotEmpty) _infoRow('Email', email),
-            if (phone.isNotEmpty) _infoRow('Phone', phone),
-            if ((client['city'] ?? '').isNotEmpty) _infoRow('City', client['city'] ?? ''),
-            if (country.isNotEmpty) _infoRow('Country', country),
-          ],
-        ),
-        const SizedBox(height: 24),
-        // Projects list for this client
-        Text('Projects for this client', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19, color: colors.primaryBlue)),
-        const SizedBox(height: 10),
-        FutureBuilder<List<Map<String, dynamic>>>(
-          future: _projectsFuture,
-          builder: (context, snap) {
-            if (snap.connectionState == ConnectionState.waiting) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 20.0),
-                child: Center(child: CircularProgressIndicator()),
-              );
-            }
-            final projects = snap.data ?? [];
-            if (projects.isEmpty) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 14),
-                child: Text('No projects found for this client.'),
-              );
-            }
-            return Column(
-              children: [
-                _projectTableHeader(colors),
-                ...projects.map((proj) => _ProjectRow(
+          const SizedBox(height: 10),
+          // Edit button - left aligned under name
+          ElevatedButton.icon(
+            onPressed: () async {
+              final result = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => EditClientDialog(
                   companyId: widget.companyId,
-                  project: proj,
-                )),
-              ],
-            );
-          },
-        ),
-      ],
+                  client: widget.client,
+                ),
+              );
+              if (result == true) {
+                widget.onEdit(); // Call the callback to refresh the parent
+              }
+            },
+            icon: const Icon(Icons.edit, size: 20),
+            label: const Text('Edit'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colors.primaryBlue,
+              foregroundColor: colors.whiteTextOnBlue,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+          ),
+          const SizedBox(height: 14),
+          // Info fields - left aligned in column
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (address.isNotEmpty) _infoRow('Address', address),
+              if (person.isNotEmpty) _infoRow('Contact Person', person),
+              if (email.isNotEmpty) _infoRow('Email', email),
+              if (phone.isNotEmpty) _infoRow('Phone', phone),
+              if ((client['city'] ?? '').isNotEmpty) _infoRow('City', client['city'] ?? ''),
+              if (country.isNotEmpty) _infoRow('Country', country),
+            ],
+          ),
+          const SizedBox(height: 24),
+          // Projects list for this client
+          Text('Projects for this client', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19, color: colors.primaryBlue)),
+          const SizedBox(height: 10),
+          FutureBuilder<List<Map<String, dynamic>>>(
+            future: _projectsFuture,
+            builder: (context, snap) {
+              if (snap.connectionState == ConnectionState.waiting) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20.0),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+              final projects = snap.data ?? [];
+              if (projects.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 14),
+                  child: Text('No projects found for this client.'),
+                );
+              }
+              return Column(
+                children: [
+                  // Client totals summary
+                  _ClientTotalsCard(
+                    companyId: widget.companyId,
+                    projects: projects,
+                  ),
+                  const SizedBox(height: 16),
+                  // Individual project cards
+                  ...projects.map((project) => _ProjectCard(
+                    companyId: widget.companyId,
+                    project: project,
+                  )),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -159,31 +167,12 @@ class _ViewClientsState extends State<ViewClients> {
     ),
   );
 
-  Widget _projectTableHeader(AppColors colors) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 6),
-      margin: const EdgeInsets.only(bottom: 2),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: colors.lightGray, width: 1)),
-        color: colors.lightGray.withValues(alpha:0.35),
-      ),
-      child: Row(
-        children: const [
-          Expanded(flex: 2, child: Text('Project Name', style: TextStyle(fontWeight: FontWeight.bold))),
-          Expanded(flex: 2, child: Text('Project ID', style: TextStyle(fontWeight: FontWeight.bold))),
-          Expanded(flex: 3, child: Text('Address', style: TextStyle(fontWeight: FontWeight.bold))),
-          Expanded(flex: 2, child: Text('Total Hours', style: TextStyle(fontWeight: FontWeight.bold))),
-          Expanded(flex: 2, child: Text('Total Expenses', style: TextStyle(fontWeight: FontWeight.bold))),
-        ],
-      ),
-    );
-  }
 }
 
-class _ProjectRow extends StatelessWidget {
+class _ProjectCard extends StatelessWidget {
   final String companyId;
   final Map<String, dynamic> project;
-  const _ProjectRow({
+  const _ProjectCard({
     Key? key,
     required this.companyId,
     required this.project,
@@ -223,12 +212,14 @@ class _ProjectRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>()!;
     final address = [
       project['address']?['street'] ?? '',
       project['address']?['number'] ?? '',
       project['address']?['post_code'] ?? '',
       project['address']?['city'] ?? ''
     ].where((e) => (e as String).isNotEmpty).join(' ');
+    
     return FutureBuilder<Map<String, dynamic>>(
       future: _totals(),
       builder: (context, snap) {
@@ -236,19 +227,250 @@ class _ProjectRow extends StatelessWidget {
         double expenses = snap.data?['expenses'] ?? 0;
         final hoursText = hours > 0 ? hours.toStringAsFixed(2) : '-';
         final expensesText = expenses > 0 ? expenses.toStringAsFixed(2) + ' CHF' : '-';
-        return Container(
-          padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 6),
-          decoration: const BoxDecoration(
-            border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE), width: 1)),
+        
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
-          child: Row(
-            children: [
-              Expanded(flex: 2, child: Text(project['name'] ?? '')),
-              Expanded(flex: 2, child: Text(project['project_id'] ?? '')),
-              Expanded(flex: 3, child: Text(address)),
-              Expanded(flex: 2, child: Text(hoursText)),
-              Expanded(flex: 2, child: Text(expensesText)),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  project['name'] ?? '',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: colors.textColor,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'ID: ${project['projectRef'] ?? ''}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: colors.textColor.withOpacity(0.7),
+                  ),
+                ),
+                if (address.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on,
+                        size: 16,
+                        color: colors.textColor.withOpacity(0.6),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          address,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: colors.textColor.withOpacity(0.8),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.access_time,
+                      size: 16,
+                      color: colors.textColor.withOpacity(0.6),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Total Hours: $hoursText',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: colors.textColor.withOpacity(0.8),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.attach_money,
+                      size: 16,
+                      color: colors.textColor.withOpacity(0.6),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Total Expenses: $expensesText',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: colors.textColor.withOpacity(0.8),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ClientTotalsCard extends StatelessWidget {
+  final String companyId;
+  final List<Map<String, dynamic>> projects;
+  
+  const _ClientTotalsCard({
+    Key? key,
+    required this.companyId,
+    required this.projects,
+  }) : super(key: key);
+
+  Future<Map<String, dynamic>> _calculateTotals() async {
+    double totalHours = 0;
+    double totalExpenses = 0;
+    
+    final usersSnap = await FirebaseFirestore.instance
+        .collection('companies')
+        .doc(companyId)
+        .collection('users')
+        .get();
+        
+    for (final userDoc in usersSnap.docs) {
+              for (final project in projects) {
+          final logsSnap = await FirebaseFirestore.instance
+              .collection('companies')
+              .doc(companyId)
+              .collection('users')
+              .doc(userDoc.id)
+              .collection('all_logs')
+              .where('projectId', isEqualTo: project['id'])
+              .get();
+        for (final log in logsSnap.docs) {
+          final data = log.data();
+          totalHours += (data['duration_minutes'] ?? 0) / 60.0;
+          final expenses = (data['expenses'] ?? {}) as Map<String, dynamic>;
+          for (var v in expenses.values) {
+            if (v is num) totalExpenses += v.toDouble();
+          }
+        }
+      }
+    }
+    
+    return {
+      'hours': totalHours,
+      'expenses': totalExpenses,
+      'projectCount': projects.length,
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>()!;
+    
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _calculateTotals(),
+      builder: (context, snap) {
+        if (snap.connectionState == ConnectionState.waiting) {
+          return Card(
+            margin: const EdgeInsets.only(bottom: 12),
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          );
+        }
+        
+        final totals = snap.data ?? {'hours': 0.0, 'expenses': 0.0, 'projectCount': 0};
+        final hours = totals['hours'] as double;
+        final expenses = totals['expenses'] as double;
+        final projectCount = totals['projectCount'] as int;
+        
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Client Summary',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: colors.primaryBlue,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.folder,
+                      size: 16,
+                      color: colors.textColor.withOpacity(0.6),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Total Projects: $projectCount',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: colors.textColor.withOpacity(0.8),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.access_time,
+                      size: 16,
+                      color: colors.textColor.withOpacity(0.6),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Total Hours: ${hours.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: colors.textColor.withOpacity(0.8),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.attach_money,
+                      size: 16,
+                      color: colors.textColor.withOpacity(0.6),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Total Expenses: ${expenses.toStringAsFixed(2)} CHF',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: colors.textColor.withOpacity(0.8),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },

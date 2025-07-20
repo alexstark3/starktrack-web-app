@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../theme/app_colors.dart';
+import '../../../../theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'members/members.dart';
 import 'projects/projects.dart';
 import 'clients/clients.dart';
@@ -28,6 +29,7 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
+    final l10n = AppLocalizations.of(context)!;
     
     return Container(
       color: colors.backgroundDark,
@@ -46,7 +48,7 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                     // Members tab
                     _TeamTab(
                       icon: Icons.group,
-                      title: 'Members',
+                      title: l10n.members,
                       isSelected: _selectedIndex == 0,
                       colors: colors,
                       selectedMemberDoc: _selectedMemberDoc,
@@ -61,7 +63,7 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                     // Projects tab
                     _TeamTab(
                       icon: Icons.folder_copy_rounded,
-                      title: 'Projects',
+                      title: l10n.projects,
                       isSelected: _selectedIndex == 1,
                       colors: colors,
                       selectedProject: _selectedProject,
@@ -76,7 +78,7 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                     // Clients tab
                     _TeamTab(
                       icon: Icons.people_alt_rounded,
-                      title: 'Clients',
+                      title: l10n.clients,
                       isSelected: _selectedIndex == 2,
                       colors: colors,
                       selectedClient: _selectedClient,
@@ -130,7 +132,7 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
     if (_selectedIndex == 0) {
       return MembersTab(
         companyId: widget.companyId,
-        teamLeaderId: widget.userId,
+        teamLeaderId: null, // Show all users, not just team members
         selectedMember: _selectedMemberDoc,
         onSelectMember: (doc) {
           setState(() {

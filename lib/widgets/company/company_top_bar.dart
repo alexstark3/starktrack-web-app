@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 
 class CompanyTopBar extends StatelessWidget {
   static const double kHeight = 56;
@@ -79,15 +80,15 @@ class CompanyTopBar extends StatelessWidget {
                   ),
                   PopupMenuItem(
                     value: 'settings',
-                    child: const Row(
+                    child: Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.settings,
                           color: Colors.grey,
                           size: 20,
                         ),
-                        SizedBox(width: 12),
-                        Text('Settings'),
+                        const SizedBox(width: 12),
+                        Text(AppLocalizations.of(context)!.settings),
                       ],
                     ),
                     onTap: onSettings,

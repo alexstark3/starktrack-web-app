@@ -1,7 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../../../../theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 
 // Filter styling constants
 const double kFilterHeight = 40.0;
@@ -76,8 +77,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
         .get();
     final users = usersSnapshot.docs;
 
-    final String projectId = (_currentProject['project_id'] ?? _currentProject['id'] ?? '').toString();
-    final String projectName = (_currentProject['name'] ?? '').toString();
+            final String projectId = (_currentProject['id'] ?? '').toString();
 
     List<Map<String, dynamic>> allLogs = [];
     for (final userDoc in users) {
@@ -86,42 +86,25 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
       final userFirstName = userData['firstName'] ?? '';
       final userSurname = userData['surname'] ?? '';
       
-      // Query for sessions with projectId matching projectId or projectName
-      final logsSnapshot1 = await FirebaseFirestore.instance
+      // Query for sessions with projectId matching the Firestore document ID
+      final logsSnapshot = await FirebaseFirestore.instance
           .collection('companies')
           .doc(widget.companyId)
           .collection('users')
           .doc(userId)
           .collection('all_logs')
-          .where('projectId', isEqualTo: projectId.isNotEmpty ? projectId : projectName)
+          .where('projectId', isEqualTo: projectId)
           .get();
       
-      // Also query for sessions with project field matching projectName (for backward compatibility)
-      final logsSnapshot2 = await FirebaseFirestore.instance
-          .collection('companies')
-          .doc(widget.companyId)
-          .collection('users')
-          .doc(userId)
-          .collection('all_logs')
-          .where('project', isEqualTo: projectName)
-          .get();
-      
-      // Combine and deduplicate results
-      final allDocs = [...logsSnapshot1.docs, ...logsSnapshot2.docs];
-      final seenIds = <String>{};
-      
-      for (final logDoc in allDocs) {
-        if (!seenIds.contains(logDoc.id)) {
-          seenIds.add(logDoc.id);
-          final logData = logDoc.data();
-          allLogs.add({
-            ...logData,
-            'userFirstName': userFirstName,
-            'userSurname': userSurname,
-            'userId': userId,
-            'logId': logDoc.id,
-          });
-        }
+      for (final logDoc in logsSnapshot.docs) {
+        final logData = logDoc.data();
+        allLogs.add({
+          ...logData,
+          'userFirstName': userFirstName,
+          'userSurname': userSurname,
+          'userId': userId,
+          'logId': logDoc.id,
+        });
       }
     }
     return allLogs;
@@ -147,7 +130,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
     final project = _currentProject;
-    final String projectId = (project['project_id'] ?? project['id'] ?? '').toString();
+            final String projectRef = (project['projectRef'] ?? '').toString();
     final String projectName = (project['name'] ?? '').toString();
 
     final address = project['address'];
@@ -200,13 +183,13 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                   child: const Text('Edit'),
                 ),
                 const SizedBox(height: 10),
-                if (projectId.isNotEmpty)
+                if (projectRef.isNotEmpty)
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Project ID: ',
+                      Text('Project Ref: ',
                           style: TextStyle(fontWeight: FontWeight.bold)),
-                      Expanded(child: Text(projectId, maxLines: null, softWrap: true)),
+                      Expanded(child: Text(projectRef, maxLines: null, softWrap: true)),
                     ],
                   ),
                 if (addressString.isNotEmpty)
@@ -616,7 +599,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                                         child: Row(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Text('Note: ',
+                                            Text('${AppLocalizations.of(context)!.note}: ',
                                                 style: TextStyle(fontWeight: FontWeight.bold)),
                                             Expanded(
                                               child: Text(
@@ -681,7 +664,7 @@ class _EditProjectDialogState extends State<EditProjectDialog> {
     super.initState();
     final p = widget.project;
     _nameCtrl = TextEditingController(text: p['name'] ?? '');
-    _projectIdCtrl = TextEditingController(text: p['project_id'] ?? p['id'] ?? '');
+            _projectIdCtrl = TextEditingController(text: p['projectRef'] ?? p['id'] ?? '');
     final addr = p['address'] as Map<String, dynamic>? ?? {};
     _streetCtrl = TextEditingController(text: addr['street'] ?? '');
     _numberCtrl = TextEditingController(text: addr['number'] ?? '');
@@ -731,7 +714,7 @@ class _EditProjectDialogState extends State<EditProjectDialog> {
               ),
               TextField(
                 controller: _projectIdCtrl,
-                decoration: InputDecoration(labelText: 'Project ID'),
+                decoration: InputDecoration(labelText: 'Project Ref'),
               ),
               Row(
                 children: [
@@ -795,11 +778,11 @@ class _EditProjectDialogState extends State<EditProjectDialog> {
                               };
                               final update = {
                                 'name': _nameCtrl.text.trim(),
-                                'project_id': _projectIdCtrl.text.trim(),
+                                'projectRef': _projectIdCtrl.text.trim(),
                                 'address': address,
                                 'client': _selectedClientId ?? '',
                               };
-                              final docId = widget.project['id'] ?? widget.project['project_id'];
+                              final docId = widget.project['id'];
                               if (docId == null || docId.toString().isEmpty) {
                                 setState(() {
                                   _error = "Project document ID is missing!";

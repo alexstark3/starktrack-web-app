@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../../../theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 
 const double kFilterHeight = 38;
 const double kFilterRadius = 9;
@@ -173,22 +174,22 @@ class _HistoryLogsState extends State<HistoryLogs> {
           value: groupType,
           style: pillTextStyle,
           icon: const Icon(Icons.keyboard_arrow_down, size: 22),
-          items: const [
+          items: [
             DropdownMenuItem(
               value: GroupType.day,
-              child: Text('Day'),
+              child: Text(AppLocalizations.of(context)!.day),
             ),
             DropdownMenuItem(
               value: GroupType.week,
-              child: Text('Week'),
+              child: Text(AppLocalizations.of(context)!.week),
             ),
             DropdownMenuItem(
               value: GroupType.month,
-              child: Text('Month'),
+              child: Text(AppLocalizations.of(context)!.month),
             ),
             DropdownMenuItem(
               value: GroupType.year,
-              child: Text('Year'),
+              child: Text(AppLocalizations.of(context)!.year),
             ),
           ],
           onChanged: (val) {
@@ -208,7 +209,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
       child: TextField(
         controller: projectController,
         decoration: InputDecoration(
-          hintText: 'Project',
+          hintText: AppLocalizations.of(context)!.project,
           border: InputBorder.none,
           isDense: true,
           contentPadding: EdgeInsets.zero,
@@ -227,7 +228,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
       child: TextField(
         controller: noteController,
         decoration: InputDecoration(
-          hintText: 'Note',
+          hintText: AppLocalizations.of(context)!.note,
           border: InputBorder.none,
           isDense: true,
           contentPadding: EdgeInsets.zero,

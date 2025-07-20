@@ -1,0 +1,149 @@
+{
+  "@@locale": "en",
+  "appTitle": "Stark Track",
+  "timeTracker": "Time Tracker",
+  "history": "History",
+  "team": "Team",
+  "members": "Members",
+  "projects": "Projects",
+  "clients": "Clients",
+  "admin": "Admin",
+  "settings": "Settings",
+  "login": "Login",
+  "logout": "Log out",
+  "email": "Email",
+  "password": "Password",
+  "firstName": "First Name",
+  "surname": "Surname",
+  "phone": "Phone",
+  "address": "Address",
+  "search": "Search",
+  "add": "Add",
+  "edit": "Edit",
+  "delete": "Delete",
+  "save": "Save",
+  "cancel": "Cancel",
+  "start": "Start",
+  "end": "End",
+  "project": "Project",
+  "note": "Note",
+  "expenses": "Expenses",
+  "perDiem": "Per Diem",
+  "worked": "Worked",
+  "breaks": "Breaks",
+  "total": "Total",
+  "approved": "Approved",
+  "rejected": "Rejected",
+  "pending": "Pending",
+  "darkMode": "Dark mode",
+  "language": "Language",
+  "today": "Today",
+  "noLogsForThisDay": "No logs for this day",
+  "addNewUser": "Add New User",
+  "addNewClient": "Add New Client",
+  "addNewProject": "Add New Project",
+  "searchByName": "Search by name",
+  "searchByEmail": "Search by email",
+  "searchByProject": "Search by project",
+  "searchByClient": "Search by client",
+  "contactPerson": "Contact Person",
+  "country": "Country",
+  "city": "City",
+  "duration": "Duration",
+  "worker": "Worker",
+  "actions": "Actions",
+  "view": "View",
+  "refresh": "Refresh",
+  "filter": "Filter",
+  "from": "From",
+  "to": "To",
+  "groupBy": "Group by",
+  "day": "Day",
+  "week": "Week",
+  "month": "Month",
+  "year": "Year",
+  "overtime": "Overtime",
+  "totalExpenses": "Total Expenses",
+  "totalTime": "Total Time",
+  "weeklyHours": "Weekly Hours",
+  "workload": "Workload",
+  "active": "Active",
+  "roles": "Roles",
+  "modules": "Modules",
+  "teamLeader": "Team Leader",
+  "passwordManualEntry": "Password (manual entry)",
+  "passwordMinLength": "Password must be at least 6 characters.",
+  "editUser": "Edit User",
+  "addNewSession": "Add New Session",
+  "approvalNote": "Approval Note (optional)",
+  "noMembersFound": "No members found.",
+  "noProjectsFound": "No projects found.",
+  "noClientsFound": "No clients found.",
+  "noTimeLogsFound": "No time logs found for this worker.",
+  "errorLoadingProjects": "Error loading projects: {error}",
+  "@errorLoadingProjects": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noProjectsFoundInFirestore": "No projects found in Firestore.",
+  "projectId": "Project ID",
+  "clientName": "Client Name",
+  "personName": "Person Name",
+  "optional": "optional",
+  "companyAdmin": "Company Admin",
+  "worker": "Worker",
+  "required": "required",
+  "includesHistory": "includes History",
+  "additionalModules": "Additional Modules",
+  "showBreaks": "Show Breaks",
+  "assignToTeamLeader": "Assign to Team Leader",
+  "none": "None",
+  "saveChanges": "Save Changes",
+  "createUser": "Create User",
+  "sendPasswordResetEmail": "Send password reset email",
+  "passwordResetEmailSent": "Password reset email sent to {email}",
+  "@passwordResetEmailSent": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSendResetEmail": "Failed to send reset email: {error}",
+  "@failedToSendResetEmail": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "searchByNameEmailRole": "Search by name, email, or role",
+  "confirmDelete": "Confirm Delete",
+  "confirmDeleteMessage": "Are you sure you want to delete this user?",
+  "firstNameSurnameEmailRequired": "First Name, Surname, and Email are required!",
+  "atLeastOneRoleRequired": "At least one role is required!",
+  "atLeastOneModuleRequired": "At least one module is required!",
+  "passwordMustBeAtLeast6Characters": "Password must be at least 6 characters!",
+  "userWithThisEmailAlreadyExists": "A user with this email already exists.",
+  "onlySuperAdminCanEditCompanyAdmin": "Only super admin can edit the company admin.",
+  "authError": "Auth error",
+  "permissionDenied": "Permission denied: {error}",
+  "@permissionDenied": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "unknownError": "Unknown error: {error}",
+  "@unknownError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
+} 

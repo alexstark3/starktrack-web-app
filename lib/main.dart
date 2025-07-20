@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'l10n/app_localizations.dart';
 import 'firebase_options.dart';
 import 'providers/theme_provider.dart';
 import 'theme/light_theme.dart';
@@ -31,12 +33,39 @@ class MyApp extends StatelessWidget {
     if (!tp.isReady) {
       return const MaterialApp(debugShowCheckedModeBanner: false, home: Scaffold(body: Center(child: CircularProgressIndicator())));
     }
+    
+    // Determine locale based on language setting
+    Locale locale;
+    switch (tp.language) {
+      case 'DE':
+        locale = const Locale('de');
+        break;
+      case 'EN':
+      default:
+        locale = const Locale('en');
+        break;
+    }
+    
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Stark Track',
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: tp.themeMode,
+      locale: locale, // Set the locale based on language setting
+      
+      // Localization support
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'), // English
+        Locale('de'), // German
+      ],
+      
       home: const AuthGate(),
     );
   }

@@ -150,115 +150,265 @@ class _ProjectsListState extends State<_ProjectsList> {
         ),
         const SizedBox(height: 20),
         Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minWidth: constraints.maxWidth,
-                    maxWidth: double.infinity,
-                  ),
-                  child: StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection('companies')
-                        .doc(widget.companyId)
-                        .collection('projects')
-                        .orderBy(FieldPath.documentId)
-                        .snapshots(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                        return const Center(child: Text('No projects found.'));
-                      }
-                      final docs = snapshot.data!.docs;
-                      final filtered = docs.where((doc) {
-                        final data = doc.data() as Map<String, dynamic>;
-                        final projectName = (data['name'] ?? '').toString().toLowerCase();
-                        final clientId = (data['client'] ?? '').toString().toLowerCase();
-                        return projectName.contains(_searchProject) &&
-                            clientId.contains(_searchClient);
-                      }).toList();
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('companies')
+                .doc(widget.companyId)
+                .collection('projects')
+                .orderBy(FieldPath.documentId)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return const Center(child: Text('No projects found.'));
+              }
+              final docs = snapshot.data!.docs;
+              final filtered = docs.where((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                final projectName = (data['name'] ?? '').toString().toLowerCase();
+                final clientId = (data['client'] ?? '').toString().toLowerCase();
+                return projectName.contains(_searchProject) &&
+                    clientId.contains(_searchClient);
+              }).toList();
 
-                      if (filtered.isEmpty) {
-                        return const Center(child: Text('No projects found.'));
-                      }
+              if (filtered.isEmpty) {
+                return const Center(child: Text('No projects found.'));
+              }
 
-                      return FutureBuilder<Map<String, Map<String, dynamic>>>(
-                        future: _batchFetchClients(context, filtered, widget.companyId),
-                        builder: (context, clientSnapshot) {
-                          final clientsMap = clientSnapshot.data ?? {};
+              // Sort projects: active projects first, then by name
+              filtered.sort((a, b) {
+                final aData = a.data() as Map<String, dynamic>;
+                final bData = b.data() as Map<String, dynamic>;
+                final aActive = aData['active'] == true;
+                final bActive = bData['active'] == true;
+                
+                if (aActive != bActive) {
+                  return aActive ? -1 : 1; // Active projects first
+                }
+                
+                // If both have same active status, sort by name
+                final aName = (aData['name'] ?? '').toString().toLowerCase();
+                final bName = (bData['name'] ?? '').toString().toLowerCase();
+                return aName.compareTo(bName);
+              });
 
-                          return DataTable(
-                            columns: const [
-                              DataColumn(label: Text('Actions')),
-                              DataColumn(label: Text('Project ID')),
-                              DataColumn(label: Text('Project Name')),
-                              DataColumn(label: Text('Project Address')),
-                              DataColumn(label: Text('Client')),
-                              DataColumn(label: Text('Contact Person')),
-                              DataColumn(label: Text('Phone')),
-                              DataColumn(label: Text('Email')),
-                            ],
-                            rows: filtered.map((doc) {
-                              final data = doc.data() as Map<String, dynamic>;
-                              final address = data['address'] ?? {};
-                              final projectId = data['project_id'] ?? '';
-                              final projectName = data['name'] ?? '';
-                              final addressString = [
-                                address['street'],
-                                address['number'],
-                                address['post_code'],
-                                address['city'],
-                              ]
-                                  .where((e) => e != null && e.toString().isNotEmpty)
-                                  .map((e) => e.toString())
-                                  .join(' ');
-                              final clientId = data['client'] ?? '';
+              return FutureBuilder<Map<String, Map<String, dynamic>>>(
+                future: _batchFetchClients(context, filtered, widget.companyId),
+                builder: (context, clientSnapshot) {
+                  final clientsMap = clientSnapshot.data ?? {};
 
-                              final clientData = clientsMap[clientId];
-                              final clientName = clientData?['name'] ?? '';
-                              final contact = clientData?['contact_person'] ?? {};
-                              final contactPerson =
-                                  '${contact['first_name'] ?? ''} ${contact['surname'] ?? ''}'.trim();
-                              final phone = clientData?['phone'] ?? '';
-                              final email = clientData?['email'] ?? '';
+                  return ListView.builder(
+                    itemCount: filtered.length,
+                    itemBuilder: (context, index) {
+                      final doc = filtered[index];
+                      final data = doc.data() as Map<String, dynamic>;
+                      final address = data['address'] ?? {};
+                      final projectId = data['projectRef'] ?? '';
+                      final projectName = data['name'] ?? '';
+                      final addressString = [
+                        address['street'],
+                        address['number'],
+                        address['post_code'],
+                        address['city'],
+                      ]
+                          .where((e) => e != null && e.toString().isNotEmpty)
+                          .map((e) => e.toString())
+                          .join(' ');
+                      final clientId = data['client'] ?? '';
 
-                              return DataRow(cells: [
-                                DataCell(
-                                  ElevatedButton(
+                      final clientData = clientsMap[clientId];
+                      final clientName = clientData?['name'] ?? '';
+                      final contact = clientData?['contact_person'] ?? {};
+                      final contactPerson =
+                          '${contact['first_name'] ?? ''} ${contact['surname'] ?? ''}'.trim();
+                      final phone = clientData?['phone'] ?? '';
+                      final email = clientData?['email'] ?? '';
+
+                      final isActive = data['active'] == true;
+                      
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () async {
+                                      await doc.reference.update({
+                                        'active': !isActive,
+                                      });
+                                    },
+                                    child: Icon(
+                                      Icons.folder_copy_rounded,
+                                      color: isActive ? Colors.green : colors.primaryBlue,
+                                      size: 24,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          projectName,
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: colors.textColor,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'ID: $projectId',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: colors.textColor.withOpacity(0.7),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              if (addressString.isNotEmpty) ...[
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.location_on,
+                                      size: 16,
+                                      color: colors.textColor.withOpacity(0.6),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        addressString,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: colors.textColor.withOpacity(0.8),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                              ],
+                              if (clientName.isNotEmpty) ...[
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.business,
+                                      size: 16,
+                                      color: colors.textColor.withOpacity(0.6),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        'Client: $clientName',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: colors.textColor.withOpacity(0.8),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                              ],
+                              if (contactPerson.isNotEmpty) ...[
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.person,
+                                      size: 16,
+                                      color: colors.textColor.withOpacity(0.6),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        'Contact: $contactPerson',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: colors.textColor.withOpacity(0.8),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                              ],
+                              if (phone.isNotEmpty || email.isNotEmpty) ...[
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.contact_phone,
+                                      size: 16,
+                                      color: colors.textColor.withOpacity(0.6),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          if (phone.isNotEmpty)
+                                            Text(
+                                              phone,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: colors.textColor.withOpacity(0.8),
+                                              ),
+                                            ),
+                                          if (email.isNotEmpty)
+                                            Text(
+                                              email,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: colors.textColor.withOpacity(0.8),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                              const SizedBox(height: 16),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  ElevatedButton.icon(
                                     onPressed: () {
                                       widget.onSelectProject({...data, 'id': doc.id});
                                     },
-                                    child: const Text('View'),
+                                    icon: const Icon(Icons.visibility, size: 16),
+                                    label: const Text('View'),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: colors.primaryBlue,
                                       foregroundColor: colors.whiteTextOnBlue,
-                                      minimumSize: const Size(48, 32),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(6),
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                     ),
                                   ),
-                                ),
-                                DataCell(Text(projectId, style: TextStyle(color: colors.textColor))),
-                                DataCell(Text(projectName, style: TextStyle(color: colors.textColor))),
-                                DataCell(Text(addressString, style: TextStyle(color: colors.textColor))),
-                                DataCell(Text(clientName, style: TextStyle(color: colors.textColor))),
-                                DataCell(Text(contactPerson, style: TextStyle(color: colors.textColor))),
-                                DataCell(Text(phone, style: TextStyle(color: colors.textColor))),
-                                DataCell(Text(email, style: TextStyle(color: colors.textColor))),
-                              ]);
-                            }).toList(),
-                          );
-                        },
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                       );
                     },
-                  ),
-                ),
+                  );
+                },
               );
             },
           ),

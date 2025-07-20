@@ -9,6 +9,7 @@ import '../settings_screen.dart';
 import 'package:starktrack/widgets/company/company_side_menu.dart';
 import '../../widgets/company/company_top_bar.dart';
 import 'package:starktrack/theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 
 String _initials(String name) {
   final parts = name.trim().split(RegExp(r'\s+'));
@@ -38,21 +39,28 @@ class CompanyDashboardScreen extends StatefulWidget {
 
 class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
   late String _selected;
-  late final List<_ScreenCfg> _screenConfigs;
-  late final List<String> _tabLabels;
 
   @override
   void initState() {
     super.initState();
-    _screenConfigs = _screens;
-    _tabLabels = _screenConfigs.map((s) => s.label).toList();
-    _selected = _tabLabels.first;
+    // Initialize with default values, will be updated in build method
+    _selected = 'Time Tracker'; // Default, will be updated
   }
 
   @override
   Widget build(BuildContext context) {
     final initials = _initials(widget.fullName);
     final colors   = Theme.of(context).extension<AppColors>()!;
+    final l10n = AppLocalizations.of(context)!;
+
+    // Update screen configs and labels in build method when context is available
+    final screenConfigs = _getScreens(l10n);
+    final tabLabels = screenConfigs.map((s) => s.label).toList();
+    
+    // Ensure selected is always valid
+    if (!tabLabels.contains(_selected) || tabLabels.isEmpty) {
+      _selected = tabLabels.isNotEmpty ? tabLabels.first : '';
+    }
 
     // rail width depends on compact
     final bool compact = MediaQuery.of(context).size.width < 600;
@@ -63,33 +71,33 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
     final body = Container(
       color: colors.dashboardBackground,
       child: IndexedStack(
-        index: _tabLabels.indexOf(_selected),
+        index: tabLabels.isNotEmpty ? tabLabels.indexOf(_selected).clamp(0, tabLabels.length - 1) : 0,
         children: [
-          if (_tabLabels.contains('Time Tracker'))
+          if (tabLabels.contains(l10n.timeTracker))
             TimeTrackerScreen(
               key: const PageStorageKey('tracker'),
               companyId: widget.companyId,
               userId: widget.userId,
             ),
-          if (_tabLabels.contains('History'))
+          if (tabLabels.contains(l10n.history))
             HistoryLogs(
               key: const PageStorageKey('history'),
               companyId: widget.companyId,
               userId: widget.userId,
             ),
-          if (_tabLabels.contains('Team'))
+          if (tabLabels.contains(l10n.team))
             TeamModuleTabScreen(
               key: const PageStorageKey('team'),
               companyId: widget.companyId,
               userId: widget.userId,
             ),
-          if (_tabLabels.contains('Admin'))
+          if (tabLabels.contains(l10n.admin))
             AdminPanel(
               key: const PageStorageKey('admin'),
               companyId: widget.companyId,
               currentUserRoles: widget.roles,
             ),
-          if (_tabLabels.contains('Settings'))
+          if (tabLabels.contains(l10n.settings))
             const SettingsScreen(key: PageStorageKey('settings')),
         ],
       ),
@@ -112,7 +120,7 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
             left: 0,
             width: railWidth,
             child: CompanySideMenu(
-              menuItems: _screenConfigs
+              menuItems: screenConfigs
                   .map((s) => SideMenuItem(
                         label   : s.label,
                         icon    : s.icon,
@@ -136,7 +144,7 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
               email:         widget.email,
               initials:      initials,
               selectedScreen: _selected,
-              onSettings:    () => setState(() => _selected = 'Settings'),
+              onSettings:    () => setState(() => _selected = l10n.settings),
               onLogout: () async {
                 await FirebaseAuth.instance.signOut();
                 if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
@@ -148,22 +156,22 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
     );
   }
 
-  List<_ScreenCfg> get _screens {
+  List<_ScreenCfg> _getScreens(AppLocalizations l10n) {
     final l = <_ScreenCfg>[];
     if (widget.access['time_tracker'] == true) {
-      l.add(_ScreenCfg('Time Tracker', Icons.access_time));
-      l.add(_ScreenCfg('History',      Icons.history));
+      l.add(_ScreenCfg(l10n.timeTracker, Icons.access_time));
+      l.add(_ScreenCfg(l10n.history,      Icons.history));
     }
     // TEAM MODULE: Only for roles company_admin, admin, team_leader
     if (widget.roles.contains('company_admin') ||
         widget.roles.contains('admin') ||
         widget.roles.contains('team_leader')) {
-      l.add(_ScreenCfg('Team', Icons.group));
+      l.add(_ScreenCfg(l10n.team, Icons.group));
     }
     if (widget.roles.contains('admin') || widget.roles.contains('company_admin')) {
-      l.add(_ScreenCfg('Admin', Icons.admin_panel_settings));
+      l.add(_ScreenCfg(l10n.admin, Icons.admin_panel_settings));
     }
-    l.add(_ScreenCfg('Settings', Icons.settings));
+    l.add(_ScreenCfg(l10n.settings, Icons.settings));
     return l;
   }
 }

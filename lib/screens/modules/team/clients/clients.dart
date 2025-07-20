@@ -86,23 +86,10 @@ class _ClientsTabState extends State<ClientsTab> {
           ),
           const SizedBox(height: 20),
           Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minWidth: constraints.maxWidth,
-                      maxWidth: double.infinity,
-                    ),
-                    child: _ClientsTable(
-                      companyId: widget.companyId,
-                      search: _search,
-                      onSelectClient: (clientData) => widget.onSelectClient?.call(clientData),
-                    ),
-                  ),
-                );
-              },
+            child: _ClientsTable(
+              companyId: widget.companyId,
+              search: _search,
+              onSelectClient: (clientData) => widget.onSelectClient?.call(clientData),
             ),
           ),
         ],
@@ -161,18 +148,10 @@ class _ClientsTable extends StatelessWidget {
           return const Center(child: Text('No clients found.'));
         }
 
-        return DataTable(
-          columns: const [
-            DataColumn(label: Text('')),
-            DataColumn(label: Text('Client Name')),
-            DataColumn(label: Text('Address')),
-            DataColumn(label: Text('Contact Person')),
-            DataColumn(label: Text('Email')),
-            DataColumn(label: Text('Phone')),
-            DataColumn(label: Text('City')),
-            DataColumn(label: Text('Country')),
-          ],
-          rows: filtered.map((doc) {
+        return ListView.builder(
+          itemCount: filtered.length,
+          itemBuilder: (context, index) {
+            final doc = filtered[index];
             final data = doc.data() as Map<String, dynamic>;
             final contact = data['contact_person'] ?? {};
             final clientName = (data['name'] ?? '').toString();
@@ -188,33 +167,162 @@ class _ClientsTable extends StatelessWidget {
             final city = data['city'] ?? '';
             final country = data['country'] ?? '';
 
-            return DataRow(
-              cells: [
-                DataCell(
-                  ElevatedButton(
-                    onPressed: () => onSelectClient({...data, 'id': doc.id}),
-                    child: const Text('View'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colors.primaryBlue,
-                      foregroundColor: colors.whiteTextOnBlue,
-                      minimumSize: const Size(48, 32),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            return Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: colors.primaryBlue.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.business,
+                            color: colors.primaryBlue,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                clientName,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: colors.textColor,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              if (city.isNotEmpty || country.isNotEmpty)
+                                Text(
+                                  [city, country].where((e) => e.isNotEmpty).join(', '),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: colors.textColor.withOpacity(0.7),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
+                    const SizedBox(height: 16),
+                    if (address.isNotEmpty) ...[
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on,
+                            size: 16,
+                            color: colors.textColor.withOpacity(0.6),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              address,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: colors.textColor.withOpacity(0.8),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    if (person.isNotEmpty) ...[
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.person,
+                            size: 16,
+                            color: colors.textColor.withOpacity(0.6),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Contact: $person',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: colors.textColor.withOpacity(0.8),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    if (email.isNotEmpty || phone.isNotEmpty) ...[
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.contact_phone,
+                            size: 16,
+                            color: colors.textColor.withOpacity(0.6),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (email.isNotEmpty)
+                                  Text(
+                                    email,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: colors.textColor.withOpacity(0.8),
+                                    ),
+                                  ),
+                                if (phone.isNotEmpty)
+                                  Text(
+                                    phone,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: colors.textColor.withOpacity(0.8),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: () => onSelectClient({...data, 'id': doc.id}),
+                          icon: const Icon(Icons.visibility, size: 16),
+                          label: const Text('View'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: colors.primaryBlue,
+                            foregroundColor: colors.whiteTextOnBlue,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                DataCell(Text(clientName, style: TextStyle(color: colors.textColor))),
-                DataCell(Text(address, style: TextStyle(color: colors.textColor))),
-                DataCell(Text(person, style: TextStyle(color: colors.textColor))),
-                DataCell(Text(email, style: TextStyle(color: colors.textColor))),
-                DataCell(Text(phone, style: TextStyle(color: colors.textColor))),
-                DataCell(Text(city, style: TextStyle(color: colors.textColor))),
-                DataCell(Text(country, style: TextStyle(color: colors.textColor))),
-              ],
+              ),
             );
-          }).toList(),
+          },
         );
       },
     );

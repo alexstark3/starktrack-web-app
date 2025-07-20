@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:provider/provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/theme_provider.dart';
 import '../../theme/app_colors.dart';
 
@@ -14,6 +15,7 @@ class SettingsScreen extends StatelessWidget {
     final appColors = Theme.of(context).extension<AppColors>()!;
     final isDark = themeProvider.themeMode == ThemeMode.dark;
     final currentLang = themeProvider.language;
+    final l10n = AppLocalizations.of(context)!;
 
     const green = Color(0xFF3ECB68);
     const double labelWidth = 110;
@@ -34,7 +36,7 @@ class SettingsScreen extends StatelessWidget {
               children: [
                 SizedBox(
                   width: labelWidth,
-                  child: Text('Dark mode', style: theme.textTheme.bodyLarge),
+                  child: Text(l10n.darkMode, style: theme.textTheme.bodyLarge),
                 ),
                 const SizedBox(width: minGap),
                 SizedBox(
@@ -65,7 +67,7 @@ class SettingsScreen extends StatelessWidget {
               children: [
                 SizedBox(
                   width: labelWidth,
-                  child: Text('Language', style: theme.textTheme.bodyLarge),
+                  child: Text(l10n.language, style: theme.textTheme.bodyLarge),
                 ),
                 const SizedBox(width: minGap),
                 SizedBox(

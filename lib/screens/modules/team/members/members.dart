@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../../../theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'members_view.dart';
 
 class MembersTab extends StatelessWidget {
@@ -47,7 +49,7 @@ class MembersTab extends StatelessWidget {
               ),
               child: TextField(
                 decoration: InputDecoration(
-                  hintText: 'Search by name, surname or email',
+                  hintText: AppLocalizations.of(context)?.searchByName ?? 'Search by name, surname or email',
                   prefixIcon: const Icon(Icons.search),
                   isDense: true,
                   border: InputBorder.none,
@@ -59,24 +61,11 @@ class MembersTab extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minWidth: constraints.maxWidth,
-                        maxWidth: double.infinity,
-                      ),
-                      child: _MembersTable(
-                        companyId: companyId,
-                        search: _search,
-                        teamLeaderId: teamLeaderId,
-                        onView: onSelectMember,
-                      ),
-                    ),
-                  );
-                },
+              child: _MembersTable(
+                companyId: companyId,
+                search: _search,
+                teamLeaderId: teamLeaderId,
+                onView: onSelectMember,
               ),
             ),
           ],
@@ -103,6 +92,8 @@ class _MembersTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
+    final l10n = AppLocalizations.of(context);
+    
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('companies')
@@ -115,7 +106,7 @@ class _MembersTable extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Center(child: Text('No members found.'));
+          return Center(child: Text(l10n?.noMembersFound ?? 'No members found.'));
         }
         final docs = snapshot.data!.docs;
         final filtered = docs.where((doc) {
@@ -123,51 +114,187 @@ class _MembersTable extends StatelessWidget {
           final firstName = (data['firstName'] ?? '').toString().toLowerCase();
           final surname = (data['surname'] ?? '').toString().toLowerCase();
           final email = (data['email'] ?? '').toString().toLowerCase();
+          final userTeamLeader = data['teamLeader'] ?? '';
+          
+          // Apply team leader filter if specified
+          if (teamLeaderId != null && teamLeaderId!.isNotEmpty) {
+            if (userTeamLeader != teamLeaderId) {
+              return false;
+            }
+          }
+          
           return (firstName.contains(search) ||
                surname.contains(search) ||
                email.contains(search));
         }).toList();
 
         if (filtered.isEmpty) {
-          return const Center(child: Text('No members found.'));
+          return Center(child: Text(l10n?.noMembersFound ?? 'No members found.'));
         }
 
-        return DataTable(
-          columns: const [
-            DataColumn(label: Text('Actions')),
-            DataColumn(label: Text('First Name')),
-            DataColumn(label: Text('Surname')),
-            DataColumn(label: Text('Email')),
-            DataColumn(label: Text('Phone')),
-          ],
-          rows: filtered.map((doc) {
+        return ListView.builder(
+          itemCount: filtered.length,
+          itemBuilder: (context, index) {
+            final doc = filtered[index];
             final data = doc.data() as Map<String, dynamic>;
-            final firstName = data['firstName'] ?? '';
-            final surname = data['surname'] ?? '';
-            final email = data['email'] ?? '';
-            final phone = data['phone'] ?? '';
-            return DataRow(cells: [
-              DataCell(
-                ElevatedButton(
-                  onPressed: () => onView(doc),
-                  child: const Text('View'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.primaryBlue,
-                    foregroundColor: colors.whiteTextOnBlue,
-                    minimumSize: const Size(48, 32),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
+            final firstName = (data['firstName'] ?? '').toString();
+            final surname = (data['surname'] ?? '').toString();
+            final email = (data['email'] ?? '').toString();
+            final roles = (data['roles'] as List?)?.join(', ') ?? '';
+            final modules = (data['modules'] as List?)?.join(', ') ?? '';
+            
+            return Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              '$firstName $surname',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: colors.textColor,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            _MemberStatusIcon(companyId: companyId, userId: doc.id),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          email,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: colors.textColor.withOpacity(0.7),
+                          ),
+                        ),
+                      ],
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  ),
+                    if (roles.isNotEmpty || modules.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      if (roles.isNotEmpty) ...[
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.work,
+                              size: 16,
+                              color: colors.textColor.withOpacity(0.6),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Roles: $roles',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: colors.textColor.withOpacity(0.8),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                      ],
+                      if (modules.isNotEmpty) ...[
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.apps,
+                              size: 16,
+                              color: colors.textColor.withOpacity(0.6),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Modules: $modules',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: colors.textColor.withOpacity(0.8),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: () => onView(doc),
+                          icon: const Icon(Icons.visibility, size: 16),
+                          label: Text(l10n?.view ?? 'View'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: colors.primaryBlue,
+                            foregroundColor: colors.whiteTextOnBlue,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              DataCell(Text(firstName, style: TextStyle(color: colors.textColor))),
-              DataCell(Text(surname, style: TextStyle(color: colors.textColor))),
-              DataCell(Text(email, style: TextStyle(color: colors.textColor))),
-              DataCell(Text(phone, style: TextStyle(color: colors.textColor))),
-            ]);
-          }).toList(),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _MemberStatusIcon extends StatelessWidget {
+  final String companyId;
+  final String userId;
+
+  const _MemberStatusIcon({required this.companyId, required this.userId});
+
+  @override
+  Widget build(BuildContext context) {
+    final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('companies')
+          .doc(companyId)
+          .collection('users')
+          .doc(userId)
+          .collection('all_logs')
+          .where('sessionDate', isEqualTo: todayStr)
+          .snapshots(),
+      builder: (context, snapshot) {
+        bool isWorking = false;
+        if (snapshot.hasData) {
+          for (var doc in snapshot.data!.docs) {
+            final data = doc.data() as Map<String, dynamic>;
+            final hasBegin = data['begin'] != null;
+            final hasEnd = data['end'] != null;
+            if (hasBegin && !hasEnd) {
+              isWorking = true;
+              break;
+            }
+          }
+        }
+        return Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: isWorking ? Colors.green : Colors.red,
+            shape: BoxShape.circle,
+          ),
         );
       },
     );

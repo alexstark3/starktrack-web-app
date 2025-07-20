@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:starktrack/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class AdminPanel extends StatefulWidget {
   final String companyId;
@@ -82,6 +83,7 @@ class _AdminPanelState extends State<AdminPanel> {
       context: context,
       builder: (ctx) {
         final appColors = Theme.of(ctx).extension<AppColors>()!;
+        final l10n = AppLocalizations.of(ctx)!;
         return StatefulBuilder(builder: (ctx, setState) {
           return Dialog(
             backgroundColor: appColors.backgroundDark,
@@ -95,7 +97,7 @@ class _AdminPanelState extends State<AdminPanel> {
                     children: [
 
 
-                      Text(isEdit ? 'Edit User' : 'Add New User',
+                      Text(isEdit ? l10n.editUser : l10n.addNewUser,
                           style: TextStyle(
                             fontSize: 22,
                             color: appColors.primaryBlue,
@@ -105,7 +107,7 @@ class _AdminPanelState extends State<AdminPanel> {
 
                       _themedTextField(
                         ctx,
-                        label: 'First Name',
+                        label: l10n.firstName,
                         initialValue: userData['firstName'],
                         onChanged: (v) => userData['firstName'] = v,
                       ),
@@ -113,7 +115,7 @@ class _AdminPanelState extends State<AdminPanel> {
 
                       _themedTextField(
                         ctx,
-                        label: 'Surname',
+                        label: l10n.surname,
                         initialValue: userData['surname'],
                         onChanged: (v) => userData['surname'] = v,
                       ),
@@ -121,7 +123,7 @@ class _AdminPanelState extends State<AdminPanel> {
 
                       _themedTextField(
                         ctx,
-                        label: 'Email',
+                        label: l10n.email,
                         initialValue: userData['email'],
                         keyboardType: TextInputType.emailAddress,
                         onChanged: (v) => userData['email'] = v,
@@ -131,7 +133,7 @@ class _AdminPanelState extends State<AdminPanel> {
 
                       _themedTextField(
                         ctx,
-                        label: 'Phone (optional)',
+                        label: '${l10n.phone} (${l10n.optional})',
                         initialValue: userData['phone'] ?? '',
                         keyboardType: TextInputType.phone,
                         onChanged: (v) => userData['phone'] = v,
@@ -140,20 +142,20 @@ class _AdminPanelState extends State<AdminPanel> {
 
                       _themedTextField(
                         ctx,
-                        label: 'Address (optional)',
+                        label: '${l10n.address} (${l10n.optional})',
                         initialValue: userData['address'] ?? '',
                         onChanged: (v) => userData['address'] = v,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
 
                       _themedCheckboxGroup(
                         ctx: ctx,
-                        label: 'Roles',
-                        options: const [
-                          {'label': 'Company Admin', 'value': 'company_admin'},
-                          {'label': 'Admin', 'value': 'admin'},
-                          {'label': 'Team Leader', 'value': 'team_leader'},
-                          {'label': 'Worker', 'value': 'worker'},
+                        label: l10n.roles,
+                        options: [
+                          {'label': l10n.companyAdmin, 'value': 'company_admin'},
+                          {'label': l10n.admin, 'value': 'admin'},
+                          {'label': l10n.teamLeader, 'value': 'team_leader'},
+                          {'label': l10n.worker, 'value': 'worker'},
                         ],
                         values: List<String>.from(userData['roles']),
                         onChanged: (val) => setState(() => userData['roles'] = val),
@@ -168,7 +170,7 @@ class _AdminPanelState extends State<AdminPanel> {
                             onChanged: null, // disabled
                             activeColor: appColors.primaryBlue,
                           ),
-                          Text('Time Tracker (required, includes History)',
+                          Text('${l10n.timeTracker} (${l10n.required}, ${l10n.includesHistory})',
                               style: TextStyle(
                                   color: appColors.textColor,
                                   fontWeight: FontWeight.w600)),
@@ -176,105 +178,101 @@ class _AdminPanelState extends State<AdminPanel> {
                       ),
                       _themedCheckboxGroup(
                         ctx: ctx,
-                        label: 'Additional Modules',
-                        options: const [
-                          {'label': 'Admin', 'value': 'admin'},
+                        label: l10n.additionalModules,
+                        options: [
+                          {'label': l10n.admin, 'value': 'admin'},
                           // Add more modules here if needed in future
                         ],
                         values: List<String>.from(userData['modules'])
                             .where((m) => m != 'time_tracker')
                             .toList(),
                         onChanged: (val) {
-                          // Always include 'time_tracker'
-                          final modules = <String>{'time_tracker', ...val};
-                          setState(() => userData['modules'] = modules.toList());
+                          setState(() {
+                            userData['modules'] = ['time_tracker', ...val];
+                          });
                         },
                       ),
                       const SizedBox(height: 12),
 
+                      // Active status
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Active',
+                          Text(l10n.active,
                               style: TextStyle(
                                   color: appColors.textColor,
-                                  fontWeight: FontWeight.w500)),
+                                  fontWeight: FontWeight.w600)),
                           Switch(
-                            value: userData['active'],
+                            value: userData['active'] ?? true,
+                            onChanged: (val) => setState(() => userData['active'] = val),
                             activeColor: appColors.primaryBlue,
-                            inactiveThumbColor: appColors.lightGray,
-                            onChanged: (v) =>
-                                setState(() => userData['active'] = v),
                           ),
                         ],
                       ),
-
-  // --- NEW: Show Breaks Toggle ---
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Show Breaks',
-                            style: TextStyle(
-                                color: appColors.textColor,
-                                fontWeight: FontWeight.w500)),
-                        Switch(
-                          value: userData['showBreaks'],
-                          activeColor: appColors.primaryBlue,
-                          inactiveThumbColor: appColors.lightGray,
-                          onChanged: (v) =>
-                              setState(() => userData['showBreaks'] = v),
-                        ),
-                      ],
-                    ),
-
-
                       const SizedBox(height: 8),
+
+                      // Show breaks option
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(l10n.showBreaks,
+                              style: TextStyle(
+                                  color: appColors.textColor,
+                                  fontWeight: FontWeight.w600)),
+                          Switch(
+                            value: userData['showBreaks'] ?? true,
+                            onChanged: (val) => setState(() => userData['showBreaks'] = val),
+                            activeColor: appColors.primaryBlue,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
 
                       _themedTextField(
                         ctx,
-                        label: 'Workload (%)',
+                        label: '${l10n.workload} (%)',
                         initialValue: '${userData['workPercent'] ?? 100}',
                         keyboardType: TextInputType.number,
-                        onChanged: (v) => userData['workPercent'] =
-                            int.tryParse(v) ?? 100,
+                        onChanged: (v) => userData['workPercent'] = int.tryParse(v) ?? 100,
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
 
                       _themedTextField(
                         ctx,
-                        label: 'Weekly Hours',
+                        label: l10n.weeklyHours,
                         initialValue: '${userData['weeklyHours'] ?? 40}',
                         keyboardType: TextInputType.number,
-                        onChanged: (v) => userData['weeklyHours'] =
-                            int.tryParse(v) ?? 40,
+                        onChanged: (v) => userData['weeklyHours'] = int.tryParse(v) ?? 40,
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
 
+                      // Team Leader assignment
                       DropdownButtonFormField<String>(
-                        value: userData['teamLeaderId'] == ''
-                            ? null
+                        value: userData['teamLeaderId'] == null || userData['teamLeaderId'].toString().isEmpty
+                            ? ''
                             : userData['teamLeaderId'],
                         decoration: InputDecoration(
-                          labelText: 'Assign to Team Leader',
+                          labelText: l10n.assignToTeamLeader,
                           filled: true,
                           fillColor: appColors.lightGray,
                           border: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: appColors.darkGray, width: 1.2),
-                              borderRadius: BorderRadius.circular(8)),
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide.none,
+                          ),
                         ),
                         items: [
                           DropdownMenuItem(
                             value: '',
-                            child: Text('None',
+                            child: Text(l10n.none,
                                 style: TextStyle(color: appColors.textColor)),
                           ),
                           ..._teamLeaders.map((tl) {
                             return DropdownMenuItem(
                               value: tl['id'],
                               child: Text(
-                                  '${tl['firstName']} ${tl['surname']}',
-                                  style: TextStyle(color: appColors.textColor)),
+                                '${tl['firstName']} ${tl['surname']}',
+                                style: TextStyle(color: appColors.textColor),
+                              ),
                             );
                           }),
                         ],
@@ -286,13 +284,13 @@ class _AdminPanelState extends State<AdminPanel> {
                       if (!isEdit) ...[
                         _themedTextField(
                           ctx,
-                          label: 'Password (manual entry)',
+                          label: l10n.passwordManualEntry,
                           obscureText: true,
                           onChanged: (v) => password = v,
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Password must be at least 6 characters.',
+                          l10n.passwordMinLength,
                           style: TextStyle(color: appColors.darkGray, fontSize: 13),
                         ),
                       ],
@@ -322,78 +320,46 @@ class _AdminPanelState extends State<AdminPanel> {
                                     isSubmitting = true;
                                   });
 
-                                  // VALIDATION
-                                  if ((userData['firstName'] ?? '').isEmpty ||
-                                      (userData['surname'] ?? '').isEmpty ||
-                                      (userData['email'] ?? '').isEmpty) {
+                                  // Validation
+                                  if (userData['firstName'].toString().trim().isEmpty ||
+                                      userData['surname'].toString().trim().isEmpty ||
+                                      userData['email'].toString().trim().isEmpty) {
                                     setState(() {
-                                      errorText =
-                                          'First Name, Surname, and Email are required!';
+                                      errorText = l10n.firstNameSurnameEmailRequired;
                                       isSubmitting = false;
                                     });
                                     return;
                                   }
+
                                   if (userData['roles'] == null ||
                                       (userData['roles'] as List).isEmpty) {
                                     setState(() {
-                                      errorText = 'At least one role is required!';
+                                      errorText = l10n.atLeastOneRoleRequired;
                                       isSubmitting = false;
                                     });
                                     return;
                                   }
-                                  // Make sure modules always includes 'time_tracker'
-                                  final modules = Set<String>.from(userData['modules'] ?? []);
-                                  modules.add('time_tracker');
-                                  userData['modules'] = modules.toList();
 
                                   if (userData['modules'] == null ||
                                       (userData['modules'] as List).isEmpty) {
                                     setState(() {
-                                      errorText = 'At least one module is required!';
+                                      errorText = l10n.atLeastOneModuleRequired;
                                       isSubmitting = false;
                                     });
                                     return;
                                   }
-                                  // Only require password on create
-                                  if (!isEdit) {
-                                    if (password.length < 6) {
-                                      setState(() {
-                                        errorText = 'Password must be at least 6 characters!';
-                                        isSubmitting = false;
-                                      });
-                                      return;
-                                    }
-                                  }
 
-                                  // Check if email already exists in Firestore
-                                  if (!isEdit) {
-                                    var existing = await FirebaseFirestore
-                                        .instance
-                                        .collection('companies')
-                                        .doc(widget.companyId)
-                                        .collection('users')
-                                        .where('email', isEqualTo: userData['email'])
-                                        .get();
-                                    if (existing.docs.isNotEmpty) {
-                                      setState(() {
-                                        errorText =
-                                            'A user with this email already exists.';
-                                        isSubmitting = false;
-                                      });
-                                      return;
-                                    }
+                                  if (!isEdit && password.length < 6) {
+                                    setState(() {
+                                      errorText = l10n.passwordMustBeAtLeast6Characters;
+                                      isSubmitting = false;
+                                    });
+                                    return;
                                   }
 
                                   try {
                                     if (isEdit) {
-                                      final isCompanyAdmin = (userData['roles'] as List<dynamic>).contains('company_admin');
-                                      if (isCompanyAdmin && !isSuperAdmin) {
-                                        setState(() {
-                                          errorText = "Only super admin can edit the company admin.";
-                                          isSubmitting = false;
-                                        });
-                                        return;
-                                      }
+                                      // Update existing user
                                       await FirebaseFirestore.instance
                                           .collection('companies')
                                           .doc(widget.companyId)
@@ -401,49 +367,73 @@ class _AdminPanelState extends State<AdminPanel> {
                                           .doc(editUser.id)
                                           .update(userData);
                                     } else {
-                                      UserCredential? newAuthUser;
-                                      // === Create Auth user first ===
-                                      try {
-                                        newAuthUser = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                                          email: userData['email'],
-                                          password: password,
-                                        );
-                                      } on FirebaseAuthException catch (e) {
-                                        setState(() {
-                                          errorText = e.message ?? 'Auth error';
-                                          isSubmitting = false;
-                                        });
-                                        return;
-                                      }
-                                      // === Try to create Firestore doc with Auth UID ===
-                                      try {
-                                        await FirebaseFirestore.instance
-                                            .collection('companies')
-                                            .doc(widget.companyId)
-                                            .collection('users')
-                                            .doc(newAuthUser.user!.uid)
-                                            .set(userData);
-                                      } on FirebaseException catch (e) {
-                                        await newAuthUser.user!.delete();
-                                        setState(() {
-                                          errorText = 'Permission denied: ${e.message}';
-                                          isSubmitting = false;
-                                        });
-                                        return;
-                                      }
+                                      // Create new user
+                                      final newAuthUser = await FirebaseAuth.instance
+                                          .createUserWithEmailAndPassword(
+                                              email: userData['email'],
+                                              password: password);
+
+                                      await FirebaseFirestore.instance
+                                          .collection('companies')
+                                          .doc(widget.companyId)
+                                          .collection('users')
+                                          .doc(newAuthUser.user!.uid)
+                                          .set(userData);
                                     }
+
                                     Navigator.of(ctx).pop();
+                                    _fetchTeamLeaders(); // Refresh the list
+                                  } on FirebaseAuthException catch (e) {
+                                    if (e.code == 'email-already-in-use') {
+                                      setState(() {
+                                        errorText = l10n.userWithThisEmailAlreadyExists;
+                                        isSubmitting = false;
+                                      });
+                                    } else if (e.code == 'permission-denied') {
+                                      // Check if trying to edit company admin
+                                      final isCompanyAdmin = (userData['roles'] as List).contains('company_admin');
+                                      if (isCompanyAdmin && !isSuperAdmin) {
+                                        setState(() {
+                                          errorText = l10n.onlySuperAdminCanEditCompanyAdmin;
+                                          isSubmitting = false;
+                                        });
+                                        return;
+                                      }
+                                      try {
+                                        // Only try to delete if we have a newAuthUser
+                                        if (!isEdit) {
+                                          final newAuthUser = await FirebaseAuth.instance
+                                              .createUserWithEmailAndPassword(
+                                                  email: userData['email'],
+                                                  password: password);
+                                          await newAuthUser.user!.delete();
+                                        }
+                                        setState(() {
+                                          errorText = l10n.permissionDenied(e.message ?? '');
+                                          isSubmitting = false;
+                                        });
+                                      } catch (e) {
+                                        setState(() {
+                                          errorText = l10n.authError;
+                                          isSubmitting = false;
+                                        });
+                                      }
+                                    } else {
+                                      setState(() {
+                                        errorText = e.message ?? l10n.authError;
+                                        isSubmitting = false;
+                                      });
+                                    }
                                   } catch (e) {
                                     setState(() {
-                                      errorText = 'Unknown error: $e';
+                                      errorText = l10n.unknownError(e.toString());
                                       isSubmitting = false;
                                     });
                                   }
                                 },
-                          child: Text(isEdit ? 'Save Changes' : 'Create User',
+                          child: Text(isEdit ? l10n.saveChanges : l10n.createUser,
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: appColors.whiteTextOnBlue,
                                   fontSize: 16)),
                         ),
                       ),
@@ -455,7 +445,7 @@ class _AdminPanelState extends State<AdminPanel> {
                             width: double.infinity,
                             child: ElevatedButton.icon(
                               icon: Icon(Icons.lock_reset, color: appColors.whiteTextOnBlue),
-                              label: Text("Send password reset email",
+                              label: Text(l10n.sendPasswordResetEmail,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: appColors.whiteTextOnBlue,
@@ -474,7 +464,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                   if (ctx.mounted) {
                                     ScaffoldMessenger.of(ctx).showSnackBar(
                                       SnackBar(
-                                        content: Text("Password reset email sent to ${userData['email']}"),
+                                        content: Text(l10n.passwordResetEmailSent(userData['email'])),
                                         backgroundColor: appColors.primaryBlue,
                                         duration: Duration(seconds: 3),
                                       ),
@@ -484,7 +474,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                   if (ctx.mounted) {
                                     ScaffoldMessenger.of(ctx).showSnackBar(
                                       SnackBar(
-                                        content: Text("Failed to send reset email: $e"),
+                                        content: Text(l10n.failedToSendResetEmail(e.toString())),
                                         backgroundColor: appColors.red,
                                         duration: Duration(seconds: 3),
                                       ),
@@ -581,284 +571,448 @@ class _AdminPanelState extends State<AdminPanel> {
     );
   }
 
+  Widget _buildUserCard(Map<String, dynamic> data, DocumentSnapshot doc, AppColors colors, AppLocalizations l10n) {
+    // Helper function to get role display names
+    String getRoleDisplayName(String role) {
+      switch (role) {
+        case 'company_admin':
+          return l10n.companyAdmin;
+        case 'admin':
+          return l10n.admin;
+        case 'team_leader':
+          return l10n.teamLeader;
+        case 'worker':
+          return l10n.worker;
+        default:
+          return role;
+      }
+    }
 
+    // Helper function to get module display names
+    String getModuleDisplayName(String module) {
+      switch (module) {
+        case 'time_tracker':
+          return l10n.timeTracker;
+        case 'admin':
+          return l10n.admin;
+        default:
+          return module;
+      }
+    }
 
-  @override
-  Widget build(BuildContext context) {
-    final appColors = Theme.of(context).extension<AppColors>()!;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    return Container(
-      color: appColors.backgroundDark,
-      padding: const EdgeInsets.all(10), // Reduced from 16 to 10
-      child: Card(
-        elevation: isDark ? 0 : 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(10), // Reduced from 16 to 10
-          child: Column(
-            children: [
-              Row(
+    // Helper function to get team leader name
+    String getTeamLeaderName(String? teamLeaderId) {
+      if (teamLeaderId == null || teamLeaderId.isEmpty) {
+        return l10n.none;
+      }
+      final teamLeader = _teamLeaders.firstWhere(
+        (tl) => tl['id'] == teamLeaderId,
+        orElse: () => {'firstName': 'Unknown', 'surname': 'User'},
+      );
+      return '${teamLeader['firstName']} ${teamLeader['surname']}';
+    }
+
+    final roles = (data['roles'] as List?)?.map((r) => getRoleDisplayName(r.toString())).toList() ?? [];
+    final modules = (data['modules'] as List?)?.map((m) => getModuleDisplayName(m.toString())).toList() ?? [];
+    final workload = data['workPercent'] ?? 100;
+    final weeklyHours = data['weeklyHours'] ?? 40;
+    final isActive = data['active'] ?? true;
+    final showBreaks = data['showBreaks'] ?? true;
+    final isCompanyAdmin = roles.contains(l10n.companyAdmin);
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      color: colors.cardColorDark,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Name and Email
+            Text(
+              '${data['firstName']} ${data['surname']}',
+              style: TextStyle(
+                color: colors.textColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              data['email'] ?? '',
+              style: TextStyle(
+                color: colors.textColor,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Contact Information
+            if (data['phone'] != null && data['phone'].toString().isNotEmpty) ...[
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: '${l10n.phone}: ',
+                      style: TextStyle(
+                        color: colors.textColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: data['phone'],
+                      style: TextStyle(
+                        color: colors.textColor,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 4),
+            ],
+            if (data['address'] != null && data['address'].toString().isNotEmpty) ...[
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: '${l10n.address}: ',
+                      style: TextStyle(
+                        color: colors.textColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: data['address'],
+                      style: TextStyle(
+                        color: colors.textColor,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+
+            // Roles
+            Text.rich(
+              TextSpan(
                 children: [
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: isDark ? Colors.white24 : Colors.black26,
-                          width: 1,
-                        ),
-                        color: appColors.lightGray,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          prefixIcon: const Icon(Icons.search),
-                          hintText: 'Search by name, email, or role',
-                          isDense: true,
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        ),
-                        style: TextStyle(color: appColors.textColor),
-                        onChanged: (v) => setState(() => _searchText = v.trim()),
-                      ),
+                  TextSpan(
+                    text: '${l10n.roles}: ',
+                    style: TextStyle(
+                      color: colors.textColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(width: 18),
-                  ElevatedButton.icon(
-                    icon: Icon(Icons.person_add, color: appColors.whiteTextOnBlue),
-                    label: Text('Add New User',
-                        style: TextStyle(
-                            color: appColors.whiteTextOnBlue,
-                            fontWeight: FontWeight.bold)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: appColors.primaryBlue,
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 14, horizontal: 18),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
+                  TextSpan(
+                    text: roles.join(', '),
+                    style: TextStyle(
+                      color: colors.textColor,
+                      fontSize: 14,
                     ),
-                    onPressed: () => _showUserDialog(),
                   ),
                 ],
               ),
-              const SizedBox(height: 10), // Reduced from 16 to 10
-              Expanded(
-                child: StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('companies')
-                      .doc(widget.companyId)
-                      .collection('users')
-                      .snapshots(),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                    var docs = snapshot.data!.docs;
-                    if (_searchText.isNotEmpty) {
-                      docs = docs.where((doc) {
-                        final d = doc.data() as Map<String, dynamic>;
-                        final s = _searchText.toLowerCase();
-                        return (d['firstName'] ?? '')
-                                .toString()
-                                .toLowerCase()
-                                .contains(s) ||
-                            (d['surname'] ?? '')
-                                .toString()
-                                .toLowerCase()
-                                .contains(s) ||
-                            (d['email'] ?? '')
-                                .toString()
-                                .toLowerCase()
-                                .contains(s) ||
-                            (d['roles'] ?? [])
-                                .toString()
-                                .toLowerCase()
-                                .contains(s);
-                      }).toList();
-                    }
-                    return SingleChildScrollView(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                                                  child: DataTable(
-                            headingRowColor: WidgetStateProperty.all(Colors.transparent),//WidgetStateProperty Previously MaterialStateProperty
-                            dataRowColor: WidgetStateProperty.all(Colors.transparent), //MaterialStateProperty
-                          columns: const [
-                            DataColumn(label: Text('Name')),
-                            DataColumn(label: Text('Email')),
-                            DataColumn(label: Text('Roles')),
-                            DataColumn(label: Text('Modules')),
-                            DataColumn(label: Text('Active')),
-                            DataColumn(label: Text('Team Leader')),
-                            DataColumn(label: Text('Workload')),
-                            DataColumn(label: Text('Weekly Hours')),
-                            DataColumn(label: Text('Edit')),
-                            DataColumn(label: Text('Delete')),
-                          ],
-                          rows: docs.map((doc) {
-                            final data = doc.data() as Map<String, dynamic>;
-                            final bool isCompanyAdmin = (data['roles'] as List<dynamic>?)?.contains('company_admin') == true;
+            ),
+            const SizedBox(height: 4),
 
-                            return DataRow(cells: [
-                              DataCell(Text(
-                                '${data['firstName'] ?? ''} ${data['surname'] ?? ''}',
-                                style: TextStyle(color: appColors.textColor),
-                              )),
-                              DataCell(Text(
-                                data['email'] ?? '',
-                                style: TextStyle(color: appColors.textColor),
-                              )),
-                              DataCell(Text(
-                                (data['roles'] as List<dynamic>?)?.join(', ') ?? '',
-                                style: TextStyle(color: appColors.textColor),
-                              )),
-                              DataCell(Text(
-                                (data['modules'] as List<dynamic>?)?.join(', ') ?? '',
-                                style: TextStyle(color: appColors.textColor),
-                              )),
-                              DataCell(
-                                Checkbox(
-                                  value: data['active'] == true,
-                                  onChanged: (checked) => _toggleActive(doc.id, checked ?? false),
-                                  activeColor: appColors.primaryBlue,
-                                  checkColor: Colors.white,
-                                ),
-                              ),
-                              DataCell(
-                                DropdownButton<String>(
-                                  value: data['teamLeader'] ?? 'none',
-                                  items: [
-                                    const DropdownMenuItem(value: 'none', child: Text('None')),
-                                    ..._teamLeaders.map((tl) => DropdownMenuItem(
-                                          value: tl['id'],
-                                          child: Text('${tl['firstName']} ${tl['surname']}'),
-                                        )),
-                                  ],
-                                  onChanged: (val) => _updateTeamLeader(doc.id, val),
-                                ),
-                              ),
-                              DataCell(
-                                SizedBox(
-                                  width: 80,
-                                  child: TextField(
-                                    controller: TextEditingController(text: '${data['workPercent'] ?? 100}'),
-                                    keyboardType: TextInputType.number,
-                                    onSubmitted: (val) => _updateWorkPercent(doc.id, int.tryParse(val) ?? 100),
-                                    style: TextStyle(color: appColors.textColor),
-                                    decoration: InputDecoration(
-                                      suffixText: '%',
-                                      isDense: true,
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              DataCell(
-                                SizedBox(
-                                  width: 80,
-                                  child: TextField(
-                                    controller: TextEditingController(text: data['weeklyHours']?.toString() ?? '40'),
-                                    keyboardType: TextInputType.number,
-                                    onSubmitted: (val) => _updateWeeklyHours(doc.id, int.tryParse(val) ?? 40),
-                                    style: TextStyle(color: appColors.textColor),
-                                  ),
-                                ),
-                              ),
-                              DataCell(
-                                IconButton(
-                                  icon: const Icon(Icons.edit),
-                                  color: appColors.primaryBlue,
-                                  onPressed: () => _showUserDialog(editUser: doc),
-                                ),
-                              ),
-                              DataCell(
-                                IconButton(
-                                  icon: const Icon(Icons.delete),
-                                  color: appColors.red,
-                                  onPressed: isCompanyAdmin ? null : () async {
-                                    final confirmed = await showDialog<bool>(
-                                      context: context,
-                                      builder: (ctx) => AlertDialog(
-                                        title: const Text('Confirm Delete'),
-                                        content: const Text('Are you sure you want to delete this user?'),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () => Navigator.of(ctx).pop(false),
-                                            child: const Text('Cancel'),
-                                          ),
-                                          ElevatedButton(
-                                            child: const Text('Delete'),
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: appColors.red,
-                                              foregroundColor: appColors.whiteTextOnBlue,
-                                            ),
-                                            onPressed: () => Navigator.of(ctx).pop(true),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                    if (confirmed == true) {
-                                      await FirebaseFirestore.instance
-                                          .collection('companies')
-                                          .doc(widget.companyId)
-                                          .collection('users')
-                                          .doc(doc.id)
-                                          .delete();
-                                    }
-                                  },
-                                ),
-                              ),
-                            ]);
-                          }).toList(),
-                        ),
+            // Modules
+            Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: '${l10n.modules}: ',
+                    style: TextStyle(
+                      color: colors.textColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextSpan(
+                    text: modules.join(', '),
+                    style: TextStyle(
+                      color: colors.textColor,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 4),
+
+            // Workload and Weekly Hours
+            Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: '${l10n.workload}: ',
+                    style: TextStyle(
+                      color: colors.textColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextSpan(
+                    text: '$workload%',
+                    style: TextStyle(
+                      color: colors.textColor,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: '${l10n.weeklyHours}: ',
+                    style: TextStyle(
+                      color: colors.textColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextSpan(
+                    text: '$weeklyHours',
+                    style: TextStyle(
+                      color: colors.textColor,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 4),
+
+            // Status information
+            Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: '${l10n.active}: ',
+                    style: TextStyle(
+                      color: colors.textColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextSpan(
+                    text: isActive ? 'Yes' : 'No',
+                    style: TextStyle(
+                      color: isActive ? Colors.green : colors.red,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: '${l10n.showBreaks}: ',
+                    style: TextStyle(
+                      color: colors.textColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextSpan(
+                    text: showBreaks ? 'Yes' : 'No',
+                    style: TextStyle(
+                      color: colors.textColor,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 4),
+
+            // Team Leader Assignment
+            Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: '${l10n.teamLeader}: ',
+                    style: TextStyle(
+                      color: colors.textColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextSpan(
+                    text: getTeamLeaderName(data['teamLeaderId']),
+                    style: TextStyle(
+                      color: colors.textColor,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Action buttons at the bottom left
+            Row(
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.edit,
+                    color: isCompanyAdmin ? colors.darkGray : colors.primaryBlue,
+                    size: 20,
+                  ),
+                  onPressed: isCompanyAdmin ? null : () => _showUserDialog(editUser: doc),
+                  tooltip: isCompanyAdmin ? 'Company Admin cannot be edited' : l10n.edit,
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: Icon(
+                    Icons.delete,
+                    color: isCompanyAdmin ? colors.darkGray : colors.red,
+                    size: 20,
+                  ),
+                  onPressed: isCompanyAdmin ? null : () {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text(l10n.confirmDelete),
+                        content: Text(l10n.confirmDeleteMessage),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(false),
+                            child: Text(l10n.cancel),
+                          ),
+                          ElevatedButton(
+                            child: Text(l10n.delete),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: colors.red,
+                            ),
+                            onPressed: () async {
+                              Navigator.of(ctx).pop(true);
+                              await doc.reference.delete();
+                              setState(() {});
+                            },
+                          ),
+                        ],
                       ),
                     );
                   },
+                  tooltip: isCompanyAdmin ? 'Company Admin cannot be deleted' : l10n.delete,
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
 
-  void _toggleActive(String userId, bool active) async {
-    await FirebaseFirestore.instance
-        .collection('companies')
-        .doc(widget.companyId)
-        .collection('users')
-        .doc(userId)
-        .update({'active': active});
-  }
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = Theme.of(context).extension<AppColors>()!;
+    
+    return Container(
+      color: colors.backgroundDark,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
+        child: Column(
+          children: [
+            // Search bar
+            Container(
+              height: 50,
+              decoration: BoxDecoration(
+                color: colors.cardColorDark,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: TextField(
+                onChanged: (value) => setState(() => _searchText = value),
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.search),
+                  hintText: l10n.searchByNameEmailRole,
+                  isDense: true,
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
 
-  void _updateTeamLeader(String userId, String? teamLeaderId) async {
-    await FirebaseFirestore.instance
-        .collection('companies')
-        .doc(widget.companyId)
-        .collection('users')
-        .doc(userId)
-        .update({'teamLeader': teamLeaderId ?? 'none'});
-  }
+            // Add User Button
+            Align(
+              alignment: Alignment.centerLeft,
+              child: ElevatedButton.icon(
+                icon: Icon(Icons.person_add, color: colors.whiteTextOnBlue),
+                label: Text(l10n.addNewUser,
+                    style: TextStyle(
+                        color: colors.whiteTextOnBlue,
+                        fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colors.primaryBlue,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                ),
+                onPressed: () => _showUserDialog(),
+              ),
+            ),
+            const SizedBox(height: 16),
 
-  void _updateWeeklyHours(String userId, int hours) async {
-    await FirebaseFirestore.instance
-        .collection('companies')
-        .doc(widget.companyId)
-        .collection('users')
-        .doc(userId)
-        .update({'weeklyHours': hours});
-  }
+            // Users List
+            Expanded(
+              child: FutureBuilder<QuerySnapshot>(
+                future: FirebaseFirestore.instance
+                    .collection('companies')
+                    .doc(widget.companyId)
+                    .collection('users')
+                    .get(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-  void _updateWorkPercent(String userId, int workPercent) async {
-    // Ensure workPercent is between 0 and 100
-    int clampedPercent = workPercent.clamp(0, 100);
-    await FirebaseFirestore.instance
-        .collection('companies')
-        .doc(widget.companyId)
-        .collection('users')
-        .doc(userId)
-        .update({'workPercent': clampedPercent});
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'No users found.',
+                        style: TextStyle(color: colors.textColor),
+                      ),
+                    );
+                  }
+
+                  final filteredUsers = snapshot.data!.docs.where((doc) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    final searchLower = _searchText.toLowerCase();
+                    return data['firstName'].toString().toLowerCase().contains(searchLower) ||
+                           data['surname'].toString().toLowerCase().contains(searchLower) ||
+                           data['email'].toString().toLowerCase().contains(searchLower) ||
+                           data['roles'].toString().toLowerCase().contains(searchLower);
+                  }).toList();
+
+                  return ListView.builder(
+                    itemCount: filteredUsers.length,
+                    itemBuilder: (context, index) {
+                      final doc = filteredUsers[index];
+                      final data = doc.data() as Map<String, dynamic>;
+                      
+                      return _buildUserCard(data, doc, colors, l10n);
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -1,0 +1,149 @@
+{
+  "@@locale": "de",
+  "appTitle": "Stark Track",
+  "timeTracker": "Zeiterfassung",
+  "history": "Verlauf",
+  "team": "Team",
+  "members": "Mitglieder",
+  "projects": "Projekte",
+  "clients": "Kunden",
+  "admin": "Administration",
+  "settings": "Einstellungen",
+  "login": "Anmelden",
+  "logout": "Abmelden",
+  "email": "E-Mail",
+  "password": "Passwort",
+  "firstName": "Vorname",
+  "surname": "Nachname",
+  "phone": "Telefon",
+  "address": "Adresse",
+  "search": "Suchen",
+  "add": "Hinzufügen",
+  "edit": "Bearbeiten",
+  "delete": "Löschen",
+  "save": "Speichern",
+  "cancel": "Abbrechen",
+  "start": "Start",
+  "end": "Ende",
+  "project": "Projekt",
+  "note": "Notiz",
+  "expenses": "Ausgaben",
+  "perDiem": "Tagesgeld",
+  "worked": "Gearbeitet",
+  "breaks": "Pausen",
+  "total": "Gesamt",
+  "approved": "Genehmigt",
+  "rejected": "Abgelehnt",
+  "pending": "Ausstehend",
+  "darkMode": "Dunkler Modus",
+  "language": "Sprache",
+  "today": "Heute",
+  "noLogsForThisDay": "Keine Einträge für diesen Tag",
+  "addNewUser": "Neuen Benutzer hinzufügen",
+  "addNewClient": "Neuen Kunden hinzufügen",
+  "addNewProject": "Neues Projekt hinzufügen",
+  "searchByName": "Nach Namen suchen",
+  "searchByEmail": "Nach E-Mail suchen",
+  "searchByProject": "Nach Projekt suchen",
+  "searchByClient": "Nach Kunde suchen",
+  "contactPerson": "Kontaktperson",
+  "country": "Land",
+  "city": "Stadt",
+  "duration": "Dauer",
+  "worker": "Mitarbeiter",
+  "actions": "Aktionen",
+  "view": "Anzeigen",
+  "refresh": "Aktualisieren",
+  "filter": "Filter",
+  "from": "Von",
+  "to": "Bis",
+  "groupBy": "Gruppieren nach",
+  "day": "Tag",
+  "week": "Woche",
+  "month": "Monat",
+  "year": "Jahr",
+  "overtime": "Überstunden",
+  "totalExpenses": "Gesamtausgaben",
+  "totalTime": "Gesamtzeit",
+  "weeklyHours": "Wochenstunden",
+  "workload": "Arbeitslast",
+  "active": "Aktiv",
+  "roles": "Rollen",
+  "modules": "Module",
+  "teamLeader": "Teamleiter",
+  "passwordManualEntry": "Passwort (manuelle Eingabe)",
+  "passwordMinLength": "Das Passwort muss mindestens 6 Zeichen lang sein.",
+  "editUser": "Benutzer bearbeiten",
+  "addNewSession": "Neue Sitzung hinzufügen",
+  "approvalNote": "Genehmigungsnotiz (optional)",
+  "noMembersFound": "Keine Mitglieder gefunden.",
+  "noProjectsFound": "Keine Projekte gefunden.",
+  "noClientsFound": "Keine Kunden gefunden.",
+  "noTimeLogsFound": "Keine Zeiteinträge für diesen Mitarbeiter gefunden.",
+  "errorLoadingProjects": "Fehler beim Laden der Projekte: {error}",
+  "@errorLoadingProjects": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noProjectsFoundInFirestore": "Keine Projekte in Firestore gefunden.",
+  "projectId": "Projekt-ID",
+  "clientName": "Kundenname",
+  "personName": "Personenname",
+  "optional": "optional",
+  "companyAdmin": "Firmenadministrator",
+  "worker": "Mitarbeiter",
+  "required": "erforderlich",
+  "includesHistory": "enthält Verlauf",
+  "additionalModules": "Zusätzliche Module",
+  "showBreaks": "Pausen anzeigen",
+  "assignToTeamLeader": "Teamleiter zuweisen",
+  "none": "Keine",
+  "saveChanges": "Änderungen speichern",
+  "createUser": "Benutzer erstellen",
+  "sendPasswordResetEmail": "Passwort-Reset-E-Mail senden",
+  "passwordResetEmailSent": "Passwort-Reset-E-Mail an {email} gesendet",
+  "@passwordResetEmailSent": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSendResetEmail": "Fehler beim Senden der Reset-E-Mail: {error}",
+  "@failedToSendResetEmail": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "searchByNameEmailRole": "Nach Name, E-Mail oder Rolle suchen",
+  "confirmDelete": "Löschen bestätigen",
+  "confirmDeleteMessage": "Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?",
+  "firstNameSurnameEmailRequired": "Vorname, Nachname und E-Mail sind erforderlich!",
+  "atLeastOneRoleRequired": "Mindestens eine Rolle ist erforderlich!",
+  "atLeastOneModuleRequired": "Mindestens ein Modul ist erforderlich!",
+  "passwordMustBeAtLeast6Characters": "Das Passwort muss mindestens 6 Zeichen lang sein!",
+  "userWithThisEmailAlreadyExists": "Ein Benutzer mit dieser E-Mail existiert bereits.",
+  "onlySuperAdminCanEditCompanyAdmin": "Nur Super-Admin kann den Firmenadministrator bearbeiten.",
+  "authError": "Authentifizierungsfehler",
+  "permissionDenied": "Zugriff verweigert: {error}",
+  "@permissionDenied": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "unknownError": "Unbekannter Fehler: {error}",
+  "@unknownError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
+} 
