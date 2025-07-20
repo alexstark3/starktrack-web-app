@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../../../theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'add_project_dialog.dart';
 import 'project_view_page.dart';
 
@@ -94,7 +95,7 @@ class _ProjectsListState extends State<_ProjectsList> {
                 ),
                 child: TextField(
                   decoration: InputDecoration(
-                    hintText: 'Search by project name',
+                    hintText: AppLocalizations.of(context)!.searchByProject,
                     prefixIcon: const Icon(Icons.search),
                     isDense: true,
                     border: InputBorder.none,
@@ -118,7 +119,7 @@ class _ProjectsListState extends State<_ProjectsList> {
                 ),
                 child: TextField(
                   decoration: InputDecoration(
-                    hintText: 'Search by client',
+                    hintText: AppLocalizations.of(context)!.searchByClient,
                     prefixIcon: const Icon(Icons.grid_on),
                     isDense: true,
                     border: InputBorder.none,
@@ -132,7 +133,7 @@ class _ProjectsListState extends State<_ProjectsList> {
             const SizedBox(width: 16),
             ElevatedButton.icon(
               icon: const Icon(Icons.add, size: 20),
-              label: const Text('Add New'),
+              label: Text(AppLocalizations.of(context)!.addNewProject),
               style: ElevatedButton.styleFrom(
                 backgroundColor: colors.primaryBlue,
                 foregroundColor: colors.whiteTextOnBlue,
@@ -162,7 +163,7 @@ class _ProjectsListState extends State<_ProjectsList> {
                 return const Center(child: CircularProgressIndicator());
               }
               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return const Center(child: Text('No projects found.'));
+                return Center(child: Text(AppLocalizations.of(context)!.noProjectsFound));
               }
               final docs = snapshot.data!.docs;
               final filtered = docs.where((doc) {
@@ -174,7 +175,7 @@ class _ProjectsListState extends State<_ProjectsList> {
               }).toList();
 
               if (filtered.isEmpty) {
-                return const Center(child: Text('No projects found.'));
+                return Center(child: Text(AppLocalizations.of(context)!.noProjectsFound));
               }
 
               // Sort projects: active projects first, then by name
@@ -268,7 +269,7 @@ class _ProjectsListState extends State<_ProjectsList> {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          'ID: $projectId',
+                                          '${AppLocalizations.of(context)!.projectId}: $projectId',
                                           style: TextStyle(
                                             fontSize: 14,
                                             color: colors.textColor.withOpacity(0.7),
@@ -313,7 +314,7 @@ class _ProjectsListState extends State<_ProjectsList> {
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
-                                        'Client: $clientName',
+                                        '${AppLocalizations.of(context)!.clientName}: $clientName',
                                         style: TextStyle(
                                           fontSize: 14,
                                           color: colors.textColor.withOpacity(0.8),
@@ -335,7 +336,7 @@ class _ProjectsListState extends State<_ProjectsList> {
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
-                                        'Contact: $contactPerson',
+                                        '${AppLocalizations.of(context)!.contactPerson}: $contactPerson',
                                         style: TextStyle(
                                           fontSize: 14,
                                           color: colors.textColor.withOpacity(0.8),
@@ -390,7 +391,7 @@ class _ProjectsListState extends State<_ProjectsList> {
                                       widget.onSelectProject({...data, 'id': doc.id});
                                     },
                                     icon: const Icon(Icons.visibility, size: 16),
-                                    label: const Text('View'),
+                                    label: Text(AppLocalizations.of(context)!.view),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: colors.primaryBlue,
                                       foregroundColor: colors.whiteTextOnBlue,

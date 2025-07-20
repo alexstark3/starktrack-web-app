@@ -607,7 +607,7 @@ class _AdminPanelState extends State<AdminPanel> {
       }
       final teamLeader = _teamLeaders.firstWhere(
         (tl) => tl['id'] == teamLeaderId,
-        orElse: () => {'firstName': 'Unknown', 'surname': 'User'},
+        orElse: () => {'firstName': l10n.unknown, 'surname': l10n.worker},
       );
       return '${teamLeader['firstName']} ${teamLeader['surname']}';
     }
@@ -804,7 +804,7 @@ class _AdminPanelState extends State<AdminPanel> {
                     ),
                   ),
                   TextSpan(
-                    text: isActive ? 'Yes' : 'No',
+                    text: isActive ? l10n.yes : l10n.no,
                     style: TextStyle(
                       color: isActive ? Colors.green : colors.red,
                       fontSize: 14,
@@ -827,7 +827,7 @@ class _AdminPanelState extends State<AdminPanel> {
                     ),
                   ),
                   TextSpan(
-                    text: showBreaks ? 'Yes' : 'No',
+                    text: showBreaks ? l10n.yes : l10n.no,
                     style: TextStyle(
                       color: colors.textColor,
                       fontSize: 14,
@@ -872,7 +872,7 @@ class _AdminPanelState extends State<AdminPanel> {
                     size: 20,
                   ),
                   onPressed: isCompanyAdmin ? null : () => _showUserDialog(editUser: doc),
-                  tooltip: isCompanyAdmin ? 'Company Admin cannot be edited' : l10n.edit,
+                  tooltip: isCompanyAdmin ? '${l10n.companyAdmin} ${l10n.cannotBeEdited}' : l10n.edit,
                 ),
                 const SizedBox(width: 8),
                 IconButton(
@@ -907,7 +907,7 @@ class _AdminPanelState extends State<AdminPanel> {
                       ),
                     );
                   },
-                  tooltip: isCompanyAdmin ? 'Company Admin cannot be deleted' : l10n.delete,
+                  tooltip: isCompanyAdmin ? '${l10n.companyAdmin} ${l10n.cannotBeDeleted}' : l10n.delete,
                 ),
               ],
             ),
@@ -983,7 +983,7 @@ class _AdminPanelState extends State<AdminPanel> {
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                     return Center(
                       child: Text(
-                        'No users found.',
+                        l10n.noMembersFound,
                         style: TextStyle(color: colors.textColor),
                       ),
                     );

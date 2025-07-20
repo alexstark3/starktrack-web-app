@@ -49,7 +49,7 @@ class MembersTab extends StatelessWidget {
               ),
               child: TextField(
                 decoration: InputDecoration(
-                  hintText: AppLocalizations.of(context)?.searchByName ?? 'Search by name, surname or email',
+                  hintText: AppLocalizations.of(context)?.searchByNameSurnameEmail ?? 'Search by name, surname or email',
                   prefixIcon: const Icon(Icons.search),
                   isDense: true,
                   border: InputBorder.none,
@@ -140,8 +140,8 @@ class _MembersTable extends StatelessWidget {
             final firstName = (data['firstName'] ?? '').toString();
             final surname = (data['surname'] ?? '').toString();
             final email = (data['email'] ?? '').toString();
-            final roles = (data['roles'] as List?)?.join(', ') ?? '';
-            final modules = (data['modules'] as List?)?.join(', ') ?? '';
+            final roles = _formatRoles(data['roles'] as List?, l10n);
+            final modules = _formatModules(data['modules'] as List?, l10n);
             
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
@@ -194,7 +194,7 @@ class _MembersTable extends StatelessWidget {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                'Roles: $roles',
+                                '${l10n?.roles ?? 'Roles'}: $roles',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: colors.textColor.withOpacity(0.8),
@@ -216,7 +216,7 @@ class _MembersTable extends StatelessWidget {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                'Modules: $modules',
+                                '${l10n?.modules ?? 'Modules'}: $modules',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: colors.textColor.withOpacity(0.8),
@@ -254,6 +254,46 @@ class _MembersTable extends StatelessWidget {
         );
       },
     );
+  }
+
+  String _formatRoles(List? roles, AppLocalizations? l10n) {
+    if (roles == null || roles.isEmpty) return '';
+    
+    return roles.map((role) {
+      switch (role.toString()) {
+        case 'admin':
+          return l10n?.role_admin ?? 'Admin';
+        case 'team_leader':
+          return l10n?.role_team_leader ?? 'Team Leader';
+        case 'company_admin':
+          return l10n?.role_company_admin ?? 'Company Admin';
+        case 'user':
+          return l10n?.role_user ?? 'User';
+        case 'worker':
+          return l10n?.role_worker ?? 'Worker';
+        default:
+          return role.toString();
+      }
+    }).join(', ');
+  }
+
+  String _formatModules(List? modules, AppLocalizations? l10n) {
+    if (modules == null || modules.isEmpty) return '';
+    
+    return modules.map((module) {
+      switch (module.toString()) {
+        case 'admin':
+          return l10n?.module_admin ?? 'Administration';
+        case 'time_tracker':
+          return l10n?.module_time_tracker ?? 'Time Tracker';
+        case 'team':
+          return l10n?.module_team ?? 'Team Management';
+        case 'history':
+          return l10n?.module_history ?? 'History';
+        default:
+          return module.toString();
+      }
+    }).join(', ');
   }
 }
 

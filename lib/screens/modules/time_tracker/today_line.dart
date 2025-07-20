@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:starktrack/theme/app_colors.dart';
+import 'package:starktrack/l10n/app_localizations.dart';
 
 class TodayLine extends StatefulWidget {
   const TodayLine({Key? key}) : super(key: key);
@@ -31,6 +32,7 @@ class _TodayLineState extends State<TodayLine> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final appColors = Theme.of(context).extension<AppColors>()!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -58,7 +60,7 @@ class _TodayLineState extends State<TodayLine> {
           child: Padding(
             padding: const EdgeInsets.all(10),
             child: Text(
-              'Today: ${DateFormat('dd MMM yyyy – HH:mm').format(_now)}',
+              '${l10n.today}: ${DateFormat('dd MMM yyyy – HH:mm').format(_now)}',
               style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w400,
                     color: appColors.textColor,

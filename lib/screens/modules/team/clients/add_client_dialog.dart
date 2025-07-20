@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:diacritic/diacritic.dart'; // <-- Import this!
 import '../../../../theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class AddClientDialog extends StatefulWidget {
   final String companyId;
@@ -65,7 +66,7 @@ class _AddClientDialogState extends State<AddClientDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Add New Client',
+                Text(AppLocalizations.of(context)!.addNewClient,
                     style: TextStyle(
                       color: colors.primaryBlue,
                       fontWeight: FontWeight.bold,
@@ -76,7 +77,7 @@ class _AddClientDialogState extends State<AddClientDialog> {
                 TextFormField(
                   controller: _nameCtrl,
                   decoration: InputDecoration(
-                    labelText: 'Company Name',
+                    labelText: AppLocalizations.of(context)!.clientName,
                     filled: true,
                     fillColor: colors.lightGray,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -89,7 +90,7 @@ class _AddClientDialogState extends State<AddClientDialog> {
                 TextFormField(
                   controller: _firstNameCtrl,
                   decoration: InputDecoration(
-                    labelText: 'Contact First Name',
+                    labelText: '${AppLocalizations.of(context)!.contactPerson} ${AppLocalizations.of(context)!.firstName}',
                     filled: true,
                     fillColor: colors.lightGray,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -101,7 +102,7 @@ class _AddClientDialogState extends State<AddClientDialog> {
                 TextFormField(
                   controller: _surnameCtrl,
                   decoration: InputDecoration(
-                    labelText: 'Contact Surname',
+                    labelText: '${AppLocalizations.of(context)!.contactPerson} ${AppLocalizations.of(context)!.surname}',
                     filled: true,
                     fillColor: colors.lightGray,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -113,7 +114,7 @@ class _AddClientDialogState extends State<AddClientDialog> {
                 TextFormField(
                   controller: _addressCtrl,
                   decoration: InputDecoration(
-                    labelText: 'Street',
+                    labelText: AppLocalizations.of(context)!.street,
                     filled: true,
                     fillColor: colors.lightGray,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -125,7 +126,7 @@ class _AddClientDialogState extends State<AddClientDialog> {
                 TextFormField(
                   controller: _numberCtrl,
                   decoration: InputDecoration(
-                    labelText: 'Street Number',
+                    labelText: '${AppLocalizations.of(context)!.street} ${AppLocalizations.of(context)!.number}',
                     filled: true,
                     fillColor: colors.lightGray,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -137,7 +138,7 @@ class _AddClientDialogState extends State<AddClientDialog> {
                 TextFormField(
                   controller: _postCodeCtrl,
                   decoration: InputDecoration(
-                    labelText: 'Post Code',
+                    labelText: AppLocalizations.of(context)!.postCode,
                     filled: true,
                     fillColor: colors.lightGray,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -149,7 +150,7 @@ class _AddClientDialogState extends State<AddClientDialog> {
                 TextFormField(
                   controller: _cityCtrl,
                   decoration: InputDecoration(
-                    labelText: 'City',
+                    labelText: AppLocalizations.of(context)!.city,
                     filled: true,
                     fillColor: colors.lightGray,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -161,7 +162,7 @@ class _AddClientDialogState extends State<AddClientDialog> {
                 TextFormField(
                   controller: _countryCtrl,
                   decoration: InputDecoration(
-                    labelText: 'Country',
+                    labelText: AppLocalizations.of(context)!.country,
                     filled: true,
                     fillColor: colors.lightGray,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -173,7 +174,7 @@ class _AddClientDialogState extends State<AddClientDialog> {
                 TextFormField(
                   controller: _emailCtrl,
                   decoration: InputDecoration(
-                    labelText: 'Client Email',
+                    labelText: '${AppLocalizations.of(context)!.clientName} ${AppLocalizations.of(context)!.email}',
                     filled: true,
                     fillColor: colors.lightGray,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -191,7 +192,7 @@ class _AddClientDialogState extends State<AddClientDialog> {
                 TextFormField(
                   controller: _phoneCtrl,
                   decoration: InputDecoration(
-                    labelText: 'Client Phone',
+                    labelText: '${AppLocalizations.of(context)!.clientName} ${AppLocalizations.of(context)!.phone}',
                     filled: true,
                     fillColor: colors.lightGray,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -255,13 +256,13 @@ class _AddClientDialogState extends State<AddClientDialog> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                        child: const Text('Cancel'),
+                        child: Text(AppLocalizations.of(context)!.cancel),
                         onPressed: _isSaving ? null : () => Navigator.of(context).pop(false)),
                     const SizedBox(width: 18),
                     ElevatedButton(
                       child: _isSaving
                           ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                          : const Text('Save', style: TextStyle(fontWeight: FontWeight.bold)),
+                          : Text(AppLocalizations.of(context)!.save, style: TextStyle(fontWeight: FontWeight.bold)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: colors.primaryBlue,
                         foregroundColor: colors.whiteTextOnBlue,
@@ -322,7 +323,7 @@ class _AddClientDialogState extends State<AddClientDialog> {
       setState(() {
         _isSaving = false;
         _suggestedName = clientId;
-        _error = 'Client name already used (by ID).';
+        _error = '${AppLocalizations.of(context)!.clientName} bereits verwendet (durch ID).';
       });
       return;
     }
@@ -347,7 +348,7 @@ class _AddClientDialogState extends State<AddClientDialog> {
       Navigator.of(context).pop(true);
     } catch (e) {
       setState(() {
-        _error = 'Failed to save client. Please try again.';
+        _error = 'Fehler beim Speichern des ${AppLocalizations.of(context)!.client.toLowerCase()}. Bitte versuchen Sie es erneut.';
         _isSaving = false;
       });
     }
@@ -427,7 +428,7 @@ class _EditClientDialogState extends State<EditClientDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Edit Client',
+                Text('${AppLocalizations.of(context)!.edit} ${AppLocalizations.of(context)!.client}',
                     style: TextStyle(
                       color: colors.primaryBlue,
                       fontWeight: FontWeight.bold,
@@ -438,7 +439,7 @@ class _EditClientDialogState extends State<EditClientDialog> {
                 TextFormField(
                   controller: _nameCtrl,
                   decoration: InputDecoration(
-                    labelText: 'Company Name',
+                    labelText: AppLocalizations.of(context)!.clientName,
                     filled: true,
                     fillColor: colors.lightGray,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -451,7 +452,7 @@ class _EditClientDialogState extends State<EditClientDialog> {
                 TextFormField(
                   controller: _firstNameCtrl,
                   decoration: InputDecoration(
-                    labelText: 'Contact First Name',
+                    labelText: '${AppLocalizations.of(context)!.contactPerson} ${AppLocalizations.of(context)!.firstName}',
                     filled: true,
                     fillColor: colors.lightGray,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -463,7 +464,7 @@ class _EditClientDialogState extends State<EditClientDialog> {
                 TextFormField(
                   controller: _surnameCtrl,
                   decoration: InputDecoration(
-                    labelText: 'Contact Surname',
+                    labelText: '${AppLocalizations.of(context)!.contactPerson} ${AppLocalizations.of(context)!.surname}',
                     filled: true,
                     fillColor: colors.lightGray,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -475,7 +476,7 @@ class _EditClientDialogState extends State<EditClientDialog> {
                 TextFormField(
                   controller: _addressCtrl,
                   decoration: InputDecoration(
-                    labelText: 'Street',
+                    labelText: AppLocalizations.of(context)!.street,
                     filled: true,
                     fillColor: colors.lightGray,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -487,7 +488,7 @@ class _EditClientDialogState extends State<EditClientDialog> {
                 TextFormField(
                   controller: _numberCtrl,
                   decoration: InputDecoration(
-                    labelText: 'Street Number',
+                    labelText: '${AppLocalizations.of(context)!.street} ${AppLocalizations.of(context)!.number}',
                     filled: true,
                     fillColor: colors.lightGray,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -499,7 +500,7 @@ class _EditClientDialogState extends State<EditClientDialog> {
                 TextFormField(
                   controller: _postCodeCtrl,
                   decoration: InputDecoration(
-                    labelText: 'Post Code',
+                    labelText: AppLocalizations.of(context)!.postCode,
                     filled: true,
                     fillColor: colors.lightGray,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -511,7 +512,7 @@ class _EditClientDialogState extends State<EditClientDialog> {
                 TextFormField(
                   controller: _cityCtrl,
                   decoration: InputDecoration(
-                    labelText: 'City',
+                    labelText: AppLocalizations.of(context)!.city,
                     filled: true,
                     fillColor: colors.lightGray,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -523,7 +524,7 @@ class _EditClientDialogState extends State<EditClientDialog> {
                 TextFormField(
                   controller: _countryCtrl,
                   decoration: InputDecoration(
-                    labelText: 'Country',
+                    labelText: AppLocalizations.of(context)!.country,
                     filled: true,
                     fillColor: colors.lightGray,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -535,7 +536,7 @@ class _EditClientDialogState extends State<EditClientDialog> {
                 TextFormField(
                   controller: _emailCtrl,
                   decoration: InputDecoration(
-                    labelText: 'Client Email',
+                    labelText: '${AppLocalizations.of(context)!.clientName} ${AppLocalizations.of(context)!.email}',
                     filled: true,
                     fillColor: colors.lightGray,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -553,7 +554,7 @@ class _EditClientDialogState extends State<EditClientDialog> {
                 TextFormField(
                   controller: _phoneCtrl,
                   decoration: InputDecoration(
-                    labelText: 'Client Phone',
+                    labelText: '${AppLocalizations.of(context)!.clientName} ${AppLocalizations.of(context)!.phone}',
                     filled: true,
                     fillColor: colors.lightGray,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -579,13 +580,13 @@ class _EditClientDialogState extends State<EditClientDialog> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                        child: const Text('Cancel'),
+                        child: Text(AppLocalizations.of(context)!.cancel),
                         onPressed: _isSaving ? null : () => Navigator.of(context).pop(false)),
                     const SizedBox(width: 18),
                     ElevatedButton(
                       child: _isSaving
                           ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                          : const Text('Save', style: TextStyle(fontWeight: FontWeight.bold)),
+                          : Text(AppLocalizations.of(context)!.save, style: TextStyle(fontWeight: FontWeight.bold)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: colors.primaryBlue,
                         foregroundColor: colors.whiteTextOnBlue,

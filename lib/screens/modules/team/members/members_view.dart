@@ -176,7 +176,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                               );
                             },
                             icon: const Icon(Icons.add_circle_outline),
-                            label: const Text('Add New Session'),
+                            label: Text(AppLocalizations.of(context)!.addNewSession),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: colors.primaryBlue,
                               foregroundColor: colors.whiteTextOnBlue,
@@ -215,7 +215,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                                   Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
                                   const SizedBox(width: 6),
                                   Text(
-                                    fromDate == null ? "From" : dateFormat.format(fromDate!),
+                                    fromDate == null ? AppLocalizations.of(context)!.from : dateFormat.format(fromDate!),
                                     style: TextStyle(
                                       color: fromDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
                                       fontWeight: FontWeight.w500,
@@ -248,7 +248,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                                   Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
                                   const SizedBox(width: 6),
                                   Text(
-                                    toDate == null ? "To" : dateFormat.format(toDate!),
+                                    toDate == null ? AppLocalizations.of(context)!.to : dateFormat.format(toDate!),
                                     style: TextStyle(
                                       color: toDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
                                       fontWeight: FontWeight.w500,
@@ -352,7 +352,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                             ),
                             child: IconButton(
                               icon: Icon(Icons.refresh, color: theme.colorScheme.primary, size: 24),
-                              tooltip: 'Clear filters',
+                              tooltip: AppLocalizations.of(context)!.clearFilters,
                               onPressed: () {
                                 setState(() {
                                   fromDate = null;
@@ -587,9 +587,9 @@ class _TotalsHeader extends StatelessWidget {
           spacing: 18,
           runSpacing: 8,
           children: [
-            Text('Total Work: ${_fmtH(totalWork)}', style: const TextStyle(fontWeight: FontWeight.w600)),
-            Text('Total Expenses: ${totalExpenses.toStringAsFixed(2)} CHF', style: const TextStyle(fontWeight: FontWeight.w600)),
-            Text('Approved: $approvedCount | Rejected: $rejectedCount | Pending: $pendingCount', style: const TextStyle(fontSize: 13, color: Colors.grey)),
+            Text('${AppLocalizations.of(context)!.totalTime}: ${_fmtH(totalWork)}', style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text('${AppLocalizations.of(context)!.totalExpenses}: ${totalExpenses.toStringAsFixed(2)} CHF', style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text('${AppLocalizations.of(context)!.approved}: $approvedCount | ${AppLocalizations.of(context)!.rejected}: $rejectedCount | ${AppLocalizations.of(context)!.pending}: $pendingCount', style: const TextStyle(fontSize: 13, color: Colors.grey)),
           ],
         );
       },
@@ -657,7 +657,7 @@ class _LogsTableState extends State<_LogsTable> {
       builder: (context) => AlertDialog(
         backgroundColor: colors.backgroundDark,
         title: Text(
-          'Delete Session',
+          AppLocalizations.of(context)!.deleteSession,
           style: TextStyle(
             color: colors.textColor,
             fontWeight: FontWeight.bold,
@@ -668,7 +668,7 @@ class _LogsTableState extends State<_LogsTable> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Are you sure you want to delete this session?',
+              AppLocalizations.of(context)!.confirmDeleteMessage,
               style: TextStyle(color: colors.textColor),
             ),
             const SizedBox(height: 16),
@@ -682,17 +682,17 @@ class _LogsTableState extends State<_LogsTable> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (sessionDate.isNotEmpty)
-                    Text('Date: $sessionDate', style: TextStyle(color: colors.textColor)),
+                    Text('${AppLocalizations.of(context)!.sessionDate}: $sessionDate', style: TextStyle(color: colors.textColor)),
                   if (timeRange.isNotEmpty)
-                    Text('Time: $timeRange', style: TextStyle(color: colors.textColor)),
+                    Text('${AppLocalizations.of(context)!.time}: $timeRange', style: TextStyle(color: colors.textColor)),
                   if (project.isNotEmpty)
-                    Text('Project: $project', style: TextStyle(color: colors.textColor)),
+                    Text('${AppLocalizations.of(context)!.project}: $project', style: TextStyle(color: colors.textColor)),
                 ],
               ),
             ),
             const SizedBox(height: 16),
             Text(
-              'This action cannot be undone.',
+              AppLocalizations.of(context)!.confirmDeleteMessage,
               style: TextStyle(
                 color: colors.red,
                 fontWeight: FontWeight.w500,
@@ -704,7 +704,7 @@ class _LogsTableState extends State<_LogsTable> {
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(
-              'Cancel',
+              AppLocalizations.of(context)!.cancel,
               style: TextStyle(color: colors.textColor),
             ),
           ),
@@ -714,7 +714,7 @@ class _LogsTableState extends State<_LogsTable> {
               backgroundColor: colors.red,
               foregroundColor: colors.whiteTextOnBlue,
             ),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context)!.delete),
           ),
         ],
       ),
@@ -737,6 +737,17 @@ class _LogsTableState extends State<_LogsTable> {
     final jan4StartOfWeek = jan4.subtract(Duration(days: jan4.weekday - 1));
     final weekNumber = ((startOfWeek.difference(jan4StartOfWeek).inDays) / 7).floor() + 1;
     return weekNumber;
+  }
+
+  // Helper function to translate expense keys
+  String _translateExpenseKey(String key, AppLocalizations l10n) {
+    switch (key.toLowerCase()) {
+      case 'per diem':
+      case 'perdiem':
+        return l10n.perDiem;
+      default:
+        return key;
+    }
   }
 
 
@@ -787,7 +798,7 @@ class _LogsTableState extends State<_LogsTable> {
         }).toList();
 
         if (docs.isEmpty) {
-          return const Center(child: Text('No time logs found for this worker.'));
+          return Center(child: Text(AppLocalizations.of(context)!.noTimeLogsFound));
         }
 
         // ==== GROUPING LOGIC STARTS HERE ====
@@ -849,7 +860,7 @@ class _LogsTableState extends State<_LogsTable> {
 
         for (var entry in entries) {
           String key = '';
-          if (entry.begin == null) key = 'Unknown';
+          if (entry.begin == null) key = AppLocalizations.of(context)!.unknown;
           else {
             switch (widget.groupType) {
               case GroupType.day:
@@ -975,28 +986,28 @@ class _LogsTableState extends State<_LogsTable> {
                          children: [
                            if (entry.project != '') 
                              Text(
-                               'Project: ${entry.project}',
+                               '${AppLocalizations.of(context)!.project}: ${entry.project}',
                                style: TextStyle(
                                  color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
                                ),
                              ),
                            if (entry.duration != Duration.zero)
                              Text(
-                               'Duration: ${_formatDuration(entry.duration)}',
+                               '${AppLocalizations.of(context)!.duration}: ${_formatDuration(entry.duration)}',
                                style: TextStyle(
                                  color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
                                ),
                              ),
                            if (entry.note != '') 
                              Text(
-                               'Note: ${entry.note}',
+                               '${AppLocalizations.of(context)!.note}: ${entry.note}',
                                style: TextStyle(
                                  color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
                                ),
                              ),
                            if (entry.perDiem)
                              Text(
-                               'Per diem: Yes', 
+                               '${AppLocalizations.of(context)!.perDiem}: ${AppLocalizations.of(context)!.yes}', 
                                style: TextStyle(
                                  color: theme.colorScheme.primary,
                                ),
@@ -1016,7 +1027,7 @@ class _LogsTableState extends State<_LogsTable> {
                                      // Skip boolean values
                                      return const SizedBox.shrink();
                                    }
-                                   return Text('${e.key}: ${expenseFormat.format(expenseValue)}',
+                                   return Text('${_translateExpenseKey(e.key, AppLocalizations.of(context)!)}: ${expenseFormat.format(expenseValue)}',
                                      style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.w600, fontSize: 15),
                                    );
                                  }).toList(),
@@ -1031,7 +1042,7 @@ class _LogsTableState extends State<_LogsTable> {
                                if (!isApproved && !isRejected && !isApprovedAfterEdit)
                                  IconButton(
                                    icon: const Icon(Icons.check, color: Colors.green, size: 20),
-                                   tooltip: 'Approve',
+                                   tooltip: AppLocalizations.of(context)!.approve,
                                    onPressed: () async {
                                      await entry.doc.reference.update({
                                        'approved': true,
@@ -1045,7 +1056,7 @@ class _LogsTableState extends State<_LogsTable> {
                                if (!isApproved && !isRejected && !isApprovedAfterEdit)
                                  IconButton(
                                    icon: const Icon(Icons.close, color: Colors.red, size: 20),
-                                   tooltip: 'Reject',
+                                   tooltip: AppLocalizations.of(context)!.reject,
                                    onPressed: () async {
                                      await entry.doc.reference.update({
                                        'rejected': true,
@@ -1059,7 +1070,7 @@ class _LogsTableState extends State<_LogsTable> {
                                if (!isApproved && !isRejected && !isApprovedAfterEdit)
                                  IconButton(
                                    icon: const Icon(Icons.edit, color: Colors.blue, size: 20),
-                                   tooltip: 'Edit',
+                                   tooltip: AppLocalizations.of(context)!.edit,
                                    onPressed: () async {
                                      await showDialog(
                                        context: context,
@@ -1075,18 +1086,18 @@ class _LogsTableState extends State<_LogsTable> {
                                if (!isApproved && !isRejected && !isApprovedAfterEdit)
                                  IconButton(
                                    icon: const Icon(Icons.delete, color: Colors.red, size: 20),
-                                   tooltip: 'Delete',
+                                   tooltip: AppLocalizations.of(context)!.delete,
                                    onPressed: () async {
                                      final confirmed = await _showDeleteConfirmation(context, data);
                                      if (confirmed == true) {
                                        await entry.doc.reference.delete();
                                        widget.onAction();
                                        if (context.mounted) {
-                                         ScaffoldMessenger.of(context).showSnackBar(
-                                           const SnackBar(
-                                             content: Text('Session deleted successfully'),
-                                             backgroundColor: Colors.green,
-                                           ),
+                                                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                             SnackBar(
+                                              content: Text(AppLocalizations.of(context)!.sessionDeletedSuccessfully),
+                                              backgroundColor: Colors.green,
+                                            ),
                                          );
                                        }
                                      }
@@ -1128,14 +1139,14 @@ class _LogsTableState extends State<_LogsTable> {
                        builder: (context, userSnapshot) {
                          List<Widget> totalWidgets = [
                            Text(
-                             'Total Time: ${_formatDuration(groupTotal)}',
+                             '${AppLocalizations.of(context)!.totalTime}: ${_formatDuration(groupTotal)}',
                              style: TextStyle(
                                fontWeight: FontWeight.w700,
                                color: theme.colorScheme.primary,
                              ),
                            ),
                            Text(
-                             'Total Expenses: ${expenseFormat.format(groupExpense)}',
+                             '${AppLocalizations.of(context)!.totalExpenses}: ${expenseFormat.format(groupExpense)}',
                              style: TextStyle(
                                fontWeight: FontWeight.w700,
                                color: theme.colorScheme.primary,
@@ -1157,7 +1168,7 @@ class _LogsTableState extends State<_LogsTable> {
                              
                              totalWidgets.add(
                                Text(
-                                 'Overtime: $sign${_formatDuration(Duration(minutes: overtimeMinutes.abs()))}',
+                                 '${AppLocalizations.of(context)!.overtime}: $sign${_formatDuration(Duration(minutes: overtimeMinutes.abs()))}',
                                  style: TextStyle(
                                    fontWeight: FontWeight.w700,
                                    color: color,
@@ -1388,7 +1399,7 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                     Padding(
                       padding: const EdgeInsets.only(left: 6),
                       child: Tooltip(
-                        message: "Per diem already used in another session today",
+                        message: AppLocalizations.of(context)!.perDiemAlreadyUsedInAnotherSession,
                         child: Icon(Icons.info_outline, color: Colors.grey, size: 18),
                       ),
                     ),
@@ -1402,7 +1413,7 @@ class _EditLogDialogState extends State<_EditLogDialog> {
 
             return AlertDialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-              title: const Text('Expenses'),
+                                  title: Text(AppLocalizations.of(context)!.expensesTitle),
               content: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1415,8 +1426,8 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                           flex: 2,
                           child: TextField(
                             controller: nameCtrl,
-                            decoration: const InputDecoration(
-                              hintText: 'Name',
+                                                          decoration: InputDecoration(
+                               hintText: AppLocalizations.of(context)!.nameLabel,
                               border: UnderlineInputBorder(),
                               isDense: true,
                               contentPadding: EdgeInsets.symmetric(vertical: 4),
@@ -1430,8 +1441,8 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                           flex: 1,
                           child: TextField(
                             controller: amountCtrl,
-                            decoration: const InputDecoration(
-                              hintText: 'Amount',
+                                                          decoration: InputDecoration(
+                               hintText: AppLocalizations.of(context)!.amountLabel,
                               border: UnderlineInputBorder(),
                               isDense: true,
                               contentPadding: EdgeInsets.symmetric(vertical: 4),
@@ -1450,7 +1461,7 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           ),
-                          child: const Text('Add', style: TextStyle(fontSize: 14)),
+                                                      child: Text(AppLocalizations.of(context)!.addLabel, style: const TextStyle(fontSize: 14)),
                         ),
                       ],
                     ),
@@ -1460,7 +1471,7 @@ class _EditLogDialogState extends State<_EditLogDialog> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel', style: TextStyle(color: Colors.blue, fontSize: 16)),
+                                              child: Text(AppLocalizations.of(context)!.cancelLabel, style: const TextStyle(color: Colors.blue, fontSize: 16)),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -1471,7 +1482,7 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                     textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   onPressed: () => Navigator.pop(context, tempExpenses),
-                  child: const Text('Save'),
+                                      child: Text(AppLocalizations.of(context)!.saveLabel),
                 ),
               ],
             );
@@ -1491,7 +1502,7 @@ class _EditLogDialogState extends State<_EditLogDialog> {
   Widget build(BuildContext context) {
   
     return AlertDialog(
-      title: const Text('Edit Time Log'),
+                        title: Text(AppLocalizations.of(context)!.editTimeLog),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1499,13 +1510,13 @@ class _EditLogDialogState extends State<_EditLogDialog> {
             // Start time
             TextField(
               controller: _startCtrl,
-              decoration: const InputDecoration(labelText: 'Start Time (HH:mm)'),
+              decoration: InputDecoration(labelText: '${AppLocalizations.of(context)!.start} ${AppLocalizations.of(context)!.time} (HH:mm)'),
               keyboardType: TextInputType.datetime,
             ),
             // End time
             TextField(
               controller: _endCtrl,
-              decoration: const InputDecoration(labelText: 'End Time (HH:mm)'),
+              decoration: InputDecoration(labelText: '${AppLocalizations.of(context)!.end} ${AppLocalizations.of(context)!.time} (HH:mm)'),
               keyboardType: TextInputType.datetime,
             ),
             // Project (dropdown)
@@ -1524,20 +1535,20 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                   _projectError = false;
                 });
               },
-              decoration: const InputDecoration(labelText: 'Project'),
+                                          decoration: InputDecoration(labelText: AppLocalizations.of(context)!.projectLabel),
             ),
             if (_projectError)
               Padding(
                 padding: const EdgeInsets.only(top: 4.0),
-                child: Text(
-                  'No Project selected!',
-                  style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                child:                 Text(
+                  '${AppLocalizations.of(context)!.selectProject}!',
+                  style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                 ),
               ),
             // Note
             TextField(
               controller: _noteCtrl,
-              decoration: const InputDecoration(labelText: 'Note'),
+                                          decoration: InputDecoration(labelText: AppLocalizations.of(context)!.noteLabel),
             ),
             const SizedBox(height: 12),
             // Expenses (using standard expense popup)
@@ -1549,10 +1560,10 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Expenses:', style: TextStyle(fontWeight: FontWeight.w600)),
+                      Text('${AppLocalizations.of(context)!.expenses}:', style: const TextStyle(fontWeight: FontWeight.w600)),
                       const SizedBox(width: 8),
                       if (_expenses.isEmpty)
-                        const Text('Tap to add', style: TextStyle(color: Colors.grey))
+                        Text(AppLocalizations.of(context)!.tapToAdd, style: const TextStyle(color: Colors.grey))
                       else
                         Expanded(
                           child: Wrap(
@@ -1587,7 +1598,7 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                                       color: Colors.blue.withOpacity(0.3),
                                     ),
                                   ),
-                                  child: Text('Per diem ${(_expenses['Per diem'] as num).toStringAsFixed(2)} CHF', 
+                                  child: Text(AppLocalizations.of(context)!.perDiemLabel((_expenses['Per diem'] as num).toStringAsFixed(2)), 
                                     style: const TextStyle(fontSize: 13)),
                                 ),
                             ],
@@ -1601,7 +1612,7 @@ class _EditLogDialogState extends State<_EditLogDialog> {
             const SizedBox(height: 12),
             // Approval note (optional)
             TextField(
-              decoration: const InputDecoration(labelText: 'Approval Note (optional)'),
+              decoration: InputDecoration(labelText: '${AppLocalizations.of(context)!.approvalNote}'),
               onChanged: (v) => _approvalNote = v.trim(),
             ),
           ],
@@ -1609,11 +1620,11 @@ class _EditLogDialogState extends State<_EditLogDialog> {
       ),
       actions: [
         TextButton(
-          child: const Text('Cancel'),
+                      child: Text(AppLocalizations.of(context)!.cancel),
           onPressed: () => Navigator.of(context).pop(),
         ),
         ElevatedButton(
-          child: const Text('Save & Approve'),
+          child: Text('${AppLocalizations.of(context)!.save} & ${AppLocalizations.of(context)!.approve}'),
           onPressed: () async {
             // Validate time and project
             DateTime start, end;
@@ -1623,9 +1634,9 @@ class _EditLogDialogState extends State<_EditLogDialog> {
               final eParts = _endCtrl.text.split(':');
               start = DateTime(baseDay.year, baseDay.month, baseDay.day, int.parse(sParts[0]), int.parse(sParts[1]));
               end = DateTime(baseDay.year, baseDay.month, baseDay.day, int.parse(eParts[0]), int.parse(eParts[1]));
-              if (!end.isAfter(start)) throw 'End before start';
+              if (!end.isAfter(start)) throw AppLocalizations.of(context)!.endBeforeStart;
             } catch (_) {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid start/end time')));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.endBeforeStart)));
               return;
             }
             if (_projectValue == null || _projectValue!.trim().isEmpty) {

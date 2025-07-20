@@ -55,6 +55,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     
@@ -117,7 +118,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                 Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
                 const SizedBox(width: 6),
                 Text(
-                  fromDate == null ? "From" : dateFormat.format(fromDate!),
+                  fromDate == null ? l10n.from : dateFormat.format(fromDate!),
                   style: TextStyle(
                     color: fromDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withValues(alpha:0.87) : Colors.black.withValues(alpha:0.87)),
                     fontWeight: FontWeight.w500,
@@ -150,7 +151,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                 Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
                 const SizedBox(width: 6),
                 Text(
-                  toDate == null ? "To" : dateFormat.format(toDate!),
+                  toDate == null ? l10n.to : dateFormat.format(toDate!),
                   style: TextStyle(
                     color: toDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withValues(alpha:0.87) : Colors.black.withValues(alpha:0.87)),
                     fontWeight: FontWeight.w500,
@@ -256,7 +257,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
       ),
       child: IconButton(
         icon: Icon(Icons.refresh, color: theme.colorScheme.primary, size: 24),
-        tooltip: 'Clear filters',
+        tooltip: l10n.clearFilters,
         onPressed: () {
           setState(() {
             fromDate = null;
@@ -337,7 +338,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return Center(
                     child: Text(
-                      'No logs found.',
+                      l10n.noLogsFound,
                       style: TextStyle(
                         color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
                         fontSize: 16,
@@ -373,7 +374,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                 }).toList();
 
                 if (filteredLogs.isEmpty) {
-                  return const Center(child: Text('No entries match your filters.'));
+                  return Center(child: Text(l10n.noEntriesMatchFilters));
                 }
 
                 // Process all logs into entries
@@ -464,7 +465,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                 for (var entry in entries) {
                   String key = '';
                   if (entry.begin == null) {
-                    key = 'Unknown';
+                    key = l10n.unknown;
                   } else {
                     switch (groupType) {
                       case GroupType.day:
@@ -472,7 +473,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                         break;
                       case GroupType.week:
                         final week = _weekNumber(entry.begin!);
-                        key = 'Week $week, ${entry.begin!.year}';
+                        key = '${l10n.week} $week, ${entry.begin!.year}';
                         break;
                       case GroupType.month:
                         key = DateFormat('MMMM yyyy').format(entry.begin!);
@@ -587,28 +588,28 @@ class _HistoryLogsState extends State<HistoryLogs> {
                                children: [
                                  if (entry.project.isNotEmpty) 
                                    Text(
-                                     'Project: ${entry.project}',
+                                     '${l10n.project}: ${entry.project}',
                                      style: TextStyle(
                                        color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
                                      ),
                                    ),
                                  if (entry.duration != Duration.zero)
                                    Text(
-                                     'Duration: ${_formatDuration(entry.duration)}',
+                                     '${l10n.duration}: ${_formatDuration(entry.duration)}',
                                      style: TextStyle(
                                        color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
                                      ),
                                    ),
                                  if (entry.note.isNotEmpty) 
                                    Text(
-                                     'Note: ${entry.note}',
+                                     '${l10n.note}: ${entry.note}',
                                      style: TextStyle(
                                        color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
                                      ),
                                    ),
                                  if (entry.perDiem)
                                    Text(
-                                     'Per diem: Yes', 
+                                     '${l10n.perDiem}: ${l10n.yes}', 
                                      style: TextStyle(
                                        color: theme.colorScheme.primary,
                                      ),
@@ -621,7 +622,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                                        children: [
                                          ...entry.expensesMap.entries.map((e) {
                                            if (e.value is bool) {
-                                             return Text('${e.key}: ${e.value ? "Yes" : "No"}',
+                                             return Text('${_translateExpenseKey(e.key, l10n)}: ${e.value ? l10n.yes : l10n.no}',
                                                style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w600, fontSize: 15),
                                              );
                                            } else {
@@ -631,7 +632,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                                              } else if (e.value is String) {
                                                expenseValue = double.tryParse(e.value as String) ?? 0.0;
                                              }
-                                             return Text('${e.key}: ${expenseFormat.format(expenseValue)}',
+                                             return Text('${_translateExpenseKey(e.key, l10n)}: ${expenseFormat.format(expenseValue)}',
                                                style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.w600, fontSize: 15),
                                              );
                                            }
@@ -640,7 +641,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                                            Padding(
                                              padding: const EdgeInsets.only(top: 4.0),
                                              child: Text(
-                                               'Total Expenses: ${expenseFormat.format(entry.expense)}',
+                                               '${l10n.totalExpenses}: ${expenseFormat.format(entry.expense)}',
                                                style: const TextStyle(
                                                  color: Colors.red,
                                                  fontWeight: FontWeight.w600,
@@ -654,8 +655,8 @@ class _HistoryLogsState extends State<HistoryLogs> {
                                  else if (entry.expense > 0)
                                    Padding(
                                      padding: const EdgeInsets.only(top: 2.0),
-                                     child: Text(
-                                       'Total Expenses: ${expenseFormat.format(entry.expense)}',
+                                                                        child: Text(
+                                     '${l10n.totalExpenses}: ${expenseFormat.format(entry.expense)}',
                                        style: const TextStyle(
                                          color: Colors.red,
                                          fontWeight: FontWeight.w600,
@@ -684,14 +685,14 @@ class _HistoryLogsState extends State<HistoryLogs> {
                                runSpacing: 4,
                                children: [
                                  Text(
-                                   'Total Time: ${_formatDuration(groupTotal)}',
+                                   '${l10n.totalTime}: ${_formatDuration(groupTotal)}',
                                    style: TextStyle(
                                      fontWeight: FontWeight.w700,
                                      color: theme.colorScheme.primary,
                                    ),
                                  ),
                                  Text(
-                                   'Total Expenses: ${expenseFormat.format(groupExpense)}',
+                                   '${l10n.totalExpenses}: ${expenseFormat.format(groupExpense)}',
                                    style: TextStyle(
                                      fontWeight: FontWeight.w700,
                                      color: theme.colorScheme.primary,
@@ -756,4 +757,15 @@ int _weekNumber(DateTime date) {
   final jan4StartOfWeek = jan4.subtract(Duration(days: jan4.weekday - 1));
   final weekNumber = ((startOfWeek.difference(jan4StartOfWeek).inDays) / 7).floor() + 1;
   return weekNumber;
+}
+
+// Helper function to translate expense keys
+String _translateExpenseKey(String key, AppLocalizations l10n) {
+  switch (key.toLowerCase()) {
+    case 'per diem':
+    case 'perdiem':
+      return l10n.perDiem;
+    default:
+      return key;
+  }
 }

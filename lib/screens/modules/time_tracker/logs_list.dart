@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:starktrack/theme/app_colors.dart';
+import 'package:starktrack/l10n/app_localizations.dart';
 
 typedef ProjectInfo = Map<String, String>;
 
@@ -88,6 +89,7 @@ class _LogsListState extends State<LogsList> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme      = Theme.of(context);
     final appColors  = theme.extension<AppColors>()!;
     final textColor  = appColors.textColor;
@@ -117,9 +119,9 @@ class _LogsListState extends State<LogsList> {
           if (!snap.hasData || snap.data!.docs.isEmpty) {
             return _shellCard(
               theme,
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 32, horizontal: 20),
-                child: Center(child: Text('No logs for this day.')),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+                child: Center(child: Text(l10n.noLogsForThisDay)),
               ),
             );
           }
@@ -154,7 +156,7 @@ class _LogsListState extends State<LogsList> {
             }
             if (expensesMap.containsKey('Per diem')) {
               final value = expensesMap['Per diem'];
-              expenseLines.add('Per diem ${(value as num).toStringAsFixed(2)} CHF');
+              expenseLines.add('${l10n.perDiem} ${(value as num).toStringAsFixed(2)} CHF');
             }
 
             final String noteText  = log['note'] ?? '';
@@ -297,7 +299,7 @@ class _LogsListState extends State<LogsList> {
     final endStr   = DateFormat.Hm().format(to);
     final h = d.inHours.toString().padLeft(2, '0');
     final m = (d.inMinutes % 60).toString().padLeft(2, '0');
-    return 'Break: $startStr - $endStr = $h:$m' + 'h';
+    return '${AppLocalizations.of(context)?.breaks ?? 'Breaks'}: $startStr - $endStr = $h:$m' + 'h';
   }
 
   Widget _shellCard(ThemeData theme, Widget child) => Card(

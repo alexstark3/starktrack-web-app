@@ -27,23 +27,29 @@ class SettingsScreen extends StatelessWidget {
       height: double.infinity,
       color: appColors.backgroundDark,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10), // Reduced from 16 to 10
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Dark Mode Toggle Row
-            Row(
+        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
+        child: Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          color: Theme.of(context).brightness == Brightness.dark 
+            ? appColors.cardColorDark 
+            : Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(
-                  width: labelWidth,
-                  child: Text(l10n.darkMode, style: theme.textTheme.bodyLarge),
-                ),
-                const SizedBox(width: minGap),
-                SizedBox(
-                  width: tabWidth,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: FlutterSwitch(
+                // Dark Mode Toggle Row
+                Row(
+                  children: [
+                    SizedBox(
+                      width: labelWidth,
+                      child: Text(l10n.darkMode, style: theme.textTheme.bodyLarge),
+                    ),
+                    const SizedBox(width: minGap),
+                    FlutterSwitch(
                       width: 48,
                       height: 28,
                       toggleSize: 20,
@@ -57,24 +63,18 @@ class SettingsScreen extends StatelessWidget {
                       value: isDark,
                       onToggle: (_) => themeProvider.toggleTheme(),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 10), // Reduced from 16 to 10
-            // Language Picker Row
-            Row(
-              children: [
-                SizedBox(
-                  width: labelWidth,
-                  child: Text(l10n.language, style: theme.textTheme.bodyLarge),
-                ),
-                const SizedBox(width: minGap),
-                SizedBox(
-                  width: tabWidth,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: DropdownButton<String>(
+                const SizedBox(height: 16),
+                // Language Picker Row
+                Row(
+                  children: [
+                    SizedBox(
+                      width: labelWidth,
+                      child: Text(l10n.language, style: theme.textTheme.bodyLarge),
+                    ),
+                    const SizedBox(width: minGap),
+                    DropdownButton<String>(
                       value: currentLang,
                       underline: Container(),
                       alignment: AlignmentDirectional.centerStart,
@@ -89,11 +89,11 @@ class SettingsScreen extends StatelessWidget {
                         }
                       },
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:starktrack/theme/app_colors.dart';
+import 'package:starktrack/l10n/app_localizations.dart';
 
 const double kEntryHeight = 38;
 const double kEntryRadius = 9;
@@ -73,11 +74,12 @@ class _TimeEntryCardState extends State<TimeEntryCard>
 
   Future<void> _showProjectPopup() async {
     if (widget.projects.isEmpty) return;
+    final l10n = AppLocalizations.of(context)!;
     final res = await showDialog<String>(
       context: context,
       useRootNavigator: false,            // keep within same navigator tree
       builder: (_) => SimpleDialog(
-        title: const Text('Select Project'),
+        title: Text(l10n.selectProject),
         children: widget.projects
             .map((p) => SimpleDialogOption(
                   child: Text(p),
@@ -90,16 +92,17 @@ class _TimeEntryCardState extends State<TimeEntryCard>
   }
 
   Future<void> _showNotePopup() async {
+    final l10n = AppLocalizations.of(context)!;
     final ctrl = TextEditingController(text: _note ?? '');
     final res = await showDialog<String>(
       context: context,
       useRootNavigator: false,
       builder: (_) => AlertDialog(
-        title: const Text('Note'),
+        title: Text(l10n.note),
         content: TextField(controller: ctrl, maxLines: 3),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, ctrl.text), child: const Text('Save')),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel)),
+          TextButton(onPressed: () => Navigator.pop(context, ctrl.text), child: Text(l10n.save)),
         ],
       ),
     );
@@ -107,6 +110,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
   }
 
   Future<void> _showExpensePopup() async {
+    final l10n = AppLocalizations.of(context)!;
     final TextEditingController nameCtrl = TextEditingController();
     final TextEditingController amountCtrl = TextEditingController();
 
@@ -218,7 +222,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4)),
                 ),
-                Text('Per Diem',
+                Text(l10n.perDiem,
                   style: TextStyle(
                     fontWeight: FontWeight.normal,
                     fontSize: 16,
@@ -228,15 +232,15 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                   ),
                 ),
                 const Spacer(),
-                const Text('16.00 CHF',
+                Text(l10n.perDiemAmount,
                     style: TextStyle(
                         fontWeight: FontWeight.normal, fontSize: 16)),
                 if (!canEditPerDiem)
-                  const Padding(
-                    padding: EdgeInsets.only(left: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
                     child: Tooltip(
-                      message: "Per Diem already used for this day",
-                      child: Icon(Icons.lock, color: Colors.grey, size: 17),
+                      message: l10n.perDiemAlreadyUsed,
+                      child: const Icon(Icons.lock, color: Colors.grey, size: 17),
                     ),
                   ),
               ],
@@ -245,7 +249,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
 
           return AlertDialog(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-            title: const Text('Expenses'),
+            title: Text(l10n.expenses),
             content: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -258,11 +262,11 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                         flex: 2,
                         child: TextField(
                           controller: nameCtrl,
-                          decoration: const InputDecoration(
-                            hintText: 'Name',
-                            border: UnderlineInputBorder(),
+                          decoration: InputDecoration(
+                            hintText: l10n.name,
+                            border: const UnderlineInputBorder(),
                             isDense: true,
-                            contentPadding: EdgeInsets.symmetric(vertical: 4),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 4),
                           ),
                           onChanged: (_) => setStateDialog(() {}),
                           onSubmitted: (_) => canAddExpense() ? addExpense() : null,
@@ -273,11 +277,11 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                         flex: 1,
                         child: TextField(
                           controller: amountCtrl,
-                          decoration: const InputDecoration(
-                            hintText: 'Amount',
-                            border: UnderlineInputBorder(),
+                          decoration: InputDecoration(
+                            hintText: l10n.amount,
+                            border: const UnderlineInputBorder(),
                             isDense: true,
-                            contentPadding: EdgeInsets.symmetric(vertical: 4),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 4),
                           ),
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           onChanged: (_) => setStateDialog(() {}),
@@ -298,7 +302,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                             ),
                           ),
                           onPressed: canAddExpense() ? addExpense : null,
-                          child: const Text('Add'),
+                          child: Text(l10n.add),
                         ),
                       ),
                     ],
@@ -310,7 +314,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('Cancel', style: TextStyle(color: primaryColor, fontSize: 16)),
+                child: Text(l10n.cancel, style: TextStyle(color: primaryColor, fontSize: 16)),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -326,7 +330,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                   });
                   Navigator.pop(context);
                 },
-                child: const Text('Save'),
+                child: Text(l10n.save),
               ),
             ],
           );
@@ -366,19 +370,20 @@ class _TimeEntryCardState extends State<TimeEntryCard>
   }
 
   Future<void> _onAddPressed() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() => _isLoading = true);
     try {
       final s = _startController.text.trim();
       final e = _endController.text.trim();
-      if (s.isEmpty || e.isEmpty) throw 'Start and End times cannot be empty';
+      if (s.isEmpty || e.isEmpty) throw l10n.startAndEndTimesCannotBeEmpty;
 
       final st = DateFormat.Hm().parse(s);
       final et = DateFormat.Hm().parse(e);
       final d  = widget.selectedDay;
       final begin = DateTime(d.year, d.month, d.day, st.hour, st.minute);
       final end   = DateTime(d.year, d.month, d.day, et.hour, et.minute);
-      if (!end.isAfter(begin)) throw 'End time must be after start time';
-      if (await _hasOverlap(begin, end)) throw 'Error: Time overlap';
+      if (!end.isAfter(begin)) throw l10n.endTimeMustBeAfterStartTime;
+      if (await _hasOverlap(begin, end)) throw l10n.timeOverlap;
 
       // Check Per Diem again before add!
       final dayStr = DateFormat('yyyy-MM-dd').format(widget.selectedDay);
@@ -398,7 +403,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
         }
       }
       if (_expenses.containsKey('Per diem') && perDiemAlreadyUsed) {
-        throw 'Per Diem already entered today';
+        throw l10n.perDiemAlreadyEntered;
       }
 
       final mins = end.difference(begin).inMinutes;
@@ -456,6 +461,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final l10n = AppLocalizations.of(context)!;
     final app   = Theme.of(context).extension<AppColors>()!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -587,13 +593,13 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                   spacing: kFieldSpacing,
                   runSpacing: kFieldSpacing,
                   children: [
-                    timeBox(_startController, 'Start'),
-                    timeBox(_endController, 'End'),
-                    selector(_project ?? 'Project +', _showProjectPopup),
+                    timeBox(_startController, l10n.start),
+                    timeBox(_endController, l10n.end),
+                    selector(_project ?? '${l10n.project} +', _showProjectPopup),
                     selector(
                       _expenses.containsKey('Per diem')
-                          ? 'Per Diem'
-                          : 'Expenses +',
+                          ? l10n.perDiem
+                          : '${l10n.expenses} +',
                       _showExpensePopup,
                     ),
                   ],
@@ -604,7 +610,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                 Row(
                   children: [
                     Expanded(
-                      child: selector(_note ?? 'Add Note', _showNotePopup),
+                      child: selector(_note ?? l10n.note, _showNotePopup),
                     ),
                     const SizedBox(width: kFieldSpacing),
                     SizedBox(
@@ -615,8 +621,8 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                           foregroundColor: app.whiteTextOnBlue,
                           textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kEntryRadius)),
-                          minimumSize: const Size(60, kEntryHeight),
-                          maximumSize: const Size(86, kEntryHeight),
+                          minimumSize: const Size(100, kEntryHeight),
+                          maximumSize: const Size(120, kEntryHeight),
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           elevation: 0,
                         ),
@@ -627,7 +633,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                                 height: 18,
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : const Text('Add'),
+                            : Text(l10n.add),
                       ),
                     ),
                   ],

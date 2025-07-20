@@ -93,7 +93,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get expenses => 'Ausgaben';
 
   @override
-  String get perDiem => 'Tagesgeld';
+  String get perDiem => 'Spesen';
 
   @override
   String get worked => 'Gearbeitet';
@@ -114,7 +114,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get pending => 'Ausstehend';
 
   @override
-  String get darkMode => 'Dunkler Modus';
+  String get darkMode => 'Dunkel Mod';
 
   @override
   String get language => 'Sprache';
@@ -132,7 +132,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get addNewClient => 'Neuen Kunden hinzufügen';
 
   @override
-  String get addNewProject => 'Neues Projekt hinzufügen';
+  String get addNewProject => 'Hinzufügen';
 
   @override
   String get searchByName => 'Nach Namen suchen';
@@ -231,7 +231,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get editUser => 'Benutzer bearbeiten';
 
   @override
-  String get addNewSession => 'Neue Sitzung hinzufügen';
+  String get addNewSession => 'Neue Zeiterfassung';
 
   @override
   String get approvalNote => 'Genehmigungsnotiz (optional)';
@@ -347,4 +347,183 @@ class AppLocalizationsDe extends AppLocalizations {
   String unknownError(String error) {
     return 'Unbekannter Fehler: $error';
   }
+
+  @override
+  String get selectProject => 'Projekt auswählen';
+
+  @override
+  String get name => 'Name';
+
+  @override
+  String get amount => 'Betrag';
+
+  @override
+  String get perDiemAmount => '16.00 CHF';
+
+  @override
+  String get perDiemAlreadyUsed => 'Spesen bereits für diesen Tag verwendet';
+
+  @override
+  String get perDiemAlreadyEntered => 'Spesen bereits heute eingegeben';
+
+  @override
+  String get startAndEndTimesCannotBeEmpty => 'Start- und Endzeiten dürfen nicht leer sein';
+
+  @override
+  String get endTimeMustBeAfterStartTime => 'Endzeit muss nach Startzeit liegen';
+
+  @override
+  String get timeOverlap => 'Fehler: Zeitüberschneidung';
+
+  @override
+  String get clearFilters => 'Filter löschen';
+
+  @override
+  String get noLogsFound => 'Keine Einträge gefunden.';
+
+  @override
+  String get noEntriesMatchFilters => 'Keine Einträge entsprechen Ihren Filtern.';
+
+  @override
+  String get unknown => 'Unbekannt';
+
+  @override
+  String get yes => 'Ja';
+
+  @override
+  String get no => 'Nein';
+
+  @override
+  String get addNew => 'Hinzufügen';
+
+  @override
+  String get searchByClientNamePersonEmail => 'Nach Kundenname, Person oder E-Mail suchen';
+
+  @override
+  String get contact => 'Kontakt';
+
+  @override
+  String get searchByNameSurnameEmail => 'Nach Name, Nachname oder E-Mail suchen';
+
+  @override
+  String get role_admin => 'Admin';
+
+  @override
+  String get role_team_leader => 'Teamleiter';
+
+  @override
+  String get role_company_admin => 'Firmenadmin';
+
+  @override
+  String get role_user => 'Benutzer';
+
+  @override
+  String get role_worker => 'Mitarbeiter';
+
+  @override
+  String get module_admin => 'Verwaltung';
+
+  @override
+  String get module_time_tracker => 'Zeiterfassung';
+
+  @override
+  String get module_team => 'Teamverwaltung';
+
+  @override
+  String get module_history => 'Verlauf';
+
+  @override
+  String get deleteSession => 'Sitzung löschen';
+
+  @override
+  String get sessionDeletedSuccessfully => 'Sitzung erfolgreich gelöscht';
+
+  @override
+  String get approve => 'Genehmigen';
+
+  @override
+  String get reject => 'Ablehnen';
+
+  @override
+  String get editTimeLog => 'Zeiteintrag bearbeiten';
+
+  @override
+  String get tapToAdd => 'Tippen zum Hinzufügen';
+
+  @override
+  String get perDiemAlreadyUsedInAnotherSession => 'Spesen bereits in einer anderen Sitzung heute verwendet';
+
+  @override
+  String get projectName => 'Projektname';
+
+  @override
+  String get street => 'Straße';
+
+  @override
+  String get number => 'Nummer';
+
+  @override
+  String get postCode => 'PLZ';
+
+  @override
+  String get client => 'Kunde';
+
+  @override
+  String get createNewClient => 'Neuen Kunden erstellen';
+
+  @override
+  String get clientMustBeSelectedOrCreated => 'Kunde muss ausgewählt oder erstellt werden';
+
+  @override
+  String get editProject => 'Projekt bearbeiten';
+
+  @override
+  String get projectRef => 'Projekt-Ref';
+
+  @override
+  String get clientDetails => 'Kundendetails';
+
+  @override
+  String get expensesTitle => 'Ausgaben';
+
+  @override
+  String get nameLabel => 'Name';
+
+  @override
+  String get amountLabel => 'Betrag';
+
+  @override
+  String get addLabel => 'Hinzufügen';
+
+  @override
+  String get cancelLabel => 'Abbrechen';
+
+  @override
+  String get saveLabel => 'Speichern';
+
+  @override
+  String get projectLabel => 'Projekt';
+
+  @override
+  String get noteLabel => 'Notiz';
+
+  @override
+  String perDiemLabel(String amount) {
+    return 'Spesen $amount CHF';
+  }
+
+  @override
+  String get endBeforeStart => 'Ende vor Start';
+
+  @override
+  String get sessionDate => 'Datum';
+
+  @override
+  String get time => 'Zeit';
+
+  @override
+  String get cannotBeEdited => 'kann nicht bearbeitet werden';
+
+  @override
+  String get cannotBeDeleted => 'kann nicht gelöscht werden';
 }

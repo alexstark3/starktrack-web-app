@@ -226,19 +226,19 @@ class _AnimatedMenuItemState extends State<_AnimatedMenuItem> {
               )
             : Row(
                 mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  SizedBox(
+            children: [
+              SizedBox(
                     width: 32,
                     height: 32,
                     child: Icon(widget.item.icon, color: color, size: 26),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(widget.item.label,
-                        style: TextStyle(fontSize: 16, color: color)),
-                  ),
-                ],
               ),
+                const SizedBox(width: 12),
+                  Expanded(
+                  child: Text(widget.item.label,
+                      style: TextStyle(fontSize: 16, color: color)),
+                ),
+            ],
+          ),
         ),
       ),
     );

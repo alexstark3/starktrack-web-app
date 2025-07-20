@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'add_client_dialog.dart';
 
 class ViewClients extends StatefulWidget {
@@ -88,7 +89,7 @@ class _ViewClientsState extends State<ViewClients> {
               }
             },
             icon: const Icon(Icons.edit, size: 20),
-            label: const Text('Edit'),
+            label: Text(AppLocalizations.of(context)!.edit),
             style: ElevatedButton.styleFrom(
               backgroundColor: colors.primaryBlue,
               foregroundColor: colors.whiteTextOnBlue,
@@ -100,17 +101,17 @@ class _ViewClientsState extends State<ViewClients> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (address.isNotEmpty) _infoRow('Address', address),
-              if (person.isNotEmpty) _infoRow('Contact Person', person),
-              if (email.isNotEmpty) _infoRow('Email', email),
-              if (phone.isNotEmpty) _infoRow('Phone', phone),
-              if ((client['city'] ?? '').isNotEmpty) _infoRow('City', client['city'] ?? ''),
-              if (country.isNotEmpty) _infoRow('Country', country),
+              if (address.isNotEmpty) _infoRow(AppLocalizations.of(context)!.address, address),
+              if (person.isNotEmpty) _infoRow(AppLocalizations.of(context)!.contactPerson, person),
+              if (email.isNotEmpty) _infoRow(AppLocalizations.of(context)!.email, email),
+              if (phone.isNotEmpty) _infoRow(AppLocalizations.of(context)!.phone, phone),
+              if ((client['city'] ?? '').isNotEmpty) _infoRow(AppLocalizations.of(context)!.city, client['city'] ?? ''),
+              if (country.isNotEmpty) _infoRow(AppLocalizations.of(context)!.country, country),
             ],
           ),
           const SizedBox(height: 24),
           // Projects list for this client
-          Text('Projects for this client', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19, color: colors.primaryBlue)),
+          Text('${AppLocalizations.of(context)!.projects} für diesen ${AppLocalizations.of(context)!.client.toLowerCase()}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19, color: colors.primaryBlue)),
           const SizedBox(height: 10),
           FutureBuilder<List<Map<String, dynamic>>>(
             future: _projectsFuture,
@@ -123,9 +124,9 @@ class _ViewClientsState extends State<ViewClients> {
               }
               final projects = snap.data ?? [];
               if (projects.isEmpty) {
-                return const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 14),
-                  child: Text('No projects found for this client.'),
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  child: Text('${AppLocalizations.of(context)!.noProjectsFound} für diesen ${AppLocalizations.of(context)!.client.toLowerCase()}.'),
                 );
               }
               return Column(
@@ -287,7 +288,7 @@ class _ProjectCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Total Hours: $hoursText',
+                      '${AppLocalizations.of(context)!.totalTime}: $hoursText',
                       style: TextStyle(
                         fontSize: 14,
                         color: colors.textColor.withOpacity(0.8),
@@ -305,7 +306,7 @@ class _ProjectCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Total Expenses: $expensesText',
+                      '${AppLocalizations.of(context)!.totalExpenses}: $expensesText',
                       style: TextStyle(
                         fontSize: 14,
                         color: colors.textColor.withOpacity(0.8),
@@ -408,7 +409,7 @@ class _ClientTotalsCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Client Summary',
+                  '${AppLocalizations.of(context)!.clientName} Zusammenfassung',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -425,7 +426,7 @@ class _ClientTotalsCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Total Projects: $projectCount',
+                      '${AppLocalizations.of(context)!.total} ${AppLocalizations.of(context)!.projects}: $projectCount',
                       style: TextStyle(
                         fontSize: 14,
                         color: colors.textColor.withOpacity(0.8),
@@ -443,7 +444,7 @@ class _ClientTotalsCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Total Hours: ${hours.toStringAsFixed(2)}',
+                      '${AppLocalizations.of(context)!.totalTime}: ${hours.toStringAsFixed(2)}',
                       style: TextStyle(
                         fontSize: 14,
                         color: colors.textColor.withOpacity(0.8),
@@ -461,7 +462,7 @@ class _ClientTotalsCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Total Expenses: ${expenses.toStringAsFixed(2)} CHF',
+                      '${AppLocalizations.of(context)!.totalExpenses}: ${expenses.toStringAsFixed(2)} CHF',
                       style: TextStyle(
                         fontSize: 14,
                         color: colors.textColor.withOpacity(0.8),

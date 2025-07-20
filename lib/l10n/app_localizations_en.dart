@@ -93,7 +93,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expenses => 'Expenses';
 
   @override
-  String get perDiem => 'Per Diem';
+  String get perDiem => 'Per diem';
 
   @override
   String get worked => 'Worked';
@@ -347,4 +347,183 @@ class AppLocalizationsEn extends AppLocalizations {
   String unknownError(String error) {
     return 'Unknown error: $error';
   }
+
+  @override
+  String get selectProject => 'Select Project';
+
+  @override
+  String get name => 'Name';
+
+  @override
+  String get amount => 'Amount';
+
+  @override
+  String get perDiemAmount => '16.00 CHF';
+
+  @override
+  String get perDiemAlreadyUsed => 'Per Diem already used for this day';
+
+  @override
+  String get perDiemAlreadyEntered => 'Per Diem already entered today';
+
+  @override
+  String get startAndEndTimesCannotBeEmpty => 'Start and End times cannot be empty';
+
+  @override
+  String get endTimeMustBeAfterStartTime => 'End time must be after start time';
+
+  @override
+  String get timeOverlap => 'Error: Time overlap';
+
+  @override
+  String get clearFilters => 'Clear filters';
+
+  @override
+  String get noLogsFound => 'No logs found.';
+
+  @override
+  String get noEntriesMatchFilters => 'No entries match your filters.';
+
+  @override
+  String get unknown => 'Unknown';
+
+  @override
+  String get yes => 'Yes';
+
+  @override
+  String get no => 'No';
+
+  @override
+  String get addNew => 'Add New';
+
+  @override
+  String get searchByClientNamePersonEmail => 'Search by client name, person, or email';
+
+  @override
+  String get contact => 'Contact';
+
+  @override
+  String get searchByNameSurnameEmail => 'Search by name, surname or email';
+
+  @override
+  String get role_admin => 'Admin';
+
+  @override
+  String get role_team_leader => 'Team Leader';
+
+  @override
+  String get role_company_admin => 'Company Admin';
+
+  @override
+  String get role_user => 'User';
+
+  @override
+  String get role_worker => 'Worker';
+
+  @override
+  String get module_admin => 'Administration';
+
+  @override
+  String get module_time_tracker => 'Time Tracker';
+
+  @override
+  String get module_team => 'Team Management';
+
+  @override
+  String get module_history => 'History';
+
+  @override
+  String get deleteSession => 'Delete Session';
+
+  @override
+  String get sessionDeletedSuccessfully => 'Session deleted successfully';
+
+  @override
+  String get approve => 'Approve';
+
+  @override
+  String get reject => 'Reject';
+
+  @override
+  String get editTimeLog => 'Edit Time Log';
+
+  @override
+  String get tapToAdd => 'Tap to add';
+
+  @override
+  String get perDiemAlreadyUsedInAnotherSession => 'Per diem already used in another session today';
+
+  @override
+  String get projectName => 'Project Name';
+
+  @override
+  String get street => 'Street';
+
+  @override
+  String get number => 'Number';
+
+  @override
+  String get postCode => 'Post Code';
+
+  @override
+  String get client => 'Client';
+
+  @override
+  String get createNewClient => 'Create new client';
+
+  @override
+  String get clientMustBeSelectedOrCreated => 'Client must be selected or created';
+
+  @override
+  String get editProject => 'Edit Project';
+
+  @override
+  String get projectRef => 'Project Ref';
+
+  @override
+  String get clientDetails => 'Client Details';
+
+  @override
+  String get expensesTitle => 'Expenses';
+
+  @override
+  String get nameLabel => 'Name';
+
+  @override
+  String get amountLabel => 'Amount';
+
+  @override
+  String get addLabel => 'Add';
+
+  @override
+  String get cancelLabel => 'Cancel';
+
+  @override
+  String get saveLabel => 'Save';
+
+  @override
+  String get projectLabel => 'Project';
+
+  @override
+  String get noteLabel => 'Note';
+
+  @override
+  String perDiemLabel(String amount) {
+    return 'Per diem $amount CHF';
+  }
+
+  @override
+  String get endBeforeStart => 'End before start';
+
+  @override
+  String get sessionDate => 'Date';
+
+  @override
+  String get time => 'Time';
+
+  @override
+  String get cannotBeEdited => 'cannot be edited';
+
+  @override
+  String get cannotBeDeleted => 'cannot be deleted';
 }

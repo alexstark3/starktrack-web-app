@@ -165,7 +165,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  projectName.isNotEmpty ? projectName : 'No Project Name',
+                  projectName.isNotEmpty ? projectName : AppLocalizations.of(context)!.noProjectsFound,
                   style: TextStyle(
                     fontSize: 18, // Reduced from 22 to 18
                     fontWeight: FontWeight.bold,
@@ -180,14 +180,14 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   onPressed: _showEditDialog,
-                  child: const Text('Edit'),
+                  child: Text(AppLocalizations.of(context)!.edit),
                 ),
                 const SizedBox(height: 10),
                 if (projectRef.isNotEmpty)
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Project Ref: ',
+                      Text('${AppLocalizations.of(context)!.projectRef}: ',
                           style: TextStyle(fontWeight: FontWeight.bold)),
                       Expanded(child: Text(projectRef, maxLines: null, softWrap: true)),
                     ],
@@ -196,18 +196,18 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Address: ',
+                      Text('${AppLocalizations.of(context)!.address}: ',
                           style: TextStyle(fontWeight: FontWeight.bold)),
                       Expanded(child: Text(addressString, maxLines: null, softWrap: true)),
                     ],
                   ),
                 if (clientName.toString().isNotEmpty) ...[
                   const SizedBox(height: 10),
-                  Text('Client Details', style: TextStyle(fontWeight: FontWeight.bold, color: colors.primaryBlue)),
+                  Text(AppLocalizations.of(context)!.clientDetails, style: TextStyle(fontWeight: FontWeight.bold, color: colors.primaryBlue)),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Client: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text('${AppLocalizations.of(context)!.clientName}: ', style: TextStyle(fontWeight: FontWeight.bold)),
                       Expanded(child: Text(clientName.toString(), maxLines: null, softWrap: true)),
                     ],
                   ),
@@ -215,7 +215,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Contact Person: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text('${AppLocalizations.of(context)!.contactPerson}: ', style: TextStyle(fontWeight: FontWeight.bold)),
                         Expanded(child: Text(contactPerson, maxLines: null, softWrap: true)),
                       ],
                     ),
@@ -223,7 +223,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Phone: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text('${AppLocalizations.of(context)!.phone}: ', style: TextStyle(fontWeight: FontWeight.bold)),
                         Expanded(child: Text(phone.toString(), maxLines: null, softWrap: true)),
                       ],
                     ),
@@ -231,7 +231,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Email: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text('${AppLocalizations.of(context)!.email}: ', style: TextStyle(fontWeight: FontWeight.bold)),
                         Expanded(child: Text(email.toString(), maxLines: null, softWrap: true)),
                       ],
                     ),
@@ -252,7 +252,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                   }
                   final logs = snapshot.data ?? [];
                   if (logs.isEmpty) {
-                    return const Center(child: Text('No work sessions found for this project.'));
+                    return Center(child: Text(AppLocalizations.of(context)!.noTimeLogsFound));
                   }
 
                   // ---- DATE FILTER logic ----
@@ -338,7 +338,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                                     Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
                                     const SizedBox(width: 6),
                                     Text(
-                                      _filterStart == null ? "Start" : dateFormat.format(_filterStart!),
+                                      _filterStart == null ? AppLocalizations.of(context)!.start : dateFormat.format(_filterStart!),
                                       style: TextStyle(
                                         color: _filterStart == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
                                         fontWeight: FontWeight.w500,
@@ -372,7 +372,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                                     Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
                                     const SizedBox(width: 6),
                                     Text(
-                                      _filterEnd == null ? "End" : dateFormat.format(_filterEnd!),
+                                      _filterEnd == null ? AppLocalizations.of(context)!.end : dateFormat.format(_filterEnd!),
                                       style: TextStyle(
                                         color: _filterEnd == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
                                         fontWeight: FontWeight.w500,
@@ -402,7 +402,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                               ),
                               child: IconButton(
                                 icon: Icon(Icons.refresh, color: theme.colorScheme.primary, size: 24),
-                                tooltip: 'Clear filters',
+                                tooltip: AppLocalizations.of(context)!.clearFilters,
                                 onPressed: () {
                                   setState(() {
                                     _filterStart = null;
@@ -452,7 +452,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  'Total: ',
+                                  '${AppLocalizations.of(context)!.total}: ',
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
                                 Text('${_formatTimeFromMinutes(totalMinutes.toInt())} h'),
@@ -462,7 +462,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  'Total expenses: ',
+                                  '${AppLocalizations.of(context)!.totalExpenses}: ',
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
                                 Text('${totalExpenses.toStringAsFixed(2)} CHF'),
@@ -533,7 +533,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                                   children: [
                                     // Worker name with wrapping
                                     Text(
-                                      'Worker: $userName',
+                                      '${AppLocalizations.of(context)!.worker}: $userName',
                                       style: TextStyle(fontWeight: FontWeight.bold),
                                       maxLines: null,
                                       softWrap: true,
@@ -556,21 +556,21 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                                         Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Text('Start: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                            Text('${AppLocalizations.of(context)!.start}: ', style: TextStyle(fontWeight: FontWeight.bold)),
                                             Text(start),
                                           ],
                                         ),
                                         Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Text('End: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                            Text('${AppLocalizations.of(context)!.end}: ', style: TextStyle(fontWeight: FontWeight.bold)),
                                             Text(finish),
                                           ],
                                         ),
                                         Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Text('Total: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                            Text('${AppLocalizations.of(context)!.total}: ', style: TextStyle(fontWeight: FontWeight.bold)),
                                             Text('${_formatTimeFromMinutes(duration ?? 0)} h'),
                                           ],
                                         ),
@@ -582,7 +582,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Text('Expenses: ',
+                                            Text('${AppLocalizations.of(context)!.expenses}: ',
                                                 style: TextStyle(fontWeight: FontWeight.bold)),
                                             const SizedBox(height: 2),
                                             Text(
@@ -706,28 +706,28 @@ class _EditProjectDialogState extends State<EditProjectDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Edit Project', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: colors.primaryBlue)),
+              Text(AppLocalizations.of(context)!.editProject, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: colors.primaryBlue)),
               const SizedBox(height: 18),
               TextField(
                 controller: _nameCtrl,
-                decoration: InputDecoration(labelText: 'Project Name'),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.projectName),
               ),
               TextField(
                 controller: _projectIdCtrl,
-                decoration: InputDecoration(labelText: 'Project Ref'),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.projectRef),
               ),
               Row(
                 children: [
-                  Expanded(child: TextField(controller: _streetCtrl, decoration: InputDecoration(labelText: 'Street'))),
+                  Expanded(child: TextField(controller: _streetCtrl, decoration: InputDecoration(labelText: AppLocalizations.of(context)!.street))),
                   const SizedBox(width: 8),
-                  Expanded(child: TextField(controller: _numberCtrl, decoration: InputDecoration(labelText: 'No.'))),
+                  Expanded(child: TextField(controller: _numberCtrl, decoration: InputDecoration(labelText: AppLocalizations.of(context)!.number))),
                 ],
               ),
               Row(
                 children: [
-                  Expanded(child: TextField(controller: _postCodeCtrl, decoration: InputDecoration(labelText: 'Post Code'))),
+                  Expanded(child: TextField(controller: _postCodeCtrl, decoration: InputDecoration(labelText: AppLocalizations.of(context)!.postCode))),
                   const SizedBox(width: 8),
-                  Expanded(child: TextField(controller: _cityCtrl, decoration: InputDecoration(labelText: 'City'))),
+                  Expanded(child: TextField(controller: _cityCtrl, decoration: InputDecoration(labelText: AppLocalizations.of(context)!.city))),
                 ],
               ),
               const SizedBox(height: 12),
@@ -741,7 +741,7 @@ class _EditProjectDialogState extends State<EditProjectDialog> {
                     child: Text(name.toString()),
                   );
                 }).toList(),
-                decoration: InputDecoration(labelText: 'Client'),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.client),
                 onChanged: (val) => setState(() => _selectedClientId = val),
               ),
               if (_error.isNotEmpty) ...[
@@ -754,7 +754,7 @@ class _EditProjectDialogState extends State<EditProjectDialog> {
                 children: [
                   TextButton(
                     onPressed: _saving ? null : () => Navigator.pop(context),
-                    child: Text('Cancel'),
+                    child: Text(AppLocalizations.of(context)!.cancel),
                   ),
                   const SizedBox(width: 10),
                   ElevatedButton(

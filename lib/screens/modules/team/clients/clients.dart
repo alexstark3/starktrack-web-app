@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../../../theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'view_clients.dart';
+import 'add_client_dialog.dart';
 
 class ClientsTab extends StatefulWidget {
   final String companyId;
@@ -24,6 +26,7 @@ class _ClientsTabState extends State<ClientsTab> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final colors = Theme.of(context).extension<AppColors>()!;
     // If a client is selected, show ViewClients (details)
     if (widget.selectedClient != null && widget.selectedClient!['id'] != null) {
@@ -55,7 +58,7 @@ class _ClientsTabState extends State<ClientsTab> {
                   ),
                   child: TextField(
                     decoration: InputDecoration(
-                      hintText: 'Search by client name, person, or email',
+                      hintText: l10n.searchByClientNamePersonEmail,
                       prefixIcon: const Icon(Icons.search),
                       isDense: true,
                       border: InputBorder.none,
@@ -68,18 +71,23 @@ class _ClientsTabState extends State<ClientsTab> {
               ),
               const SizedBox(width: 16),
               ElevatedButton.icon(
-                icon: const Icon(Icons.add),
-                label: const Text('Add New Client'),
+                icon: const Icon(Icons.add, size: 20),
+                label: Text(l10n.addNew),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colors.primaryBlue,
                   foregroundColor: colors.whiteTextOnBlue,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  elevation: 0,
                   padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                  textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
                 onPressed: () async {
-                  // client dialog code
+                  final result = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AddClientDialog(companyId: widget.companyId),
+                  );
+                  if (result == true) {
+                    // Refresh the clients list
+                    setState(() {});
+                  }
                 },
               ),
             ],
@@ -112,6 +120,7 @@ class _ClientsTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final colors = Theme.of(context).extension<AppColors>()!;
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
@@ -125,7 +134,7 @@ class _ClientsTable extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Center(child: Text('No clients found.'));
+          return Center(child: Text(l10n.noClientsFound));
         }
         final docs = snapshot.data!.docs;
         final filtered = docs.where((doc) {
@@ -145,7 +154,7 @@ class _ClientsTable extends StatelessWidget {
         }).toList();
 
         if (filtered.isEmpty) {
-          return const Center(child: Text('No clients found.'));
+          return Center(child: Text(l10n.noClientsFound));
         }
 
         return ListView.builder(
@@ -253,7 +262,7 @@ class _ClientsTable extends StatelessWidget {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Contact: $person',
+                              '${l10n.contact}: $person',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: colors.textColor.withOpacity(0.8),
@@ -306,7 +315,7 @@ class _ClientsTable extends StatelessWidget {
                         ElevatedButton.icon(
                           onPressed: () => onSelectClient({...data, 'id': doc.id}),
                           icon: const Icon(Icons.visibility, size: 16),
-                          label: const Text('View'),
+                          label: Text(l10n.view),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: colors.primaryBlue,
                             foregroundColor: colors.whiteTextOnBlue,

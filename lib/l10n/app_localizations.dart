@@ -266,7 +266,7 @@ abstract class AppLocalizations {
   /// No description provided for @perDiem.
   ///
   /// In en, this message translates to:
-  /// **'Per Diem'**
+  /// **'Per diem'**
   String get perDiem;
 
   /// No description provided for @worked.
@@ -754,6 +754,360 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unknown error: {error}'**
   String unknownError(String error);
+
+  /// No description provided for @selectProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Project'**
+  String get selectProject;
+
+  /// No description provided for @name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get name;
+
+  /// No description provided for @amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get amount;
+
+  /// No description provided for @perDiemAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'16.00 CHF'**
+  String get perDiemAmount;
+
+  /// No description provided for @perDiemAlreadyUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Per Diem already used for this day'**
+  String get perDiemAlreadyUsed;
+
+  /// No description provided for @perDiemAlreadyEntered.
+  ///
+  /// In en, this message translates to:
+  /// **'Per Diem already entered today'**
+  String get perDiemAlreadyEntered;
+
+  /// No description provided for @startAndEndTimesCannotBeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Start and End times cannot be empty'**
+  String get startAndEndTimesCannotBeEmpty;
+
+  /// No description provided for @endTimeMustBeAfterStartTime.
+  ///
+  /// In en, this message translates to:
+  /// **'End time must be after start time'**
+  String get endTimeMustBeAfterStartTime;
+
+  /// No description provided for @timeOverlap.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: Time overlap'**
+  String get timeOverlap;
+
+  /// No description provided for @clearFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get clearFilters;
+
+  /// No description provided for @noLogsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No logs found.'**
+  String get noLogsFound;
+
+  /// No description provided for @noEntriesMatchFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'No entries match your filters.'**
+  String get noEntriesMatchFilters;
+
+  /// No description provided for @unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get unknown;
+
+  /// No description provided for @yes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get yes;
+
+  /// No description provided for @no.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get no;
+
+  /// No description provided for @addNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New'**
+  String get addNew;
+
+  /// No description provided for @searchByClientNamePersonEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by client name, person, or email'**
+  String get searchByClientNamePersonEmail;
+
+  /// No description provided for @contact.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get contact;
+
+  /// No description provided for @searchByNameSurnameEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name, surname or email'**
+  String get searchByNameSurnameEmail;
+
+  /// No description provided for @role_admin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get role_admin;
+
+  /// No description provided for @role_team_leader.
+  ///
+  /// In en, this message translates to:
+  /// **'Team Leader'**
+  String get role_team_leader;
+
+  /// No description provided for @role_company_admin.
+  ///
+  /// In en, this message translates to:
+  /// **'Company Admin'**
+  String get role_company_admin;
+
+  /// No description provided for @role_user.
+  ///
+  /// In en, this message translates to:
+  /// **'User'**
+  String get role_user;
+
+  /// No description provided for @role_worker.
+  ///
+  /// In en, this message translates to:
+  /// **'Worker'**
+  String get role_worker;
+
+  /// No description provided for @module_admin.
+  ///
+  /// In en, this message translates to:
+  /// **'Administration'**
+  String get module_admin;
+
+  /// No description provided for @module_time_tracker.
+  ///
+  /// In en, this message translates to:
+  /// **'Time Tracker'**
+  String get module_time_tracker;
+
+  /// No description provided for @module_team.
+  ///
+  /// In en, this message translates to:
+  /// **'Team Management'**
+  String get module_team;
+
+  /// No description provided for @module_history.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get module_history;
+
+  /// No description provided for @deleteSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Session'**
+  String get deleteSession;
+
+  /// No description provided for @sessionDeletedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Session deleted successfully'**
+  String get sessionDeletedSuccessfully;
+
+  /// No description provided for @approve.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get approve;
+
+  /// No description provided for @reject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get reject;
+
+  /// No description provided for @editTimeLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Time Log'**
+  String get editTimeLog;
+
+  /// No description provided for @tapToAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to add'**
+  String get tapToAdd;
+
+  /// No description provided for @perDiemAlreadyUsedInAnotherSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Per diem already used in another session today'**
+  String get perDiemAlreadyUsedInAnotherSession;
+
+  /// No description provided for @projectName.
+  ///
+  /// In en, this message translates to:
+  /// **'Project Name'**
+  String get projectName;
+
+  /// No description provided for @street.
+  ///
+  /// In en, this message translates to:
+  /// **'Street'**
+  String get street;
+
+  /// No description provided for @number.
+  ///
+  /// In en, this message translates to:
+  /// **'Number'**
+  String get number;
+
+  /// No description provided for @postCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Post Code'**
+  String get postCode;
+
+  /// No description provided for @client.
+  ///
+  /// In en, this message translates to:
+  /// **'Client'**
+  String get client;
+
+  /// No description provided for @createNewClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new client'**
+  String get createNewClient;
+
+  /// No description provided for @clientMustBeSelectedOrCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Client must be selected or created'**
+  String get clientMustBeSelectedOrCreated;
+
+  /// No description provided for @editProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Project'**
+  String get editProject;
+
+  /// No description provided for @projectRef.
+  ///
+  /// In en, this message translates to:
+  /// **'Project Ref'**
+  String get projectRef;
+
+  /// No description provided for @clientDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Client Details'**
+  String get clientDetails;
+
+  /// No description provided for @expensesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get expensesTitle;
+
+  /// No description provided for @nameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get nameLabel;
+
+  /// No description provided for @amountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get amountLabel;
+
+  /// No description provided for @addLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get addLabel;
+
+  /// No description provided for @cancelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelLabel;
+
+  /// No description provided for @saveLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get saveLabel;
+
+  /// No description provided for @projectLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Project'**
+  String get projectLabel;
+
+  /// No description provided for @noteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get noteLabel;
+
+  /// No description provided for @perDiemLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Per diem {amount} CHF'**
+  String perDiemLabel(String amount);
+
+  /// No description provided for @endBeforeStart.
+  ///
+  /// In en, this message translates to:
+  /// **'End before start'**
+  String get endBeforeStart;
+
+  /// No description provided for @sessionDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get sessionDate;
+
+  /// No description provided for @time.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get time;
+
+  /// No description provided for @cannotBeEdited.
+  ///
+  /// In en, this message translates to:
+  /// **'cannot be edited'**
+  String get cannotBeEdited;
+
+  /// No description provided for @cannotBeDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'cannot be deleted'**
+  String get cannotBeDeleted;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

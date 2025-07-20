@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../../../../theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class AddNewSessionDialog extends StatefulWidget {
   final String companyId;
@@ -251,7 +252,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
 
             return AlertDialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-              title: const Text('Expenses'),
+              title: Text(AppLocalizations.of(context)!.expensesTitle),
               content: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -264,8 +265,8 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                           flex: 2,
                           child: TextField(
                             controller: nameController,
-                            decoration: const InputDecoration(
-                              hintText: 'Name',
+                            decoration: InputDecoration(
+                              hintText: AppLocalizations.of(context)!.nameLabel,
                               border: UnderlineInputBorder(),
                               isDense: true,
                               contentPadding: EdgeInsets.symmetric(vertical: 4),
@@ -279,8 +280,8 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                           flex: 1,
                           child: TextField(
                             controller: amountController,
-                            decoration: const InputDecoration(
-                              hintText: 'Amount',
+                            decoration: InputDecoration(
+                              hintText: AppLocalizations.of(context)!.amountLabel,
                               border: UnderlineInputBorder(),
                               isDense: true,
                               contentPadding: EdgeInsets.symmetric(vertical: 4),
@@ -304,7 +305,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                               ),
                             ),
                             onPressed: canAddExpense() ? addExpense : null,
-                            child: const Text('Add'),
+                            child: Text(AppLocalizations.of(context)!.addLabel),
                           ),
                         ),
                       ],
@@ -316,7 +317,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text('Cancel', style: TextStyle(color: colors.primaryBlue, fontSize: 16)),
+                  child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(color: colors.primaryBlue, fontSize: 16)),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -332,7 +333,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                     });
                     Navigator.pop(context);
                   },
-                  child: const Text('Save'),
+                  child: Text(AppLocalizations.of(context)!.save),
                 ),
               ],
             );
@@ -475,7 +476,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Add New Session for ${widget.userName}',
+                '${AppLocalizations.of(context)!.addNewSession} für ${widget.userName}',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -490,8 +491,8 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                   Expanded(
                     child: TextFormField(
                       readOnly: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Date',
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.sessionDate,
                         border: OutlineInputBorder(),
                         suffixIcon: Icon(Icons.calendar_today),
                       ),
@@ -511,15 +512,15 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                   Expanded(
                     child: TextFormField(
                       controller: _startTimeController,
-                      decoration: const InputDecoration(
-                        labelText: 'Start Time',
+                      decoration: InputDecoration(
+                        labelText: '${AppLocalizations.of(context)!.start} ${AppLocalizations.of(context)!.time}',
                         border: OutlineInputBorder(),
                         suffixIcon: Icon(Icons.access_time),
                       ),
                       onTap: () => _selectTime(_startTimeController),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter start time';
+                          return '${AppLocalizations.of(context)!.startAndEndTimesCannotBeEmpty}';
                         }
                         return null;
                       },
@@ -529,15 +530,15 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                   Expanded(
                     child: TextFormField(
                       controller: _endTimeController,
-                      decoration: const InputDecoration(
-                        labelText: 'End Time',
+                      decoration: InputDecoration(
+                        labelText: '${AppLocalizations.of(context)!.end} ${AppLocalizations.of(context)!.time}',
                         border: OutlineInputBorder(),
                         suffixIcon: Icon(Icons.access_time),
                       ),
                       onTap: () => _selectTime(_endTimeController),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter end time';
+                          return '${AppLocalizations.of(context)!.startAndEndTimesCannotBeEmpty}';
                         }
                         return null;
                       },
@@ -550,8 +551,8 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
               // Project selection
               DropdownButtonFormField<String>(
                 value: _projectController.text.isEmpty ? null : _projectController.text,
-                decoration: const InputDecoration(
-                  labelText: 'Project',
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.project,
                   border: OutlineInputBorder(),
                 ),
                 items: _availableProjects.map((project) {
@@ -565,7 +566,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please select a project';
+                    return '${AppLocalizations.of(context)!.selectProject}';
                   }
                   return null;
                 },
@@ -576,8 +577,8 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
               TextFormField(
                 controller: _noteController,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Note',
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.note,
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -587,14 +588,14 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Expenses',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  Text(
+                    AppLocalizations.of(context)!.expenses,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   ElevatedButton.icon(
                     onPressed: _addExpense,
                     icon: const Icon(Icons.add),
-                    label: const Text('Add Expense'),
+                    label: Text('${AppLocalizations.of(context)!.add} ${AppLocalizations.of(context)!.expenses}'),
                   ),
                 ],
               ),
@@ -626,7 +627,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel'),
+                    child: Text(AppLocalizations.of(context)!.cancel),
                   ),
                   const SizedBox(width: 16),
                   ElevatedButton(
@@ -637,7 +638,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                             height: 16,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Add Session'),
+                        : Text(AppLocalizations.of(context)!.addNewSession),
                   ),
                 ],
               ),

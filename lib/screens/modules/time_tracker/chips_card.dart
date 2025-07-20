@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:starktrack/theme/app_colors.dart';
+import 'package:starktrack/l10n/app_localizations.dart';
 
 class ChipsCard extends StatelessWidget {
   final Duration worked;
@@ -22,6 +23,7 @@ class ChipsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final appColors = Theme.of(context).extension<AppColors>()!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -79,10 +81,10 @@ class ChipsCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            buildChip('Worked: ${_formatDuration(worked)}'),
+            buildChip('${l10n.worked}: ${_formatDuration(worked)}'),
             if (showBreaks) ...[
               const SizedBox(width: 10),
-              buildChip('Breaks: ${_formatDuration(breaks)}'),
+              buildChip('${l10n.breaks}: ${_formatDuration(breaks)}'),
             ],
           ],
         ),

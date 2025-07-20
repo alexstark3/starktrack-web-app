@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:diacritic/diacritic.dart';
 import '../../../../theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../clients/add_client_dialog.dart';
 
 class AddProjectDialog extends StatefulWidget {
@@ -66,7 +67,7 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Add New Project',
+                  AppLocalizations.of(context)!.addNewProject,
                   style: TextStyle(
                     color: colors.primaryBlue,
                     fontWeight: FontWeight.bold,
@@ -78,7 +79,7 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
                 TextFormField(
                   controller: _projectNameCtrl,
                   decoration: InputDecoration(
-                    labelText: 'Project Name',
+                    labelText: AppLocalizations.of(context)!.projectName,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                     filled: true,
                     fillColor: colors.lightGray,
@@ -91,7 +92,7 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
                 TextFormField(
                   controller: _projectRefCtrl,
                   decoration: InputDecoration(
-                    labelText: 'Project ID',
+                    labelText: AppLocalizations.of(context)!.projectId,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                     filled: true,
                     fillColor: colors.lightGray,
@@ -109,7 +110,7 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
                       child: TextFormField(
                         controller: _streetCtrl,
                         decoration: InputDecoration(
-                          labelText: 'Street',
+                          labelText: AppLocalizations.of(context)!.street,
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                           filled: true,
                           fillColor: colors.lightGray,
@@ -124,7 +125,7 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
                       child: TextFormField(
                         controller: _numberCtrl,
                         decoration: InputDecoration(
-                          labelText: 'No.',
+                          labelText: AppLocalizations.of(context)!.number,
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                           filled: true,
                           fillColor: colors.lightGray,
@@ -143,7 +144,7 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
                       child: TextFormField(
                         controller: _postCodeCtrl,
                         decoration: InputDecoration(
-                          labelText: 'Post Code',
+                          labelText: AppLocalizations.of(context)!.postCode,
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                           filled: true,
                           fillColor: colors.lightGray,
@@ -157,7 +158,7 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
                       child: TextFormField(
                         controller: _cityCtrl,
                         decoration: InputDecoration(
-                          labelText: 'City',
+                          labelText: AppLocalizations.of(context)!.city,
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                           filled: true,
                           fillColor: colors.lightGray,
@@ -174,7 +175,7 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Client',
+                    AppLocalizations.of(context)!.client,
                     style: TextStyle(
                         color: colors.darkGray,
                         fontWeight: FontWeight.w600,
@@ -250,7 +251,7 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
                                     _error = null;
                                   });
                                 },
-                                child: const Text("Cancel"),
+                                child: Text(AppLocalizations.of(context)!.cancel),
                               ),
                             ],
                           ),
@@ -263,7 +264,7 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      child: const Text('Cancel'),
+                      child: Text(AppLocalizations.of(context)!.cancel),
                       onPressed: _isSaving
                           ? null
                           : () => Navigator.of(context).pop(),
@@ -284,7 +285,7 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
                               width: 18,
                               height: 18,
                               child: CircularProgressIndicator(strokeWidth: 2))
-                          : const Text('Save',
+                          : Text(AppLocalizations.of(context)!.save,
                               style: TextStyle(fontWeight: FontWeight.bold)),
                       onPressed: _isSaving ? null : _save,
                     ),
@@ -305,10 +306,10 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
         TextFormField(
           controller: _clientSearchCtrl,
           decoration: InputDecoration(
-            labelText: 'Search clients...',
+            labelText: '${AppLocalizations.of(context)!.search} ${AppLocalizations.of(context)!.clients}...',
             suffixIcon: IconButton(
               icon: const Icon(Icons.add),
-              tooltip: 'Create new client',
+              tooltip: AppLocalizations.of(context)!.createNewClient,
               onPressed: () async {
                 final created = await showDialog<bool>(
                   context: context,
@@ -349,7 +350,7 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
               if (filtered.isEmpty && _clientSearchCtrl.text.isNotEmpty) {
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text("No matching clients. Click + to add.",
+                  child: Text("${AppLocalizations.of(context)!.noClientsFound} ${AppLocalizations.of(context)!.tapToAdd}.",
                       style: TextStyle(color: colors.darkGray)),
                 );
               }
@@ -387,7 +388,7 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
         if (_selectedClientName != null)
           Padding(
             padding: const EdgeInsets.only(top: 8.0),
-            child: Text("Selected: $_selectedClientName",
+            child: Text("${AppLocalizations.of(context)!.view}: $_selectedClientName",
                 style: TextStyle(color: colors.primaryBlue)),
           ),
       ],
@@ -404,7 +405,7 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
       setState(() {
         _isSaving = false;
         if (_selectedClientName == null)
-          _error = 'Client must be selected or created';
+          _error = AppLocalizations.of(context)!.clientMustBeSelectedOrCreated;
       });
       return;
     }
