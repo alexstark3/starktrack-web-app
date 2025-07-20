@@ -20,7 +20,6 @@ class SettingsScreen extends StatelessWidget {
     const green = Color(0xFF3ECB68);
     const double labelWidth = 110;
     const double minGap = 50;
-    const double tabWidth = 64;
 
     return Container(
       width: double.infinity,
