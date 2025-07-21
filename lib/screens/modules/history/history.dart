@@ -427,12 +427,13 @@ class _HistoryLogsState extends State<HistoryLogs> {
                               continue;
                             }
                           } catch (e) {
+                            print('Error processing expense entry ${entry.key}: $e');
                             continue;
                           }
                         }
                       }
                     } catch (e) {
-                      continue;
+                      print('Error processing log data: $e');
                     }
 
                     entries.add(_HistoryEntry(
@@ -447,6 +448,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                       expensesMap: expensesMap,
                     ));
                   } catch (e) {
+                    print('Error creating history entry: $e');
                     continue;
                   }
                 }
@@ -530,7 +532,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                           groupExpense += e.expense;
                         }
                       } catch (error) {
-                        continue;
+                        print('Error in group calculation: $error');
                       }
                     }
                     

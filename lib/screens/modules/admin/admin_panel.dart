@@ -997,37 +997,37 @@ class _AdminPanelState extends State<AdminPanel> {
               children: [
                 Expanded(
                   child: Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: colors.cardColorDark,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: TextField(
-                      onChanged: (value) => setState(() => _searchText = value),
-                      decoration: InputDecoration(
-                        prefixIcon: const Icon(Icons.search),
-                        hintText: l10n.searchByNameEmailRole,
-                        isDense: true,
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      ),
-                    ),
-                  ),
+              height: 50,
+              decoration: BoxDecoration(
+                color: colors.cardColorDark,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: TextField(
+                onChanged: (value) => setState(() => _searchText = value),
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.search),
+                  hintText: l10n.searchByNameEmailRole,
+                  isDense: true,
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+              ),
+            ),
                 ),
                 const SizedBox(width: 16),
                 ElevatedButton.icon(
-                  icon: Icon(Icons.person_add, color: colors.whiteTextOnBlue),
-                  label: Text(l10n.addNewUser,
-                      style: TextStyle(
-                          color: colors.whiteTextOnBlue,
-                          fontWeight: FontWeight.bold)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.primaryBlue,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
-                  ),
-                  onPressed: () => _showUserDialog(),
+                icon: Icon(Icons.person_add, color: colors.whiteTextOnBlue),
+                label: Text(l10n.addNewUser,
+                    style: TextStyle(
+                        color: colors.whiteTextOnBlue,
+                        fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colors.primaryBlue,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
+                onPressed: () => _showUserDialog(),
+              ),
               ],
             ),
             const SizedBox(height: 16),

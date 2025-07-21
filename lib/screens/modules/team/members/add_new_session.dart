@@ -66,6 +66,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
             .toList();
       });
     } catch (e) {
+    //  print('Error loading projects: $e');
     }
   }
 
@@ -124,6 +125,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
       }
       return false;
     } catch (e) {
+      print('Error checking per diem: $e');
       return false;
     }
   }

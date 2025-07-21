@@ -21,6 +21,8 @@ class ThemeProvider extends ChangeNotifier {
     final sp = await SharedPreferences.getInstance();
     final theme = sp.getString(_kThemeKey);
 
+    debugPrint('[ThemeProvider] RAW loaded theme: $theme'); // NEW debug print
+
     if (theme == 'dark') {
       _themeMode = ThemeMode.dark;
     } else {
@@ -30,6 +32,7 @@ class ThemeProvider extends ChangeNotifier {
 
     _ready = true;
     notifyListeners();
+    debugPrint('[ThemeProvider] Loaded theme: $_themeMode, lang: $_language');
   }
 
   Future<void> toggleTheme() async {
@@ -37,7 +40,9 @@ class ThemeProvider extends ChangeNotifier {
         _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
     final value = _themeMode == ThemeMode.dark ? 'dark' : 'light';
     await _save(_kThemeKey, value);
+    debugPrint('[ThemeProvider] Saved theme: $value');
     notifyListeners();
+    debugPrint('[ThemeProvider] Toggled theme: $_themeMode');
   }
 
   Future<void> setLanguage(String lang) async {
@@ -45,10 +50,12 @@ class ThemeProvider extends ChangeNotifier {
     _language = lang;
     await _save(_kLangKey, lang);
     notifyListeners();
+    debugPrint('[ThemeProvider] Language set: $_language');
   }
 
   Future<void> _save(String key, String value) async {
     final sp = await SharedPreferences.getInstance();
-    await sp.setString(key, value);
+    final ok = await sp.setString(key, value);
+    debugPrint('[ThemeProvider] _save: key=$key, value=$value, success=$ok'); // <-- see if this is true or false!
   }
 }

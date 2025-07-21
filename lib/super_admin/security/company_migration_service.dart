@@ -8,6 +8,7 @@ class CompanyMigrationService {
   /// Migrate a single company to secure ID structure
   static Future<Map<String, dynamic>> migrateCompany(String oldCompanyId) async {
     try {
+      print('Starting migration for company: $oldCompanyId');
       
       // 1. Get the old company document
       final oldCompanyDoc = await _firestore
@@ -28,6 +29,7 @@ class CompanyMigrationService {
       } else {
         newCompanyId = CompanyIdGenerator.generateSecureCompanyId(oldCompanyId);
       }
+      print('Using company ID: $newCompanyId');
       
       // 3. Create new company document with secure ID
       await _firestore
@@ -150,6 +152,8 @@ class CompanyMigrationService {
         'status': 'completed',
       });
       
+      print('Migration completed for company: $oldCompanyId → $newCompanyId');
+      
       return {
         'oldCompanyId': oldCompanyId,
         'newCompanyId': newCompanyId,
@@ -158,6 +162,7 @@ class CompanyMigrationService {
       };
       
     } catch (e) {
+      print('Migration failed for company $oldCompanyId: $e');
       throw Exception('Migration failed: $e');
     }
   }
@@ -165,6 +170,7 @@ class CompanyMigrationService {
   /// Migrate all companies in the system
   static Future<List<Map<String, dynamic>>> migrateAllCompanies() async {
     try {
+      print('Starting migration of all companies...');
       
       // Get all existing companies
       final companiesSnapshot = await _firestore
@@ -179,6 +185,7 @@ class CompanyMigrationService {
         // Skip if already migrated (has secureId field)
         final companyData = companyDoc.data();
         if (companyData.containsKey('secureId')) {
+          print('Company $companyId already migrated, skipping...');
           continue;
         }
         
@@ -190,6 +197,7 @@ class CompanyMigrationService {
           await Future.delayed(const Duration(milliseconds: 500));
           
         } catch (e) {
+          print('Failed to migrate company $companyId: $e');
           results.add({
             'oldCompanyId': companyId,
             'status': 'failed',
@@ -198,9 +206,11 @@ class CompanyMigrationService {
         }
       }
       
+      print('Migration of all companies completed. Results: $results');
       return results;
       
     } catch (e) {
+      print('Migration of all companies failed: $e');
       throw Exception('Migration failed: $e');
     }
   }
@@ -230,7 +240,10 @@ class CompanyMigrationService {
           });
         }
         
+        print('Migrated $collectionName collection: ${collectionSnapshot.docs.length} documents');
+        
       } catch (e) {
+        print('Failed to migrate $collectionName collection: $e');
       }
     }
   }
@@ -249,6 +262,7 @@ class CompanyMigrationService {
       
       return null;
     } catch (e) {
+      print('Error checking migration status: $e');
       return null;
     }
   }
@@ -289,7 +303,10 @@ class CompanyMigrationService {
           .doc('company_$oldCompanyId')
           .delete();
       
+      print('Rollback completed for company: $oldCompanyId');
+      
     } catch (e) {
+      print('Rollback failed for company $oldCompanyId: $e');
       throw Exception('Rollback failed: $e');
     }
   }

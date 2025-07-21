@@ -17,6 +17,7 @@ class SuperAdminAuthService {
       
       return adminDoc.exists;
     } catch (e) {
+      print('Error checking admin status: $e');
       return false;
     }
   }
@@ -36,6 +37,7 @@ class SuperAdminAuthService {
       
       return adminDoc.data();
     } catch (e) {
+      print('Error getting admin data: $e');
       return null;
     }
   }
@@ -68,6 +70,7 @@ class SuperAdminAuthService {
               })
           .toList();
     } catch (e) {
+      print('Error getting all admins: $e');
       return [];
     }
   }
@@ -104,6 +107,7 @@ class SuperAdminAuthService {
       
       return true;
     } catch (e) {
+      print('Error creating admin: $e');
       return false;
     }
   }
@@ -124,6 +128,7 @@ class SuperAdminAuthService {
       
       return true;
     } catch (e) {
+      print('Error updating admin: $e');
       return false;
     }
   }
@@ -138,6 +143,7 @@ class SuperAdminAuthService {
       
       return true;
     } catch (e) {
+      print('Error deleting admin: $e');
       return false;
     }
   }

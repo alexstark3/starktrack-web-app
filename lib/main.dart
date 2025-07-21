@@ -135,7 +135,8 @@ class _AuthGateState extends State<AuthGate> {
         if (!snap.hasData) return const CompanyLoginScreen();
 
         final uid = snap.data!.uid;
-        
+        print('AuthGate: Logged in as UID: ' + uid);
+
         // Try to find the user's company using the new fast access structure
         return FutureBuilder<DocumentSnapshot>(
           future: FirebaseFirestore.instance.collection('userCompany').doc(uid).get(),
@@ -143,15 +144,20 @@ class _AuthGateState extends State<AuthGate> {
             if (userSnap.connectionState == ConnectionState.waiting) {
               return const Scaffold(body: Center(child: CircularProgressIndicator()));
             }
+            print('AuthGate: /userCompany/$uid exists: ' + (userSnap.hasData && userSnap.data!.exists).toString());
             // If user access document doesn't exist, fall back to old method
             if (!userSnap.hasData || !userSnap.data!.exists) {
+              print('AuthGate: /userCompany/$uid does not exist, falling back to old method');
               return _fallbackToOldMethod(uid);
             }
             final userData = userSnap.data!.data() as Map<String, dynamic>?;
+            print('AuthGate: /userCompany/$uid data: ' + userData.toString());
             if (userData == null || !userData.containsKey('companyId')) {
+              print('AuthGate: /userCompany/$uid missing companyId, falling back to old method');
               return _fallbackToOldMethod(uid);
             }
             final companyId = userData['companyId'] as String;
+            print('AuthGate: Found companyId: ' + companyId);
             // Get user details from company
             return FutureBuilder<DocumentSnapshot>(
               future: FirebaseFirestore.instance
@@ -164,10 +170,13 @@ class _AuthGateState extends State<AuthGate> {
                 if (companyUserSnap.connectionState == ConnectionState.waiting) {
                   return const Scaffold(body: Center(child: CircularProgressIndicator()));
                 }
+                print('AuthGate: /companies/$companyId/users/$uid exists: ' + (companyUserSnap.hasData && companyUserSnap.data!.exists).toString());
                 if (!companyUserSnap.hasData || !companyUserSnap.data!.exists) {
+                  print('AuthGate: User not found in company.');
                   return const Scaffold(body: Center(child: Text('User not found in company.')));
                 }
                 final data = companyUserSnap.data!.data() as Map<String, dynamic>;
+                print('AuthGate: /companies/$companyId/users/$uid data: ' + data.toString());
                 // Compose a safe full name
                 final full = (data['fullName'] as String?)?.trim() ?? '';
                 final first = (data['firstName'] as String?)?.trim() ?? '';
@@ -185,6 +194,7 @@ class _AuthGateState extends State<AuthGate> {
                   'time_tracker': modules.contains('time_tracker'),
                   'admin': modules.contains('admin'),
                 };
+                print('AuthGate: Navigating to CompanyDashboardScreen');
                 return CompanyDashboardScreen(
                   companyId: companyId,
                   userId: uid,
@@ -203,13 +213,16 @@ class _AuthGateState extends State<AuthGate> {
 
   // Fallback method for users not yet migrated to new structure
   Widget _fallbackToOldMethod(String uid) {
+    print('AuthGate: Running fallback company search for UID: ' + uid);
     return FutureBuilder<QuerySnapshot>(
       future: FirebaseFirestore.instance.collection('companies').get(),
       builder: (context, companySnap) {
         if (companySnap.connectionState == ConnectionState.waiting) {
           return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
+        print('AuthGate: /companies count: ' + (companySnap.hasData ? companySnap.data!.docs.length.toString() : 'null'));
         if (!companySnap.hasData || companySnap.data!.docs.isEmpty) {
+          print('AuthGate: No companies found in collection.');
           return const Scaffold(body: Center(child: Text('No companies found.')));
         }
         // Search for user in each company
@@ -219,6 +232,7 @@ class _AuthGateState extends State<AuthGate> {
   }
 
   Widget _findUserInCompanies(List<QueryDocumentSnapshot> companies, String uid) {
+    print('AuthGate: Searching for user in companies...');
     return FutureBuilder<List<DocumentSnapshot>>(
       future: Future.wait(
         companies.map((company) => company.reference.collection('users').doc(uid).get()),
@@ -229,6 +243,7 @@ class _AuthGateState extends State<AuthGate> {
         }
         final docs = usersSnap.data;
         if (docs == null) {
+          print('AuthGate: No user docs found.');
           return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
         for (int i = 0; i < docs.length; i++) {
@@ -236,6 +251,7 @@ class _AuthGateState extends State<AuthGate> {
           if (userDoc.exists) {
             final data = userDoc.data() as Map<String, dynamic>;
             final companyId = companies[i].id;
+            print('AuthGate: Found user in company: ' + companyId);
             // Compose a safe full name
             final full = (data['fullName'] as String?)?.trim() ?? '';
             final first = (data['firstName'] as String?)?.trim() ?? '';
@@ -253,6 +269,7 @@ class _AuthGateState extends State<AuthGate> {
       'time_tracker': modules.contains('time_tracker'),
       'admin'       : modules.contains('admin'),
     };
+            print('AuthGate: Navigating to CompanyDashboardScreen (fallback)');
             return CompanyDashboardScreen(
               companyId: companyId,
               userId: uid,
@@ -263,6 +280,7 @@ class _AuthGateState extends State<AuthGate> {
             );
           }
         }
+        print('AuthGate: User not assigned to any company.');
         return const Scaffold(body: Center(child: Text('User not assigned to any company.')));
       },
     );

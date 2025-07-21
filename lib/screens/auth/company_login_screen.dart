@@ -52,6 +52,7 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
         password: _passwordController.text,
       );
       final userId = authResult.user!.uid;
+      // print('LOGIN: Authenticated with UID=$userId');
 
       // 2. Find the company the user belongs to using userCompany collection
       final userCompanyDoc = await FirebaseFirestore.instance
@@ -117,8 +118,10 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
           ),
         ),
       );
+     // print('LOGIN: User found! Navigating to dashboard for company $companyId');
 
     } on FirebaseAuthException catch (e) {
+      print('LOGIN: FirebaseAuthException: ${e.message}');
       if (!mounted) return;
       
       // Record failed login attempt for rate limiting
@@ -137,6 +140,7 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
         }
       });
     } catch (e) {
+      print('LOGIN: Unknown error: $e');
       if (!mounted) return;
       
       // Record failed login attempt for rate limiting

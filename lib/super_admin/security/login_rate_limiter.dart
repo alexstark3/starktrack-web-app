@@ -60,6 +60,7 @@ class LoginRateLimiter {
       return true;
     } catch (e) {
       // If there's an error, allow login (fail open for user experience)
+      print('Rate limiter error: $e');
       return true;
     }
   }
@@ -109,7 +110,7 @@ class LoginRateLimiter {
         'lastUpdated': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      // print('Error recording failed attempt: $e');
+      print('Error recording failed attempt: $e');
     }
   }
 
@@ -121,7 +122,7 @@ class LoginRateLimiter {
       // Reset the account on successful login
       await _resetAccount(emailKey);
     } catch (e) {
-      // print('Error recording successful login: $e');
+      print('Error recording successful login: $e');
     }
   }
 
@@ -179,7 +180,7 @@ class LoginRateLimiter {
 
       return lockoutUntil.difference(now);
     } catch (e) {
-      // print('Error getting lockout time: $e');
+      print('Error getting lockout time: $e');
       return null;
     }
   }
@@ -206,7 +207,7 @@ class LoginRateLimiter {
 
       return maxFailedAttempts - recentAttempts.length;
     } catch (e) {
-      // print('Error getting remaining attempts: $e');
+      print('Error getting remaining attempts: $e');
       return maxFailedAttempts;
     }
   }
