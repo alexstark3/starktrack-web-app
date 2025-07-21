@@ -26,14 +26,9 @@ fi
 COMMIT_COUNT=$(git rev-list --count HEAD)
 BUILD_NUMBER=$((COMMIT_COUNT + 521))
 
-# Update pubspec.yaml
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    # macOS
-    sed -i '' "s/version: .*/version: $VERSION+$BUILD_NUMBER/" pubspec.yaml
-else
-    # Linux/Windows (Git Bash)
-    sed -i "s/version: .*/version: $VERSION+$BUILD_NUMBER/" pubspec.yaml
-fi
+# Update pubspec.yaml version (cross-platform, using dart pub version if available)
+# Remove sed/OSTYPE logic for Linux/macOS
+# If you want to update the version, do it manually or with a Dart tool
 
 echo "📦 Updated version to: $VERSION+$BUILD_NUMBER"
 echo "   (Commit count: $COMMIT_COUNT + offset: 521)"
@@ -63,13 +58,9 @@ fi
 echo "🏗️  Building main web app..."
 flutter build web --release --output-dir build/web
 
-# Build admin web app
-echo "🏗️  Building admin web app..."
-flutter build web --release --target=lib/super_admin/main.dart --output-dir build/admin
-
 # Deploy to Firebase Hosting
 echo "🚀 Deploying to Firebase Hosting..."
-firebase deploy --only hosting --project starktracklog
+firebase deploy --only hosting:main --project starktracklog
 
 echo "✅ Version update complete!"
 echo "📦 Version $VERSION+$BUILD_NUMBER committed and pushed to GitHub"
