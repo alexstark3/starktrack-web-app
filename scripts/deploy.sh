@@ -59,6 +59,18 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Build main web app
+echo "🏗️  Building main web app..."
+flutter build web --release --output-dir build/web
+
+# Build admin web app
+echo "🏗️  Building admin web app..."
+flutter build web --release --target=lib/super_admin/main.dart --output-dir build/admin
+
+# Deploy to Firebase Hosting
+echo "🚀 Deploying to Firebase Hosting..."
+firebase deploy --only hosting --project starktracklog
+
 echo "✅ Version update complete!"
 echo "📦 Version $VERSION+$BUILD_NUMBER committed and pushed to GitHub"
 echo "🚀 Deployment will be triggered automatically by your CI/CD pipeline"
