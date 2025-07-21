@@ -510,7 +510,7 @@ Future<void> _showEditExpensesPopup() async {
   final bool perDiemUsedElsewhere = widget.perDiemLogId != null && widget.perDiemLogId != widget.logId;
   final bool perDiemAvailableHere = widget.perDiemLogId == null || widget.perDiemLogId == widget.logId;
 
-  final result = await showDialog<Map<String, dynamic>>(
+  await showDialog<Map<String, dynamic>>(
     context: context,
     barrierDismissible: false,           // Disable tap-away to close for mobile
     useRootNavigator: false,             // Use local navigator for mobile compatibility

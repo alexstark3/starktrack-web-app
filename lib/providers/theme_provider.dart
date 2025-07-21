@@ -49,6 +49,6 @@ class ThemeProvider extends ChangeNotifier {
 
   Future<void> _save(String key, String value) async {
     final sp = await SharedPreferences.getInstance();
-    final ok = await sp.setString(key, value);
+    await sp.setString(key, value);
   }
 }
