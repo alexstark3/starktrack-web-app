@@ -1300,7 +1300,7 @@ class _EditLogDialogState extends State<_EditLogDialog> {
           }
         }
       } catch (e) {
-        print('Error checking per diem: $e');
+        // print('Error checking per diem: $e');
       }
     }
     

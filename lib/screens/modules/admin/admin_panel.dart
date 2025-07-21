@@ -152,6 +152,7 @@ class _AdminPanelState extends State<AdminPanel> {
                         ctx: ctx,
                         label: l10n.roles,
                         options: [
+                          {'label': l10n.superAdmin, 'value': 'super_admin'},
                           {'label': l10n.companyAdmin, 'value': 'company_admin'},
                           {'label': l10n.admin, 'value': 'admin'},
                           {'label': l10n.teamLeader, 'value': 'team_leader'},
@@ -367,12 +368,71 @@ class _AdminPanelState extends State<AdminPanel> {
                                           .doc(editUser.id)
                                           .update(userData);
                                     } else {
-                                      // Create new user
+                                      // Prompt admin for password before creating a new user
+                                      final adminEmail = FirebaseAuth.instance.currentUser!.email;
+                                      String? adminPassword;
+                                      await showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (ctx) {
+                                          String tempPassword = '';
+                                          return AlertDialog(
+                                            title: Text(l10n.adminPasswordRequired),
+                                            content: TextField(
+                                              obscureText: true,
+                                              autofocus: true,
+                                              decoration: InputDecoration(
+                                                labelText: l10n.enterYourPassword,
+                                              ),
+                                              onChanged: (v) => tempPassword = v,
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(ctx).pop();
+                                                },
+                                                child: Text(l10n.cancel),
+                                              ),
+                                              ElevatedButton(
+                                                onPressed: () {
+                                                  adminPassword = tempPassword;
+                                                  Navigator.of(ctx).pop();
+                                                },
+                                                child: Text(l10n.confirm),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                      if (adminPassword == null || adminPassword!.isEmpty) {
+                                        setState(() {
+                                          errorText = l10n.adminPasswordRequired;
+                                          isSubmitting = false;
+                                        });
+                                        return;
+                                      }
+
+                                      // 1. Create the new user (this signs in as the new user)
                                       final newAuthUser = await FirebaseAuth.instance
                                           .createUserWithEmailAndPassword(
                                               email: userData['email'],
                                               password: password);
 
+                                      // 2. Immediately sign back in as the admin
+                                      await FirebaseAuth.instance.signOut();
+                                      await FirebaseAuth.instance.signInWithEmailAndPassword(
+                                        email: adminEmail!,
+                                        password: adminPassword!,
+                                      );
+
+                                      // 3. Write to Firestore as the admin
+                                      await FirebaseFirestore.instance
+                                          .collection('userCompany')
+                                          .doc(newAuthUser.user!.uid)
+                                          .set({
+                                            'email': userData['email'],
+                                            'companyId': widget.companyId,
+                                          });
                                       await FirebaseFirestore.instance
                                           .collection('companies')
                                           .doc(widget.companyId)
@@ -575,6 +635,8 @@ class _AdminPanelState extends State<AdminPanel> {
     // Helper function to get role display names
     String getRoleDisplayName(String role) {
       switch (role) {
+        case 'super_admin':
+          return l10n.superAdmin;
         case 'company_admin':
           return l10n.companyAdmin;
         case 'admin':
@@ -618,7 +680,9 @@ class _AdminPanelState extends State<AdminPanel> {
     final weeklyHours = data['weeklyHours'] ?? 40;
     final isActive = data['active'] ?? true;
     final showBreaks = data['showBreaks'] ?? true;
-    final isCompanyAdmin = roles.contains(l10n.companyAdmin);
+    final isCompanyAdmin = (data['roles'] as List).contains('company_admin');
+    final isSuperAdmin = (data['roles'] as List).contains('super_admin');
+    final isProtectedUser = isCompanyAdmin || isSuperAdmin;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -868,20 +932,20 @@ class _AdminPanelState extends State<AdminPanel> {
                 IconButton(
                   icon: Icon(
                     Icons.edit,
-                    color: isCompanyAdmin ? colors.darkGray : colors.primaryBlue,
+                    color: isProtectedUser ? colors.darkGray : colors.primaryBlue,
                     size: 20,
                   ),
-                  onPressed: isCompanyAdmin ? null : () => _showUserDialog(editUser: doc),
-                  tooltip: isCompanyAdmin ? '${l10n.companyAdmin} ${l10n.cannotBeEdited}' : l10n.edit,
+                  onPressed: isProtectedUser ? null : () => _showUserDialog(editUser: doc),
+                  tooltip: isProtectedUser ? '${isSuperAdmin ? l10n.superAdmin : l10n.companyAdmin} ${l10n.cannotBeEdited}' : l10n.edit,
                 ),
                 const SizedBox(width: 8),
                 IconButton(
                   icon: Icon(
                     Icons.delete,
-                    color: isCompanyAdmin ? colors.darkGray : colors.red,
+                    color: isProtectedUser ? colors.darkGray : colors.red,
                     size: 20,
                   ),
-                  onPressed: isCompanyAdmin ? null : () {
+                  onPressed: isProtectedUser ? null : () {
                     showDialog(
                       context: context,
                       builder: (ctx) => AlertDialog(
@@ -907,7 +971,7 @@ class _AdminPanelState extends State<AdminPanel> {
                       ),
                     );
                   },
-                  tooltip: isCompanyAdmin ? '${l10n.companyAdmin} ${l10n.cannotBeDeleted}' : l10n.delete,
+                  tooltip: isProtectedUser ? '${isSuperAdmin ? l10n.superAdmin : l10n.companyAdmin} ${l10n.cannotBeDeleted}' : l10n.delete,
                 ),
               ],
             ),
@@ -928,42 +992,43 @@ class _AdminPanelState extends State<AdminPanel> {
         padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
         child: Column(
           children: [
-            // Search bar
-            Container(
-              height: 50,
-              decoration: BoxDecoration(
-                color: colors.cardColorDark,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: TextField(
-                onChanged: (value) => setState(() => _searchText = value),
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.search),
-                  hintText: l10n.searchByNameEmailRole,
-                  isDense: true,
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            // Search bar and Add User Button in a Row
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: colors.cardColorDark,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: TextField(
+                      onChanged: (value) => setState(() => _searchText = value),
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.search),
+                        hintText: l10n.searchByNameEmailRole,
+                        isDense: true,
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Add User Button
-            Align(
-              alignment: Alignment.centerLeft,
-              child: ElevatedButton.icon(
-                icon: Icon(Icons.person_add, color: colors.whiteTextOnBlue),
-                label: Text(l10n.addNewUser,
-                    style: TextStyle(
-                        color: colors.whiteTextOnBlue,
-                        fontWeight: FontWeight.bold)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colors.primaryBlue,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
+                const SizedBox(width: 16),
+                ElevatedButton.icon(
+                  icon: Icon(Icons.person_add, color: colors.whiteTextOnBlue),
+                  label: Text(l10n.addNewUser,
+                      style: TextStyle(
+                          color: colors.whiteTextOnBlue,
+                          fontWeight: FontWeight.bold)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colors.primaryBlue,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                  ),
+                  onPressed: () => _showUserDialog(),
                 ),
-                onPressed: () => _showUserDialog(),
-              ),
+              ],
             ),
             const SizedBox(height: 16),
 

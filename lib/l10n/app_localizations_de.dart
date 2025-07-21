@@ -415,6 +415,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get role_company_admin => 'Firmenadmin';
 
   @override
+  String get superAdmin => 'Super Admin';
+
+  @override
   String get role_user => 'Benutzer';
 
   @override
@@ -526,4 +529,53 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get cannotBeDeleted => 'kann nicht gelöscht werden';
+
+  @override
+  String get deleteEntry => 'Eintrag löschen';
+
+  @override
+  String get deleteEntryMessage => 'Sind Sie sicher, dass Sie diesen Eintrag löschen möchten? Dies kann nicht rückgängig gemacht werden.';
+
+  @override
+  String get work => 'Arbeit';
+
+  @override
+  String get tapToAddNote => 'Tippen zum Hinzufügen einer Notiz';
+
+  @override
+  String get approvedAfterEdit => 'Nach Bearbeitung genehmigt';
+
+  @override
+  String get noNote => 'Keine Notiz';
+
+  @override
+  String get accountLocked => 'Konto vorübergehend gesperrt';
+
+  @override
+  String get tooManyFailedAttempts => 'Zu viele fehlgeschlagene Anmeldeversuche';
+
+  @override
+  String accountLockedMessage(int minutes) {
+    return 'Ihr Konto wurde aufgrund zu vieler fehlgeschlagener Anmeldeversuche vorübergehend gesperrt. Bitte versuchen Sie es in $minutes Minuten erneut.';
+  }
+
+  @override
+  String remainingAttempts(int attempts) {
+    return '$attempts Anmeldeversuche verbleibend';
+  }
+
+  @override
+  String get accountUnlocked => 'Konto entsperrt';
+
+  @override
+  String get accountUnlockedMessage => 'Ihr Konto wurde entsperrt. Sie können sich jetzt erneut anmelden.';
+
+  @override
+  String get adminPasswordRequired => 'Admin-Passwort erforderlich';
+
+  @override
+  String get enterYourPassword => 'Geben Sie Ihr Passwort ein';
+
+  @override
+  String get confirm => 'Bestätigen';
 }

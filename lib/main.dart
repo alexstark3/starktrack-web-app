@@ -71,11 +71,61 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class AuthGate extends StatelessWidget {
+class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
 
   @override
+  State<AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<AuthGate> {
+  bool _forceLogout = false;
+  bool _checkedForceLogout = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _listenForceLogout();
+  }
+
+  void _listenForceLogout() {
+    FirebaseFirestore.instance
+      .collection('appConfig')
+      .doc('global')
+      .snapshots()
+      .listen((doc) async {
+        final force = doc.exists && doc.data()?['forceLogout'] == true;
+        if (force) {
+          setState(() {
+            _forceLogout = true;
+            _checkedForceLogout = true;
+          });
+          await FirebaseAuth.instance.signOut();
+        } else {
+          setState(() {
+            _forceLogout = false;
+            _checkedForceLogout = true;
+          });
+        }
+      });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (!_checkedForceLogout) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (_forceLogout) {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            'The system is under maintenance. Please try again later.',
+            style: TextStyle(fontSize: 20, color: Colors.red, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snap) {
@@ -85,22 +135,85 @@ class AuthGate extends StatelessWidget {
         if (!snap.hasData) return const CompanyLoginScreen();
 
         final uid = snap.data!.uid;
-
-        // Try to find the company the user belongs to by iterating all companies
-        return FutureBuilder<QuerySnapshot>(
-          future: FirebaseFirestore.instance.collection('companies').get(),
-          builder: (context, companySnap) {
-            if (companySnap.connectionState == ConnectionState.waiting) {
+        
+        // Try to find the user's company using the new fast access structure
+        return FutureBuilder<DocumentSnapshot>(
+          future: FirebaseFirestore.instance.collection('userCompany').doc(uid).get(),
+          builder: (context, userSnap) {
+            if (userSnap.connectionState == ConnectionState.waiting) {
               return const Scaffold(body: Center(child: CircularProgressIndicator()));
             }
-            if (!companySnap.hasData || companySnap.data!.docs.isEmpty) {
-              return const Scaffold(body: Center(child: Text('No companies found.')));
+            // If user access document doesn't exist, fall back to old method
+            if (!userSnap.hasData || !userSnap.data!.exists) {
+              return _fallbackToOldMethod(uid);
             }
-
-            // Search for user in each company
-            return _findUserInCompanies(companySnap.data!.docs, uid);
+            final userData = userSnap.data!.data() as Map<String, dynamic>?;
+            if (userData == null || !userData.containsKey('companyId')) {
+              return _fallbackToOldMethod(uid);
+            }
+            final companyId = userData['companyId'] as String;
+            // Get user details from company
+            return FutureBuilder<DocumentSnapshot>(
+              future: FirebaseFirestore.instance
+                  .collection('companies')
+                  .doc(companyId)
+                  .collection('users')
+                  .doc(uid)
+                  .get(),
+              builder: (context, companyUserSnap) {
+                if (companyUserSnap.connectionState == ConnectionState.waiting) {
+                  return const Scaffold(body: Center(child: CircularProgressIndicator()));
+                }
+                if (!companyUserSnap.hasData || !companyUserSnap.data!.exists) {
+                  return const Scaffold(body: Center(child: Text('User not found in company.')));
+                }
+                final data = companyUserSnap.data!.data() as Map<String, dynamic>;
+                // Compose a safe full name
+                final full = (data['fullName'] as String?)?.trim() ?? '';
+                final first = (data['firstName'] as String?)?.trim() ?? '';
+                final sur = (data['surname'] as String?)?.trim() ?? '';
+                final fullName = full.isNotEmpty ? full : '$first $sur'.trim();
+                // --- SAFE EXTRACTION ---
+                final email = (data['email'] ?? '') as String;
+                final roles = (data['roles'] is List)
+                    ? (data['roles'] as List).map((e) => e.toString()).toList()
+                    : <String>[];
+                final modules = (data['modules'] is List)
+                    ? (data['modules'] as List).map((e) => e.toString()).toList()
+                    : <String>[];
+                final access = <String, dynamic>{
+                  'time_tracker': modules.contains('time_tracker'),
+                  'admin': modules.contains('admin'),
+                };
+                return CompanyDashboardScreen(
+                  companyId: companyId,
+                  userId: uid,
+                  fullName: fullName,
+                  email: email,
+                  roles: roles,
+                  access: access,
+                );
+              },
+            );
           },
         );
+      },
+    );
+  }
+
+  // Fallback method for users not yet migrated to new structure
+  Widget _fallbackToOldMethod(String uid) {
+    return FutureBuilder<QuerySnapshot>(
+      future: FirebaseFirestore.instance.collection('companies').get(),
+      builder: (context, companySnap) {
+        if (companySnap.connectionState == ConnectionState.waiting) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+        if (!companySnap.hasData || companySnap.data!.docs.isEmpty) {
+          return const Scaffold(body: Center(child: Text('No companies found.')));
+        }
+        // Search for user in each company
+        return _findUserInCompanies(companySnap.data!.docs, uid);
       },
     );
   }
@@ -118,19 +231,16 @@ class AuthGate extends StatelessWidget {
         if (docs == null) {
           return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
-
         for (int i = 0; i < docs.length; i++) {
           final userDoc = docs[i];
           if (userDoc.exists) {
             final data = userDoc.data() as Map<String, dynamic>;
             final companyId = companies[i].id;
-
             // Compose a safe full name
             final full = (data['fullName'] as String?)?.trim() ?? '';
             final first = (data['firstName'] as String?)?.trim() ?? '';
             final sur = (data['surname'] as String?)?.trim() ?? '';
             final fullName = full.isNotEmpty ? full : '$first $sur'.trim();
-
             // --- SAFE EXTRACTION ---
             final email = (data['email'] ?? '') as String;
             final roles = (data['roles'] is List)
@@ -143,7 +253,6 @@ class AuthGate extends StatelessWidget {
       'time_tracker': modules.contains('time_tracker'),
       'admin'       : modules.contains('admin'),
     };
-
             return CompanyDashboardScreen(
               companyId: companyId,
               userId: uid,
@@ -154,7 +263,6 @@ class AuthGate extends StatelessWidget {
             );
           }
         }
-
         return const Scaffold(body: Center(child: Text('User not assigned to any company.')));
       },
     );

@@ -185,6 +185,7 @@
   "role_admin": "Admin",
   "role_team_leader": "Team Leader",
   "role_company_admin": "Company Admin",
+  "superAdmin": "Super Admin",
   "role_user": "User",
   "role_worker": "Worker",
   "module_admin": "Administration",
@@ -229,5 +230,37 @@
   "sessionDate": "Date",
   "time": "Time",
   "cannotBeEdited": "cannot be edited",
-  "cannotBeDeleted": "cannot be deleted"
+  "cannotBeDeleted": "cannot be deleted",
+  "deleteEntry": "Delete Entry",
+  "deleteEntryMessage": "Are you sure you want to delete this entry? This cannot be undone.",
+  "work": "Work",
+  "tapToAdd": "Tap to add",
+  "tapToAddNote": "Tap to add note",
+  "approvedAfterEdit": "Approved After Edit",
+  "approved": "Approved",
+  "rejected": "Rejected",
+  "noNote": "No note",
+  "accountLocked": "Account temporarily locked",
+  "tooManyFailedAttempts": "Too many failed login attempts",
+  "accountLockedMessage": "Your account has been temporarily locked due to too many failed login attempts. Please try again in {minutes} minutes.",
+  "@accountLockedMessage": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "remainingAttempts": "{attempts} login attempts remaining",
+  "@remainingAttempts": {
+    "placeholders": {
+      "attempts": {
+        "type": "int"
+      }
+    }
+  },
+  "accountUnlocked": "Account unlocked",
+  "accountUnlockedMessage": "Your account has been unlocked. You can now try logging in again.",
+  "adminPasswordRequired": "Admin password required",
+  "enterYourPassword": "Enter your password",
+  "confirm": "Confirm"
 } 

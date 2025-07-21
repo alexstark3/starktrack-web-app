@@ -37,17 +37,17 @@ class SettingsScreen extends StatelessWidget {
             : Colors.white,
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Dark Mode Toggle Row
+            Row(
               children: [
-                // Dark Mode Toggle Row
-                Row(
-                  children: [
-                    SizedBox(
-                      width: labelWidth,
-                      child: Text(l10n.darkMode, style: theme.textTheme.bodyLarge),
-                    ),
-                    const SizedBox(width: minGap),
+                SizedBox(
+                  width: labelWidth,
+                  child: Text(l10n.darkMode, style: theme.textTheme.bodyLarge),
+                ),
+                const SizedBox(width: minGap),
                     FlutterSwitch(
                       width: 48,
                       height: 28,
@@ -65,14 +65,14 @@ class SettingsScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                // Language Picker Row
-                Row(
-                  children: [
-                    SizedBox(
-                      width: labelWidth,
-                      child: Text(l10n.language, style: theme.textTheme.bodyLarge),
-                    ),
-                    const SizedBox(width: minGap),
+            // Language Picker Row
+            Row(
+              children: [
+                SizedBox(
+                  width: labelWidth,
+                  child: Text(l10n.language, style: theme.textTheme.bodyLarge),
+                ),
+                const SizedBox(width: minGap),
                     DropdownButton<String>(
                       value: currentLang,
                       underline: Container(),

@@ -22,7 +22,9 @@
       }
     }
   },
-  "hosting": {
+  "hosting": [
+    {
+      "target": "main",
     "public": "build/web",
     "ignore": [
       "firebase.json",
@@ -35,5 +37,50 @@
         "destination": "/index.html"
       }
     ]
-  }
+    },
+    {
+      "target": "admin",
+      "public": "build/admin",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    }
+  ],
+  "targets": {
+    "main": {
+      "hosting": {
+        "starktrack": [
+          "starktracklog"
+        ]
+      }
+    },
+    "admin": {
+      "hosting": {
+        "admin-starktrack": [
+          "admin-starktracklog"
+        ]
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    }
+  ]
 }

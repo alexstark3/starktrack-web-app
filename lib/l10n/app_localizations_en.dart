@@ -415,6 +415,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get role_company_admin => 'Company Admin';
 
   @override
+  String get superAdmin => 'Super Admin';
+
+  @override
   String get role_user => 'User';
 
   @override
@@ -526,4 +529,53 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cannotBeDeleted => 'cannot be deleted';
+
+  @override
+  String get deleteEntry => 'Delete Entry';
+
+  @override
+  String get deleteEntryMessage => 'Are you sure you want to delete this entry? This cannot be undone.';
+
+  @override
+  String get work => 'Work';
+
+  @override
+  String get tapToAddNote => 'Tap to add note';
+
+  @override
+  String get approvedAfterEdit => 'Approved After Edit';
+
+  @override
+  String get noNote => 'No note';
+
+  @override
+  String get accountLocked => 'Account temporarily locked';
+
+  @override
+  String get tooManyFailedAttempts => 'Too many failed login attempts';
+
+  @override
+  String accountLockedMessage(int minutes) {
+    return 'Your account has been temporarily locked due to too many failed login attempts. Please try again in $minutes minutes.';
+  }
+
+  @override
+  String remainingAttempts(int attempts) {
+    return '$attempts login attempts remaining';
+  }
+
+  @override
+  String get accountUnlocked => 'Account unlocked';
+
+  @override
+  String get accountUnlockedMessage => 'Your account has been unlocked. You can now try logging in again.';
+
+  @override
+  String get adminPasswordRequired => 'Admin password required';
+
+  @override
+  String get enterYourPassword => 'Enter your password';
+
+  @override
+  String get confirm => 'Confirm';
 }

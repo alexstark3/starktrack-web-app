@@ -410,8 +410,6 @@ class _LogEditRowState extends State<_LogEditRow>
   void didUpdateWidget(_LogEditRow oldWidget) {
     super.didUpdateWidget(oldWidget);
     // Expenses are now managed at parent level, no need to update here
-    final updatedExpenses = widget.getExpenses(widget.logId, widget.expensesMap);
-    print('DEBUG: Widget updated - current expenses: $updatedExpenses');
   }
 
   @override
@@ -498,12 +496,10 @@ Future<void> _showEditExpensesPopup() async {
   });
   
   final currentExpenses = widget.getExpenses(widget.logId, widget.expensesMap);
-  print('DEBUG: Current expenses before dialog: $currentExpenses');
   final TextEditingController nameCtrl = TextEditingController();
   final TextEditingController amountCtrl = TextEditingController();
 
   Map<String, dynamic> tempExpenses = Map<String, dynamic>.from(currentExpenses);
-  print('DEBUG: Initial tempExpenses: $tempExpenses');
 
   bool tempPerDiem = tempExpenses.containsKey('Per diem');
   String? errorMsg;
@@ -560,12 +556,9 @@ Future<void> _showEditExpensesPopup() async {
           }
 
           void handleExpenseChange(String key, bool? checked) {
-            print('DEBUG: handleExpenseChange called - key: $key, checked: $checked');
             if (checked == false) {
-              print('DEBUG: Removing expense: $key');
               setStateDialog(() => tempExpenses.remove(key));
             }
-            print('DEBUG: tempExpenses after handleExpenseChange: $tempExpenses');
           }
 
           final List<String> otherExpenseKeys =
@@ -718,7 +711,6 @@ Future<void> _showEditExpensesPopup() async {
             actions: [
               TextButton(
                 onPressed: () {
-                  print('DEBUG: Cancel button pressed - expenses remain: ${widget.getExpenses(widget.logId, widget.expensesMap)}');
                   Navigator.pop(context);
                 },
                 child: Text('Cancel', style: TextStyle(color: primaryColor, fontSize: 16)),
@@ -732,13 +724,10 @@ Future<void> _showEditExpensesPopup() async {
                   textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 onPressed: () {
-                  print('DEBUG: Final tempExpenses before dialog close: $tempExpenses');
                   final result = Map<String, dynamic>.from(tempExpenses);
-                  print('DEBUG: About to return from dialog: $result');
                   
                   // Update expenses at parent level
                   widget.updateExpenses(widget.logId, result);
-                  print('DEBUG: Expenses updated at parent level: $result');
                   
                   Navigator.pop(context, result);
                 },
@@ -751,13 +740,9 @@ Future<void> _showEditExpensesPopup() async {
     },
   );
   
-  print('DEBUG: Dialog showDialog completed with result: $result');
-  
   if (!mounted) return;
-  print('DEBUG: Dialog result received: $result');
   
   // Expenses should already be updated at parent level
-  print('DEBUG: Current expenses after dialog: ${widget.getExpenses(widget.logId, widget.expensesMap)}');
   
   setState(() {
     _dialogOpen = false;
@@ -800,17 +785,18 @@ Future<void> _showEditExpensesPopup() async {
     final style = TextStyle(color: widget.textColor, fontSize: 16);
 
     if (!widget.isEditing) {
+      final l10n = AppLocalizations.of(context)!;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _infoText('Work', '${startCtrl.text.isNotEmpty ? startCtrl.text : '--'} - ${endCtrl.text.isNotEmpty ? endCtrl.text : '--'} = ${widget.duration.inMinutes == 0
+          _infoText(l10n.work, '${startCtrl.text.isNotEmpty ? startCtrl.text : '--'} - ${endCtrl.text.isNotEmpty ? endCtrl.text : '--'} = ${widget.duration.inMinutes == 0
               ? '00:00h'
               : '${widget.duration.inHours.toString().padLeft(2, '0')}:${(widget.duration.inMinutes % 60).toString().padLeft(2, '0')}h'}'),
-          _infoText('Project', widget.projectName),
+          _infoText(l10n.project, widget.projectName),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Expenses:', style: style),
+              Text('${l10n.expenses}:', style: style),
               const SizedBox(width: 8),
               if (widget.expenseLines.isEmpty)
                 Text('-', style: style.copyWith(color: Colors.grey))
@@ -839,13 +825,13 @@ Future<void> _showEditExpensesPopup() async {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Note:', style: style),
+              Text('${l10n.note}:', style: style),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   widget.getNote(widget.logId, widget.note).isNotEmpty 
                     ? widget.getNote(widget.logId, widget.note)
-                    : 'No note',
+                    : l10n.noNote,
                   style: style.copyWith(
                     fontSize: 14,
                     color: widget.getNote(widget.logId, widget.note).isNotEmpty 
@@ -875,18 +861,19 @@ Future<void> _showEditExpensesPopup() async {
                         : widget.isRejected
                             ? _iconBtn(Icons.cancel, Colors.red, () {}, 'Rejected')
                             : _iconBtn(Icons.delete, Colors.red[300]!, () async {
+                  final l10n = AppLocalizations.of(context)!;
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder: (ctx) => AlertDialog(
-                      title: const Text('Delete Entry'),
-                      content: const Text('Are you sure you want to delete this entry? This cannot be undone.'),
+                      title: Text(l10n.deleteEntry),
+                      content: Text(l10n.deleteEntryMessage),
                       actions: [
                         TextButton(
-                          child: const Text('Cancel'),
+                          child: Text(l10n.cancel),
                           onPressed: () => Navigator.of(ctx).pop(false),
                         ),
                         ElevatedButton(
-                          child: const Text('Delete'),
+                          child: Text(l10n.delete),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
                             foregroundColor: widget.appColors.whiteTextOnBlue,
@@ -916,10 +903,11 @@ Future<void> _showEditExpensesPopup() async {
         'Per diem ${(expensesToDisplay['Per diem'] as num).toStringAsFixed(2)} CHF',
     ];
 
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _infoText('Work', '${startCtrl.text.isNotEmpty ? startCtrl.text : '--'} - ${endCtrl.text.isNotEmpty ? endCtrl.text : '--'} = ${widget.duration.inMinutes == 0
+        _infoText(l10n.work, '${startCtrl.text.isNotEmpty ? startCtrl.text : '--'} - ${endCtrl.text.isNotEmpty ? endCtrl.text : '--'} = ${widget.duration.inMinutes == 0
             ? '00:00h'
             : '${widget.duration.inHours.toString().padLeft(2, '0')}:${(widget.duration.inMinutes % 60).toString().padLeft(2, '0')}h'}'),
         if (widget.isApprovedAfterEdit || widget.isApproved || widget.isRejected)
@@ -943,10 +931,10 @@ Future<void> _showEditExpensesPopup() async {
                 const SizedBox(width: 4),
                 Text(
                   widget.isApprovedAfterEdit
-                      ? 'Approved After Edit'
+                      ? l10n.approvedAfterEdit
                       : widget.isApproved
-                          ? 'Approved'
-                          : 'Rejected',
+                          ? l10n.approved
+                          : l10n.rejected,
                   style: TextStyle(
                     color: widget.isApprovedAfterEdit
                         ? Colors.orange
@@ -963,7 +951,7 @@ Future<void> _showEditExpensesPopup() async {
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text('Project: ', style: style),
+            Text('${l10n.project}: ', style: style),
             Expanded(child: _projectDropdown(style)),
           ],
         ),
@@ -975,10 +963,10 @@ Future<void> _showEditExpensesPopup() async {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Expenses:', style: style),
+                  Text('${l10n.expenses}:', style: style),
                   const SizedBox(width: 8),
                   if (currExpenseLines.isEmpty)
-                    Text('Tap to add', style: style.copyWith(color: Colors.grey))
+                    Text(l10n.tapToAdd, style: style.copyWith(color: Colors.grey))
                   else
                     Expanded(
                       child: Wrap(
@@ -1010,7 +998,7 @@ Future<void> _showEditExpensesPopup() async {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text('Note:', style: style),
+              Text('${l10n.note}:', style: style),
               const SizedBox(width: 8),
               Expanded(
                 child: Container(
@@ -1026,7 +1014,7 @@ Future<void> _showEditExpensesPopup() async {
                     builder: (context) {
                       final displayNote = widget.getNote(widget.logId, widget.note);
                       return Text(
-                        displayNote.isNotEmpty ? displayNote : 'Tap to add note',
+                        displayNote.isNotEmpty ? displayNote : l10n.tapToAddNote,
                         style: style.copyWith(
                             color: displayNote.isNotEmpty ? widget.textColor : Colors.grey,
                             fontSize: 14),
@@ -1047,8 +1035,6 @@ Future<void> _showEditExpensesPopup() async {
                 setState(() => _saving = true);
                 try {
                   final expensesToSave = widget.getExpenses(widget.logId, widget.expensesMap);
-                  print('DEBUG: About to save - expenses variable: $expensesToSave');
-                  print('DEBUG: Saving expenses: $expensesToSave');
                   final noteToSave = widget.getNote(widget.logId, widget.note);
                   await widget.onSave(
                     startCtrl.text,
@@ -1057,7 +1043,6 @@ Future<void> _showEditExpensesPopup() async {
                     selectedProjectId ?? '',
                     expensesToSave,
                   );
-                  print('DEBUG: Save completed successfully');
                   widget.setEditingState(widget.logId, false);
                   // Clear pending data after successful save so database values are used
                   widget.clearPendingExpenses(widget.logId);
@@ -1068,7 +1053,6 @@ Future<void> _showEditExpensesPopup() async {
                     );
                   }
                 } catch (e) {
-                  print('DEBUG: Save failed with error: $e');
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Save failed: $e'), backgroundColor: Colors.red),
@@ -1085,18 +1069,19 @@ Future<void> _showEditExpensesPopup() async {
                   () => widget.setEditingState(widget.logId, false)),
               const SizedBox(width: 8),
               _iconBtn(Icons.delete, Colors.red[300]!, () async {
+                final l10n = AppLocalizations.of(context)!;
                 final confirm = await showDialog<bool>(
                   context: context,
                   builder: (ctx) => AlertDialog(
-                    title: const Text('Delete Entry'),
-                    content: const Text('Are you sure you want to delete this entry? This cannot be undone.'),
+                    title: Text(l10n.deleteEntry),
+                    content: Text(l10n.deleteEntryMessage),
                     actions: [
                       TextButton(
-                        child: const Text('Cancel'),
+                        child: Text(l10n.cancel),
                         onPressed: () => Navigator.of(ctx).pop(false),
                       ),
                       ElevatedButton(
-                        child: const Text('Delete'),
+                        child: Text(l10n.delete),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
                           foregroundColor: widget.appColors.whiteTextOnBlue,

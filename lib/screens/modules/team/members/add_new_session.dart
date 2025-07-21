@@ -66,7 +66,6 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
             .toList();
       });
     } catch (e) {
-    //  print('Error loading projects: $e');
     }
   }
 
@@ -125,7 +124,6 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
       }
       return false;
     } catch (e) {
-      print('Error checking per diem: $e');
       return false;
     }
   }
@@ -411,7 +409,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
           actualProjectId = projectQuery.docs.first.id;
         }
       }
-
+      
       // Create session data
       final sessionData = {
         'sessionDate': DateFormat('yyyy-MM-dd').format(_selectedDate),

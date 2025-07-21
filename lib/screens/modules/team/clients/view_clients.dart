@@ -62,75 +62,75 @@ class _ViewClientsState extends State<ViewClients> {
 
     return SingleChildScrollView(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Client name
-          Text(
-            client['name'] ?? '',
-            style: TextStyle(
-              fontSize: 18, // Reduced from 22 to 18
-              fontWeight: FontWeight.bold,
-              color: colors.primaryBlue,
-            ),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Client name
+        Text(
+          client['name'] ?? '',
+          style: TextStyle(
+            fontSize: 18, // Reduced from 22 to 18
+            fontWeight: FontWeight.bold,
+            color: colors.primaryBlue,
           ),
-          const SizedBox(height: 10),
-          // Edit button - left aligned under name
-          ElevatedButton.icon(
-            onPressed: () async {
-              final result = await showDialog<bool>(
-                context: context,
-                builder: (ctx) => EditClientDialog(
-                  companyId: widget.companyId,
-                  client: widget.client,
-                ),
-              );
-              if (result == true) {
-                widget.onEdit(); // Call the callback to refresh the parent
-              }
-            },
-            icon: const Icon(Icons.edit, size: 20),
+        ),
+        const SizedBox(height: 10),
+        // Edit button - left aligned under name
+        ElevatedButton.icon(
+          onPressed: () async {
+            final result = await showDialog<bool>(
+              context: context,
+              builder: (ctx) => EditClientDialog(
+                companyId: widget.companyId,
+                client: widget.client,
+              ),
+            );
+            if (result == true) {
+              widget.onEdit(); // Call the callback to refresh the parent
+            }
+          },
+          icon: const Icon(Icons.edit, size: 20),
             label: Text(AppLocalizations.of(context)!.edit),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: colors.primaryBlue,
-              foregroundColor: colors.whiteTextOnBlue,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: colors.primaryBlue,
+            foregroundColor: colors.whiteTextOnBlue,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
-          const SizedBox(height: 14),
-          // Info fields - left aligned in column
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+        ),
+        const SizedBox(height: 14),
+        // Info fields - left aligned in column
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
               if (address.isNotEmpty) _infoRow(AppLocalizations.of(context)!.address, address),
               if (person.isNotEmpty) _infoRow(AppLocalizations.of(context)!.contactPerson, person),
               if (email.isNotEmpty) _infoRow(AppLocalizations.of(context)!.email, email),
               if (phone.isNotEmpty) _infoRow(AppLocalizations.of(context)!.phone, phone),
               if ((client['city'] ?? '').isNotEmpty) _infoRow(AppLocalizations.of(context)!.city, client['city'] ?? ''),
               if (country.isNotEmpty) _infoRow(AppLocalizations.of(context)!.country, country),
-            ],
-          ),
-          const SizedBox(height: 24),
-          // Projects list for this client
+          ],
+        ),
+        const SizedBox(height: 24),
+        // Projects list for this client
           Text('${AppLocalizations.of(context)!.projects} für diesen ${AppLocalizations.of(context)!.client.toLowerCase()}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19, color: colors.primaryBlue)),
-          const SizedBox(height: 10),
-          FutureBuilder<List<Map<String, dynamic>>>(
-            future: _projectsFuture,
-            builder: (context, snap) {
-              if (snap.connectionState == ConnectionState.waiting) {
-                return const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20.0),
-                  child: Center(child: CircularProgressIndicator()),
-                );
-              }
-              final projects = snap.data ?? [];
-              if (projects.isEmpty) {
+        const SizedBox(height: 10),
+        FutureBuilder<List<Map<String, dynamic>>>(
+          future: _projectsFuture,
+          builder: (context, snap) {
+            if (snap.connectionState == ConnectionState.waiting) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 20.0),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            final projects = snap.data ?? [];
+            if (projects.isEmpty) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   child: Text('${AppLocalizations.of(context)!.noProjectsFound} für diesen ${AppLocalizations.of(context)!.client.toLowerCase()}.'),
-                );
-              }
-              return Column(
-                children: [
+              );
+            }
+            return Column(
+              children: [
                   // Client totals summary
                   _ClientTotalsCard(
                     companyId: widget.companyId,
@@ -139,14 +139,14 @@ class _ViewClientsState extends State<ViewClients> {
                   const SizedBox(height: 16),
                   // Individual project cards
                   ...projects.map((project) => _ProjectCard(
-                    companyId: widget.companyId,
+                  companyId: widget.companyId,
                     project: project,
-                  )),
-                ],
-              );
-            },
-          ),
-        ],
+                )),
+              ],
+            );
+          },
+        ),
+      ],
       ),
     );
   }
@@ -454,7 +454,7 @@ class _ClientTotalsCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Row(
-                  children: [
+            children: [
                     Icon(
                       Icons.attach_money,
                       size: 16,
@@ -468,7 +468,7 @@ class _ClientTotalsCard extends StatelessWidget {
                         color: colors.textColor.withOpacity(0.8),
                       ),
                     ),
-                  ],
+            ],
                 ),
               ],
             ),

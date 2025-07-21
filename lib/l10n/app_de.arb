@@ -185,6 +185,7 @@
   "role_admin": "Admin",
   "role_team_leader": "Teamleiter",
   "role_company_admin": "Firmenadmin",
+  "superAdmin": "Super Admin",
   "role_user": "Benutzer",
   "role_worker": "Mitarbeiter",
   "module_admin": "Verwaltung",
@@ -229,5 +230,37 @@
   "sessionDate": "Datum",
   "time": "Zeit",
   "cannotBeEdited": "kann nicht bearbeitet werden",
-  "cannotBeDeleted": "kann nicht gelöscht werden"
+  "cannotBeDeleted": "kann nicht gelöscht werden",
+  "deleteEntry": "Eintrag löschen",
+  "deleteEntryMessage": "Sind Sie sicher, dass Sie diesen Eintrag löschen möchten? Dies kann nicht rückgängig gemacht werden.",
+  "work": "Arbeit",
+  "tapToAdd": "Tippen zum Hinzufügen",
+  "tapToAddNote": "Tippen zum Hinzufügen einer Notiz",
+  "approvedAfterEdit": "Nach Bearbeitung genehmigt",
+  "approved": "Genehmigt",
+  "rejected": "Abgelehnt",
+  "noNote": "Keine Notiz",
+  "accountLocked": "Konto vorübergehend gesperrt",
+  "tooManyFailedAttempts": "Zu viele fehlgeschlagene Anmeldeversuche",
+  "accountLockedMessage": "Ihr Konto wurde aufgrund zu vieler fehlgeschlagener Anmeldeversuche vorübergehend gesperrt. Bitte versuchen Sie es in {minutes} Minuten erneut.",
+  "@accountLockedMessage": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "remainingAttempts": "{attempts} Anmeldeversuche verbleibend",
+  "@remainingAttempts": {
+    "placeholders": {
+      "attempts": {
+        "type": "int"
+      }
+    }
+  },
+  "accountUnlocked": "Konto entsperrt",
+  "accountUnlockedMessage": "Ihr Konto wurde entsperrt. Sie können sich jetzt erneut anmelden.",
+  "adminPasswordRequired": "Admin-Passwort erforderlich",
+  "enterYourPassword": "Geben Sie Ihr Passwort ein",
+  "confirm": "Bestätigen"
 } 

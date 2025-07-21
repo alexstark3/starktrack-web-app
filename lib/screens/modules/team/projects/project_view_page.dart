@@ -97,14 +97,14 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
           .get();
       
       for (final logDoc in logsSnapshot.docs) {
-        final logData = logDoc.data();
-        allLogs.add({
-          ...logData,
-          'userFirstName': userFirstName,
-          'userSurname': userSurname,
-          'userId': userId,
-          'logId': logDoc.id,
-        });
+          final logData = logDoc.data();
+          allLogs.add({
+            ...logData,
+            'userFirstName': userFirstName,
+            'userSurname': userSurname,
+            'userId': userId,
+            'logId': logDoc.id,
+          });
       }
     }
     return allLogs;

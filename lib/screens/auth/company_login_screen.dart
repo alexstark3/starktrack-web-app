@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../widgets/company/login_form.dart';
 import '../dashboard/company_dashboard_screen.dart';
+import '../../super_admin/security/login_rate_limiter.dart';
+import '../../l10n/app_localizations.dart';
 
 class CompanyLoginScreen extends StatefulWidget {
   const CompanyLoginScreen({Key? key}) : super(key: key);
@@ -21,44 +23,62 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
 
   Future<void> _login() async {
     if (!mounted) return;
+    
+    final userEmail = _emailController.text.trim();
+    final l10n = AppLocalizations.of(context)!;
+    
     setState(() {
       _isLoading = true;
       _error = null;
     });
 
     try {
-      // 1. Sign in with Firebase Auth
-      final authResult = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-      );
-      final userId = authResult.user!.uid;
-      // print('LOGIN: Authenticated with UID=$userId');
-
-      // 2. Find the company the user belongs to (no hardcoding)
-      final companiesSnapshot = await FirebaseFirestore.instance
-          .collection('companies')
-          .get();
-
-      String? companyId;
-      DocumentSnapshot<Map<String, dynamic>>? userDocSnap;
-
-      for (var companyDoc in companiesSnapshot.docs) {
-        final potentialUserDoc = await companyDoc.reference
-            .collection('users')
-            .doc(userId)
-            .get();
-        if (potentialUserDoc.exists) {
-          companyId = companyDoc.id;
-          userDocSnap = potentialUserDoc;
-          break;
+      // 1. Check if user can attempt login (rate limiting)
+      final canAttempt = await LoginRateLimiter.canAttemptLogin(userEmail);
+      if (!canAttempt) {
+        final lockoutTime = await LoginRateLimiter.getRemainingLockoutTime(userEmail);
+        if (lockoutTime != null) {
+          final minutes = lockoutTime.inMinutes + 1; // Round up
+          setState(() {
+            _error = l10n.accountLockedMessage(minutes);
+          });
+          return;
         }
       }
 
-      if (companyId == null || userDocSnap == null) {
-      //  print('LOGIN: No company assigned for this user.');
+      // 2. Sign in with Firebase Auth
+      final authResult = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: userEmail,
+        password: _passwordController.text,
+      );
+      final userId = authResult.user!.uid;
+
+      // 2. Find the company the user belongs to using userCompany collection
+      final userCompanyDoc = await FirebaseFirestore.instance
+          .collection('userCompany')
+          .doc(userId)
+          .get();
+
+      if (!userCompanyDoc.exists) {
         setState(() {
           _error = 'You are not assigned to any company. Contact your administrator.';
+        });
+        return;
+      }
+
+      final companyId = userCompanyDoc['companyId'] as String;
+
+      // 3. Get user data from the company users subcollection
+      final userDocSnap = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(companyId)
+          .collection('users')
+          .doc(userId)
+          .get();
+
+      if (!userDocSnap.exists) {
+        setState(() {
+          _error = 'User data not found in company. Contact your administrator.';
         });
         return;
       }
@@ -81,11 +101,14 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
       final String surname  = (data['surname']   ?? '') as String;
       final String fullName = '${firstName.trim()} ${surname.trim()}'.trim();
 
+      // 4. Record successful login (reset rate limiting)
+      await LoginRateLimiter.recordSuccessfulLogin(email);
+
       // Only navigate once!
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (_) => CompanyDashboardScreen(
-            companyId: companyId!,
+            companyId: companyId,
             userId: userId,
             roles: roles,
             access: access,
@@ -94,17 +117,31 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
           ),
         ),
       );
-     // print('LOGIN: User found! Navigating to dashboard for company $companyId');
 
     } on FirebaseAuthException catch (e) {
-      print('LOGIN: FirebaseAuthException: ${e.message}');
       if (!mounted) return;
+      
+      // Record failed login attempt for rate limiting
+      await LoginRateLimiter.recordFailedAttempt(userEmail);
+      
+      // Get remaining attempts for user feedback
+      final remainingAttempts = await LoginRateLimiter.getRemainingAttempts(userEmail);
+      
       setState(() {
-        _error = e.message ?? 'Authentication failed';
+        if (remainingAttempts <= 0) {
+          // Account is now locked
+          _error = l10n.tooManyFailedAttempts;
+        } else {
+          // Show remaining attempts
+          _error = '${e.message ?? 'Authentication failed'}\n${l10n.remainingAttempts(remainingAttempts)}';
+        }
       });
     } catch (e) {
-      print('LOGIN: Unknown error: $e');
       if (!mounted) return;
+      
+      // Record failed login attempt for rate limiting
+      await LoginRateLimiter.recordFailedAttempt(userEmail);
+      
       setState(() {
         _error = 'Unknown error: $e';
       });

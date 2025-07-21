@@ -95,15 +95,15 @@ class CompanyTopBar extends StatelessWidget {
                   ),
                   PopupMenuItem(
                     value: 'logout',
-                    child: const Row(
+                    child: Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.logout,
                           color: Colors.grey,
                           size: 20,
                         ),
-                        SizedBox(width: 12),
-                        Text('Log out'),
+                        const SizedBox(width: 12),
+                        Text(AppLocalizations.of(context)!.logout),
                       ],
                     ),
                     onTap: onLogout,

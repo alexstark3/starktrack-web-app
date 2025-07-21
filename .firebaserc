@@ -1,5 +1,18 @@
 {
   "projects": {
     "default": "starktracklog"
-  }
+  },
+  "targets": {
+    "starktracklog": {
+      "hosting": {
+        "main": [
+          "starktracklog"
+        ],
+        "admin": [
+          "admin-starktracklog"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

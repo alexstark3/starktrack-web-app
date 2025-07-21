@@ -887,6 +887,12 @@ abstract class AppLocalizations {
   /// **'Company Admin'**
   String get role_company_admin;
 
+  /// No description provided for @superAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Super Admin'**
+  String get superAdmin;
+
   /// No description provided for @role_user.
   ///
   /// In en, this message translates to:
@@ -1108,6 +1114,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'cannot be deleted'**
   String get cannotBeDeleted;
+
+  /// No description provided for @deleteEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Entry'**
+  String get deleteEntry;
+
+  /// No description provided for @deleteEntryMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this entry? This cannot be undone.'**
+  String get deleteEntryMessage;
+
+  /// No description provided for @work.
+  ///
+  /// In en, this message translates to:
+  /// **'Work'**
+  String get work;
+
+  /// No description provided for @tapToAddNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to add note'**
+  String get tapToAddNote;
+
+  /// No description provided for @approvedAfterEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved After Edit'**
+  String get approvedAfterEdit;
+
+  /// No description provided for @noNote.
+  ///
+  /// In en, this message translates to:
+  /// **'No note'**
+  String get noNote;
+
+  /// No description provided for @accountLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Account temporarily locked'**
+  String get accountLocked;
+
+  /// No description provided for @tooManyFailedAttempts.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many failed login attempts'**
+  String get tooManyFailedAttempts;
+
+  /// No description provided for @accountLockedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account has been temporarily locked due to too many failed login attempts. Please try again in {minutes} minutes.'**
+  String accountLockedMessage(int minutes);
+
+  /// No description provided for @remainingAttempts.
+  ///
+  /// In en, this message translates to:
+  /// **'{attempts} login attempts remaining'**
+  String remainingAttempts(int attempts);
+
+  /// No description provided for @accountUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Account unlocked'**
+  String get accountUnlocked;
+
+  /// No description provided for @accountUnlockedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account has been unlocked. You can now try logging in again.'**
+  String get accountUnlockedMessage;
+
+  /// No description provided for @adminPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin password required'**
+  String get adminPasswordRequired;
+
+  /// No description provided for @enterYourPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password'**
+  String get enterYourPassword;
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
