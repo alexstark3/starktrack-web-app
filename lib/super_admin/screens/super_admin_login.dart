@@ -48,10 +48,12 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
       if (!isAdmin) {
         // Sign out if not admin
         await FirebaseAuth.instance.signOut();
+              if (mounted) {
         setState(() {
           _errorMessage = 'Access denied. Super admin privileges required.';
           _isLoading = false;
         });
+      }
         return;
       }
 
@@ -85,15 +87,19 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
           errorMsg = 'Login failed. Please try again.';
       }
       
+      if (mounted) {
       setState(() {
         _errorMessage = errorMsg;
         _isLoading = false;
       });
+      }
     } catch (e) {
+      if (mounted) {
       setState(() {
         _errorMessage = 'An unexpected error occurred.';
         _isLoading = false;
       });
+      }
     }
   }
 

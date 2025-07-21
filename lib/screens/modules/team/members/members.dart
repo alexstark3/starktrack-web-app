@@ -158,25 +158,25 @@ class _MembersTable extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          children: [
-                            Text(
-                              '$firstName $surname',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: colors.textColor,
-                              ),
+                            children: [
+                              Text(
+                                '$firstName $surname',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: colors.textColor,
+                                ),
                             ),
                             const SizedBox(width: 8),
                             _MemberStatusIcon(companyId: companyId, userId: doc.id),
                           ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          email,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: colors.textColor.withOpacity(0.7),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                email,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: colors.textColor.withOpacity(0.7),
                           ),
                         ),
                       ],
