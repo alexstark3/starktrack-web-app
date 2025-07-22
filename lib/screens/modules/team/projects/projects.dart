@@ -228,7 +228,7 @@ class _ProjectsListState extends State<_ProjectsList> {
                       final email = clientData?['email'] ?? '';
 
                       final isActive = data['active'] == true;
-                      
+
                       return Card(
                         margin: const EdgeInsets.only(bottom: 12),
                         elevation: 2,

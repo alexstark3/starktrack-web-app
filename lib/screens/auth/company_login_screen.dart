@@ -35,8 +35,10 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
     try {
       // 1. Check if user can attempt login (rate limiting)
       final canAttempt = await LoginRateLimiter.canAttemptLogin(userEmail);
+      if (!mounted) return;
       if (!canAttempt) {
         final lockoutTime = await LoginRateLimiter.getRemainingLockoutTime(userEmail);
+        if (!mounted) return;
         if (lockoutTime != null) {
           final minutes = lockoutTime.inMinutes + 1; // Round up
           setState(() {
@@ -51,6 +53,7 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
         email: userEmail,
         password: _passwordController.text,
       );
+      if (!mounted) return;
       final userId = authResult.user!.uid;
       // print('LOGIN: Authenticated with UID=$userId');
 
@@ -59,6 +62,7 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
           .collection('userCompany')
           .doc(userId)
           .get();
+      if (!mounted) return;
 
       if (!userCompanyDoc.exists) {
         setState(() {
@@ -76,6 +80,7 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
           .collection('users')
           .doc(userId)
           .get();
+      if (!mounted) return;
 
       if (!userDocSnap.exists) {
         setState(() {
@@ -104,6 +109,7 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
 
       // 4. Record successful login (reset rate limiting)
       await LoginRateLimiter.recordSuccessfulLogin(email);
+      if (!mounted) return;
 
       // Only navigate once!
       Navigator.of(context).pushReplacement(
@@ -126,9 +132,11 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
       
       // Record failed login attempt for rate limiting
       await LoginRateLimiter.recordFailedAttempt(userEmail);
+      if (!mounted) return;
       
       // Get remaining attempts for user feedback
       final remainingAttempts = await LoginRateLimiter.getRemainingAttempts(userEmail);
+      if (!mounted) return;
       
       setState(() {
         if (remainingAttempts <= 0) {
@@ -145,6 +153,7 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
       
       // Record failed login attempt for rate limiting
       await LoginRateLimiter.recordFailedAttempt(userEmail);
+      if (!mounted) return;
       
       setState(() {
         _error = 'Unknown error: $e';

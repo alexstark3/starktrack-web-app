@@ -411,7 +411,6 @@ class _LogEditRowState extends State<_LogEditRow>
     super.didUpdateWidget(oldWidget);
     // Expenses are now managed at parent level, no need to update here
     final updatedExpenses = widget.getExpenses(widget.logId, widget.expensesMap);
-    print('DEBUG: Widget updated - current expenses: $updatedExpenses');
   }
 
   @override
@@ -498,12 +497,10 @@ Future<void> _showEditExpensesPopup() async {
   });
   
   final currentExpenses = widget.getExpenses(widget.logId, widget.expensesMap);
-  print('DEBUG: Current expenses before dialog: $currentExpenses');
   final TextEditingController nameCtrl = TextEditingController();
   final TextEditingController amountCtrl = TextEditingController();
 
   Map<String, dynamic> tempExpenses = Map<String, dynamic>.from(currentExpenses);
-  print('DEBUG: Initial tempExpenses: $tempExpenses');
 
   bool tempPerDiem = tempExpenses.containsKey('Per diem');
   String? errorMsg;
@@ -560,12 +557,9 @@ Future<void> _showEditExpensesPopup() async {
           }
 
           void handleExpenseChange(String key, bool? checked) {
-            print('DEBUG: handleExpenseChange called - key: $key, checked: $checked');
             if (checked == false) {
-              print('DEBUG: Removing expense: $key');
               setStateDialog(() => tempExpenses.remove(key));
             }
-            print('DEBUG: tempExpenses after handleExpenseChange: $tempExpenses');
           }
 
           final List<String> otherExpenseKeys =
@@ -718,7 +712,6 @@ Future<void> _showEditExpensesPopup() async {
             actions: [
               TextButton(
                 onPressed: () {
-                  print('DEBUG: Cancel button pressed - expenses remain: ${widget.getExpenses(widget.logId, widget.expensesMap)}');
                   Navigator.pop(context);
                 },
                 child: Text('Cancel', style: TextStyle(color: primaryColor, fontSize: 16)),
@@ -732,13 +725,10 @@ Future<void> _showEditExpensesPopup() async {
                   textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 onPressed: () {
-                  print('DEBUG: Final tempExpenses before dialog close: $tempExpenses');
                   final result = Map<String, dynamic>.from(tempExpenses);
-                  print('DEBUG: About to return from dialog: $result');
                   
                   // Update expenses at parent level
                   widget.updateExpenses(widget.logId, result);
-                  print('DEBUG: Expenses updated at parent level: $result');
                   
                   Navigator.pop(context, result);
                 },
@@ -751,14 +741,9 @@ Future<void> _showEditExpensesPopup() async {
     },
   );
   
-  print('DEBUG: Dialog showDialog completed with result: $result');
-  
   if (!mounted) return;
-  print('DEBUG: Dialog result received: $result');
   
   // Expenses should already be updated at parent level
-  print('DEBUG: Current expenses after dialog: ${widget.getExpenses(widget.logId, widget.expensesMap)}');
-  
   setState(() {
     _dialogOpen = false;
     _expenseDialogOpen = false;
@@ -1050,8 +1035,6 @@ Future<void> _showEditExpensesPopup() async {
                 setState(() => _saving = true);
                 try {
                   final expensesToSave = widget.getExpenses(widget.logId, widget.expensesMap);
-                  print('DEBUG: About to save - expenses variable: $expensesToSave');
-                  print('DEBUG: Saving expenses: $expensesToSave');
                   final noteToSave = widget.getNote(widget.logId, widget.note);
                   await widget.onSave(
                     startCtrl.text,
@@ -1060,7 +1043,6 @@ Future<void> _showEditExpensesPopup() async {
                     selectedProjectId ?? '',
                     expensesToSave,
                   );
-                  print('DEBUG: Save completed successfully');
                   widget.setEditingState(widget.logId, false);
                   // Clear pending data after successful save so database values are used
                   widget.clearPendingExpenses(widget.logId);
@@ -1071,7 +1053,6 @@ Future<void> _showEditExpensesPopup() async {
                     );
                   }
                 } catch (e) {
-                  print('DEBUG: Save failed with error: $e');
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Save failed: $e'), backgroundColor: Colors.red),

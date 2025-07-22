@@ -130,16 +130,13 @@ class _ClientsTable extends StatelessWidget {
           .orderBy(FieldPath.documentId)
           .snapshots(),
       builder: (context, snapshot) {
-        print('Firestore snapshot: hasData= [32m [1m [4m [7m [0m [0m [0m [0m${snapshot.hasData}, docs= [32m [1m [4m [7m [0m [0m [0m [0m${snapshot.data?.docs.length}');
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          print('No clients found in Firestore!');
           return Center(child: Text(l10n.noClientsFound));
         }
         final docs = snapshot.data!.docs;
-        print('Client docs: ' + docs.map((d) => d.data()).toList().toString());
         final filtered = docs.where((doc) {
           final data = doc.data() as Map<String, dynamic>;
           final contact = data['contact_person'] ?? {};
@@ -157,7 +154,6 @@ class _ClientsTable extends StatelessWidget {
         }).toList();
 
         if (filtered.isEmpty) {
-          print('Clients found in Firestore, but none match the filter.');
           return Center(child: Text(l10n.noClientsFound));
         }
 

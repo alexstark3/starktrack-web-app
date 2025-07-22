@@ -29,7 +29,10 @@ class LoginRateLimiter {
       }
 
       final data = attemptsDoc.data()!;
-      final attempts = List<DateTime>.from(data['attempts'] ?? []);
+      final attempts = (data['attempts'] as List<dynamic>? ?? [])
+          .where((e) => e != null)
+          .map((e) => (e as Timestamp).toDate())
+          .toList();
       final isLocked = data['isLocked'] ?? false;
       final lockoutUntil = data['lockoutUntil'] != null 
           ? (data['lockoutUntil'] as Timestamp).toDate() 
@@ -79,7 +82,10 @@ class LoginRateLimiter {
       List<DateTime> attempts = [];
       if (attemptsDoc.exists) {
         final data = attemptsDoc.data()!;
-        attempts = List<DateTime>.from(data['attempts'] ?? []);
+        attempts = (data['attempts'] as List<dynamic>? ?? [])
+            .where((e) => e != null)
+            .map((e) => (e as Timestamp).toDate())
+            .toList();
       }
 
       // Add new attempt
@@ -199,7 +205,10 @@ class LoginRateLimiter {
       if (!attemptsDoc.exists) return maxFailedAttempts;
 
       final data = attemptsDoc.data()!;
-      final attempts = List<DateTime>.from(data['attempts'] ?? []);
+      final attempts = (data['attempts'] as List<dynamic>? ?? [])
+          .where((e) => e != null)
+          .map((e) => (e as Timestamp).toDate())
+          .toList();
       
       // Filter attempts within the time window
       final recentAttempts = attempts.where((attempt) => 
