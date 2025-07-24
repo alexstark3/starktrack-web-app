@@ -578,4 +578,61 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get confirm => 'Bestätigen';
+
+  @override
+  String get deleteUser => 'Benutzer löschen';
+
+  @override
+  String get deleteUserConfirmation => 'Sind Sie sicher, dass Sie diesen Benutzer löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.';
+
+  @override
+  String get userDeleted => 'Benutzer erfolgreich gelöscht';
+
+  @override
+  String get adminPanel => 'Admin-Panel';
+
+  @override
+  String get searchUsers => 'Benutzer suchen...';
+
+  @override
+  String get noUsers => 'Keine Benutzer gefunden';
+
+  @override
+  String get noUsersFound => 'Keine Benutzer gefunden, die Ihrer Suche entsprechen';
+
+  @override
+  String get basicInformation => 'Grundinformationen';
+
+  @override
+  String get invalidEmail => 'Bitte geben Sie eine gültige E-Mail-Adresse ein';
+
+  @override
+  String get rolesAndModules => 'Rollen und Module';
+
+  @override
+  String get workSettings => 'Arbeitseinstellungen';
+
+  @override
+  String get annualLeave => 'Jahresurlaub (Tage)';
+
+  @override
+  String get privateAddress => 'Private Adresse';
+
+  @override
+  String get workplaceSame => 'Arbeitsplatz gleich wie private Adresse';
+
+  @override
+  String get workAddress => 'Arbeitsadresse';
+
+  @override
+  String get security => 'Sicherheit';
+
+  @override
+  String get updateUser => 'Benutzer aktualisieren';
+
+  @override
+  String get area => 'Bereich';
+
+  @override
+  String get streetNumber => 'Hausnummer';
 }

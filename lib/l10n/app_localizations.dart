@@ -1204,6 +1204,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm'**
   String get confirm;
+
+  /// No description provided for @deleteUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete User'**
+  String get deleteUser;
+
+  /// No description provided for @deleteUserConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this user? This action cannot be undone.'**
+  String get deleteUserConfirmation;
+
+  /// No description provided for @userDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'User deleted successfully'**
+  String get userDeleted;
+
+  /// No description provided for @adminPanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Panel'**
+  String get adminPanel;
+
+  /// No description provided for @searchUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Search users...'**
+  String get searchUsers;
+
+  /// No description provided for @noUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'No users found'**
+  String get noUsers;
+
+  /// No description provided for @noUsersFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No users found matching your search'**
+  String get noUsersFound;
+
+  /// No description provided for @basicInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic Information'**
+  String get basicInformation;
+
+  /// No description provided for @invalidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email address'**
+  String get invalidEmail;
+
+  /// No description provided for @rolesAndModules.
+  ///
+  /// In en, this message translates to:
+  /// **'Roles and Modules'**
+  String get rolesAndModules;
+
+  /// No description provided for @workSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Work Settings'**
+  String get workSettings;
+
+  /// No description provided for @annualLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual Leave (days)'**
+  String get annualLeave;
+
+  /// No description provided for @privateAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Private Address'**
+  String get privateAddress;
+
+  /// No description provided for @workplaceSame.
+  ///
+  /// In en, this message translates to:
+  /// **'Workplace same as private address'**
+  String get workplaceSame;
+
+  /// No description provided for @workAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Work Address'**
+  String get workAddress;
+
+  /// No description provided for @security.
+  ///
+  /// In en, this message translates to:
+  /// **'Security'**
+  String get security;
+
+  /// No description provided for @updateUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Update User'**
+  String get updateUser;
+
+  /// No description provided for @area.
+  ///
+  /// In en, this message translates to:
+  /// **'Area'**
+  String get area;
+
+  /// No description provided for @streetNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Street Number'**
+  String get streetNumber;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

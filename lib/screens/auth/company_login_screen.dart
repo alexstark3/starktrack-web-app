@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../widgets/company/login_form.dart';
 import '../dashboard/company_dashboard_screen.dart';
 import '../../super_admin/security/login_rate_limiter.dart';
 import '../../l10n/app_localizations.dart';
+import '../../utils/browser_persistence.dart';
 
 class CompanyLoginScreen extends StatefulWidget {
   const CompanyLoginScreen({Key? key}) : super(key: key);
@@ -20,6 +22,17 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
 
   bool _isLoading = false;
   String? _error;
+
+  /// Save email for browser persistence
+  Future<void> _saveEmailForPersistence(String email) async {
+    try {
+      if (email.isNotEmpty) {
+        await BrowserPersistence.saveUserEmail(email, true);
+      }
+    } catch (e) {
+      print('Error saving email for persistence: $e');
+    }
+  }
 
   Future<void> _login() async {
     if (!mounted) return;
@@ -109,6 +122,10 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
 
       // 4. Record successful login (reset rate limiting)
       await LoginRateLimiter.recordSuccessfulLogin(email);
+      if (!mounted) return;
+
+      // 5. Save email for browser persistence
+      await _saveEmailForPersistence(userEmail);
       if (!mounted) return;
 
       // Only navigate once!

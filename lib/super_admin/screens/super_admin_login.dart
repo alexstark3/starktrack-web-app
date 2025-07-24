@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import '../security/super_admin_auth_service.dart';
 import '../../theme/app_colors.dart';
 import 'super_admin_dashboard.dart';
 import 'package:web/web.dart' as web;
+import '../../utils/browser_persistence.dart';
 
 class SuperAdminLoginScreen extends StatefulWidget {
   const SuperAdminLoginScreen({Key? key}) : super(key: key);
@@ -21,10 +23,39 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
   String _errorMessage = '';
 
   @override
+  void initState() {
+    super.initState();
+    _loadSavedData();
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadSavedData() async {
+    try {
+      final savedEmail = await BrowserPersistence.loadSuperAdminEmail();
+      
+      if (mounted && savedEmail != null && savedEmail.isNotEmpty) {
+        _emailController.text = savedEmail;
+      }
+    } catch (e) {
+      print('Error loading saved super admin login data: $e');
+    }
+  }
+
+  Future<void> _saveLoginData() async {
+    try {
+      final email = _emailController.text.trim();
+      if (email.isNotEmpty) {
+        await BrowserPersistence.saveSuperAdminEmail(email, true);
+      }
+    } catch (e) {
+      print('Error saving super admin login data: $e');
+    }
   }
 
   Future<void> _login() async {
@@ -56,6 +87,10 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
       }
         return;
       }
+
+      // Save email for browser persistence (if remember me is enabled)
+      await _saveLoginData();
+      if (!mounted) return;
 
       // Navigate to admin dashboard
       if (mounted) {
@@ -169,9 +204,13 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
                       TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
+                        autocorrect: false,
+                        enableSuggestions: false,
+                        autofillHints: const [AutofillHints.email],
                         decoration: InputDecoration(
                           labelText: 'Email',
-                          prefixIcon: Icon(Icons.email, color: colors.textColor),
+                          hintText: 'Enter your email address',
+                          prefixIcon: Icon(Icons.email, color: colors.primaryBlue),
                           filled: true,
                           fillColor: colors.lightGray,
                           border: OutlineInputBorder(
@@ -203,9 +242,13 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
                       TextFormField(
                         controller: _passwordController,
                         obscureText: true,
+                        autocorrect: false,
+                        enableSuggestions: false,
+                        autofillHints: const [AutofillHints.password],
                         decoration: InputDecoration(
                           labelText: 'Password',
-                          prefixIcon: Icon(Icons.lock, color: colors.textColor),
+                          hintText: 'Enter your password',
+                          prefixIcon: Icon(Icons.lock, color: colors.primaryBlue),
                           filled: true,
                           fillColor: colors.lightGray,
                           border: OutlineInputBorder(
@@ -232,7 +275,7 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
                         },
                         onFieldSubmitted: (_) => !_isLoading ? _login() : null,
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 8),
 
                       // Error Message
                       if (_errorMessage.isNotEmpty)

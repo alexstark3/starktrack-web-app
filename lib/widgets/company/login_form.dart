@@ -1,11 +1,13 @@
 // lib/company/widgets/login_form.dart
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/browser_persistence.dart';
 
-/// Login form with animated button.
-/// • Idle → full‑width 30 px rounded‑rect button.
-/// • Loading → morphs into a 50 × 50 blue circle with a 45 px white spinner.
-class LoginForm extends StatelessWidget {
+/// Login form with animated button and browser data persistence.
+/// • Idle → full‑width 30 px rounded‑rect button.
+/// • Loading → morphs into a 50 × 50 blue circle with a 45 px white spinner.
+/// • Browser persistence → remembers email and supports password managers.
+class LoginForm extends StatefulWidget {
   const LoginForm({
     super.key,
     required this.emailController,
@@ -23,101 +25,187 @@ class LoginForm extends StatelessWidget {
   final String? error;
   final VoidCallback onLogin;
 
-  // Sizes
-  static const double _idleH = 30;
-  static const double _circle = 50;
-  static const double _spinner = 45;
+  @override
+  State<LoginForm> createState() => _LoginFormState();
+}
+
+class _LoginFormState extends State<LoginForm> {
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedData();
+  }
+
+  Future<void> _loadSavedData() async {
+    try {
+      final savedEmail = await BrowserPersistence.loadUserEmail();
+      if (mounted && savedEmail != null && savedEmail.isNotEmpty) {
+        widget.emailController.text = savedEmail;
+      }
+    } catch (e) {
+      print('Error loading saved login data: $e');
+    }
+  }
+
+  void _submit() {
+    if (_formKey.currentState?.validate() ?? false) {
+      widget.onLogin();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final w = MediaQuery.of(context).size.width;
-    final cardW = w > 500 ? 400.0 : w - 32; // 16‑px margin each side
+    final colors = Theme.of(context).extension<AppColors>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Center(
+    return Scaffold(
+      backgroundColor: isDark ? colors?.backgroundDark : Colors.grey[50],
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Card(
+              color: isDark ? colors?.cardColorDark : Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Form(
+                  key: _formKey,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          /* ───── App title ───── */
           Text(
             'Stark Track',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        style: TextStyle(
+                          fontSize: 32,
               fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          /* ───── Card ───── */
-          Container(
-            width: cardW,
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: Theme.of(context).brightness == Brightness.dark 
-                ? Theme.of(context).extension<AppColors>()!.cardColorDark
-                : Colors.white,
-              boxShadow: Theme.of(context).brightness == Brightness.light 
-                ? [BoxShadow(color: Colors.black.withValues(alpha:0.1), blurRadius: 10, offset: Offset(0, 4))]
-                : null,
-              border: Theme.of(context).brightness == Brightness.dark 
-                ? Border.all(color: const Color(0xFF404040), width: 1)
-                : null,
-            ),
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
+                          color: colors?.primaryBlue ?? Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
                 _buildFields(),
-                const SizedBox(height: 24),
-                if (error != null)
+                      const SizedBox(height: 8),
+                      if (widget.error != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
-                    child: Text(error!, style: const TextStyle(color: Colors.red)),
+                          child: Text(widget.error!, style: const TextStyle(color: Colors.red)),
+                        ),
+                      _AnimatedLoginButton(
+                        loading: widget.loading,
+                        onTap: _submit,
+                        isSubmit: true,
+                      ),
+                      const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: () {},
+                        child: Text(
+                          'Forgot my password',
+                          style: TextStyle(
+                            color: colors?.primaryBlue ?? Theme.of(context).colorScheme.primary,
+                            fontSize: 14,
+                          ),
+                        )
+                      ),
+                    ],
                   ),
-                _AnimatedLoginButton(loading: loading, onTap: onLogin),
-              ],
+                ),
+              ),
             ),
           ),
-
-          const SizedBox(height: 16),
-          TextButton(onPressed: () {}, child: const Text('Forgot my password')),
-        ],
+        ),
       ),
     );
   }
 
   Column _buildFields() {
+    final colors = Theme.of(context).extension<AppColors>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       children: [
-        TextField(
-          controller: emailController,
-          decoration: const InputDecoration(labelText: 'Email'),
+        TextFormField(
+          controller: widget.emailController,
+          keyboardType: TextInputType.emailAddress,
+          autocorrect: false,
+          enableSuggestions: false,
+          autofillHints: const [AutofillHints.username],
           textInputAction: TextInputAction.next,
-          onSubmitted: (_) => passwordFocus.requestFocus(),
-          autofocus: true
+          onFieldSubmitted: (_) => widget.passwordFocus.requestFocus(),
+          autofocus: true,
+          validator: (value) => (value == null || value.isEmpty) ? 'Please enter your email' : null,
+          decoration: InputDecoration(
+            labelText: 'Email',
+            hintText: 'Enter your email address',
+            prefixIcon: Icon(Icons.email, color: colors?.primaryBlue ?? Theme.of(context).colorScheme.primary),
+            filled: true,
+            fillColor: isDark ? colors?.lightGray ?? Colors.grey[800] : Colors.grey[100],
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: colors?.primaryBlue ?? Theme.of(context).colorScheme.primary, 
+                width: 2
+              ),
+            ),
+          ),
         ),
         const SizedBox(height: 16),
-        TextField(
-          controller: passwordController,
-          focusNode: passwordFocus,
-          decoration: const InputDecoration(labelText: 'Password'),
+        TextFormField(
+          controller: widget.passwordController,
+          focusNode: widget.passwordFocus,
           obscureText: true,
+          autocorrect: false,
+          enableSuggestions: false,
+          autofillHints: const [AutofillHints.password],
           textInputAction: TextInputAction.done,
-          onSubmitted: (_) => onLogin(),
+          onFieldSubmitted: (_) => _submit(),
+          validator: (value) => (value == null || value.isEmpty) ? 'Please enter your password' : null,
+          decoration: InputDecoration(
+            labelText: 'Password',
+            hintText: 'Enter your password',
+            prefixIcon: Icon(Icons.lock, color: colors?.primaryBlue ?? Theme.of(context).colorScheme.primary),
+            filled: true,
+            fillColor: isDark ? colors?.lightGray ?? Colors.grey[800] : Colors.grey[100],
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: colors?.primaryBlue ?? Theme.of(context).colorScheme.primary, 
+                width: 2
+              ),
+            ),
+          ),
         ),
       ],
     );
   }
 }
 
-/* ────────────────────────── Animated button ───────────────────────── */
 class _AnimatedLoginButton extends StatelessWidget {
-  const _AnimatedLoginButton({required this.loading, required this.onTap});
+  const _AnimatedLoginButton({required this.loading, required this.onTap, this.isSubmit = false});
 
   final bool loading;
   final VoidCallback onTap;
+  final bool isSubmit;
 
-  static const double _idleH = LoginForm._idleH;
-  static const double _circle = LoginForm._circle;
-  static const double _spinner = LoginForm._spinner;
+  static const double _idleH = 48;
+  static const double _circle = 48;
+  static const double _spinner = 45;
 
   @override
   Widget build(BuildContext context) {
@@ -150,6 +238,8 @@ class _AnimatedLoginButton extends StatelessWidget {
                           color: Colors.white,
                         ),
                       )
+                    : isSubmit
+                      ? const Text('Login', style: TextStyle(color: Colors.white))
                     : const Text('Login', style: TextStyle(color: Colors.white)),
               ),
             ),

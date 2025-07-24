@@ -578,4 +578,61 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get confirm => 'Confirm';
+
+  @override
+  String get deleteUser => 'Delete User';
+
+  @override
+  String get deleteUserConfirmation => 'Are you sure you want to delete this user? This action cannot be undone.';
+
+  @override
+  String get userDeleted => 'User deleted successfully';
+
+  @override
+  String get adminPanel => 'Admin Panel';
+
+  @override
+  String get searchUsers => 'Search users...';
+
+  @override
+  String get noUsers => 'No users found';
+
+  @override
+  String get noUsersFound => 'No users found matching your search';
+
+  @override
+  String get basicInformation => 'Basic Information';
+
+  @override
+  String get invalidEmail => 'Please enter a valid email address';
+
+  @override
+  String get rolesAndModules => 'Roles and Modules';
+
+  @override
+  String get workSettings => 'Work Settings';
+
+  @override
+  String get annualLeave => 'Annual Leave (days)';
+
+  @override
+  String get privateAddress => 'Private Address';
+
+  @override
+  String get workplaceSame => 'Workplace same as private address';
+
+  @override
+  String get workAddress => 'Work Address';
+
+  @override
+  String get security => 'Security';
+
+  @override
+  String get updateUser => 'Update User';
+
+  @override
+  String get area => 'Area';
+
+  @override
+  String get streetNumber => 'Street Number';
 }

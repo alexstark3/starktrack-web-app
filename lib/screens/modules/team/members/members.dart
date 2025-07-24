@@ -38,25 +38,40 @@ class MembersTab extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // White card with search bar
             Container(
               decoration: BoxDecoration(
-                border: Border.all(
-                  color: Theme.of(context).brightness == Brightness.dark ? Colors.white24 : Colors.black26,
-                  width: 1,
-                ),
-                color: colors.lightGray,
-                borderRadius: BorderRadius.circular(10),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: AppLocalizations.of(context)?.searchByNameSurnameEmail ?? 'Search by name, surname or email',
-                  prefixIcon: const Icon(Icons.search),
-                  isDense: true,
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.all(16),
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Theme.of(context).brightness == Brightness.dark ? Colors.white24 : Colors.black26,
+                    width: 1,
+                  ),
+                  color: colors.lightGray,
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                style: TextStyle(color: colors.textColor),
-                onChanged: (val) => setState(() => _search = val.trim().toLowerCase()),
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)?.searchByNameSurnameEmail ?? 'Search by name, surname or email',
+                    prefixIcon: const Icon(Icons.search),
+                    isDense: true,
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                  style: TextStyle(color: colors.textColor),
+                  onChanged: (val) => setState(() => _search = val.trim().toLowerCase()),
+                ),
               ),
             ),
             const SizedBox(height: 20),
@@ -231,6 +246,7 @@ class _MembersTable extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
+                        // View button
                         ElevatedButton.icon(
                           onPressed: () => onView(doc),
                           icon: const Icon(Icons.visibility, size: 16),
@@ -238,6 +254,40 @@ class _MembersTable extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: colors.primaryBlue,
                             foregroundColor: colors.whiteTextOnBlue,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        // Edit button
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            // TODO: Implement edit functionality
+                          },
+                          icon: const Icon(Icons.edit, size: 16),
+                          label: Text('Edit'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        // Delete button
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            // TODO: Implement delete functionality
+                          },
+                          icon: const Icon(Icons.delete, size: 16),
+                          label: Text('Delete'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),

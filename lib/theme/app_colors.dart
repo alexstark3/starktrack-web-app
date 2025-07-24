@@ -17,6 +17,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color sideMenuLight;
   final Color sideMenuDark;
   final Color cardColorDark;
+  final Color backgroundLight;
 
   const AppColors({
     required this.primaryBlue,
@@ -35,6 +36,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.sideMenuLight,
     required this.sideMenuDark,
     required this.cardColorDark,
+    required this.backgroundLight,
   });
 
   @override
@@ -55,6 +57,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? sideMenuLight,
     Color? sideMenuDark,
     Color? cardColorDark,
+    Color? backgroundLight,
   }) {
     return AppColors(
       primaryBlue: primaryBlue ?? this.primaryBlue,
@@ -73,6 +76,7 @@ class AppColors extends ThemeExtension<AppColors> {
       sideMenuLight: sideMenuLight ?? this.sideMenuLight,
       sideMenuDark: sideMenuDark ?? this.sideMenuDark,
       cardColorDark: cardColorDark ?? this.cardColorDark,
+      backgroundLight: backgroundLight ?? this.backgroundLight,
     );
   }
 
@@ -96,6 +100,7 @@ class AppColors extends ThemeExtension<AppColors> {
       sideMenuLight: Color.lerp(sideMenuLight, other.sideMenuLight, t)!,
       sideMenuDark: Color.lerp(sideMenuDark, other.sideMenuDark, t)!,
       cardColorDark: Color.lerp(cardColorDark, other.cardColorDark, t)!,
+      backgroundLight: Color.lerp(backgroundLight, other.backgroundLight, t)!,
     );
   }
 
@@ -117,6 +122,7 @@ class AppColors extends ThemeExtension<AppColors> {
     sideMenuLight: Color(0xFFFFFFFF), // Light theme side menu - white
     sideMenuDark: Color(0xFFF3F3F7),  // Not used in light theme but required
     cardColorDark: Color(0xFFFFFFFF), // Light theme uses white cards
+    backgroundLight: Color(0xFFFFFFFF), // Light theme background
   );
 
   static const AppColors dark = AppColors(
@@ -136,5 +142,6 @@ class AppColors extends ThemeExtension<AppColors> {
     sideMenuLight: Color(0xFF252526), // Not used in dark theme but required
     sideMenuDark: Color(0xFF1E1E1E),  // VS Code side menu color
     cardColorDark: Color(0xFF191919), // Dark card color matching logs
+    backgroundLight: Color(0xFF2D2D30), // Dark theme light background
   );
 }
