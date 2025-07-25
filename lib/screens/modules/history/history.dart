@@ -58,7 +58,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     final logsRef = FirebaseFirestore.instance
         .collection('companies')
         .doc(widget.companyId)
@@ -68,29 +68,29 @@ class _HistoryLogsState extends State<HistoryLogs> {
         .orderBy('begin', descending: true);
 
     final appColors = Theme.of(context).extension<AppColors>()!;
-    
+
     BoxDecoration pillDecoration = BoxDecoration(
-      border: Border.all(
-        color: isDark ? Colors.white24 : Colors.black26, 
-        width: 1
-      ),
-      color: isDark 
-        ? appColors.cardColorDark
-        : Colors.white,
+      border:
+          Border.all(color: isDark ? Colors.white24 : Colors.black26, width: 1),
+      color: isDark ? appColors.cardColorDark : appColors.backgroundLight,
       borderRadius: BorderRadius.circular(10),
-      boxShadow: isDark ? null : [
-        BoxShadow(
-          color: Colors.black.withValues(alpha:0.08),
-          blurRadius: 4,
-          offset: const Offset(0, 2),
-        ),
-      ],
+      boxShadow: isDark
+          ? null
+          : [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
     );
 
     TextStyle pillTextStyle = TextStyle(
       fontSize: kFilterFontSize,
       fontWeight: FontWeight.w500,
-      color: isDark ? Colors.white.withValues(alpha:0.87) : Colors.black.withValues(alpha:0.87),
+      color: isDark
+          ? const Color(0xFFB3B3B3)
+          : Colors.black.withValues(alpha: 0.87),
     );
 
     // From and To date pickers
@@ -115,12 +115,17 @@ class _HistoryLogsState extends State<HistoryLogs> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
+                Icon(Icons.date_range,
+                    color: theme.colorScheme.primary, size: 20),
                 const SizedBox(width: 6),
                 Text(
                   fromDate == null ? l10n.from : dateFormat.format(fromDate!),
                   style: TextStyle(
-                    color: fromDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withValues(alpha:0.87) : Colors.black.withValues(alpha:0.87)),
+                    color: fromDate == null
+                        ? theme.colorScheme.primary
+                        : (isDark
+                            ? Colors.white.withValues(alpha: 0.87)
+                            : Colors.black.withValues(alpha: 0.87)),
                     fontWeight: FontWeight.w500,
                     fontSize: kFilterFontSize,
                   ),
@@ -148,12 +153,17 @@ class _HistoryLogsState extends State<HistoryLogs> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
+                Icon(Icons.date_range,
+                    color: theme.colorScheme.primary, size: 20),
                 const SizedBox(width: 6),
                 Text(
                   toDate == null ? l10n.to : dateFormat.format(toDate!),
                   style: TextStyle(
-                    color: toDate == null ? theme.colorScheme.primary : (isDark ? Colors.white.withValues(alpha:0.87) : Colors.black.withValues(alpha:0.87)),
+                    color: toDate == null
+                        ? theme.colorScheme.primary
+                        : (isDark
+                            ? Colors.white.withValues(alpha: 0.87)
+                            : Colors.black.withValues(alpha: 0.87)),
                     fontWeight: FontWeight.w500,
                     fontSize: kFilterFontSize,
                   ),
@@ -211,9 +221,15 @@ class _HistoryLogsState extends State<HistoryLogs> {
         controller: projectController,
         decoration: InputDecoration(
           hintText: AppLocalizations.of(context)!.project,
+          hintStyle: TextStyle(
+            color: isDark
+                ? const Color(0xFFB3B3B3)
+                : Colors.black.withValues(alpha: 0.87),
+          ),
           border: InputBorder.none,
           isDense: true,
-          contentPadding: EdgeInsets.zero,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
         ),
         style: pillTextStyle,
         onChanged: (v) => setState(() => searchProject = v.trim()),
@@ -230,9 +246,15 @@ class _HistoryLogsState extends State<HistoryLogs> {
         controller: noteController,
         decoration: InputDecoration(
           hintText: AppLocalizations.of(context)!.note,
+          hintStyle: TextStyle(
+            color: isDark
+                ? const Color(0xFFB3B3B3)
+                : Colors.black.withValues(alpha: 0.87),
+          ),
           border: InputBorder.none,
           isDense: true,
-          contentPadding: EdgeInsets.zero,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
         ),
         style: pillTextStyle,
         onChanged: (v) => setState(() => searchNote = v.trim()),
@@ -243,17 +265,19 @@ class _HistoryLogsState extends State<HistoryLogs> {
     final refreshBtn = Container(
       height: kFilterHeight,
       decoration: BoxDecoration(
-        color: isDark 
-          ? theme.colorScheme.primary.withValues(alpha:0.2)
-          : theme.colorScheme.primary.withValues(alpha:0.1),
+        color: isDark
+            ? theme.colorScheme.primary.withValues(alpha: 0.2)
+            : theme.colorScheme.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10),
-        boxShadow: isDark ? null : [
-          BoxShadow(
-            color: Colors.black.withValues(alpha:0.08),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: IconButton(
         icon: Icon(Icons.refresh, color: theme.colorScheme.primary, size: 24),
@@ -272,444 +296,524 @@ class _HistoryLogsState extends State<HistoryLogs> {
       ),
     );
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: Column(
-        children: [
-          // Search filters
-          Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: isDark ? appColors.cardColorDark : Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: isDark ? null : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha:0.08),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+    return Scaffold(
+      backgroundColor: appColors.backgroundDark,
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        child: Column(
+          children: [
+            // Search filters
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: isDark
+                    ? appColors.cardColorDark
+                    : appColors.backgroundLight,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: isDark
+                    ? null
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+              ),
+              padding: const EdgeInsets.all(16),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final needsWrap = constraints.maxWidth < 800;
+
+                  if (needsWrap) {
+                    return Wrap(
+                      spacing: kFilterSpacing,
+                      runSpacing: 8,
+                      children: [
+                        dateGroup,
+                        groupDropdown,
+                        refreshBtn,
+                        projectBox,
+                        noteBox,
+                      ],
+                    );
+                  } else {
+                    return Row(
+                      children: [
+                        dateGroup,
+                        const SizedBox(width: kFilterSpacing),
+                        groupDropdown,
+                        const SizedBox(width: kFilterSpacing),
+                        refreshBtn,
+                        const SizedBox(width: kFilterSpacing),
+                        projectBox,
+                        const SizedBox(width: kFilterSpacing),
+                        noteBox,
+                      ],
+                    );
+                  }
+                },
+              ),
             ),
-            padding: const EdgeInsets.all(16),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final needsWrap = constraints.maxWidth < 800;
-                
-                if (needsWrap) {
-                  return Wrap(
-                    spacing: kFilterSpacing,
-                    runSpacing: 8,
-                    children: [
-                      dateGroup,
-                      groupDropdown,
-                      refreshBtn,
-                      projectBox,
-                      noteBox,
-                    ],
-                  );
-                } else {
-                  return Row(
-                    children: [
-                      dateGroup,
-                      const SizedBox(width: kFilterSpacing),
-                      groupDropdown,
-                      const SizedBox(width: kFilterSpacing),
-                      refreshBtn,
-                      const SizedBox(width: kFilterSpacing),
-                      projectBox,
-                      const SizedBox(width: kFilterSpacing),
-                      noteBox,
-                    ],
-                  );
-                }
-              },
-            ),
-          ),
-          const SizedBox(height: 20),
-          
-          // Results
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: logsRef.snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(
-                    child: Text(
-                      l10n.noLogsFound,
-                      style: TextStyle(
-                        color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
-                        fontSize: 16,
+            const SizedBox(height: 20),
+
+            // Results
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: logsRef.snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Center(
+                      child: Text(
+                        l10n.noLogsFound,
+                        style: TextStyle(
+                          color: isDark
+                              ? const Color(0xFF969696)
+                              : const Color(0xFF6A6A6A),
+                          fontSize: 16,
+                        ),
                       ),
-                    ),
-                  );
-                }
-
-                var logs = snapshot.data!.docs;
-
-                List<QueryDocumentSnapshot> filteredLogs = logs.where((doc) {
-                  final data = doc.data() as Map<String, dynamic>;
-                  final begin = (data['begin'] is Timestamp)
-                      ? (data['begin'] as Timestamp).toDate()
-                      : null;
-                  final project = (data['project'] ?? '').toString();
-                  final note = (data['note'] ?? '').toString();
-
-                  if (fromDate != null && begin != null && begin.isBefore(fromDate!)) return false;
-                  if (toDate != null && begin != null && begin.isAfter(toDate!)) return false;
-
-                  if (searchProject.isNotEmpty &&
-                      !project.toLowerCase().contains(searchProject.toLowerCase())) {
-                    return false;
+                    );
                   }
 
-                  if (searchNote.isNotEmpty &&
-                      !note.toLowerCase().contains(searchNote.toLowerCase())) {
-                    return false;
-                  }
+                  var logs = snapshot.data!.docs;
 
-                  return true;
-                }).toList();
-
-                if (filteredLogs.isEmpty) {
-                  return Center(child: Text(l10n.noEntriesMatchFilters));
-                }
-
-                // Process all logs into entries
-                List<_HistoryEntry> entries = [];
-                for (var doc in filteredLogs) {
-                  try {
+                  List<QueryDocumentSnapshot> filteredLogs = logs.where((doc) {
                     final data = doc.data() as Map<String, dynamic>;
-                    
-                    // Safe data extraction
-                    DateTime? begin;
-                    DateTime? end;
-                    String project = '';
-                    String note = '';
-                    String sessionDate = '';
-                    bool perDiem = false;
-                    Duration duration = Duration.zero;
-                    double totalExpense = 0.0;
-                    Map<String, dynamic> expensesMap = {};
-                    
+                    final begin = (data['begin'] is Timestamp)
+                        ? (data['begin'] as Timestamp).toDate()
+                        : null;
+                    final project = (data['project'] ?? '').toString();
+                    final note = (data['note'] ?? '').toString();
+
+                    if (fromDate != null &&
+                        begin != null &&
+                        begin.isBefore(fromDate!)) return false;
+                    if (toDate != null &&
+                        begin != null &&
+                        begin.isAfter(toDate!)) return false;
+
+                    if (searchProject.isNotEmpty &&
+                        !project
+                            .toLowerCase()
+                            .contains(searchProject.toLowerCase())) {
+                      return false;
+                    }
+
+                    if (searchNote.isNotEmpty &&
+                        !note
+                            .toLowerCase()
+                            .contains(searchNote.toLowerCase())) {
+                      return false;
+                    }
+
+                    return true;
+                  }).toList();
+
+                  if (filteredLogs.isEmpty) {
+                    return Center(child: Text(l10n.noEntriesMatchFilters));
+                  }
+
+                  // Process all logs into entries
+                  List<_HistoryEntry> entries = [];
+                  for (var doc in filteredLogs) {
                     try {
-                      begin = (data['begin'] is Timestamp) ? (data['begin'] as Timestamp).toDate() : null;
-                      end = (data['end'] is Timestamp) ? (data['end'] as Timestamp).toDate() : null;
-                      project = (data['project'] ?? '').toString();
-                      note = (data['note'] ?? '').toString();
-                      sessionDate = (data['sessionDate'] ?? '').toString();
-                      
-                      final perDiemRaw = data['perDiem'];
-                      perDiem = perDiemRaw == true || perDiemRaw == 1 || perDiemRaw == '1';
-                      
-                      // Calculate duration
-                      if (begin != null && end != null) {
-                        duration = end.difference(begin);
-                      }
-                      
-                      // Process expenses safely
-                      final rawExpenses = data['expenses'];
-                      if (rawExpenses is Map) {
-                        expensesMap = Map<String, dynamic>.from(rawExpenses);
-                        
-                        for (var entry in expensesMap.entries) {
-                          try {
-                            final v = entry.value;
-                            if (v is num) {
-                              totalExpense += v.toDouble();
-                            } else if (v is String) {
-                              final parsed = double.tryParse(v);
-                              if (parsed != null) totalExpense += parsed;
-                            } else if (v is bool) {
-                              // Skip boolean values
+                      final data = doc.data() as Map<String, dynamic>;
+
+                      // Safe data extraction
+                      DateTime? begin;
+                      DateTime? end;
+                      String project = '';
+                      String note = '';
+                      String sessionDate = '';
+                      bool perDiem = false;
+                      Duration duration = Duration.zero;
+                      double totalExpense = 0.0;
+                      Map<String, dynamic> expensesMap = {};
+
+                      try {
+                        begin = (data['begin'] is Timestamp)
+                            ? (data['begin'] as Timestamp).toDate()
+                            : null;
+                        end = (data['end'] is Timestamp)
+                            ? (data['end'] as Timestamp).toDate()
+                            : null;
+                        project = (data['project'] ?? '').toString();
+                        note = (data['note'] ?? '').toString();
+                        sessionDate = (data['sessionDate'] ?? '').toString();
+
+                        final perDiemRaw = data['perDiem'];
+                        perDiem = perDiemRaw == true ||
+                            perDiemRaw == 1 ||
+                            perDiemRaw == '1';
+
+                        // Calculate duration
+                        if (begin != null && end != null) {
+                          duration = end.difference(begin);
+                        }
+
+                        // Process expenses safely
+                        final rawExpenses = data['expenses'];
+                        if (rawExpenses is Map) {
+                          expensesMap = Map<String, dynamic>.from(rawExpenses);
+
+                          for (var entry in expensesMap.entries) {
+                            try {
+                              final v = entry.value;
+                              if (v is num) {
+                                totalExpense += v.toDouble();
+                              } else if (v is String) {
+                                final parsed = double.tryParse(v);
+                                if (parsed != null) totalExpense += parsed;
+                              } else if (v is bool) {
+                                // Skip boolean values
+                                continue;
+                              }
+                            } catch (e) {
+                              print(
+                                  'Error processing expense entry ${entry.key}: $e');
                               continue;
                             }
-                          } catch (e) {
-                            print('Error processing expense entry ${entry.key}: $e');
-                            continue;
                           }
                         }
+                      } catch (e) {
+                        print('Error processing log data: $e');
                       }
+
+                      entries.add(_HistoryEntry(
+                        begin: begin,
+                        end: end,
+                        duration: duration,
+                        project: project,
+                        note: note,
+                        sessionDate: sessionDate,
+                        perDiem: perDiem,
+                        expense: totalExpense,
+                        expensesMap: expensesMap,
+                      ));
                     } catch (e) {
-                      print('Error processing log data: $e');
-                    }
-
-                    entries.add(_HistoryEntry(
-                      begin: begin,
-                      end: end,
-                      duration: duration,
-                      project: project,
-                      note: note,
-                      sessionDate: sessionDate,
-                      perDiem: perDiem,
-                      expense: totalExpense,
-                      expensesMap: expensesMap,
-                    ));
-                  } catch (e) {
-                    print('Error creating history entry: $e');
-                    continue;
-                  }
-                }
-
-                // Sort by begin date descending
-                entries.sort((a, b) {
-                  if (a.begin == null) return 1;
-                  if (b.begin == null) return -1;
-                  return b.begin!.compareTo(a.begin!);
-                });
-
-                // Group entries
-                Map<String, List<_HistoryEntry>> grouped = {};
-                for (var entry in entries) {
-                  String key = '';
-                  if (entry.begin == null) {
-                    key = l10n.unknown;
-                  } else {
-                    switch (groupType) {
-                      case GroupType.day:
-                        key = dateFormat.format(entry.begin!);
-                        break;
-                      case GroupType.week:
-                        final week = _weekNumber(entry.begin!);
-                        key = '${l10n.week} $week, ${entry.begin!.year}';
-                        break;
-                      case GroupType.month:
-                        key = DateFormat('MMMM yyyy').format(entry.begin!);
-                        break;
-                      case GroupType.year:
-                        key = '${entry.begin!.year}';
-                        break;
+                      print('Error creating history entry: $e');
+                      continue;
                     }
                   }
-                  grouped.putIfAbsent(key, () => []).add(entry);
-                }
 
-                // Sort group keys
-                final sortedKeys = grouped.keys.toList()..sort((a, b) {
-                  if (groupType == GroupType.day) {
-                    try {
-                      return DateTime.parse(b).compareTo(DateTime.parse(a));
-                    } catch (_) {}
-                  } else if (groupType == GroupType.year) {
-                    return int.parse(b).compareTo(int.parse(a));
-                  } else if (groupType == GroupType.month) {
-                    try {
-                      final fa = DateFormat('MMMM yyyy').parse(a);
-                      final fb = DateFormat('MMMM yyyy').parse(b);
-                      return fb.compareTo(fa);
-                    } catch (_) {}
-                  } else if (groupType == GroupType.week) {
-                    final wa = int.tryParse(a.split(' ')[1].replaceAll(',', '')) ?? 0;
-                    final wb = int.tryParse(b.split(' ')[1].replaceAll(',', '')) ?? 0;
-                    final ya = int.tryParse(a.split(',').last.trim()) ?? 0;
-                    final yb = int.tryParse(b.split(',').last.trim()) ?? 0;
-                    return yb != ya ? yb.compareTo(ya) : wb.compareTo(wa);
-                  }
-                  return a.compareTo(b);
-                });
+                  // Sort by begin date descending
+                  entries.sort((a, b) {
+                    if (a.begin == null) return 1;
+                    if (b.begin == null) return -1;
+                    return b.begin!.compareTo(a.begin!);
+                  });
 
-                // Grouped list view
-                return ListView.builder(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  cacheExtent: 1000,
-                  addAutomaticKeepAlives: false,
-                  addRepaintBoundaries: false,
-                  itemCount: sortedKeys.length,
-                  itemBuilder: (context, groupIdx) {
-                    final groupKey = sortedKeys[groupIdx];
-                    final groupList = grouped[groupKey]!;
-
-                    // Calculate group totals
-                    Duration groupTotal = Duration.zero;
-                    double groupExpense = 0.0;
-                    
-                    for (var e in groupList) {
-                      try {
-                        groupTotal += e.duration;
-                        if (e.expense.isFinite && !e.expense.isNaN) {
-                          groupExpense += e.expense;
-                        }
-                      } catch (error) {
-                        print('Error in group calculation: $error');
+                  // Group entries
+                  Map<String, List<_HistoryEntry>> grouped = {};
+                  for (var entry in entries) {
+                    String key = '';
+                    if (entry.begin == null) {
+                      key = l10n.unknown;
+                    } else {
+                      switch (groupType) {
+                        case GroupType.day:
+                          key = dateFormat.format(entry.begin!);
+                          break;
+                        case GroupType.week:
+                          final week = _weekNumber(entry.begin!);
+                          key = '${l10n.week} $week, ${entry.begin!.year}';
+                          break;
+                        case GroupType.month:
+                          key = DateFormat('MMMM yyyy').format(entry.begin!);
+                          break;
+                        case GroupType.year:
+                          key = '${entry.begin!.year}';
+                          break;
                       }
                     }
-                    
-                                                              return Container(
-                       margin: const EdgeInsets.only(bottom: 8),
-                       decoration: BoxDecoration(
-                         color: isDark ? appColors.cardColorDark : Colors.white,
-                         borderRadius: BorderRadius.circular(12),
-                         boxShadow: isDark ? null : [
-                           BoxShadow(
-                             color: Colors.black.withValues(alpha:0.08),
-                             blurRadius: 6,
-                             offset: const Offset(0, 2),
-                           ),
-                         ],
-                       ),
-                       child: Column(
-                         children: [
-                           // Group header
-                           Container(
-                             width: double.infinity,
-                             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                             decoration: BoxDecoration(
-                               color: isDark 
-                                 ? theme.colorScheme.primary.withValues(alpha:0.1)
-                                 : theme.colorScheme.primary.withValues(alpha:0.05),
-                               borderRadius: const BorderRadius.only(
-                                 topLeft: Radius.circular(12),
-                                 topRight: Radius.circular(12),
-                               ),
-                             ),
-                             child: Text(
-                               groupKey,
-                               style: TextStyle(
-                                 fontWeight: FontWeight.bold,
-                                 color: theme.colorScheme.primary,
-                               ),
-                             ),
-                           ),
-                           // Group entries
-                           ...groupList.map((entry) => ListTile(
-                             title: Text(
-                               (entry.begin != null && entry.end != null)
-                                   ? '${dateFormat.format(entry.begin!)}  ${timeFormat.format(entry.begin!)} - ${timeFormat.format(entry.end!)}'
-                                   : entry.sessionDate,
-                               style: TextStyle(
-                                 fontWeight: FontWeight.bold,
-                                 color: isDark ? const Color(0xFFCCCCCC) : Colors.black87,
-                               ),
-                             ),
-                             subtitle: Column(
-                               crossAxisAlignment: CrossAxisAlignment.start,
-                               children: [
-                                 if (entry.project.isNotEmpty) 
-                                   Text(
-                                     '${l10n.project}: ${entry.project}',
-                                     style: TextStyle(
-                                       color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
-                                     ),
-                                   ),
-                                 if (entry.duration != Duration.zero)
-                                   Text(
-                                     '${l10n.duration}: ${_formatDuration(entry.duration)}',
-                                     style: TextStyle(
-                                       color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
-                                     ),
-                                   ),
-                                 if (entry.note.isNotEmpty) 
-                                   Text(
-                                     '${l10n.note}: ${entry.note}',
-                                     style: TextStyle(
-                                       color: isDark ? const Color(0xFF969696) : const Color(0xFF6A6A6A),
-                                     ),
-                                   ),
-                                 if (entry.perDiem)
-                                   Text(
-                                     '${l10n.perDiem}: ${l10n.yes}', 
-                                     style: TextStyle(
-                                       color: theme.colorScheme.primary,
-                                     ),
-                                   ),
-                                 if (entry.expensesMap.isNotEmpty)
-                                   Padding(
-                                     padding: const EdgeInsets.only(top: 2.0),
-                                     child: Column(
-                                       crossAxisAlignment: CrossAxisAlignment.start,
-                                       children: [
-                                         ...entry.expensesMap.entries.map((e) {
-                                           if (e.value is bool) {
-                                             return Text('${_translateExpenseKey(e.key, l10n)}: ${e.value ? l10n.yes : l10n.no}',
-                                               style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w600, fontSize: 15),
-                                             );
-                                           } else {
-                                             double expenseValue = 0.0;
-                                             if (e.value is num) {
-                                               expenseValue = (e.value as num).toDouble();
-                                             } else if (e.value is String) {
-                                               expenseValue = double.tryParse(e.value as String) ?? 0.0;
-                                             }
-                                             return Text('${_translateExpenseKey(e.key, l10n)}: ${expenseFormat.format(expenseValue)}',
-                                               style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.w600, fontSize: 15),
-                                             );
-                                           }
-                                         }).toList(),
-                                         if (entry.expense > 0)
-                                           Padding(
-                                             padding: const EdgeInsets.only(top: 4.0),
-                                             child: Text(
-                                               '${l10n.totalExpenses}: ${expenseFormat.format(entry.expense)}',
-                                               style: const TextStyle(
-                                                 color: Colors.red,
-                                                 fontWeight: FontWeight.w600,
-                                                 fontSize: 15,
-                                               ),
-                                             ),
-                                           ),
-                                       ],
-                                     ),
-                                   )
-                                 else if (entry.expense > 0)
-                                   Padding(
-                                     padding: const EdgeInsets.only(top: 2.0),
-                                     child: Text(
-                                     '${l10n.totalExpenses}: ${expenseFormat.format(entry.expense)}',
-                                       style: const TextStyle(
-                                         color: Colors.red,
-                                         fontWeight: FontWeight.w600,
-                                         fontSize: 15,
-                                       ),
-                                     ),
-                                   ),
-                               ],
-                             ),
-                           )).toList(),
-                           // Group totals footer
-                           Container(
-                             width: double.infinity,
-                             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                             decoration: BoxDecoration(
-                               color: isDark 
-                                 ? theme.colorScheme.primary.withValues(alpha:0.1)
-                                 : theme.colorScheme.primary.withValues(alpha:0.05),
-                               borderRadius: const BorderRadius.only(
-                                 bottomLeft: Radius.circular(12),
-                                 bottomRight: Radius.circular(12),
-                               ),
-                             ),
-                             child: Wrap(
-                               spacing: 16,
-                               runSpacing: 4,
-                               children: [
-                                 Text(
-                                   '${l10n.totalTime}: ${_formatDuration(groupTotal)}',
-                                   style: TextStyle(
-                                     fontWeight: FontWeight.w700,
-                                     color: theme.colorScheme.primary,
-                                   ),
-                                 ),
-                                 Text(
-                                   '${l10n.totalExpenses}: ${expenseFormat.format(groupExpense)}',
-                                   style: TextStyle(
-                                     fontWeight: FontWeight.w700,
-                                     color: theme.colorScheme.primary,
-                                   ),
-                                 ),
-                               ],
-                             ),
-                           ),
-                         ],
-                       ),
-                     );
-                  },
-                );
-              },
+                    grouped.putIfAbsent(key, () => []).add(entry);
+                  }
+
+                  // Sort group keys
+                  final sortedKeys = grouped.keys.toList()
+                    ..sort((a, b) {
+                      if (groupType == GroupType.day) {
+                        try {
+                          return DateTime.parse(b).compareTo(DateTime.parse(a));
+                        } catch (_) {}
+                      } else if (groupType == GroupType.year) {
+                        return int.parse(b).compareTo(int.parse(a));
+                      } else if (groupType == GroupType.month) {
+                        try {
+                          final fa = DateFormat('MMMM yyyy').parse(a);
+                          final fb = DateFormat('MMMM yyyy').parse(b);
+                          return fb.compareTo(fa);
+                        } catch (_) {}
+                      } else if (groupType == GroupType.week) {
+                        final wa =
+                            int.tryParse(a.split(' ')[1].replaceAll(',', '')) ??
+                                0;
+                        final wb =
+                            int.tryParse(b.split(' ')[1].replaceAll(',', '')) ??
+                                0;
+                        final ya = int.tryParse(a.split(',').last.trim()) ?? 0;
+                        final yb = int.tryParse(b.split(',').last.trim()) ?? 0;
+                        return yb != ya ? yb.compareTo(ya) : wb.compareTo(wa);
+                      }
+                      return a.compareTo(b);
+                    });
+
+                  // Grouped list view
+                  return ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    cacheExtent: 1000,
+                    addAutomaticKeepAlives: false,
+                    addRepaintBoundaries: false,
+                    itemCount: sortedKeys.length,
+                    itemBuilder: (context, groupIdx) {
+                      final groupKey = sortedKeys[groupIdx];
+                      final groupList = grouped[groupKey]!;
+
+                      // Calculate group totals
+                      Duration groupTotal = Duration.zero;
+                      double groupExpense = 0.0;
+
+                      for (var e in groupList) {
+                        try {
+                          groupTotal += e.duration;
+                          if (e.expense.isFinite && !e.expense.isNaN) {
+                            groupExpense += e.expense;
+                          }
+                        } catch (error) {
+                          print('Error in group calculation: $error');
+                        }
+                      }
+
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? appColors.cardColorDark
+                              : appColors.backgroundLight,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: isDark
+                              ? null
+                              : [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.08),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                        ),
+                        child: Column(
+                          children: [
+                            // Group header
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 12, horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? theme.colorScheme.primary
+                                        .withValues(alpha: 0.1)
+                                    : theme.colorScheme.primary
+                                        .withValues(alpha: 0.05),
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(12),
+                                  topRight: Radius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                groupKey,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                            ),
+                            // Group entries
+                            ...groupList
+                                .map((entry) => ListTile(
+                                      title: Text(
+                                        (entry.begin != null &&
+                                                entry.end != null)
+                                            ? '${dateFormat.format(entry.begin!)}  ${timeFormat.format(entry.begin!)} - ${timeFormat.format(entry.end!)}'
+                                            : entry.sessionDate,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark
+                                              ? const Color(0xFFCCCCCC)
+                                              : const Color(0xFF212121),
+                                        ),
+                                      ),
+                                      subtitle: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          if (entry.project.isNotEmpty)
+                                            Text(
+                                              '${l10n.project}: ${entry.project}',
+                                              style: TextStyle(
+                                                color: isDark
+                                                    ? const Color(0xFF969696)
+                                                    : const Color(0xFF6A6A6A),
+                                              ),
+                                            ),
+                                          if (entry.duration != Duration.zero)
+                                            Text(
+                                              '${l10n.duration}: ${_formatDuration(entry.duration)}',
+                                              style: TextStyle(
+                                                color: isDark
+                                                    ? const Color(0xFF969696)
+                                                    : const Color(0xFF6A6A6A),
+                                              ),
+                                            ),
+                                          if (entry.note.isNotEmpty)
+                                            Text(
+                                              '${l10n.note}: ${entry.note}',
+                                              style: TextStyle(
+                                                color: isDark
+                                                    ? const Color(0xFF969696)
+                                                    : const Color(0xFF6A6A6A),
+                                              ),
+                                            ),
+                                          if (entry.perDiem)
+                                            Text(
+                                              '${l10n.perDiem}: ${l10n.yes}',
+                                              style: TextStyle(
+                                                color:
+                                                    theme.colorScheme.primary,
+                                              ),
+                                            ),
+                                          if (entry.expensesMap.isNotEmpty)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 2.0),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  ...entry.expensesMap.entries
+                                                      .map((e) {
+                                                    if (e.value is bool) {
+                                                      return Text(
+                                                        '${_translateExpenseKey(e.key, l10n)}: ${e.value ? l10n.yes : l10n.no}',
+                                                        style: TextStyle(
+                                                            color: theme
+                                                                .colorScheme
+                                                                .primary,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            fontSize: 15),
+                                                      );
+                                                    } else {
+                                                      double expenseValue = 0.0;
+                                                      if (e.value is num) {
+                                                        expenseValue =
+                                                            (e.value as num)
+                                                                .toDouble();
+                                                      } else if (e.value
+                                                          is String) {
+                                                        expenseValue =
+                                                            double.tryParse(e
+                                                                        .value
+                                                                    as String) ??
+                                                                0.0;
+                                                      }
+                                                      return Text(
+                                                        '${_translateExpenseKey(e.key, l10n)}: ${expenseFormat.format(expenseValue)}',
+                                                        style: TextStyle(
+                                                            color: theme
+                                                                .colorScheme
+                                                                .error,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            fontSize: 15),
+                                                      );
+                                                    }
+                                                  }).toList(),
+                                                  if (entry.expense > 0)
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              top: 4.0),
+                                                      child: Text(
+                                                        '${l10n.totalExpenses}: ${expenseFormat.format(entry.expense)}',
+                                                        style: const TextStyle(
+                                                          color: Colors.red,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          fontSize: 15,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                ],
+                                              ),
+                                            )
+                                          else if (entry.expense > 0)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 2.0),
+                                              child: Text(
+                                                '${l10n.totalExpenses}: ${expenseFormat.format(entry.expense)}',
+                                                style: const TextStyle(
+                                                  color: Colors.red,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 15,
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ))
+                                .toList(),
+                            // Group totals footer
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 10, horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? theme.colorScheme.primary
+                                        .withValues(alpha: 0.1)
+                                    : theme.colorScheme.primary
+                                        .withValues(alpha: 0.05),
+                                borderRadius: const BorderRadius.only(
+                                  bottomLeft: Radius.circular(12),
+                                  bottomRight: Radius.circular(12),
+                                ),
+                              ),
+                              child: Wrap(
+                                spacing: 16,
+                                runSpacing: 4,
+                                children: [
+                                  Text(
+                                    '${l10n.totalTime}: ${_formatDuration(groupTotal)}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${l10n.totalExpenses}: ${expenseFormat.format(groupExpense)}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -755,7 +859,8 @@ int _weekNumber(DateTime date) {
   final jan4 = DateTime(date.year, 1, 4);
   final startOfWeek = date.subtract(Duration(days: date.weekday - 1));
   final jan4StartOfWeek = jan4.subtract(Duration(days: jan4.weekday - 1));
-  final weekNumber = ((startOfWeek.difference(jan4StartOfWeek).inDays) / 7).floor() + 1;
+  final weekNumber =
+      ((startOfWeek.difference(jan4StartOfWeek).inDays) / 7).floor() + 1;
   return weekNumber;
 }
 

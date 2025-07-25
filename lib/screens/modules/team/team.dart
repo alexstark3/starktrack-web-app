@@ -30,18 +30,20 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Container(
       color: colors.backgroundDark,
       child: Column(
         children: [
           // --- Tab bar ---
           Padding(
-            padding: const EdgeInsets.only(top: 8, left: 25, right: 10), // Reduced right from 16 to 10
+            padding: const EdgeInsets.only(
+                top: 8, left: 25, right: 10), // Reduced right from 16 to 10
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final showOnlyIcons = constraints.maxWidth < 600; // Show only icons on small screens
-                
+                final showOnlyIcons = constraints.maxWidth <
+                    600; // Show only icons on small screens
+
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -90,16 +92,17 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                         });
                       },
                     ),
-                                     ],
-                 );
-               },
+                  ],
+                );
+              },
             ),
           ),
-          
+
           // --- Main white area ---
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10), // Reduced from 16 to 10
+              padding: const EdgeInsets.only(
+                  left: 10, right: 10, bottom: 10), // Reduced from 16 to 10
               child: Stack(
                 children: [
                   Align(
@@ -107,13 +110,17 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                     child: ClipRRect(
                       borderRadius: const BorderRadius.all(Radius.circular(12)),
                       child: Material(
-                        elevation: Theme.of(context).brightness == Brightness.light ? 2 : 0,
+                        elevation:
+                            Theme.of(context).brightness == Brightness.light
+                                ? 2
+                                : 0,
                         borderRadius: BorderRadius.circular(12),
-                        color: Theme.of(context).brightness == Brightness.dark 
-                          ? colors.cardColorDark 
-                          : Colors.white,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? colors.cardColorDark
+                            : colors.backgroundLight,
                         child: Container(
-                          padding: const EdgeInsets.fromLTRB(10, 10, 10, 10), // Reduced from 16 to 10
+                          padding: const EdgeInsets.fromLTRB(
+                              10, 10, 10, 10), // Reduced from 16 to 10
                           child: _buildTabContent(),
                         ),
                       ),
@@ -151,26 +158,27 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
         },
       );
     } else if (_selectedIndex == 2) {
-  // --- Clients logic with tab navigation and detail view ---
-  return ClientsTab(
-    companyId: widget.companyId,
-    selectedClient: _selectedClient,
-    onSelectClient: (Map<String, dynamic>? clientData) { // <-- now nullable!
-      setState(() {
-        if (clientData == null || clientData['id'] == null || clientData.isEmpty) {
-          _selectedClient = null;
-        } else {
-          _selectedClient = clientData;
-        }
-      });
-    },
-  );
-}
+      // --- Clients logic with tab navigation and detail view ---
+      return ClientsTab(
+        companyId: widget.companyId,
+        selectedClient: _selectedClient,
+        onSelectClient: (Map<String, dynamic>? clientData) {
+          // <-- now nullable!
+          setState(() {
+            if (clientData == null ||
+                clientData['id'] == null ||
+                clientData.isEmpty) {
+              _selectedClient = null;
+            } else {
+              _selectedClient = clientData;
+            }
+          });
+        },
+      );
+    }
     return const SizedBox.shrink();
   }
 }
-
-
 
 // --- Team Tab Widget with isolated hover state ---
 class _TeamTab extends StatefulWidget {
@@ -206,12 +214,12 @@ class _TeamTabState extends State<_TeamTab> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     // Determine if tab has selected content
-    final hasSelectedContent = widget.selectedMemberDoc != null || 
-                              widget.selectedProject != null || 
-                              widget.selectedClient != null;
-    
+    final hasSelectedContent = widget.selectedMemberDoc != null ||
+        widget.selectedProject != null ||
+        widget.selectedClient != null;
+
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -222,9 +230,13 @@ class _TeamTabState extends State<_TeamTab> {
           margin: const EdgeInsets.only(right: 8),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           decoration: BoxDecoration(
-            color: widget.isSelected 
-              ? (isDark ? widget.colors.cardColorDark : Colors.white)
-              : (_isHovered && isDark ? widget.colors.cardColorDark : (isDark ? widget.colors.dashboardBackground : widget.colors.dashboardBackground)),
+            color: widget.isSelected
+                ? (isDark ? widget.colors.cardColorDark : Colors.white)
+                : (_isHovered && isDark
+                    ? widget.colors.cardColorDark
+                    : (isDark
+                        ? widget.colors.dashboardBackground
+                        : widget.colors.dashboardBackground)),
             borderRadius: BorderRadius.vertical(
               top: const Radius.circular(6),
               bottom: Radius.circular(widget.isSelected ? 0 : 0),
@@ -243,7 +255,9 @@ class _TeamTabState extends State<_TeamTab> {
                 widget.icon,
                 size: 20,
                 color: widget.isSelected
-                    ? (hasSelectedContent ? widget.colors.darkGray : widget.colors.primaryBlue)
+                    ? (hasSelectedContent
+                        ? widget.colors.darkGray
+                        : widget.colors.primaryBlue)
                     : widget.colors.darkGray,
               ),
               if (!widget.showOnlyIcon) ...[
@@ -252,9 +266,12 @@ class _TeamTabState extends State<_TeamTab> {
                   widget.title,
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight: widget.isSelected ? FontWeight.bold : FontWeight.w600,
+                    fontWeight:
+                        widget.isSelected ? FontWeight.bold : FontWeight.w600,
                     color: widget.isSelected
-                        ? (hasSelectedContent ? widget.colors.darkGray : widget.colors.primaryBlue)
+                        ? (hasSelectedContent
+                            ? widget.colors.darkGray
+                            : widget.colors.primaryBlue)
                         : widget.colors.darkGray,
                   ),
                 ),

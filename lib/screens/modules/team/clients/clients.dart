@@ -33,7 +33,8 @@ class _ClientsTabState extends State<ClientsTab> {
       return ViewClients(
         companyId: widget.companyId,
         client: widget.selectedClient!,
-        onEdit: () => widget.onSelectClient?.call({}), // clear view to go back to list
+        onEdit: () =>
+            widget.onSelectClient?.call({}), // clear view to go back to list
       );
     }
 
@@ -49,23 +50,49 @@ class _ClientsTabState extends State<ClientsTab> {
                 flex: 2,
                 child: Container(
                   decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Theme.of(context).brightness == Brightness.dark ? Colors.white24 : Colors.black26,
-                      width: 1,
-                    ),
-                    color: colors.lightGray,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? colors.lightGray
+                        : Colors.white,
                     borderRadius: BorderRadius.circular(10),
+                    border: Theme.of(context).brightness == Brightness.dark
+                        ? null
+                        : Border.all(color: Colors.black26, width: 1),
+                    boxShadow: Theme.of(context).brightness == Brightness.dark
+                        ? null
+                        : [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.08),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                   ),
                   child: TextField(
                     decoration: InputDecoration(
                       hintText: l10n.searchByClientNamePersonEmail,
-                      prefixIcon: const Icon(Icons.search),
+                      hintStyle: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? const Color(0xFFB3B3B3)
+                            : colors.textColor,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? const Color(0xFFB3B3B3)
+                            : colors.darkGray,
+                      ),
                       isDense: true,
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 12),
                     ),
-                    style: TextStyle(color: colors.textColor),
-                    onChanged: (val) => setState(() => _search = val.trim().toLowerCase()),
+                    style: TextStyle(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFFCCCCCC)
+                          : colors.textColor,
+                    ),
+                    onChanged: (val) =>
+                        setState(() => _search = val.trim().toLowerCase()),
                   ),
                 ),
               ),
@@ -76,13 +103,16 @@ class _ClientsTabState extends State<ClientsTab> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colors.primaryBlue,
                   foregroundColor: colors.whiteTextOnBlue,
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
                 onPressed: () async {
                   final result = await showDialog<bool>(
                     context: context,
-                    builder: (ctx) => AddClientDialog(companyId: widget.companyId),
+                    builder: (ctx) =>
+                        AddClientDialog(companyId: widget.companyId),
                   );
                   if (result == true) {
                     // Refresh the clients list
@@ -97,7 +127,8 @@ class _ClientsTabState extends State<ClientsTab> {
             child: _ClientsTable(
               companyId: widget.companyId,
               search: _search,
-              onSelectClient: (clientData) => widget.onSelectClient?.call(clientData),
+              onSelectClient: (clientData) =>
+                  widget.onSelectClient?.call(clientData),
             ),
           ),
         ],
@@ -170,7 +201,9 @@ class _ClientsTable extends StatelessWidget {
               (data['post_code'] ?? ''),
               (data['city'] ?? '')
             ].where((e) => (e as String).isNotEmpty).join(' ');
-            final person = '${contact['first_name'] ?? ''} ${contact['surname'] ?? ''}'.trim();
+            final person =
+                '${contact['first_name'] ?? ''} ${contact['surname'] ?? ''}'
+                    .trim();
             final email = data['email'] ?? '';
             final phone = data['phone'] ?? '';
             final city = data['city'] ?? '';
@@ -217,7 +250,9 @@ class _ClientsTable extends StatelessWidget {
                               const SizedBox(height: 4),
                               if (city.isNotEmpty || country.isNotEmpty)
                                 Text(
-                                  [city, country].where((e) => e.isNotEmpty).join(', '),
+                                  [city, country]
+                                      .where((e) => e.isNotEmpty)
+                                      .join(', '),
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: colors.textColor.withOpacity(0.7),
@@ -313,7 +348,8 @@ class _ClientsTable extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         ElevatedButton.icon(
-                          onPressed: () => onSelectClient({...data, 'id': doc.id}),
+                          onPressed: () =>
+                              onSelectClient({...data, 'id': doc.id}),
                           icon: const Icon(Icons.visibility, size: 16),
                           label: Text(l10n.view),
                           style: ElevatedButton.styleFrom(
@@ -322,7 +358,8 @@ class _ClientsTable extends StatelessWidget {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
                           ),
                         ),
                       ],

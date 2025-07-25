@@ -27,12 +27,12 @@ class AddUserDialog extends StatefulWidget {
 
 class _AddUserDialogState extends State<AddUserDialog> {
   final _formKey = GlobalKey<FormState>();
-  
+
   // User data
   Map<String, dynamic> _userData = {};
   Map<String, dynamic> _privateAddress = {};
   Map<String, dynamic> _workAddress = {};
-  
+
   // Form controllers
   late TextEditingController _firstNameController;
   late TextEditingController _surnameController;
@@ -42,7 +42,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
   late TextEditingController _weeklyHoursController;
   late TextEditingController _annualLeaveController;
   late TextEditingController _passwordController;
-  
+
   // Form state
   List<String> _selectedRoles = [];
   List<String> _selectedModules = ['time_tracker'];
@@ -62,18 +62,20 @@ class _AddUserDialogState extends State<AddUserDialog> {
 
   void _initializeData() {
     final isEdit = widget.editUser != null;
-    
+
     if (isEdit) {
       final editData = widget.editUser!.data() as Map<String, dynamic>;
       _userData = Map<String, dynamic>.from(editData);
-      
+
       // Initialize addresses
-      _privateAddress = Map<String, dynamic>.from(_userData['privateAdress'] ?? {});
+      _privateAddress =
+          Map<String, dynamic>.from(_userData['privateAdress'] ?? {});
       _workAddress = Map<String, dynamic>.from(_userData['workAddress'] ?? {});
-      
+
       // Initialize form values
       _selectedRoles = List<String>.from(_userData['roles'] ?? []);
-      _selectedModules = List<String>.from(_userData['modules'] ?? ['time_tracker']);
+      _selectedModules =
+          List<String>.from(_userData['modules'] ?? ['time_tracker']);
       _selectedTeamLeaderId = _userData['teamLeaderId'] ?? '';
       _isActive = _userData['active'] ?? true;
       _showBreaks = _userData['showBreaks'] ?? true;
@@ -97,20 +99,25 @@ class _AddUserDialogState extends State<AddUserDialog> {
         'privateAdress': {},
         'workAddress': {},
       };
-      
+
       _privateAddress = {};
       _workAddress = {};
     }
   }
 
   void _initializeControllers() {
-    _firstNameController = TextEditingController(text: _userData['firstName'] ?? '');
-    _surnameController = TextEditingController(text: _userData['surname'] ?? '');
+    _firstNameController =
+        TextEditingController(text: _userData['firstName'] ?? '');
+    _surnameController =
+        TextEditingController(text: _userData['surname'] ?? '');
     _emailController = TextEditingController(text: _userData['email'] ?? '');
     _phoneController = TextEditingController(text: _userData['phone'] ?? '');
-    _workloadController = TextEditingController(text: '${_userData['workPercent'] ?? 100}');
-    _weeklyHoursController = TextEditingController(text: '${_userData['weeklyHours'] ?? 40}');
-    _annualLeaveController = TextEditingController(text: '${_userData['annualLeaveDays'] ?? 25}');
+    _workloadController =
+        TextEditingController(text: '${_userData['workPercent'] ?? 100}');
+    _weeklyHoursController =
+        TextEditingController(text: '${_userData['weeklyHours'] ?? 40}');
+    _annualLeaveController =
+        TextEditingController(text: '${_userData['annualLeaveDays'] ?? 25}');
     _passwordController = TextEditingController();
   }
 
@@ -140,7 +147,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
 
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     setState(() {
       _isSubmitting = true;
       _errorText = '';
@@ -148,7 +155,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
 
     try {
       final isEdit = widget.editUser != null;
-      
+
       // Prepare user data
       final userData = {
         'firstName': _firstNameController.text.trim(),
@@ -161,7 +168,8 @@ class _AddUserDialogState extends State<AddUserDialog> {
         'workPercent': int.tryParse(_workloadController.text) ?? 100,
         'weeklyHours': int.tryParse(_weeklyHoursController.text) ?? 40,
         'annualLeaveDays': int.tryParse(_annualLeaveController.text) ?? 25,
-        'teamLeaderId': _selectedTeamLeaderId.isEmpty ? null : _selectedTeamLeaderId,
+        'teamLeaderId':
+            _selectedTeamLeaderId.isEmpty ? null : _selectedTeamLeaderId,
         'showBreaks': _showBreaks,
         'workplaceSame': _workplaceSame,
         'privateAdress': _privateAddress,
@@ -188,7 +196,8 @@ class _AddUserDialogState extends State<AddUserDialog> {
         }
 
         // Create user in Firebase Auth
-        final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        final userCredential =
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
@@ -204,7 +213,6 @@ class _AddUserDialogState extends State<AddUserDialog> {
 
       widget.onUserAdded();
       Navigator.of(context).pop();
-      
     } catch (e) {
       setState(() {
         _errorText = e.toString();
@@ -223,12 +231,15 @@ class _AddUserDialogState extends State<AddUserDialog> {
     final isEdit = widget.editUser != null;
 
     return Dialog(
-      backgroundColor: appColors.backgroundDark,
+      backgroundColor: appColors.backgroundLight,
       child: Container(
         width: 600,
-        height: MediaQuery.of(context).size.height * 0.9,
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.9,
+        ),
         padding: const EdgeInsets.all(24.0),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Header
             Row(
@@ -251,7 +262,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
             const SizedBox(height: 24),
 
             // Form
-            Expanded(
+            Flexible(
               child: Form(
                 key: _formKey,
                 child: SingleChildScrollView(
@@ -266,7 +277,8 @@ class _AddUserDialogState extends State<AddUserDialog> {
                             child: _buildTextField(
                               controller: _firstNameController,
                               label: l10n.firstName,
-                              validator: (value) => value?.isEmpty == true ? l10n.required : null,
+                              validator: (value) =>
+                                  value?.isEmpty == true ? l10n.required : null,
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -274,7 +286,8 @@ class _AddUserDialogState extends State<AddUserDialog> {
                             child: _buildTextField(
                               controller: _surnameController,
                               label: l10n.surname,
-                              validator: (value) => value?.isEmpty == true ? l10n.required : null,
+                              validator: (value) =>
+                                  value?.isEmpty == true ? l10n.required : null,
                             ),
                           ),
                         ],
@@ -290,8 +303,10 @@ class _AddUserDialogState extends State<AddUserDialog> {
                               keyboardType: TextInputType.emailAddress,
                               enabled: !isEdit,
                               validator: (value) {
-                                if (value?.isEmpty == true) return l10n.required;
-                                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value!)) {
+                                if (value?.isEmpty == true)
+                                  return l10n.required;
+                                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                                    .hasMatch(value!)) {
                                   return l10n.invalidEmail;
                                 }
                                 return null;
@@ -360,7 +375,8 @@ class _AddUserDialogState extends State<AddUserDialog> {
                         label: l10n.roles,
                         options: _getAvailableRoles(),
                         values: _selectedRoles,
-                        onChanged: (values) => setState(() => _selectedRoles = values),
+                        onChanged: (values) =>
+                            setState(() => _selectedRoles = values),
                       ),
                       const SizedBox(height: 16),
 
@@ -368,11 +384,20 @@ class _AddUserDialogState extends State<AddUserDialog> {
                       _buildModuleButtons(
                         label: l10n.modules,
                         options: [
-                          {'label': l10n.timeTracker, 'value': 'time_tracker', 'locked': true},
-                          {'label': l10n.admin, 'value': 'admin', 'locked': false},
+                          {
+                            'label': l10n.timeTracker,
+                            'value': 'time_tracker',
+                            'locked': true
+                          },
+                          {
+                            'label': l10n.admin,
+                            'value': 'admin',
+                            'locked': false
+                          },
                         ],
                         values: _selectedModules,
-                        onChanged: (values) => setState(() => _selectedModules = values),
+                        onChanged: (values) =>
+                            setState(() => _selectedModules = values),
                       ),
                       const SizedBox(height: 16),
 
@@ -430,28 +455,34 @@ class _AddUserDialogState extends State<AddUserDialog> {
 
                       // Team Leader assignment
                       DropdownButtonFormField<String>(
-                        value: _selectedTeamLeaderId.isEmpty ? null : _selectedTeamLeaderId,
+                        value: _selectedTeamLeaderId.isEmpty
+                            ? null
+                            : _selectedTeamLeaderId,
                         decoration: InputDecoration(
                           labelText: l10n.assignToTeamLeader,
                           filled: true,
                           fillColor: appColors.lightGray,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: appColors.darkGray, width: 1),
+                            borderSide:
+                                BorderSide(color: appColors.darkGray, width: 1),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: appColors.darkGray, width: 1),
+                            borderSide:
+                                BorderSide(color: appColors.darkGray, width: 1),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: appColors.primaryBlue, width: 2),
+                            borderSide: BorderSide(
+                                color: appColors.primaryBlue, width: 2),
                           ),
                         ),
                         items: [
                           DropdownMenuItem(
                             value: '',
-                            child: Text(l10n.none, style: TextStyle(color: appColors.textColor)),
+                            child: Text(l10n.none,
+                                style: TextStyle(color: appColors.textColor)),
                           ),
                           ...widget.teamLeaders.map((tl) {
                             return DropdownMenuItem(
@@ -463,14 +494,17 @@ class _AddUserDialogState extends State<AddUserDialog> {
                             );
                           }),
                         ],
-                        onChanged: (value) => setState(() => _selectedTeamLeaderId = value ?? ''),
+                        onChanged: (value) =>
+                            setState(() => _selectedTeamLeaderId = value ?? ''),
                       ),
                       const SizedBox(height: 16),
 
                       // Switches
-                      _buildSwitchRow(l10n.active, _isActive, (value) => setState(() => _isActive = value)),
+                      _buildSwitchRow(l10n.active, _isActive,
+                          (value) => setState(() => _isActive = value)),
                       const SizedBox(height: 8),
-                      _buildSwitchRow(l10n.showBreaks, _showBreaks, (value) => setState(() => _showBreaks = value)),
+                      _buildSwitchRow(l10n.showBreaks, _showBreaks,
+                          (value) => setState(() => _showBreaks = value)),
                       // Password field (only for new users)
                       if (!isEdit) ...[
                         const SizedBox(height: 16),
@@ -480,14 +514,16 @@ class _AddUserDialogState extends State<AddUserDialog> {
                           obscureText: true,
                           validator: (value) {
                             if (value?.isEmpty == true) return l10n.required;
-                            if (value!.length < 6) return l10n.passwordMinLength;
+                            if (value!.length < 6)
+                              return l10n.passwordMinLength;
                             return null;
                           },
                         ),
                         const SizedBox(height: 8),
                         Text(
                           l10n.passwordMinLength,
-                          style: TextStyle(color: appColors.darkGray, fontSize: 12),
+                          style: TextStyle(
+                              color: appColors.darkGray, fontSize: 12),
                         ),
                         const SizedBox(height: 24),
                       ],
@@ -520,7 +556,8 @@ class _AddUserDialogState extends State<AddUserDialog> {
                                   width: 20,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(appColors.backgroundDark),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        appColors.backgroundDark),
                                   ),
                                 )
                               : Text(
@@ -544,8 +581,6 @@ class _AddUserDialogState extends State<AddUserDialog> {
     );
   }
 
-
-
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -555,7 +590,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
     String? Function(String?)? validator,
   }) {
     final appColors = Theme.of(context).extension<AppColors>()!;
-    
+
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
@@ -565,7 +600,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: appColors.lightGray,
+        fillColor: appColors.backgroundLight,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(color: appColors.darkGray, width: 1),
@@ -596,9 +631,14 @@ class _AddUserDialogState extends State<AddUserDialog> {
     if (widget.currentUserRoles.contains('super_admin')) {
       return allRoles; // Super admin can assign all roles
     } else if (widget.currentUserRoles.contains('company_admin')) {
-      return allRoles.where((role) => role['value'] != 'super_admin').toList(); // Company admin can assign all except super_admin
+      return allRoles
+          .where((role) => role['value'] != 'super_admin')
+          .toList(); // Company admin can assign all except super_admin
     } else if (widget.currentUserRoles.contains('admin')) {
-      return allRoles.where((role) => !['super_admin', 'company_admin'].contains(role['value'])).toList(); // Admin can assign team_leader and worker
+      return allRoles
+          .where((role) =>
+              !['super_admin', 'company_admin'].contains(role['value']))
+          .toList(); // Admin can assign team_leader and worker
     } else {
       return []; // Lower level users cannot assign roles
     }
@@ -639,11 +679,14 @@ class _AddUserDialogState extends State<AddUserDialog> {
                 onChanged(newValues);
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? appColors.primaryBlue : Colors.transparent,
+                  color:
+                      isSelected ? appColors.primaryBlue : Colors.transparent,
                   border: Border.all(
-                    color: isSelected ? appColors.primaryBlue : appColors.darkGray,
+                    color:
+                        isSelected ? appColors.primaryBlue : appColors.darkGray,
                     width: 1,
                   ),
                   borderRadius: BorderRadius.circular(8),
@@ -652,7 +695,8 @@ class _AddUserDialogState extends State<AddUserDialog> {
                   option['label']!,
                   style: TextStyle(
                     color: isSelected ? Colors.white : appColors.textColor,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
               ),
@@ -688,23 +732,30 @@ class _AddUserDialogState extends State<AddUserDialog> {
           children: options.map((option) {
             final isSelected = values.contains(option['value']);
             final isLocked = option['locked'] == true;
-            
+
             return InkWell(
-              onTap: isLocked ? null : () {
-                final newValues = List<String>.from(values);
-                if (isSelected) {
-                  newValues.remove(option['value']!);
-                } else {
-                  newValues.add(option['value']!);
-                }
-                onChanged(newValues);
-              },
+              onTap: isLocked
+                  ? null
+                  : () {
+                      final newValues = List<String>.from(values);
+                      if (isSelected) {
+                        newValues.remove(option['value']!);
+                      } else {
+                        newValues.add(option['value']!);
+                      }
+                      onChanged(newValues);
+                    },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isLocked || isSelected ? appColors.primaryBlue : Colors.transparent,
+                  color: isLocked || isSelected
+                      ? appColors.primaryBlue
+                      : Colors.transparent,
                   border: Border.all(
-                    color: isLocked || isSelected ? appColors.primaryBlue : appColors.darkGray,
+                    color: isLocked || isSelected
+                        ? appColors.primaryBlue
+                        : appColors.darkGray,
                     width: 1,
                   ),
                   borderRadius: BorderRadius.circular(8),
@@ -715,8 +766,12 @@ class _AddUserDialogState extends State<AddUserDialog> {
                     Text(
                       option['label']!,
                       style: TextStyle(
-                        color: isLocked || isSelected ? Colors.white : appColors.textColor,
-                        fontWeight: isLocked || isSelected ? FontWeight.w600 : FontWeight.normal,
+                        color: isLocked || isSelected
+                            ? Colors.white
+                            : appColors.textColor,
+                        fontWeight: isLocked || isSelected
+                            ? FontWeight.w600
+                            : FontWeight.normal,
                       ),
                     ),
                     if (isLocked) ...[
@@ -739,7 +794,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
 
   Widget _buildSwitchRow(String label, bool value, Function(bool) onChanged) {
     final appColors = Theme.of(context).extension<AppColors>()!;
-    
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

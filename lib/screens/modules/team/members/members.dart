@@ -38,39 +38,71 @@ class MembersTab extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // White card with search bar
+            // Search field card
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF1E1E1E)
+                    : Colors.white,
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                boxShadow: Theme.of(context).brightness == Brightness.dark
+                    ? [
+                        BoxShadow(
+                          color: const Color(0xFF2A2A2A),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : [
+                        BoxShadow(
+                          color: const Color(0xFFE0E0E0),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
               ),
               padding: const EdgeInsets.all(16),
               child: Container(
                 decoration: BoxDecoration(
                   border: Border.all(
-                    color: Theme.of(context).brightness == Brightness.dark ? Colors.white24 : Colors.black26,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFF3D3D3D)
+                        : const Color(0xFF424242),
                     width: 1,
                   ),
-                  color: colors.lightGray,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? colors.lightGray
+                      : Colors.white,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: TextField(
                   decoration: InputDecoration(
-                    hintText: AppLocalizations.of(context)?.searchByNameSurnameEmail ?? 'Search by name, surname or email',
-                    prefixIcon: const Icon(Icons.search),
+                    hintText: AppLocalizations.of(context)
+                            ?.searchByNameSurnameEmail ??
+                        'Search by name, surname or email',
+                    hintStyle: TextStyle(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFFB3B3B3)
+                          : colors.textColor,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFFB3B3B3)
+                          : colors.darkGray,
+                    ),
                     isDense: true,
                     border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 12),
                   ),
-                  style: TextStyle(color: colors.textColor),
-                  onChanged: (val) => setState(() => _search = val.trim().toLowerCase()),
+                  style: TextStyle(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFFCCCCCC)
+                        : colors.textColor,
+                  ),
+                  onChanged: (val) =>
+                      setState(() => _search = val.trim().toLowerCase()),
                 ),
               ),
             ),
@@ -108,7 +140,7 @@ class _MembersTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
     final l10n = AppLocalizations.of(context);
-    
+
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('companies')
@@ -121,7 +153,8 @@ class _MembersTable extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text(l10n?.noMembersFound ?? 'No members found.'));
+          return Center(
+              child: Text(l10n?.noMembersFound ?? 'No members found.'));
         }
         final docs = snapshot.data!.docs;
         final filtered = docs.where((doc) {
@@ -130,21 +163,22 @@ class _MembersTable extends StatelessWidget {
           final surname = (data['surname'] ?? '').toString().toLowerCase();
           final email = (data['email'] ?? '').toString().toLowerCase();
           final userTeamLeader = data['teamLeader'] ?? '';
-          
+
           // Apply team leader filter if specified
           if (teamLeaderId != null && teamLeaderId!.isNotEmpty) {
             if (userTeamLeader != teamLeaderId) {
               return false;
             }
           }
-          
+
           return (firstName.contains(search) ||
-               surname.contains(search) ||
-               email.contains(search));
+              surname.contains(search) ||
+              email.contains(search));
         }).toList();
 
         if (filtered.isEmpty) {
-          return Center(child: Text(l10n?.noMembersFound ?? 'No members found.'));
+          return Center(
+              child: Text(l10n?.noMembersFound ?? 'No members found.'));
         }
 
         return ListView.builder(
@@ -157,10 +191,14 @@ class _MembersTable extends StatelessWidget {
             final email = (data['email'] ?? '').toString();
             final roles = _formatRoles(data['roles'] as List?, l10n);
             final modules = _formatModules(data['modules'] as List?, l10n);
-            
+
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
-              elevation: 2,
+              elevation:
+                  Theme.of(context).brightness == Brightness.dark ? 0 : 2,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFF1E1E1E)
+                  : null,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -173,25 +211,29 @@ class _MembersTable extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                            children: [
-                              Text(
-                                '$firstName $surname',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: colors.textColor,
-                                ),
+                          children: [
+                            Text(
+                              '$firstName $surname',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: colors.textColor,
+                              ),
                             ),
                             const SizedBox(width: 8),
-                            _MemberStatusIcon(companyId: companyId, userId: doc.id),
+                            _MemberStatusIcon(
+                                companyId: companyId, userId: doc.id),
                           ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                email,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: colors.textColor.withOpacity(0.7),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          email,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? const Color(0xFFCCCCCC)
+                                    : colors.textColor,
                           ),
                         ),
                       ],
@@ -204,7 +246,10 @@ class _MembersTable extends StatelessWidget {
                             Icon(
                               Icons.work,
                               size: 16,
-                              color: colors.textColor.withOpacity(0.6),
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? const Color(0xFF999999)
+                                  : const Color(0xFF666666),
                             ),
                             const SizedBox(width: 8),
                             Expanded(
@@ -212,7 +257,10 @@ class _MembersTable extends StatelessWidget {
                                 '${l10n?.roles ?? 'Roles'}: $roles',
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: colors.textColor.withOpacity(0.8),
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? const Color(0xFFA3A3A3)
+                                      : const Color(0xFF333333),
                                 ),
                               ),
                             ),
@@ -226,7 +274,10 @@ class _MembersTable extends StatelessWidget {
                             Icon(
                               Icons.apps,
                               size: 16,
-                              color: colors.textColor.withOpacity(0.6),
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? const Color(0xFF999999)
+                                  : const Color(0xFF666666),
                             ),
                             const SizedBox(width: 8),
                             Expanded(
@@ -234,7 +285,10 @@ class _MembersTable extends StatelessWidget {
                                 '${l10n?.modules ?? 'Modules'}: $modules',
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: colors.textColor.withOpacity(0.8),
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? const Color(0xFFA3A3A3)
+                                      : const Color(0xFF333333),
                                 ),
                               ),
                             ),
@@ -257,41 +311,8 @@ class _MembersTable extends StatelessWidget {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        // Edit button
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            // TODO: Implement edit functionality
-                          },
-                          icon: const Icon(Icons.edit, size: 16),
-                          label: Text('Edit'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        // Delete button
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            // TODO: Implement delete functionality
-                          },
-                          icon: const Icon(Icons.delete, size: 16),
-                          label: Text('Delete'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
                           ),
                         ),
                       ],
@@ -308,7 +329,7 @@ class _MembersTable extends StatelessWidget {
 
   String _formatRoles(List? roles, AppLocalizations? l10n) {
     if (roles == null || roles.isEmpty) return '';
-    
+
     return roles.map((role) {
       switch (role.toString()) {
         case 'admin':
@@ -329,7 +350,7 @@ class _MembersTable extends StatelessWidget {
 
   String _formatModules(List? modules, AppLocalizations? l10n) {
     if (modules == null || modules.isEmpty) return '';
-    
+
     return modules.map((module) {
       switch (module.toString()) {
         case 'admin':

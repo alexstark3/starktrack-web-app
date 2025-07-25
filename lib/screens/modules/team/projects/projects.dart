@@ -19,7 +19,6 @@ class ProjectsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     if (selectedProject != null) {
       return ProjectViewPage(
         companyId: companyId,
@@ -86,23 +85,49 @@ class _ProjectsListState extends State<_ProjectsList> {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Theme.of(context).brightness == Brightness.dark ? Colors.white24 : Colors.black26,
-                    width: 1,
-                  ),
-                  color: colors.lightGray,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? colors.lightGray
+                      : Colors.white,
                   borderRadius: BorderRadius.circular(10),
+                  border: Theme.of(context).brightness == Brightness.dark
+                      ? null
+                      : Border.all(color: Colors.black26, width: 1),
+                  boxShadow: Theme.of(context).brightness == Brightness.dark
+                      ? null
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.08),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                 ),
                 child: TextField(
                   decoration: InputDecoration(
                     hintText: AppLocalizations.of(context)!.searchByProject,
-                    prefixIcon: const Icon(Icons.search),
+                    hintStyle: TextStyle(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFFB3B3B3)
+                          : colors.textColor,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFFB3B3B3)
+                          : colors.darkGray,
+                    ),
                     isDense: true,
                     border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 12),
                   ),
-                  style: TextStyle(color: colors.textColor),
-                  onChanged: (val) => setState(() => _searchProject = val.trim().toLowerCase()),
+                  style: TextStyle(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFFCCCCCC)
+                        : colors.textColor,
+                  ),
+                  onChanged: (val) =>
+                      setState(() => _searchProject = val.trim().toLowerCase()),
                 ),
               ),
             ),
@@ -110,23 +135,49 @@ class _ProjectsListState extends State<_ProjectsList> {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Theme.of(context).brightness == Brightness.dark ? Colors.white24 : Colors.black26,
-                    width: 1,
-                  ),
-                  color: colors.lightGray,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? colors.lightGray
+                      : Colors.white,
                   borderRadius: BorderRadius.circular(10),
+                  border: Theme.of(context).brightness == Brightness.dark
+                      ? null
+                      : Border.all(color: Colors.black26, width: 1),
+                  boxShadow: Theme.of(context).brightness == Brightness.dark
+                      ? null
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.08),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                 ),
                 child: TextField(
                   decoration: InputDecoration(
                     hintText: AppLocalizations.of(context)!.searchByClient,
-                    prefixIcon: const Icon(Icons.grid_on),
+                    hintStyle: TextStyle(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFFB3B3B3)
+                          : colors.textColor,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.grid_on,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFFB3B3B3)
+                          : colors.darkGray,
+                    ),
                     isDense: true,
                     border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 12),
                   ),
-                  style: TextStyle(color: colors.textColor),
-                  onChanged: (val) => setState(() => _searchClient = val.trim().toLowerCase()),
+                  style: TextStyle(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFFCCCCCC)
+                        : colors.textColor,
+                  ),
+                  onChanged: (val) =>
+                      setState(() => _searchClient = val.trim().toLowerCase()),
                 ),
               ),
             ),
@@ -137,13 +188,16 @@ class _ProjectsListState extends State<_ProjectsList> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: colors.primaryBlue,
                 foregroundColor: colors.whiteTextOnBlue,
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
               ),
               onPressed: () {
                 showDialog(
                   context: context,
-                  builder: (ctx) => AddProjectDialog(companyId: widget.companyId),
+                  builder: (ctx) =>
+                      AddProjectDialog(companyId: widget.companyId),
                 );
               },
             ),
@@ -163,19 +217,23 @@ class _ProjectsListState extends State<_ProjectsList> {
                 return const Center(child: CircularProgressIndicator());
               }
               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return Center(child: Text(AppLocalizations.of(context)!.noProjectsFound));
+                return Center(
+                    child: Text(AppLocalizations.of(context)!.noProjectsFound));
               }
               final docs = snapshot.data!.docs;
               final filtered = docs.where((doc) {
                 final data = doc.data() as Map<String, dynamic>;
-                final projectName = (data['name'] ?? '').toString().toLowerCase();
-                final clientId = (data['client'] ?? '').toString().toLowerCase();
+                final projectName =
+                    (data['name'] ?? '').toString().toLowerCase();
+                final clientId =
+                    (data['client'] ?? '').toString().toLowerCase();
                 return projectName.contains(_searchProject) &&
                     clientId.contains(_searchClient);
               }).toList();
 
               if (filtered.isEmpty) {
-                return Center(child: Text(AppLocalizations.of(context)!.noProjectsFound));
+                return Center(
+                    child: Text(AppLocalizations.of(context)!.noProjectsFound));
               }
 
               // Sort projects: active projects first, then by name
@@ -184,11 +242,11 @@ class _ProjectsListState extends State<_ProjectsList> {
                 final bData = b.data() as Map<String, dynamic>;
                 final aActive = aData['active'] == true;
                 final bActive = bData['active'] == true;
-                
+
                 if (aActive != bActive) {
                   return aActive ? -1 : 1; // Active projects first
                 }
-                
+
                 // If both have same active status, sort by name
                 final aName = (aData['name'] ?? '').toString().toLowerCase();
                 final bName = (bData['name'] ?? '').toString().toLowerCase();
@@ -223,7 +281,8 @@ class _ProjectsListState extends State<_ProjectsList> {
                       final clientName = clientData?['name'] ?? '';
                       final contact = clientData?['contact_person'] ?? {};
                       final contactPerson =
-                          '${contact['first_name'] ?? ''} ${contact['surname'] ?? ''}'.trim();
+                          '${contact['first_name'] ?? ''} ${contact['surname'] ?? ''}'
+                              .trim();
                       final phone = clientData?['phone'] ?? '';
                       final email = clientData?['email'] ?? '';
 
@@ -250,14 +309,17 @@ class _ProjectsListState extends State<_ProjectsList> {
                                     },
                                     child: Icon(
                                       Icons.folder_copy_rounded,
-                                      color: isActive ? Colors.green : colors.primaryBlue,
+                                      color: isActive
+                                          ? Colors.green
+                                          : colors.primaryBlue,
                                       size: 24,
                                     ),
                                   ),
                                   const SizedBox(width: 16),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           projectName,
@@ -272,7 +334,8 @@ class _ProjectsListState extends State<_ProjectsList> {
                                           '${AppLocalizations.of(context)!.projectId}: $projectId',
                                           style: TextStyle(
                                             fontSize: 14,
-                                            color: colors.textColor.withOpacity(0.7),
+                                            color: colors.textColor
+                                                .withOpacity(0.7),
                                           ),
                                         ),
                                       ],
@@ -295,7 +358,8 @@ class _ProjectsListState extends State<_ProjectsList> {
                                         addressString,
                                         style: TextStyle(
                                           fontSize: 14,
-                                          color: colors.textColor.withOpacity(0.8),
+                                          color:
+                                              colors.textColor.withOpacity(0.8),
                                         ),
                                       ),
                                     ),
@@ -317,7 +381,8 @@ class _ProjectsListState extends State<_ProjectsList> {
                                         '${AppLocalizations.of(context)!.clientName}: $clientName',
                                         style: TextStyle(
                                           fontSize: 14,
-                                          color: colors.textColor.withOpacity(0.8),
+                                          color:
+                                              colors.textColor.withOpacity(0.8),
                                         ),
                                       ),
                                     ),
@@ -339,7 +404,8 @@ class _ProjectsListState extends State<_ProjectsList> {
                                         '${AppLocalizations.of(context)!.contactPerson}: $contactPerson',
                                         style: TextStyle(
                                           fontSize: 14,
-                                          color: colors.textColor.withOpacity(0.8),
+                                          color:
+                                              colors.textColor.withOpacity(0.8),
                                         ),
                                       ),
                                     ),
@@ -358,14 +424,16 @@ class _ProjectsListState extends State<_ProjectsList> {
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           if (phone.isNotEmpty)
                                             Text(
                                               phone,
                                               style: TextStyle(
                                                 fontSize: 14,
-                                                color: colors.textColor.withOpacity(0.8),
+                                                color: colors.textColor
+                                                    .withOpacity(0.8),
                                               ),
                                             ),
                                           if (email.isNotEmpty)
@@ -373,7 +441,8 @@ class _ProjectsListState extends State<_ProjectsList> {
                                               email,
                                               style: TextStyle(
                                                 fontSize: 14,
-                                                color: colors.textColor.withOpacity(0.8),
+                                                color: colors.textColor
+                                                    .withOpacity(0.8),
                                               ),
                                             ),
                                         ],
@@ -388,17 +457,21 @@ class _ProjectsListState extends State<_ProjectsList> {
                                 children: [
                                   ElevatedButton.icon(
                                     onPressed: () {
-                                      widget.onSelectProject({...data, 'id': doc.id});
+                                      widget.onSelectProject(
+                                          {...data, 'id': doc.id});
                                     },
-                                    icon: const Icon(Icons.visibility, size: 16),
-                                    label: Text(AppLocalizations.of(context)!.view),
+                                    icon:
+                                        const Icon(Icons.visibility, size: 16),
+                                    label: Text(
+                                        AppLocalizations.of(context)!.view),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: colors.primaryBlue,
                                       foregroundColor: colors.whiteTextOnBlue,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(8),
                                       ),
-                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 8),
                                     ),
                                   ),
                                 ],

@@ -24,7 +24,6 @@ class _AdminPanelState extends State<AdminPanel> {
   String _searchText = '';
   List<Map<String, dynamic>> _teamLeaders = [];
 
-
   bool get isSuperAdmin => widget.currentUserRoles.contains('super_admin');
 
   @override
@@ -41,7 +40,7 @@ class _AdminPanelState extends State<AdminPanel> {
           .collection('users')
           .where('roles', arrayContains: 'team_leader')
           .get();
-      
+
       _teamLeaders = res.docs
           .map((d) => {
                 'id': d.id,
@@ -52,9 +51,7 @@ class _AdminPanelState extends State<AdminPanel> {
     } catch (e) {
       print('Error fetching team leaders: $e');
     } finally {
-      setState(() {
-  
-      });
+      setState(() {});
     }
   }
 
@@ -130,7 +127,8 @@ class _AdminPanelState extends State<AdminPanel> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.cancel, style: TextStyle(color: appColors.primaryBlue)),
+            child: Text(l10n.cancel,
+                style: TextStyle(color: appColors.primaryBlue)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -176,90 +174,223 @@ class _AdminPanelState extends State<AdminPanel> {
       backgroundColor: appColors.backgroundDark,
       body: Column(
         children: [
-          // Search and Action Buttons Row
+          // Main card with search and action buttons
           Padding(
             padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                // Search bar
-                Expanded(
-                  child: TextField(
-                    onChanged: (value) => setState(() => _searchText = value),
-                    decoration: InputDecoration(
-                      hintText: l10n.searchUsers,
-                      prefixIcon: Icon(Icons.search, color: appColors.darkGray),
-                      filled: true,
-                      fillColor: appColors.lightGray,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? appColors.backgroundLight
+                    : Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Theme.of(context).brightness == Brightness.dark
+                    ? null
+                    : Border.all(color: Colors.black26, width: 1),
+                boxShadow: Theme.of(context).brightness == Brightness.dark
+                    ? [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+              ),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Search bar
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white24
+                            : Colors.black26,
+                        width: 1,
+                      ),
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? appColors.lightGray
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: TextField(
+                      onChanged: (value) => setState(() => _searchText = value),
+                      decoration: InputDecoration(
+                        hintText: l10n.searchUsers,
+                        hintStyle: TextStyle(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? const Color(0xFFB3B3B3)
+                              : appColors.textColor,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? const Color(0xFFB3B3B3)
+                              : appColors.darkGray,
+                        ),
+                        isDense: true,
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 12),
+                      ),
+                      style: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? const Color(0xFFCCCCCC)
+                            : appColors.textColor,
                       ),
                     ),
-                    style: TextStyle(color: appColors.textColor),
                   ),
-                ),
-                const SizedBox(width: 16),
-                // Add New User button
-                ElevatedButton.icon(
-                  onPressed: _showAddUserDialog,
-                  icon: Icon(Icons.add, color: appColors.backgroundDark),
-                  label: Text(
-                    l10n.addNewUser,
-                    style: TextStyle(color: appColors.backgroundDark),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: appColors.primaryBlue,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+                  const SizedBox(height: 16),
+                  // Action buttons row with responsive layout
+                  Builder(
+                    builder: (context) {
+                      // Check if we have enough space for all buttons in a row
+                      final screenWidth = MediaQuery.of(context).size.width;
+                      final hasEnoughSpace = screenWidth > 600;
 
-          // Policy Buttons Row
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: [
-                // Add Holiday Policy button
-                ElevatedButton.icon(
-                  onPressed: _showHolidayPolicyDialog,
-                  icon: Icon(Icons.calendar_today, color: appColors.primaryBlue),
-                  label: Text(
-                    'Add Holiday Policy',
-                    style: TextStyle(color: appColors.primaryBlue),
+                      if (hasEnoughSpace) {
+                        // Desktop/tablet layout - buttons in a row
+                        return Row(
+                          children: [
+                            // Add New User button
+                            ElevatedButton.icon(
+                              onPressed: _showAddUserDialog,
+                              icon: Icon(Icons.add,
+                                  color: appColors.whiteTextOnBlue),
+                              label: Text(
+                                l10n.addNewUser,
+                                style:
+                                    TextStyle(color: appColors.whiteTextOnBlue),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: appColors.primaryBlue,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            // Add Holiday Policy button
+                            ElevatedButton.icon(
+                              onPressed: _showHolidayPolicyDialog,
+                              icon: Icon(Icons.calendar_today,
+                                  color: appColors.whiteTextOnBlue),
+                              label: Text(
+                                'Add Holiday Policy',
+                                style:
+                                    TextStyle(color: appColors.whiteTextOnBlue),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: appColors.primaryBlue,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            // Add Time Off Policy button
+                            ElevatedButton.icon(
+                              onPressed: _showTimeOffPolicyDialog,
+                              icon: Icon(Icons.schedule,
+                                  color: appColors.whiteTextOnBlue),
+                              label: Text(
+                                'Add Time Off Policy',
+                                style:
+                                    TextStyle(color: appColors.whiteTextOnBlue),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: appColors.primaryBlue,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      } else {
+                        // Mobile layout - buttons stacked
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // Add New User button
+                            ElevatedButton.icon(
+                              onPressed: _showAddUserDialog,
+                              icon: Icon(Icons.add,
+                                  color: appColors.whiteTextOnBlue),
+                              label: Text(
+                                l10n.addNewUser,
+                                style:
+                                    TextStyle(color: appColors.whiteTextOnBlue),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: appColors.primaryBlue,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            // Add Holiday Policy button
+                            ElevatedButton.icon(
+                              onPressed: _showHolidayPolicyDialog,
+                              icon: Icon(Icons.calendar_today,
+                                  color: appColors.whiteTextOnBlue),
+                              label: Text(
+                                'Add Holiday Policy',
+                                style:
+                                    TextStyle(color: appColors.whiteTextOnBlue),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: appColors.primaryBlue,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            // Add Time Off Policy button
+                            ElevatedButton.icon(
+                              onPressed: _showTimeOffPolicyDialog,
+                              icon: Icon(Icons.schedule,
+                                  color: appColors.whiteTextOnBlue),
+                              label: Text(
+                                'Add Time Off Policy',
+                                style:
+                                    TextStyle(color: appColors.whiteTextOnBlue),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: appColors.primaryBlue,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+                    },
                   ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      side: BorderSide(color: appColors.primaryBlue, width: 1),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                // Add Time Off Policy button
-                ElevatedButton.icon(
-                  onPressed: _showTimeOffPolicyDialog,
-                  icon: Icon(Icons.schedule, color: appColors.primaryBlue),
-                  label: Text(
-                    'Add Time Off Policy',
-                    style: TextStyle(color: appColors.primaryBlue),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      side: BorderSide(color: appColors.primaryBlue, width: 1),
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -287,7 +418,8 @@ class _AdminPanelState extends State<AdminPanel> {
 
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(
-                    child: CircularProgressIndicator(color: appColors.primaryBlue),
+                    child:
+                        CircularProgressIndicator(color: appColors.primaryBlue),
                   );
                 }
 
@@ -295,9 +427,21 @@ class _AdminPanelState extends State<AdminPanel> {
                 final filteredUsers = users.where((doc) {
                   final data = doc.data() as Map<String, dynamic>;
                   final searchLower = _searchText.toLowerCase();
-                  return data['firstName']?.toString().toLowerCase().contains(searchLower) == true ||
-                         data['surname']?.toString().toLowerCase().contains(searchLower) == true ||
-                         data['email']?.toString().toLowerCase().contains(searchLower) == true;
+                  return data['firstName']
+                              ?.toString()
+                              .toLowerCase()
+                              .contains(searchLower) ==
+                          true ||
+                      data['surname']
+                              ?.toString()
+                              .toLowerCase()
+                              .contains(searchLower) ==
+                          true ||
+                      data['email']
+                              ?.toString()
+                              .toLowerCase()
+                              .contains(searchLower) ==
+                          true;
                 }).toList();
 
                 if (filteredUsers.isEmpty) {
@@ -315,45 +459,57 @@ class _AdminPanelState extends State<AdminPanel> {
                   itemBuilder: (context, index) {
                     final doc = filteredUsers[index];
                     final data = doc.data() as Map<String, dynamic>;
-                    final isProtectedUser = data['roles']?.contains('super_admin') == true;
+                    final isProtectedUser =
+                        data['roles']?.contains('super_admin') == true;
 
                     return Card(
                       color: appColors.backgroundLight,
                       margin: const EdgeInsets.only(bottom: 12),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: appColors.primaryBlue,
-                          child: Text(
-                            '${data['firstName']?[0] ?? ''}${data['surname']?[0] ?? ''}'.toUpperCase(),
-                            style: TextStyle(
-                              color: appColors.backgroundDark,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        title: Text(
-                          '${data['firstName'] ?? ''} ${data['surname'] ?? ''}',
-                          style: TextStyle(
-                            color: appColors.textColor,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        subtitle: Column(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              data['email'] ?? '',
-                              style: TextStyle(color: appColors.darkGray),
+                            // User info row
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${data['firstName'] ?? ''} ${data['surname'] ?? ''}',
+                                        style: TextStyle(
+                                          color: appColors.textColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        data['email'] ?? '',
+                                        style: TextStyle(
+                                            color: appColors.darkGray),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 8),
+                            // Roles
                             Wrap(
                               spacing: 4,
                               children: [
-                                ...(data['roles'] as List<dynamic>? ?? []).map((role) {
+                                ...(data['roles'] as List<dynamic>? ?? [])
+                                    .map((role) {
                                   return Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 2),
                                     decoration: BoxDecoration(
-                                      color: appColors.primaryBlue.withOpacity(0.2),
+                                      color: appColors.primaryBlue
+                                          .withOpacity(0.2),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
@@ -367,32 +523,35 @@ class _AdminPanelState extends State<AdminPanel> {
                                 }),
                               ],
                             ),
-                          ],
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Active status indicator
-                            Container(
-                              width: 12,
-                              height: 12,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: (data['active'] ?? true) ? Colors.green : Colors.red,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            // Action buttons
+                            // Action buttons at bottom left
                             if (!isProtectedUser) ...[
-                              IconButton(
-                                onPressed: () => _showEditUserDialog(doc),
-                                icon: Icon(Icons.edit, color: appColors.primaryBlue),
-                                tooltip: l10n.editUser,
-                              ),
-                              IconButton(
-                                onPressed: () => _deleteUser(doc.id),
-                                icon: Icon(Icons.delete, color: Colors.red),
-                                tooltip: l10n.deleteUser,
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  // Active status indicator
+                                  Container(
+                                    width: 12,
+                                    height: 12,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: (data['active'] ?? true)
+                                          ? Colors.green
+                                          : Colors.red,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  IconButton(
+                                    onPressed: () => _showEditUserDialog(doc),
+                                    icon: Icon(Icons.edit,
+                                        color: appColors.primaryBlue),
+                                    tooltip: l10n.editUser,
+                                  ),
+                                  IconButton(
+                                    onPressed: () => _deleteUser(doc.id),
+                                    icon: Icon(Icons.delete, color: Colors.red),
+                                    tooltip: l10n.deleteUser,
+                                  ),
+                                ],
                               ),
                             ],
                           ],
@@ -408,4 +567,4 @@ class _AdminPanelState extends State<AdminPanel> {
       ),
     );
   }
-} 
+}

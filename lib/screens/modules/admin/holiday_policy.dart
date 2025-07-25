@@ -13,7 +13,8 @@ class HolidayPolicyListDialog extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<HolidayPolicyListDialog> createState() => _HolidayPolicyListDialogState();
+  State<HolidayPolicyListDialog> createState() =>
+      _HolidayPolicyListDialogState();
 }
 
 class _HolidayPolicyListDialogState extends State<HolidayPolicyListDialog> {
@@ -22,7 +23,7 @@ class _HolidayPolicyListDialogState extends State<HolidayPolicyListDialog> {
     final appColors = Theme.of(context).extension<AppColors>()!;
 
     return Dialog(
-      backgroundColor: appColors.backgroundDark,
+      backgroundColor: appColors.backgroundLight,
       child: Container(
         width: 400,
         height: 300,
@@ -51,7 +52,8 @@ class _HolidayPolicyListDialogState extends State<HolidayPolicyListDialog> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text('Cancel', style: TextStyle(color: appColors.textColor)),
+                  child: Text('Cancel',
+                      style: TextStyle(color: appColors.textColor)),
                 ),
                 const SizedBox(width: 16),
                 ElevatedButton(
@@ -65,7 +67,8 @@ class _HolidayPolicyListDialogState extends State<HolidayPolicyListDialog> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: Text('Create New', style: TextStyle(color: Colors.white)),
+                  child:
+                      Text('Create New', style: TextStyle(color: Colors.white)),
                 ),
               ],
             ),
@@ -141,7 +144,7 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
     final appColors = Theme.of(context).extension<AppColors>()!;
 
     return Dialog(
-      backgroundColor: appColors.backgroundDark,
+      backgroundColor: appColors.backgroundLight,
       child: Container(
         width: 400,
         padding: const EdgeInsets.all(24.0),
@@ -162,7 +165,7 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
               decoration: InputDecoration(
                 labelText: 'Policy Name',
                 filled: true,
-                fillColor: appColors.lightGray,
+                fillColor: appColors.backgroundLight,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(color: appColors.darkGray, width: 1),
@@ -176,7 +179,8 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text('Cancel', style: TextStyle(color: appColors.textColor)),
+                  child: Text('Cancel',
+                      style: TextStyle(color: appColors.textColor)),
                 ),
                 const SizedBox(width: 16),
                 ElevatedButton(
@@ -193,7 +197,8 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
                       : Text('Save', style: TextStyle(color: Colors.white)),

@@ -60,3 +60,6 @@ ios/Runner/GoogleService-Info.plist
 *.json
 !pubspec.json
 !pubspec.lock
+# Allow asset JSON files needed for the app
+!lib/data/world_countries.json
+!lib/data/swiss_cities.json

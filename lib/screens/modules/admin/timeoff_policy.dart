@@ -13,7 +13,8 @@ class TimeOffPolicyListDialog extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<TimeOffPolicyListDialog> createState() => _TimeOffPolicyListDialogState();
+  State<TimeOffPolicyListDialog> createState() =>
+      _TimeOffPolicyListDialogState();
 }
 
 class _TimeOffPolicyListDialogState extends State<TimeOffPolicyListDialog> {
@@ -51,7 +52,8 @@ class _TimeOffPolicyListDialogState extends State<TimeOffPolicyListDialog> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text('Cancel', style: TextStyle(color: appColors.textColor)),
+                  child: Text('Cancel',
+                      style: TextStyle(color: appColors.textColor)),
                 ),
                 const SizedBox(width: 16),
                 ElevatedButton(
@@ -65,7 +67,8 @@ class _TimeOffPolicyListDialogState extends State<TimeOffPolicyListDialog> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: Text('Create New', style: TextStyle(color: Colors.white)),
+                  child:
+                      Text('Create New', style: TextStyle(color: Colors.white)),
                 ),
               ],
             ),
@@ -176,7 +179,8 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text('Cancel', style: TextStyle(color: appColors.textColor)),
+                  child: Text('Cancel',
+                      style: TextStyle(color: appColors.textColor)),
                 ),
                 const SizedBox(width: 16),
                 ElevatedButton(
@@ -193,7 +197,8 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
                       : Text('Save', style: TextStyle(color: Colors.white)),
@@ -205,4 +210,4 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
       ),
     );
   }
-} 
+}
