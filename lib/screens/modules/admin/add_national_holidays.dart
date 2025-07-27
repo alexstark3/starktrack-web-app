@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../services/holiday_api_service.dart';
 
 // Swiss Holiday Calculator for National Holidays
 class SwissNationalHolidayCalculator {
@@ -108,6 +109,94 @@ class SwissNationalHolidayCalculator {
     holidays.sort(
         (a, b) => (a['date'] as DateTime).compareTo(b['date'] as DateTime));
     return holidays;
+  }
+
+  // Get national holidays from API for any country
+  static Future<List<Map<String, dynamic>>> getNationalHolidaysFromApi({
+    required String countryCode,
+    required int year,
+    required int color,
+  }) async {
+    try {
+      final holidays = await HolidayApiService.getHolidaysFromNagerApi(
+        countryCode: countryCode,
+        year: year,
+      );
+
+      // Filter for national holidays only
+      final nationalHolidays =
+          holidays.where((holiday) => holiday.isNational).toList();
+
+      // Convert to the format expected by the holiday policy system
+      return nationalHolidays
+          .map((holiday) => {
+                'name': '${holiday.name} (National)',
+                'date': holiday.date,
+                'color': color,
+                'repeatAnnually':
+                    holiday.isNational, // National holidays typically repeat
+              })
+          .toList();
+    } catch (e) {
+      print('Error fetching national holidays from API: $e');
+      return [];
+    }
+  }
+
+  // Add national holidays to Firestore
+  static Future<int> addNationalHolidaysToFirestore({
+    required String companyId,
+    required String countryCode,
+    required int year,
+    required int color,
+  }) async {
+    try {
+      final holidays = await getNationalHolidaysFromApi(
+        countryCode: countryCode,
+        year: year,
+        color: color,
+      );
+
+      int addedCount = 0;
+      for (final holiday in holidays) {
+        try {
+          final policyData = {
+            'name': holiday['name'],
+            'color': holiday['color'],
+            'assignTo': 'all',
+            'region': {
+              'country': countryCode == 'CH' ? 'Switzerland' : countryCode,
+              'area': ['all'],
+              'city': '',
+              'postCode': '',
+            },
+            'period': {
+              'start': Timestamp.fromDate(holiday['date'] as DateTime),
+              'end': Timestamp.fromDate(holiday['date'] as DateTime),
+            },
+            'repeatAnnually': holiday['repeatAnnually'],
+            'paid': true,
+            'createdAt': FieldValue.serverTimestamp(),
+            'updatedAt': FieldValue.serverTimestamp(),
+          };
+
+          await FirebaseFirestore.instance
+              .collection('companies')
+              .doc(companyId)
+              .collection('holiday_policies')
+              .add(policyData);
+
+          addedCount++;
+        } catch (e) {
+          print('Error adding ${holiday['name']}: $e');
+        }
+      }
+
+      return addedCount;
+    } catch (e) {
+      print('Error adding national holidays: $e');
+      return 0;
+    }
   }
 }
 

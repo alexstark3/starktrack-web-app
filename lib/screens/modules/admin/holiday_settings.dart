@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../theme/app_colors.dart';
-import '../../../services/holiday_api_service.dart';
 import '../../../services/country_region_service.dart';
 import 'user_address.dart';
+import 'add_national_holidays.dart';
+import 'add_area_holidays.dart';
 
 class HolidaySettingsScreen extends StatefulWidget {
   final String companyId;
@@ -23,8 +24,8 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
   int _selectedYear = DateTime.now().year;
   bool _isLoading = false;
   List<CountryData> _availableCountries = [];
-  List<ApiHoliday> _nationalHolidays = [];
-  List<ApiHoliday> _areaHolidays = [];
+  List<Map<String, dynamic>> _nationalHolidays = [];
+  List<Map<String, dynamic>> _areaHolidays = [];
 
   // Holiday type selection
   bool _includeNationalHolidays = true;
@@ -86,75 +87,42 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
           )
           .code;
 
-      // Load holidays from API
-      final holidays = await HolidayApiService.getHolidaysFromNagerApi(
-        countryCode: countryCode,
-        year: _selectedYear,
-      );
-
-      print('DEBUG: Loaded ${holidays.length} total holidays for $countryCode');
-      print('DEBUG: Selected areas: $_selectedAreas');
-
-      // Separate national and area holidays
-      final national = holidays.where((h) => h.isNational).toList();
-      final area = holidays.where((h) => !h.isNational).toList();
-
-      print('DEBUG: Found ${national.length} national holidays');
-      print('DEBUG: Found ${area.length} area holidays');
-
-      // Filter area holidays based on selected areas
-      List<ApiHoliday> filteredAreaHolidays = [];
-      if (_selectedAreas.isNotEmpty) {
-        for (final holiday in area) {
-          // Check if this holiday applies to any of the selected areas
-          if (holiday.regions != null && holiday.regions!.isNotEmpty) {
-            // Extract region codes from API format (e.g., "CH-LU" -> "LU")
-            final holidayRegions = holiday.regions!
-                .map((r) => r.contains('-') ? r.split('-').last : r)
-                .map((r) => r.toUpperCase())
-                .toList();
-            final selectedRegions =
-                _selectedAreas.map((a) => a.toUpperCase()).toList();
-
-            print(
-                'DEBUG: Holiday "${holiday.name}" has regions: $holidayRegions (original: ${holiday.regions})');
-
-            // Check if there's any overlap between holiday regions and selected regions
-            final hasOverlap = holidayRegions
-                .any((region) => selectedRegions.contains(region));
-            if (hasOverlap) {
-              filteredAreaHolidays.add(holiday);
-              print(
-                  'DEBUG: Added holiday "${holiday.name}" - matches selected areas');
-            } else {
-              print(
-                  'DEBUG: Skipped holiday "${holiday.name}" - no match with selected areas');
-            }
-          } else {
-            // If holiday has no specific regions, it might be a general area holiday
-            // Include it if we have selected areas
-            filteredAreaHolidays.add(holiday);
-            print(
-                'DEBUG: Added holiday "${holiday.name}" - no specific regions');
-          }
-        }
-      } else {
-        // If no specific areas selected, show all area holidays
-        filteredAreaHolidays = area;
-        print(
-            'DEBUG: No areas selected, showing all ${area.length} area holidays');
+      // Load national holidays if selected
+      if (_includeNationalHolidays) {
+        final nationalHolidays =
+            await SwissNationalHolidayCalculator.getNationalHolidaysFromApi(
+          countryCode: countryCode,
+          year: _selectedYear,
+          color: _nationalHolidayColor,
+        );
+        setState(() {
+          _nationalHolidays = nationalHolidays;
+        });
       }
 
-      print(
-          'DEBUG: Final filtered area holidays: ${filteredAreaHolidays.length}');
+      // Load area holidays if selected
+      if (_includeAreaHolidays) {
+        final areaHolidays = await AreaHolidayService.getAreaHolidaysFromApi(
+          countryCode: countryCode,
+          year: _selectedYear,
+          selectedAreas: _selectedAreas,
+          color: _areaHolidayColor,
+        );
+        setState(() {
+          _areaHolidays = areaHolidays;
+        });
+      }
 
       setState(() {
-        _nationalHolidays = _includeNationalHolidays ? national : [];
-        _areaHolidays = _includeAreaHolidays ? filteredAreaHolidays : [];
         _isLoading = false;
       });
+
+      print('DEBUG: Loaded ${_nationalHolidays.length} national holidays');
+      print('DEBUG: Loaded ${_areaHolidays.length} area holidays');
     } catch (e) {
-      setState(() => _isLoading = false);
+      setState(() {
+        _isLoading = false;
+      });
       _showErrorSnackBar('Failed to load holidays: $e');
     }
   }
@@ -182,118 +150,113 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
 
   Future<void> _addNationalHolidays() async {
     if (_nationalHolidays.isEmpty) {
-      _showErrorSnackBar('No national holidays found for the selected year');
+      _showErrorSnackBar('No national holidays to add');
       return;
     }
 
     setState(() => _isLoading = true);
+
     try {
-      final batch = FirebaseFirestore.instance.batch();
-      final countryName = _regionFilter['country'];
-
+      int addedCount = 0;
       for (final holiday in _nationalHolidays) {
-        final holidayConfig = holiday.toHolidayConfig();
-        final docRef = FirebaseFirestore.instance
-            .collection('companies')
-            .doc(widget.companyId)
-            .collection('holiday_policies')
-            .doc();
+        try {
+          final policyData = {
+            'name': holiday['name'],
+            'color': holiday['color'],
+            'assignTo': 'all',
+            'region': {
+              'country': _regionFilter['country'],
+              'area': ['all'],
+              'city': '',
+              'postCode': '',
+            },
+            'period': {
+              'start': Timestamp.fromDate(holiday['date'] as DateTime),
+              'end': Timestamp.fromDate(holiday['date'] as DateTime),
+            },
+            'repeatAnnually': holiday['repeatAnnually'],
+            'paid': true,
+            'createdAt': FieldValue.serverTimestamp(),
+            'updatedAt': FieldValue.serverTimestamp(),
+          };
 
-        batch.set(docRef, {
-          'name': holidayConfig.name,
-          'date': Timestamp.fromDate(holidayConfig.date),
-          'color': _nationalHolidayColor,
-          'assignTo': 'all',
-          'region': {
-            'country': countryName,
-            'area': ['all'],
-            'city': '',
-            'postCode': '',
-          },
-          'period': {
-            'start': Timestamp.fromDate(holidayConfig.date),
-            'end': Timestamp.fromDate(holidayConfig.date),
-          },
-          'repeatAnnually': holidayConfig.repeatAnnually,
-          'paid': true,
-          'createdAt': FieldValue.serverTimestamp(),
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
+          await FirebaseFirestore.instance
+              .collection('companies')
+              .doc(widget.companyId)
+              .collection('holiday_policies')
+              .add(policyData);
+
+          addedCount++;
+        } catch (e) {
+          print('Error adding ${holiday['name']}: $e');
+        }
       }
 
-      await batch.commit();
+      setState(() => _isLoading = false);
+      _showSuccessSnackBar('Added $addedCount national holidays');
 
       if (widget.onHolidaysAdded != null) {
         widget.onHolidaysAdded!();
       }
-
-      _showSuccessSnackBar(
-          'Added ${_nationalHolidays.length} national holidays');
     } catch (e) {
-      _showErrorSnackBar('Failed to add national holidays: $e');
-    } finally {
       setState(() => _isLoading = false);
+      _showErrorSnackBar('Failed to add national holidays: $e');
     }
   }
 
   Future<void> _addAreaHolidays() async {
     if (_areaHolidays.isEmpty) {
-      _showErrorSnackBar('No area holidays found for the selected year');
-      return;
-    }
-
-    if (_selectedAreas.isEmpty) {
-      _showErrorSnackBar('Please select at least one area');
+      _showErrorSnackBar('No area holidays to add');
       return;
     }
 
     setState(() => _isLoading = true);
+
     try {
-      final batch = FirebaseFirestore.instance.batch();
-      final countryName = _regionFilter['country'];
-
+      int addedCount = 0;
       for (final holiday in _areaHolidays) {
-        final holidayConfig = holiday.toHolidayConfig();
-        final docRef = FirebaseFirestore.instance
-            .collection('companies')
-            .doc(widget.companyId)
-            .collection('holiday_policies')
-            .doc();
+        try {
+          final policyData = {
+            'name': holiday['name'],
+            'color': holiday['color'],
+            'assignTo': 'region',
+            'region': {
+              'country': _regionFilter['country'],
+              'area': holiday['regions'] ?? _selectedAreas,
+              'city': '',
+              'postCode': '',
+            },
+            'period': {
+              'start': Timestamp.fromDate(holiday['date'] as DateTime),
+              'end': Timestamp.fromDate(holiday['date'] as DateTime),
+            },
+            'repeatAnnually': holiday['repeatAnnually'],
+            'paid': true,
+            'createdAt': FieldValue.serverTimestamp(),
+            'updatedAt': FieldValue.serverTimestamp(),
+          };
 
-        batch.set(docRef, {
-          'name': holidayConfig.name,
-          'date': Timestamp.fromDate(holidayConfig.date),
-          'color': _areaHolidayColor,
-          'assignTo': 'region',
-          'region': {
-            'country': countryName,
-            'area': _selectedAreas,
-            'city': '',
-            'postCode': '',
-          },
-          'period': {
-            'start': Timestamp.fromDate(holidayConfig.date),
-            'end': Timestamp.fromDate(holidayConfig.date),
-          },
-          'repeatAnnually': holidayConfig.repeatAnnually,
-          'paid': true,
-          'createdAt': FieldValue.serverTimestamp(),
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
+          await FirebaseFirestore.instance
+              .collection('companies')
+              .doc(widget.companyId)
+              .collection('holiday_policies')
+              .add(policyData);
+
+          addedCount++;
+        } catch (e) {
+          print('Error adding ${holiday['name']}: $e');
+        }
       }
 
-      await batch.commit();
+      setState(() => _isLoading = false);
+      _showSuccessSnackBar('Added $addedCount area holidays');
 
       if (widget.onHolidaysAdded != null) {
         widget.onHolidaysAdded!();
       }
-
-      _showSuccessSnackBar(
-          'Added ${_areaHolidays.length} area holidays for ${_selectedAreas.length} areas');
     } catch (e) {
-      _showErrorSnackBar('Failed to add area holidays: $e');
-    } finally {
       setState(() => _isLoading = false);
+      _showErrorSnackBar('Failed to add area holidays: $e');
     }
   }
 
@@ -321,15 +284,16 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
 
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Compact Form Layout
             Card(
               color: appColors.cardColorDark,
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -413,13 +377,14 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
 
                     // Area Field (using UserAddress)
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             SizedBox(
                               width: 80,
@@ -432,7 +397,7 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Expanded(
+                            Flexible(
                               child: UserAddress(
                                 addressData: _regionFilter,
                                 onAddressChanged: _onRegionChanged,
@@ -446,13 +411,15 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 8),
 
                     // National Holidays Row
-                    Row(
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
                       children: [
                         SizedBox(
-                          width: 80,
+                          width: 70,
                           child: Text(
                             'National:',
                             style: TextStyle(
@@ -461,7 +428,6 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
                         Checkbox(
                           value: _includeNationalHolidays,
                           onChanged: (value) {
@@ -470,12 +436,14 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
                             });
                           },
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'National Holidays',
-                          style: TextStyle(color: appColors.textColor),
+                        SizedBox(
+                          width: 120,
+                          child: Text(
+                            'National Holidays',
+                            style: TextStyle(color: appColors.textColor),
+                          ),
                         ),
-                        const Spacer(),
+                        const SizedBox(width: 16),
                         GestureDetector(
                           onTap: () => _showColorPicker(true),
                           child: Container(
@@ -490,13 +458,15 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
 
                     // Area Holidays Row
-                    Row(
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
                       children: [
                         SizedBox(
-                          width: 80,
+                          width: 70,
                           child: Text(
                             'Area:',
                             style: TextStyle(
@@ -505,7 +475,6 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
                         Checkbox(
                           value: _includeAreaHolidays,
                           onChanged: (value) {
@@ -514,12 +483,14 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
                             });
                           },
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Area Holidays',
-                          style: TextStyle(color: appColors.textColor),
+                        SizedBox(
+                          width: 120,
+                          child: Text(
+                            'Area Holidays',
+                            style: TextStyle(color: appColors.textColor),
+                          ),
                         ),
-                        const Spacer(),
+                        const SizedBox(width: 16),
                         GestureDetector(
                           onTap: () => _showColorPicker(false),
                           child: Container(
@@ -534,7 +505,7 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 12),
 
                     // Load Holidays Button
                     SizedBox(
@@ -601,16 +572,16 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
                                 ),
                               ),
                               title: Text(
-                                holiday.name,
+                                holiday['name'] as String,
                                 style: TextStyle(color: appColors.textColor),
                               ),
                               subtitle: Text(
-                                '${holiday.date.day}/${holiday.date.month}/${holiday.date.year}',
+                                '${(holiday['date'] as DateTime).day}/${(holiday['date'] as DateTime).month}/${(holiday['date'] as DateTime).year}',
                                 style: TextStyle(
                                     color: appColors.textColor
                                         .withValues(alpha: 0.7)),
                               ),
-                              trailing: holiday.toHolidayConfig().repeatAnnually
+                              trailing: holiday['repeatAnnually'] as bool
                                   ? const Icon(Icons.repeat,
                                       color: Colors.green)
                                   : null,
@@ -685,22 +656,22 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
                                 ),
                               ),
                               title: Text(
-                                holiday.name,
+                                holiday['name'] as String,
                                 style: TextStyle(color: appColors.textColor),
                               ),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '${holiday.date.day}/${holiday.date.month}/${holiday.date.year}',
+                                    '${(holiday['date'] as DateTime).day}/${(holiday['date'] as DateTime).month}/${(holiday['date'] as DateTime).year}',
                                     style: TextStyle(
                                         color: appColors.textColor
                                             .withValues(alpha: 0.7)),
                                   ),
-                                  if (holiday.regions != null &&
-                                      holiday.regions!.isNotEmpty)
+                                  if (holiday['regions'] != null &&
+                                      (holiday['regions'] as List).isNotEmpty)
                                     Text(
-                                      'Regions: ${holiday.regions!.join(', ')}',
+                                      'Regions: ${(holiday['regions'] as List).join(', ')}',
                                       style: TextStyle(
                                           color: appColors.textColor
                                               .withValues(alpha: 0.7),
@@ -708,7 +679,7 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
                                     ),
                                 ],
                               ),
-                              trailing: holiday.toHolidayConfig().repeatAnnually
+                              trailing: holiday['repeatAnnually'] as bool
                                   ? const Icon(Icons.repeat,
                                       color: Colors.green)
                                   : null,
@@ -739,6 +710,7 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
             ],
 
             // Empty state

@@ -29,111 +29,129 @@ class _HolidayPolicyListDialogState extends State<HolidayPolicyListDialog> {
 
     return Dialog(
       backgroundColor: appColors.backgroundLight,
-      child: Container(
-        width: 600,
-        height: 500,
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          children: [
-            Text(
-              l10n.holidayPolicies,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: appColors.primaryBlue,
-              ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final availableHeight = constraints.maxHeight;
+          final availableWidth = constraints.maxWidth;
+
+          final dialogWidth =
+              availableWidth > 600 ? 600.0 : availableWidth * 0.95;
+
+          return Container(
+            width: dialogWidth,
+            constraints: BoxConstraints(
+              maxHeight: availableHeight * 0.90, // Max 90% of screen height
+              minHeight: 400, // Minimum height for very small content
             ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('companies')
-                    .doc(widget.companyId)
-                    .collection('holiday_policies')
-                    .orderBy('createdAt', descending: true)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: Text(
-                        'Error: ${snapshot.error}',
-                        style: TextStyle(color: appColors.textColor),
-                      ),
-                    );
-                  }
-
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  final policies = snapshot.data?.docs ?? [];
-
-                  if (policies.isEmpty) {
-                    return Center(
-                      child: Text(
-                        l10n.noHolidayPoliciesFound,
-                        style: TextStyle(color: appColors.textColor),
-                      ),
-                    );
-                  }
-
-                  return ListView.builder(
-                    itemCount: policies.length,
-                    itemBuilder: (context, index) {
-                      final policy =
-                          policies[index].data() as Map<String, dynamic>;
-                      final policyId = policies[index].id;
-
-                      return _buildPolicyCard(
-                          policy, policyId, appColors, l10n);
-                    },
-                  );
-                },
-              ),
+            padding: const EdgeInsets.all(10.0), // Reduced from 24px to 10px
+            decoration: BoxDecoration(
+              color: appColors.backgroundLight,
+              borderRadius: BorderRadius.circular(12),
             ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // Settings cog button
-                IconButton(
-                  onPressed: () {
-                    _showSwissHolidaysDialog();
-                  },
-                  icon: Icon(Icons.settings, color: appColors.primaryBlue),
-                  tooltip: 'Settings',
+                Text(
+                  l10n.holidayPolicies,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: appColors.primaryBlue,
+                  ),
                 ),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('companies')
+                        .doc(widget.companyId)
+                        .collection('holiday_policies')
+                        .orderBy('period.start', descending: false)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: Text(
+                            'Error: ${snapshot.error}',
+                            style: TextStyle(color: appColors.textColor),
+                          ),
+                        );
+                      }
 
-                // Action buttons
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      final policies = snapshot.data?.docs ?? [];
+
+                      if (policies.isEmpty) {
+                        return Center(
+                          child: Text(
+                            l10n.noHolidayPoliciesFound,
+                            style: TextStyle(color: appColors.textColor),
+                          ),
+                        );
+                      }
+
+                      return ListView.builder(
+                        itemCount: policies.length,
+                        itemBuilder: (context, index) {
+                          final policy =
+                              policies[index].data() as Map<String, dynamic>;
+                          final policyId = policies[index].id;
+
+                          return _buildPolicyCard(
+                              policy, policyId, appColors, l10n);
+                        },
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 20),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text(l10n.cancel,
-                          style: TextStyle(color: appColors.textColor)),
-                    ),
-                    const SizedBox(width: 16),
-                    ElevatedButton(
+                    // Settings cog button
+                    IconButton(
                       onPressed: () {
-                        // Removed Navigator.of(context).pop(); here
-                        _showCreateDialog();
+                        _showSwissHolidaysDialog();
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: appColors.primaryBlue,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                      icon: Icon(Icons.settings, color: appColors.primaryBlue),
+                      tooltip: 'Settings',
+                    ),
+
+                    // Action buttons
+                    Row(
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: Text(l10n.cancel,
+                              style: TextStyle(color: appColors.textColor)),
                         ),
-                      ),
-                      child: Text(l10n.createNew,
-                          style: TextStyle(
-                              color: Colors.white)), // Localized button
+                        const SizedBox(width: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            // Removed Navigator.of(context).pop(); here
+                            _showCreateDialog();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: appColors.primaryBlue,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(l10n.createNew,
+                              style: TextStyle(
+                                  color: Colors.white)), // Localized button
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -357,17 +375,26 @@ class _HolidayPolicyListDialogState extends State<HolidayPolicyListDialog> {
             Theme.of(context).extension<AppColors>()!.backgroundLight,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            // Calculate available height (80% of screen height, max 800px)
-            final availableHeight = MediaQuery.of(context).size.height * 0.8;
-            final maxHeight = 800.0;
-            final dialogHeight =
-                availableHeight > maxHeight ? maxHeight : availableHeight;
+            final availableHeight = constraints.maxHeight;
+            final availableWidth = constraints.maxWidth;
+
+            final dialogWidth =
+                availableWidth > 800 ? 800.0 : availableWidth * 0.95;
 
             return Container(
-              width: 800,
-              height: dialogHeight,
-              padding: const EdgeInsets.all(24.0),
+              width: dialogWidth,
+              constraints: BoxConstraints(
+                maxHeight: availableHeight * 0.90, // Max 90% of screen height
+                minHeight: 400, // Minimum height for very small content
+              ),
+              padding: const EdgeInsets.all(10.0), // Reduced from 24px to 10px
+              decoration: BoxDecoration(
+                color:
+                    Theme.of(context).extension<AppColors>()!.backgroundLight,
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   // Header with close button
                   Row(
@@ -443,7 +470,7 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
 
   // Region filter data (without street and number)
   Map<String, dynamic> _regionFilter = {
-    'country': '',
+    'country': 'Switzerland',
     'area': '',
     'city': '',
     'postCode': '',
@@ -767,16 +794,23 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
       backgroundColor: appColors.backgroundLight,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          // Calculate available height (80% of screen height, max 700px)
-          final availableHeight = MediaQuery.of(context).size.height * 0.8;
-          final maxHeight = 700.0;
-          final dialogHeight =
-              availableHeight > maxHeight ? maxHeight : availableHeight;
+          final availableHeight = constraints.maxHeight;
+          final availableWidth = constraints.maxWidth;
+
+          final dialogWidth =
+              availableWidth > 600 ? 600.0 : availableWidth * 0.95;
 
           return Container(
-            width: 500,
-            height: dialogHeight,
-            padding: const EdgeInsets.all(24.0),
+            width: dialogWidth,
+            constraints: BoxConstraints(
+              maxHeight: availableHeight * 0.90, // Max 90% of screen height
+              minHeight: 400, // Minimum height for very small content
+            ),
+            padding: const EdgeInsets.all(10.0), // Reduced from 24px to 10px
+            decoration: BoxDecoration(
+              color: appColors.backgroundLight,
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -1044,7 +1078,6 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
                   ),
                   const SizedBox(height: 12),
                   UserAddress(
-                    key: ValueKey('region_${_regionFilter.hashCode}'),
                     addressData: _regionFilter,
                     onAddressChanged: _onRegionChanged,
                     title: l10n.region,
@@ -1052,7 +1085,7 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
                     showCard: false,
                     showStreetAndNumber: false,
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
                   // Buttons
                   Row(

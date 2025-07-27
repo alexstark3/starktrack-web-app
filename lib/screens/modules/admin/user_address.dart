@@ -27,17 +27,19 @@ class UserAddress extends StatefulWidget {
 }
 
 class _UserAddressState extends State<UserAddress> {
-  List<Map<String, dynamic>> _countries = [];
-  List<Map<String, dynamic>> _swissData = [];
-  List<String> _areas = [];
+  final TextEditingController _countryController = TextEditingController();
+  final TextEditingController _areaController = TextEditingController();
+  final TextEditingController _cityController = TextEditingController();
+  final TextEditingController _postCodeController = TextEditingController();
+  final TextEditingController _streetController = TextEditingController();
+  final TextEditingController _numberController = TextEditingController();
 
-  // Controllers for form fields
-  late TextEditingController _countryController;
-  late TextEditingController _areaController;
-  late TextEditingController _cityController;
-  late TextEditingController _postCodeController;
-  late TextEditingController _streetController;
-  late TextEditingController _streetNumberController;
+  List<Map<String, dynamic>> _countries = [];
+  List<String> _areas = [];
+  List<Map<String, dynamic>> _swissData = [];
+
+  // Separate state for dialog selection
+  List<String> _selectedAreasInDialog = [];
 
   @override
   void initState() {
@@ -47,19 +49,13 @@ class _UserAddressState extends State<UserAddress> {
   }
 
   void _initializeControllers() {
-    _countryController = TextEditingController(
-        text: widget.addressData['country'] ??
-            (widget.isSwissAddress ? 'Switzerland' : ''));
-    _areaController =
-        TextEditingController(text: widget.addressData['area'] ?? '');
-    _cityController =
-        TextEditingController(text: widget.addressData['city'] ?? '');
-    _postCodeController =
-        TextEditingController(text: widget.addressData['postCode'] ?? '');
-    _streetController =
-        TextEditingController(text: widget.addressData['street'] ?? '');
-    _streetNumberController =
-        TextEditingController(text: widget.addressData['streetNumber'] ?? '');
+    _countryController.text = widget.addressData['country'] ??
+        (widget.isSwissAddress ? 'Switzerland' : '');
+    _areaController.text = widget.addressData['area'] ?? '';
+    _cityController.text = widget.addressData['city'] ?? '';
+    _postCodeController.text = widget.addressData['postCode'] ?? '';
+    _streetController.text = widget.addressData['street'] ?? '';
+    _numberController.text = widget.addressData['streetNumber'] ?? '';
   }
 
   Future<void> _loadData() async {
@@ -112,12 +108,50 @@ class _UserAddressState extends State<UserAddress> {
       ..sort();
   }
 
+  List<String> _getCitiesForMultipleAreas(String areasText) {
+    if (areasText.isEmpty) {
+      return _swissData.map((item) => item['city'] as String).toSet().toList()
+        ..sort();
+    }
+
+    final areas = areasText.split(',').map((e) => e.trim()).toList();
+    final cities = <String>{};
+
+    for (final area in areas) {
+      if (area.isNotEmpty) {
+        final areaCities = _getCitiesForArea(area);
+        cities.addAll(areaCities);
+      }
+    }
+
+    return cities.toList()..sort();
+  }
+
   List<String> _getPostCodesForCity(String area, String city) {
     final cityData = _swissData.firstWhere(
       (item) => item['area'] == area && item['city'] == city,
       orElse: () => {'postCodes': []},
     );
     return List<String>.from(cityData['postCodes'] ?? [])..sort();
+  }
+
+  List<String> _getPostCodesForMultipleAreasAndCity(
+      String areasText, String city) {
+    if (areasText.isEmpty || city.isEmpty) {
+      return [];
+    }
+
+    final areas = areasText.split(',').map((e) => e.trim()).toList();
+    final postCodes = <String>{};
+
+    for (final area in areas) {
+      if (area.isNotEmpty) {
+        final areaPostCodes = _getPostCodesForCity(area, city);
+        postCodes.addAll(areaPostCodes);
+      }
+    }
+
+    return postCodes.toList()..sort();
   }
 
   String? _getCityForPostCode(String postCode) {
@@ -143,38 +177,18 @@ class _UserAddressState extends State<UserAddress> {
       'city': _cityController.text,
       'postCode': _postCodeController.text,
       'street': _streetController.text,
-      'streetNumber': _streetNumberController.text,
+      'streetNumber': _numberController.text,
     };
 
     widget.onAddressChanged(newAddressData);
-  }
-
-  void _onAreaChanged(String? value) {
-    if (value != null) {
-      setState(() {
-        // If there's already text in the area field, append the new area
-        if (_areaController.text.isNotEmpty) {
-          final existingAreas =
-              _areaController.text.split(',').map((e) => e.trim()).toList();
-          if (!existingAreas.contains(value)) {
-            existingAreas.add(value);
-            _areaController.text = existingAreas.join(', ');
-          }
-        } else {
-          _areaController.text = value;
-        }
-        _cityController.clear();
-        _postCodeController.clear();
-      });
-      _updateAddressData();
-    }
   }
 
   void _onCityChanged(String? value) {
     if (value != null) {
       setState(() {
         _cityController.text = value;
-        final postCodes = _getPostCodesForCity(_areaController.text, value);
+        final postCodes =
+            _getPostCodesForMultipleAreasAndCity(_areaController.text, value);
         if (postCodes.isNotEmpty) {
           _postCodeController.text = postCodes.first;
         }
@@ -276,40 +290,11 @@ class _UserAddressState extends State<UserAddress> {
 
         // Area field (for Swiss addresses)
         if (widget.isSwissAddress) ...[
-          Autocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              print(
-                  'DEBUG: Autocomplete called with text: "${textEditingValue.text}"');
-              print('DEBUG: Available areas count: ${_areas.length}');
-
-              if (textEditingValue.text == '') {
-                return const Iterable<String>.empty();
-              }
-
-              // Get the current input (after the last comma)
-              final parts = textEditingValue.text.split(',');
-              final currentInput = parts.last.trim().toLowerCase();
-
-              print('DEBUG: Current input: "$currentInput"');
-
-              if (currentInput.isEmpty) {
-                return const Iterable<String>.empty();
-              }
-
-              final filteredAreas = _areas.where((String option) {
-                return option.toLowerCase().contains(currentInput);
-              }).toList();
-
-              print('DEBUG: Filtered areas: $filteredAreas');
-
-              return filteredAreas;
-            },
-            fieldViewBuilder:
-                (context, controller, focusNode, onEditingComplete) {
-              return TextFormField(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextFormField(
                 controller: _areaController,
-                focusNode: focusNode,
-                onEditingComplete: onEditingComplete,
                 decoration: InputDecoration(
                   labelText: l10n.area,
                   hintText:
@@ -341,16 +326,203 @@ class _UserAddressState extends State<UserAddress> {
                     borderSide:
                         BorderSide(color: appColors.primaryBlue, width: 2),
                   ),
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      // Initialize dialog state with current selection
+                      _selectedAreasInDialog = _areaController.text
+                          .split(',')
+                          .map((e) => e.trim())
+                          .where((e) => e.isNotEmpty)
+                          .toList();
+
+                      showDialog(
+                        context: context,
+                        builder: (context) => StatefulBuilder(
+                          builder: (context, setDialogState) {
+                            return Dialog(
+                              backgroundColor: appColors.backgroundLight,
+                              child: LayoutBuilder(
+                                builder: (context, constraints) {
+                                  final availableHeight = constraints.maxHeight;
+
+                                  return Container(
+                                    constraints: BoxConstraints(
+                                      maxHeight: availableHeight * 0.90,
+                                      minHeight: 200,
+                                      maxWidth:
+                                          120, // Reduced from 150 to 120 to make it more compact
+                                    ),
+                                    padding: const EdgeInsets.all(
+                                        10.0), // 10px padding
+                                    decoration: BoxDecoration(
+                                      color: appColors.backgroundLight,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left:
+                                                      6.0), // Align with codes
+                                              child: Text(
+                                                'Areas',
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: appColors.textColor,
+                                                ),
+                                              ),
+                                            ),
+                                            IconButton(
+                                              onPressed: () =>
+                                                  Navigator.of(context).pop(),
+                                              icon: Icon(
+                                                Icons.close,
+                                                color: appColors.textColor,
+                                                size: 20,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Flexible(
+                                          child: ListView.builder(
+                                            shrinkWrap: true,
+                                            itemCount: _areas.length,
+                                            itemBuilder: (context, index) {
+                                              final area = _areas[index];
+                                              final isSelected =
+                                                  _selectedAreasInDialog
+                                                      .contains(area);
+
+                                              return Column(
+                                                children: [
+                                                  InkWell(
+                                                    onTap: () {
+                                                      setDialogState(() {
+                                                        if (isSelected) {
+                                                          _selectedAreasInDialog
+                                                              .remove(area);
+                                                        } else {
+                                                          _selectedAreasInDialog
+                                                              .add(area);
+                                                        }
+                                                      });
+                                                    },
+                                                    child: Container(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                        horizontal:
+                                                            6, // Reduced from 8 to 6
+                                                        vertical:
+                                                            4, // Reduced from 6 to 4
+                                                      ),
+                                                      decoration: BoxDecoration(
+                                                        color: isSelected
+                                                            ? appColors
+                                                                .primaryBlue
+                                                                .withValues(
+                                                                    alpha: 0.2)
+                                                            : Colors
+                                                                .transparent,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(4),
+                                                      ),
+                                                      child: Row(
+                                                        children: [
+                                                          if (isSelected)
+                                                            Icon(
+                                                              Icons.check,
+                                                              color: appColors
+                                                                  .primaryBlue,
+                                                              size: 16,
+                                                            )
+                                                          else
+                                                            SizedBox(width: 16),
+                                                          const SizedBox(
+                                                              width: 6),
+                                                          Text(
+                                                            area,
+                                                            style: TextStyle(
+                                                              color: isSelected
+                                                                  ? appColors
+                                                                      .primaryBlue
+                                                                  : appColors
+                                                                      .textColor,
+                                                              fontWeight: isSelected
+                                                                  ? FontWeight
+                                                                      .w600
+                                                                  : FontWeight
+                                                                      .normal,
+                                                              fontSize:
+                                                                  16, // Increased from 15 to 16
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  if (index <
+                                                      _areas.length -
+                                                          1) // Add spacing between items
+                                                    const SizedBox(
+                                                        height:
+                                                            2), // 2px spacing between codes
+                                                ],
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            TextButton(
+                                              onPressed: () {
+                                                // Apply the selection when OK is pressed
+                                                _areaController.text =
+                                                    _selectedAreasInDialog
+                                                        .join(', ');
+                                                _updateAddressData();
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: Text(
+                                                'OK',
+                                                style: TextStyle(
+                                                  color: appColors.primaryBlue,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    icon: Icon(Icons.arrow_drop_down),
+                  ),
                 ),
                 style: TextStyle(color: appColors.textColor),
                 onChanged: (value) {
                   _updateAddressData();
                 },
-              );
-            },
-            onSelected: (String selection) {
-              _onAreaChanged(selection);
-            },
+              ),
+              const SizedBox(height: 8),
+            ],
           ),
           const SizedBox(height: 12),
         ],
@@ -362,15 +534,11 @@ class _UserAddressState extends State<UserAddress> {
               if (textEditingValue.text == '') {
                 return const Iterable<String>.empty();
               }
-              // Filter cities based on selected area
-              final citiesForArea = _areaController.text.isNotEmpty
-                  ? _getCitiesForArea(_areaController.text)
-                  : _swissData
-                      .map((item) => item['city'] as String)
-                      .toSet()
-                      .toList();
+              // Filter cities based on selected areas
+              final citiesForAreas =
+                  _getCitiesForMultipleAreas(_areaController.text);
 
-              return citiesForArea.where((String option) {
+              return citiesForAreas.where((String option) {
                 return option
                     .toLowerCase()
                     .contains(textEditingValue.text.toLowerCase());
@@ -473,7 +641,7 @@ class _UserAddressState extends State<UserAddress> {
               List<String> availablePostCodes = [];
               if (_areaController.text.isNotEmpty &&
                   _cityController.text.isNotEmpty) {
-                availablePostCodes = _getPostCodesForCity(
+                availablePostCodes = _getPostCodesForMultipleAreasAndCity(
                     _areaController.text, _cityController.text);
               } else if (_areaController.text.isNotEmpty) {
                 // If only area is selected, show all post codes for that area
@@ -624,7 +792,7 @@ class _UserAddressState extends State<UserAddress> {
 
           // Street number field
           TextFormField(
-            controller: _streetNumberController,
+            controller: _numberController,
             decoration: InputDecoration(
               labelText: l10n.streetNumber,
               filled: true,
@@ -680,7 +848,7 @@ class _UserAddressState extends State<UserAddress> {
     _cityController.dispose();
     _postCodeController.dispose();
     _streetController.dispose();
-    _streetNumberController.dispose();
+    _numberController.dispose();
     super.dispose();
   }
 }

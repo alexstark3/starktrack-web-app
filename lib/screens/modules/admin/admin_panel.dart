@@ -58,6 +58,7 @@ class _AdminPanelState extends State<AdminPanel> {
   void _showAddUserDialog() {
     showDialog(
       context: context,
+      useRootNavigator: true,
       builder: (context) => AddUserDialog(
         companyId: widget.companyId,
         teamLeaders: _teamLeaders,
@@ -72,6 +73,7 @@ class _AdminPanelState extends State<AdminPanel> {
   void _showEditUserDialog(DocumentSnapshot userDoc) {
     showDialog(
       context: context,
+      useRootNavigator: true,
       builder: (context) => AddUserDialog(
         companyId: widget.companyId,
         teamLeaders: _teamLeaders,
@@ -87,6 +89,7 @@ class _AdminPanelState extends State<AdminPanel> {
   void _showHolidayPolicyDialog() {
     showDialog(
       context: context,
+      useRootNavigator: true,
       builder: (context) => HolidayPolicyListDialog(
         companyId: widget.companyId,
         onPolicyAdded: () {
@@ -99,6 +102,7 @@ class _AdminPanelState extends State<AdminPanel> {
   void _showTimeOffPolicyDialog() {
     showDialog(
       context: context,
+      useRootNavigator: true,
       builder: (context) => TimeOffPolicyListDialog(
         companyId: widget.companyId,
         onPolicyAdded: () {
@@ -114,6 +118,7 @@ class _AdminPanelState extends State<AdminPanel> {
 
     final confirmed = await showDialog<bool>(
       context: context,
+      useRootNavigator: true,
       builder: (context) => AlertDialog(
         backgroundColor: appColors.backgroundDark,
         title: Text(

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../services/holiday_api_service.dart';
 
 // Area Holiday Configuration
 class AreaHolidayConfig {
@@ -68,6 +69,112 @@ class DateCalculator {
     final easter = calculateEaster(year);
     final ashWednesday = easter.subtract(Duration(days: 46));
     return ashWednesday.add(Duration(days: 5)); // Monday after Ash Wednesday
+  }
+}
+
+// Get area holidays from API for any country
+class AreaHolidayService {
+  static Future<List<Map<String, dynamic>>> getAreaHolidaysFromApi({
+    required String countryCode,
+    required int year,
+    required List<String> selectedAreas,
+    required int color,
+  }) async {
+    try {
+      final holidays = await HolidayApiService.getHolidaysFromNagerApi(
+        countryCode: countryCode,
+        year: year,
+      );
+
+      // Filter for area holidays only (non-national)
+      final areaHolidays =
+          holidays.where((holiday) => !holiday.isNational).toList();
+
+      // Filter by selected areas if specified
+      List<ApiHoliday> filteredHolidays;
+      if (selectedAreas.isNotEmpty && selectedAreas.first != 'all') {
+        filteredHolidays = areaHolidays.where((holiday) {
+          // Check if holiday applies to any of the selected areas
+          return holiday.regions
+                  ?.any((region) => selectedAreas.contains(region)) ??
+              false;
+        }).toList();
+      } else {
+        filteredHolidays = areaHolidays;
+      }
+
+      // Convert to the format expected by the holiday policy system
+      return filteredHolidays
+          .map((holiday) => {
+                'name': '${holiday.name} (Area)',
+                'date': holiday.date,
+                'color': color,
+                'repeatAnnually': true, // Area holidays typically repeat
+                'regions': holiday.regions,
+              })
+          .toList();
+    } catch (e) {
+      print('Error fetching area holidays from API: $e');
+      return [];
+    }
+  }
+
+  // Add area holidays to Firestore
+  static Future<int> addAreaHolidaysToFirestore({
+    required String companyId,
+    required String countryCode,
+    required int year,
+    required List<String> selectedAreas,
+    required int color,
+  }) async {
+    try {
+      final holidays = await getAreaHolidaysFromApi(
+        countryCode: countryCode,
+        year: year,
+        selectedAreas: selectedAreas,
+        color: color,
+      );
+
+      int addedCount = 0;
+      for (final holiday in holidays) {
+        try {
+          final policyData = {
+            'name': holiday['name'],
+            'color': holiday['color'],
+            'assignTo': 'region',
+            'region': {
+              'country': countryCode == 'CH' ? 'Switzerland' : countryCode,
+              'area': holiday['regions'] ?? selectedAreas,
+              'city': '',
+              'postCode': '',
+            },
+            'period': {
+              'start': Timestamp.fromDate(holiday['date'] as DateTime),
+              'end': Timestamp.fromDate(holiday['date'] as DateTime),
+            },
+            'repeatAnnually': holiday['repeatAnnually'],
+            'paid': true,
+            'createdAt': FieldValue.serverTimestamp(),
+            'updatedAt': FieldValue.serverTimestamp(),
+          };
+
+          await FirebaseFirestore.instance
+              .collection('companies')
+              .doc(companyId)
+              .collection('holiday_policies')
+              .add(policyData);
+
+          addedCount++;
+        } catch (e) {
+          print('Error adding ${holiday['name']}: $e');
+        }
+      }
+
+      return addedCount;
+    } catch (e) {
+      print('Error adding area holidays: $e');
+      return 0;
+    }
   }
 }
 

@@ -98,8 +98,7 @@ class ApiHoliday {
       countryCode: json['countryCode'] ?? '',
       regions:
           json['counties'] != null ? List<String>.from(json['counties']) : null,
-      isNational:
-          json['counties'] == null || (json['counties'] as List).isEmpty,
+      isNational: json['global'] == true,
       type: json['types']?.first,
     );
   }
