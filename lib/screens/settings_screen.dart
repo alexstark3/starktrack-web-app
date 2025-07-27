@@ -19,7 +19,7 @@ class SettingsScreen extends StatelessWidget {
 
     const green = Color(0xFF3ECB68);
     const double labelWidth = 110;
-    const double minGap = 50;
+    const double minGap = 16;
 
     return Scaffold(
       backgroundColor: appColors.backgroundDark,

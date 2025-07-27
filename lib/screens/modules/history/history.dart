@@ -93,86 +93,79 @@ class _HistoryLogsState extends State<HistoryLogs> {
           : Colors.black.withValues(alpha: 0.87),
     );
 
-    // From and To date pickers
-    final dateGroup = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        InkWell(
-          borderRadius: BorderRadius.circular(kFilterRadius),
-          onTap: () async {
-            DateTime? picked = await showDatePicker(
-              context: context,
-              initialDate: fromDate ?? DateTime.now(),
-              firstDate: DateTime(2023),
-              lastDate: DateTime(2100),
-            );
-            if (picked != null) setState(() => fromDate = picked);
-          },
-          child: Container(
-            height: kFilterHeight,
-            padding: const EdgeInsets.symmetric(horizontal: 18),
-            decoration: pillDecoration,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.date_range,
-                    color: theme.colorScheme.primary, size: 20),
-                const SizedBox(width: 6),
-                Text(
-                  fromDate == null ? l10n.from : dateFormat.format(fromDate!),
-                  style: TextStyle(
-                    color: fromDate == null
-                        ? theme.colorScheme.primary
-                        : (isDark
-                            ? Colors.white.withValues(alpha: 0.87)
-                            : Colors.black.withValues(alpha: 0.87)),
-                    fontWeight: FontWeight.w500,
-                    fontSize: kFilterFontSize,
-                  ),
-                ),
-              ],
+    // Individual date field widgets
+    final fromDateField = InkWell(
+      borderRadius: BorderRadius.circular(kFilterRadius),
+      onTap: () async {
+        DateTime? picked = await showDatePicker(
+          context: context,
+          initialDate: fromDate ?? DateTime.now(),
+          firstDate: DateTime(2023),
+          lastDate: DateTime(2100),
+        );
+        if (picked != null) setState(() => fromDate = picked);
+      },
+      child: Container(
+        height: kFilterHeight,
+        padding: const EdgeInsets.symmetric(horizontal: 18),
+        decoration: pillDecoration,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
+            const SizedBox(width: 6),
+            Text(
+              fromDate == null ? l10n.from : dateFormat.format(fromDate!),
+              style: TextStyle(
+                color: fromDate == null
+                    ? theme.colorScheme.primary
+                    : (isDark
+                        ? Colors.white.withValues(alpha: 0.87)
+                        : Colors.black.withValues(alpha: 0.87)),
+                fontWeight: FontWeight.w500,
+                fontSize: kFilterFontSize,
+              ),
             ),
-          ),
+          ],
         ),
-        const SizedBox(width: kFilterSpacing),
-        InkWell(
-          borderRadius: BorderRadius.circular(kFilterRadius),
-          onTap: () async {
-            DateTime? picked = await showDatePicker(
-              context: context,
-              initialDate: toDate ?? DateTime.now(),
-              firstDate: DateTime(2023),
-              lastDate: DateTime(2100),
-            );
-            if (picked != null) setState(() => toDate = picked);
-          },
-          child: Container(
-            height: kFilterHeight,
-            padding: const EdgeInsets.symmetric(horizontal: 18),
-            decoration: pillDecoration,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.date_range,
-                    color: theme.colorScheme.primary, size: 20),
-                const SizedBox(width: 6),
-                Text(
-                  toDate == null ? l10n.to : dateFormat.format(toDate!),
-                  style: TextStyle(
-                    color: toDate == null
-                        ? theme.colorScheme.primary
-                        : (isDark
-                            ? Colors.white.withValues(alpha: 0.87)
-                            : Colors.black.withValues(alpha: 0.87)),
-                    fontWeight: FontWeight.w500,
-                    fontSize: kFilterFontSize,
-                  ),
-                ),
-              ],
+      ),
+    );
+
+    final toDateField = InkWell(
+      borderRadius: BorderRadius.circular(kFilterRadius),
+      onTap: () async {
+        DateTime? picked = await showDatePicker(
+          context: context,
+          initialDate: toDate ?? DateTime.now(),
+          firstDate: DateTime(2023),
+          lastDate: DateTime(2100),
+        );
+        if (picked != null) setState(() => toDate = picked);
+      },
+      child: Container(
+        height: kFilterHeight,
+        padding: const EdgeInsets.symmetric(horizontal: 18),
+        decoration: pillDecoration,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
+            const SizedBox(width: 6),
+            Text(
+              toDate == null ? l10n.to : dateFormat.format(toDate!),
+              style: TextStyle(
+                color: toDate == null
+                    ? theme.colorScheme.primary
+                    : (isDark
+                        ? Colors.white.withValues(alpha: 0.87)
+                        : Colors.black.withValues(alpha: 0.87)),
+                fontWeight: FontWeight.w500,
+                fontSize: kFilterFontSize,
+              ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
 
     // Group type dropdown
@@ -330,7 +323,9 @@ class _HistoryLogsState extends State<HistoryLogs> {
                       spacing: kFilterSpacing,
                       runSpacing: 8,
                       children: [
-                        dateGroup,
+                        // Individual elements that will wrap in order
+                        fromDateField,
+                        toDateField,
                         groupDropdown,
                         refreshBtn,
                         projectBox,
@@ -340,7 +335,9 @@ class _HistoryLogsState extends State<HistoryLogs> {
                   } else {
                     return Row(
                       children: [
-                        dateGroup,
+                        fromDateField,
+                        const SizedBox(width: kFilterSpacing),
+                        toDateField,
                         const SizedBox(width: kFilterSpacing),
                         groupDropdown,
                         const SizedBox(width: kFilterSpacing),

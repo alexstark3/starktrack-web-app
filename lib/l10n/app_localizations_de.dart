@@ -126,13 +126,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noLogsForThisDay => 'Keine Einträge für diesen Tag';
 
   @override
-  String get addNewUser => 'Neuen Benutzer hinzufügen';
+  String get addNewUser => 'Neuer Benutzer';
 
   @override
   String get addNewClient => 'Neuen Kunden hinzufügen';
 
   @override
   String get addNewProject => 'Hinzufügen';
+
+  @override
+  String get addHolidayPolicy => 'Urlaubsrichtlinie';
+
+  @override
+  String get addTimeOffPolicy => 'Freizeitrichtlinie';
 
   @override
   String get searchByName => 'Nach Namen suchen';
@@ -273,6 +279,105 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get required => 'erforderlich';
+
+  @override
+  String get createHolidayPolicy => 'Urlaubsrichtlinie erstellen';
+
+  @override
+  String get editHolidayPolicy => 'Urlaubsrichtlinie bearbeiten';
+
+  @override
+  String get policyName => 'Richtlinienname';
+
+  @override
+  String get color => 'Farbe';
+
+  @override
+  String get customColor => 'Benutzerdefinierte Farbe';
+
+  @override
+  String get date => 'Datum';
+
+  @override
+  String get selectDate => 'Datum auswählen';
+
+  @override
+  String get assignToEveryone => 'Allen zuweisen';
+
+  @override
+  String get regionFilter => 'Regionsfilter';
+
+  @override
+  String get filterByRegion => 'Nach Region filtern';
+
+  @override
+  String get repeatsAnnually => 'Jährlich wiederholen';
+
+  @override
+  String get pleaseEnterPolicyName => 'Bitte geben Sie einen Richtliniennamen ein';
+
+  @override
+  String get pleaseSelectDate => 'Bitte wählen Sie ein Datum';
+
+  @override
+  String get pickAColor => 'Farbe auswählen';
+
+  @override
+  String get paid => 'Bezahlt';
+
+  @override
+  String get region => 'Region';
+
+  @override
+  String get assignToUsers => 'Benutzern/Gruppen zuweisen';
+
+  @override
+  String get searchUsers => 'Benutzer suchen...';
+
+  @override
+  String get searchGroups => 'Gruppen suchen...';
+
+  @override
+  String get users => 'Benutzer';
+
+  @override
+  String get groups => 'Gruppen';
+
+  @override
+  String get noUsersFound => 'Keine Benutzer gefunden, die Ihrer Suche entsprechen';
+
+  @override
+  String get noGroupsFound => 'Keine Gruppen gefunden';
+
+  @override
+  String get searchUsersAndGroups => 'Benutzer und Gruppen suchen...';
+
+  @override
+  String get noUsersOrGroupsFound => 'Keine Benutzer oder Gruppen gefunden';
+
+  @override
+  String get user => 'Benutzer';
+
+  @override
+  String get group => 'Gruppe';
+
+  @override
+  String get holidayPolicies => 'Urlaubsrichtlinien';
+
+  @override
+  String get noHolidayPoliciesFound => 'Keine Urlaubsrichtlinien gefunden';
+
+  @override
+  String get createNew => 'Neu erstellen';
+
+  @override
+  String get deleteHolidayPolicy => 'Urlaubsrichtlinie löschen';
+
+  @override
+  String get deleteHolidayPolicyConfirm => 'Sind Sie sicher, dass Sie löschen möchten';
+
+  @override
+  String get holidayPolicyDeleted => 'Urlaubsrichtlinie erfolgreich gelöscht';
 
   @override
   String get includesHistory => 'enthält Verlauf';
@@ -592,13 +697,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get adminPanel => 'Admin-Panel';
 
   @override
-  String get searchUsers => 'Benutzer suchen...';
-
-  @override
   String get noUsers => 'Keine Benutzer gefunden';
-
-  @override
-  String get noUsersFound => 'Keine Benutzer gefunden, die Ihrer Suche entsprechen';
 
   @override
   String get basicInformation => 'Grundinformationen';

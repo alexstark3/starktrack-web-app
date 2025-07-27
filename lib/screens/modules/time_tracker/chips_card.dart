@@ -28,12 +28,11 @@ class ChipsCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Solid colors for dark theme
-    final cardColor = isDark 
-      ? appColors.cardColorDark
-      : Theme.of(context).cardColor;
+    final cardColor =
+        isDark ? appColors.cardColorDark : Theme.of(context).cardColor;
 
     final chipBorder = Border.all(
-      color: appColors.darkGray.withValues(alpha:0.2),
+      color: appColors.darkGray.withValues(alpha: 0.2),
       width: 1,
     );
 
@@ -48,14 +47,18 @@ class ChipsCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: cardColor,
           borderRadius: BorderRadius.circular(10),
-          border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : chipBorder,
-          boxShadow: isDark ? null : [
-            BoxShadow(
-              color: Colors.black.withValues(alpha:0.12),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          border: isDark
+              ? Border.all(color: const Color(0xFF404040), width: 1)
+              : chipBorder,
+          boxShadow: isDark
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.12),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Text(text, style: chipStyle),
@@ -64,29 +67,55 @@ class ChipsCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-              decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-                  color: cardColor,
-          border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : null,
-          boxShadow: isDark ? null : [
-            BoxShadow(
-              color: Colors.black.withValues(alpha:0.15),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: cardColor,
+        border: isDark
+            ? Border.all(color: const Color(0xFF404040), width: 1)
+            : null,
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.15),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(10),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            buildChip('${l10n.worked}: ${_formatDuration(worked)}'),
-            if (showBreaks) ...[
-              const SizedBox(width: 10),
-              buildChip('${l10n.breaks}: ${_formatDuration(breaks)}'),
-            ],
-          ],
+        child: Builder(
+          builder: (context) {
+            final screenWidth = MediaQuery.of(context).size.width;
+            final isVerySmall = screenWidth < 400; // Breakpoint for wrapping
+
+            if (isVerySmall) {
+              // Very small screens: stack chips vertically
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  buildChip('${l10n.worked}: ${_formatDuration(worked)}'),
+                  if (showBreaks) ...[
+                    const SizedBox(height: 8),
+                    buildChip('${l10n.breaks}: ${_formatDuration(breaks)}'),
+                  ],
+                ],
+              );
+            } else {
+              // Normal screens: chips in a row
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  buildChip('${l10n.worked}: ${_formatDuration(worked)}'),
+                  if (showBreaks) ...[
+                    const SizedBox(width: 10),
+                    buildChip('${l10n.breaks}: ${_formatDuration(breaks)}'),
+                  ],
+                ],
+              );
+            }
+          },
         ),
       ),
     );

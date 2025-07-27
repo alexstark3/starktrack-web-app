@@ -12,7 +12,8 @@ class TimeEntryCard extends StatefulWidget {
   final String companyId;
   final String userId;
   final DateTime selectedDay;
-  final List<String> projects; // List of project names (adjust if structure changes)
+  final List<String>
+      projects; // List of project names (adjust if structure changes)
 
   const TimeEntryCard({
     Key? key,
@@ -32,9 +33,9 @@ class _TimeEntryCardState extends State<TimeEntryCard>
   bool get wantKeepAlive => true;
 
   final _startController = TextEditingController();
-  final _endController   = TextEditingController();
+  final _endController = TextEditingController();
   final FocusNode _startFocus = FocusNode();
-  final FocusNode _endFocus   = FocusNode();
+  final FocusNode _endFocus = FocusNode();
 
   String? _project;
   String? _note;
@@ -46,7 +47,8 @@ class _TimeEntryCardState extends State<TimeEntryCard>
   @override
   void initState() {
     super.initState();
-    _startFocus.addListener(() => _formatOnUnfocus(_startController, _startFocus));
+    _startFocus
+        .addListener(() => _formatOnUnfocus(_startController, _startFocus));
     _endFocus.addListener(() => _formatOnUnfocus(_endController, _endFocus));
   }
 
@@ -77,7 +79,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
     final l10n = AppLocalizations.of(context)!;
     final res = await showDialog<String>(
       context: context,
-      useRootNavigator: false,            // keep within same navigator tree
+      useRootNavigator: false, // keep within same navigator tree
       builder: (_) => SimpleDialog(
         title: Text(l10n.selectProject),
         children: widget.projects
@@ -101,8 +103,12 @@ class _TimeEntryCardState extends State<TimeEntryCard>
         title: Text(l10n.note),
         content: TextField(controller: ctrl, maxLines: 3),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel)),
-          TextButton(onPressed: () => Navigator.pop(context, ctrl.text), child: Text(l10n.save)),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.cancel)),
+          TextButton(
+              onPressed: () => Navigator.pop(context, ctrl.text),
+              child: Text(l10n.save)),
         ],
       ),
     );
@@ -122,8 +128,10 @@ class _TimeEntryCardState extends State<TimeEntryCard>
     // CHECK for Per Diem in any log for this day!
     final d = DateFormat('yyyy-MM-dd').format(widget.selectedDay);
     final perDiemQuery = await FirebaseFirestore.instance
-        .collection('companies').doc(widget.companyId)
-        .collection('users').doc(widget.userId)
+        .collection('companies')
+        .doc(widget.companyId)
+        .collection('users')
+        .doc(widget.userId)
         .collection('all_logs')
         .where('sessionDate', isEqualTo: d)
         .get();
@@ -222,25 +230,25 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4)),
                 ),
-                Text(l10n.perDiem,
+                Text(
+                  l10n.perDiem,
                   style: TextStyle(
                     fontWeight: FontWeight.normal,
                     fontSize: 16,
-                    color: canEditPerDiem
-                        ? Colors.black
-                        : Colors.grey.shade400,
+                    color: canEditPerDiem ? Colors.black : Colors.grey.shade400,
                   ),
                 ),
                 const Spacer(),
                 Text(l10n.perDiemAmount,
-                    style: TextStyle(
-                        fontWeight: FontWeight.normal, fontSize: 16)),
+                    style:
+                        TextStyle(fontWeight: FontWeight.normal, fontSize: 16)),
                 if (!canEditPerDiem)
                   Padding(
                     padding: const EdgeInsets.only(left: 8),
                     child: Tooltip(
                       message: l10n.perDiemAlreadyUsed,
-                      child: const Icon(Icons.lock, color: Colors.grey, size: 17),
+                      child:
+                          const Icon(Icons.lock, color: Colors.grey, size: 17),
                     ),
                   ),
               ],
@@ -248,7 +256,8 @@ class _TimeEntryCardState extends State<TimeEntryCard>
           ];
 
           return AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
             title: Text(l10n.expenses),
             content: SingleChildScrollView(
               child: Column(
@@ -266,10 +275,12 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                             hintText: l10n.name,
                             border: const UnderlineInputBorder(),
                             isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 4),
+                            contentPadding:
+                                const EdgeInsets.symmetric(vertical: 4),
                           ),
                           onChanged: (_) => setStateDialog(() {}),
-                          onSubmitted: (_) => canAddExpense() ? addExpense() : null,
+                          onSubmitted: (_) =>
+                              canAddExpense() ? addExpense() : null,
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -281,11 +292,14 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                             hintText: l10n.amount,
                             border: const UnderlineInputBorder(),
                             isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 4),
+                            contentPadding:
+                                const EdgeInsets.symmetric(vertical: 4),
                           ),
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
                           onChanged: (_) => setStateDialog(() {}),
-                          onSubmitted: (_) => canAddExpense() ? addExpense() : null,
+                          onSubmitted: (_) =>
+                              canAddExpense() ? addExpense() : null,
                         ),
                       ),
                       const SizedBox(width: 6),
@@ -310,19 +324,24 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                 ],
               ),
             ),
-            actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            actionsPadding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(l10n.cancel, style: TextStyle(color: primaryColor, fontSize: 16)),
+                child: Text(l10n.cancel,
+                    style: TextStyle(color: primaryColor, fontSize: 16)),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
-                  textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
+                  textStyle: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 onPressed: () {
                   setState(() {
@@ -342,8 +361,10 @@ class _TimeEntryCardState extends State<TimeEntryCard>
   Future<bool> _hasOverlap(DateTime begin, DateTime end) async {
     final d = DateFormat('yyyy-MM-dd').format(widget.selectedDay);
     final q = await FirebaseFirestore.instance
-        .collection('companies').doc(widget.companyId)
-        .collection('users').doc(widget.userId)
+        .collection('companies')
+        .doc(widget.companyId)
+        .collection('users')
+        .doc(widget.userId)
         .collection('all_logs')
         .where('sessionDate', isEqualTo: d)
         .get();
@@ -379,17 +400,19 @@ class _TimeEntryCardState extends State<TimeEntryCard>
 
       final st = DateFormat.Hm().parse(s);
       final et = DateFormat.Hm().parse(e);
-      final d  = widget.selectedDay;
+      final d = widget.selectedDay;
       final begin = DateTime(d.year, d.month, d.day, st.hour, st.minute);
-      final end   = DateTime(d.year, d.month, d.day, et.hour, et.minute);
+      final end = DateTime(d.year, d.month, d.day, et.hour, et.minute);
       if (!end.isAfter(begin)) throw l10n.endTimeMustBeAfterStartTime;
       if (await _hasOverlap(begin, end)) throw l10n.timeOverlap;
 
       // Check Per Diem again before add!
       final dayStr = DateFormat('yyyy-MM-dd').format(widget.selectedDay);
       final perDiemQuery = await FirebaseFirestore.instance
-          .collection('companies').doc(widget.companyId)
-          .collection('users').doc(widget.userId)
+          .collection('companies')
+          .doc(widget.companyId)
+          .collection('users')
+          .doc(widget.userId)
           .collection('all_logs')
           .where('sessionDate', isEqualTo: dayStr)
           .get();
@@ -426,8 +449,10 @@ class _TimeEntryCardState extends State<TimeEntryCard>
       final logId = _generateLogId(begin);
 
       await FirebaseFirestore.instance
-          .collection('companies').doc(widget.companyId)
-          .collection('users').doc(widget.userId)
+          .collection('companies')
+          .doc(widget.companyId)
+          .collection('users')
+          .doc(widget.userId)
           .collection('all_logs')
           .doc(logId)
           .set({
@@ -446,7 +471,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
         _startController.clear();
         _endController.clear();
         _project = null;
-        _note    = null;
+        _note = null;
         _expenses = {};
       });
     } catch (e) {
@@ -462,21 +487,24 @@ class _TimeEntryCardState extends State<TimeEntryCard>
   Widget build(BuildContext context) {
     super.build(context);
     final l10n = AppLocalizations.of(context)!;
-    final app   = Theme.of(context).extension<AppColors>()!;
+    final app = Theme.of(context).extension<AppColors>()!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     BoxDecoration fieldDecoration = BoxDecoration(
       color: isDark ? app.cardColorDark : theme.cardColor,
       borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: isDark ? const Color(0xFF404040) : theme.dividerColor),
-      boxShadow: isDark ? null : [
-        BoxShadow(
-          color: Colors.black.withValues(alpha:0.12),
-          blurRadius: 4,
-          offset: const Offset(0, 2),
-        ),
-      ],
+      border: Border.all(
+          color: isDark ? const Color(0xFF404040) : theme.dividerColor),
+      boxShadow: isDark
+          ? null
+          : [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.12),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
     );
 
     TextStyle fieldStyle = TextStyle(
@@ -509,14 +537,17 @@ class _TimeEntryCardState extends State<TimeEntryCard>
             initialTime: initialTime,
             builder: (context, child) {
               return MediaQuery(
-                data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+                data: MediaQuery.of(context)
+                    .copyWith(alwaysUse24HourFormat: true),
                 child: child!,
               );
             },
           );
 
           if (picked != null) {
-            final formatted = picked.hour.toString().padLeft(2, '0') + ':' + picked.minute.toString().padLeft(2, '0');
+            final formatted = picked.hour.toString().padLeft(2, '0') +
+                ':' +
+                picked.minute.toString().padLeft(2, '0');
             setState(() => c.text = formatted);
           }
         },
@@ -565,62 +596,62 @@ class _TimeEntryCardState extends State<TimeEntryCard>
 
     return SizedBox(
       width: double.infinity,
-              child: Container(
-                  decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: isDark ? app.cardColorDark : theme.cardColor,
-            border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : null,
-            boxShadow: isDark ? null : [
-              BoxShadow(
-                color: Colors.black.withValues(alpha:0.15),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: isDark ? app.cardColorDark : theme.cardColor,
+          border: isDark
+              ? Border.all(color: const Color(0xFF404040), width: 1)
+              : null,
+          boxShadow: isDark
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.15),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+        ),
         child: Card(
           color: Colors.transparent,
           elevation: 0,
           margin: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           child: Padding(
             padding: const EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ------------- FIELDS -------------
+                // ------------- ALL FIELDS -------------
                 Wrap(
                   spacing: kFieldSpacing,
                   runSpacing: kFieldSpacing,
                   children: [
                     timeBox(_startController, l10n.start),
                     timeBox(_endController, l10n.end),
-                    selector(_project ?? '${l10n.project} +', _showProjectPopup),
+                    selector(
+                        _project ?? '${l10n.project} +', _showProjectPopup),
                     selector(
                       _expenses.containsKey('Per diem')
                           ? l10n.perDiem
                           : '${l10n.expenses} +',
                       _showExpensePopup,
                     ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-
-                // ----------- NOTE + ADD -----------
-                Row(
-                  children: [
-                    Expanded(
-                      child: selector(_note ?? l10n.note, _showNotePopup),
-                    ),
-                    const SizedBox(width: kFieldSpacing),
+                    // Note field and Add button - will wrap to next line if needed
+                    selector(_note ?? l10n.note, _showNotePopup),
                     SizedBox(
                       height: kEntryHeight,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: app.primaryBlue,
                           foregroundColor: app.whiteTextOnBlue,
-                          textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kEntryRadius)),
+                          textStyle: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                          shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(kEntryRadius)),
                           minimumSize: const Size(100, kEntryHeight),
                           maximumSize: const Size(120, kEntryHeight),
                           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -631,7 +662,8 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                             ? const SizedBox(
                                 width: 18,
                                 height: 18,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
                               )
                             : Text(l10n.add),
                       ),

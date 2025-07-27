@@ -187,13 +187,7 @@ class _AdminPanelState extends State<AdminPanel> {
                     ? null
                     : Border.all(color: Colors.black26, width: 1),
                 boxShadow: Theme.of(context).brightness == Brightness.dark
-                    ? [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ]
+                    ? null
                     : [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.08),
@@ -206,60 +200,139 @@ class _AdminPanelState extends State<AdminPanel> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Search bar
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white24
-                            : Colors.black26,
-                        width: 1,
-                      ),
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? appColors.lightGray
-                          : Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: TextField(
-                      onChanged: (value) => setState(() => _searchText = value),
-                      decoration: InputDecoration(
-                        hintText: l10n.searchUsers,
-                        hintStyle: TextStyle(
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? const Color(0xFFB3B3B3)
-                              : appColors.textColor,
-                        ),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? const Color(0xFFB3B3B3)
-                              : appColors.darkGray,
-                        ),
-                        isDense: true,
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 12),
-                      ),
-                      style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? const Color(0xFFCCCCCC)
-                            : appColors.textColor,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Action buttons row with responsive layout
+                  // Search bar and New User button row
                   Builder(
                     builder: (context) {
-                      // Check if we have enough space for all buttons in a row
                       final screenWidth = MediaQuery.of(context).size.width;
-                      final hasEnoughSpace = screenWidth > 600;
+                      final isVerySmall = screenWidth < 445;
 
-                      if (hasEnoughSpace) {
-                        // Desktop/tablet layout - buttons in a row
+                      if (isVerySmall) {
+                        // Very small screens: stack search and button
+                        return Column(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.white24
+                                      : Colors.black26,
+                                  width: 1,
+                                ),
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? appColors.lightGray
+                                    : Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: TextField(
+                                onChanged: (value) =>
+                                    setState(() => _searchText = value),
+                                decoration: InputDecoration(
+                                  hintText: l10n.searchUsers,
+                                  hintStyle: TextStyle(
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? const Color(0xFFB3B3B3)
+                                        : appColors.textColor,
+                                  ),
+                                  prefixIcon: Icon(
+                                    Icons.search,
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? const Color(0xFFB3B3B3)
+                                        : appColors.darkGray,
+                                  ),
+                                  isDense: true,
+                                  border: InputBorder.none,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 12),
+                                ),
+                                style: TextStyle(
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? const Color(0xFFCCCCCC)
+                                      : appColors.textColor,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: _showAddUserDialog,
+                                icon: Icon(Icons.add,
+                                    color: appColors.whiteTextOnBlue),
+                                label: Text(
+                                  l10n.addNewUser,
+                                  style: TextStyle(
+                                      color: appColors.whiteTextOnBlue),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: appColors.primaryBlue,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      } else {
+                        // Normal screens: search and New User button on same line
                         return Row(
                           children: [
-                            // Add New User button
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.white24
+                                        : Colors.black26,
+                                    width: 1,
+                                  ),
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? appColors.lightGray
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: TextField(
+                                  onChanged: (value) =>
+                                      setState(() => _searchText = value),
+                                  decoration: InputDecoration(
+                                    hintText: l10n.searchUsers,
+                                    hintStyle: TextStyle(
+                                      color: Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? const Color(0xFFB3B3B3)
+                                          : appColors.textColor,
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.search,
+                                      color: Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? const Color(0xFFB3B3B3)
+                                          : appColors.darkGray,
+                                    ),
+                                    isDense: true,
+                                    border: InputBorder.none,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 12),
+                                  ),
+                                  style: TextStyle(
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? const Color(0xFFCCCCCC)
+                                        : appColors.textColor,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
                             ElevatedButton.icon(
                               onPressed: _showAddUserDialog,
                               icon: Icon(Icons.add,
@@ -272,47 +345,61 @@ class _AdminPanelState extends State<AdminPanel> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: appColors.primaryBlue,
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 12),
+                                    horizontal: 14, vertical: 12),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 16),
-                            // Add Holiday Policy button
+                          ],
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  // Policy buttons row
+                  Builder(
+                    builder: (context) {
+                      final screenWidth = MediaQuery.of(context).size.width;
+                      final isVerySmall = screenWidth < 445;
+
+                      if (isVerySmall) {
+                        // Very small screens: stack policy buttons
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
                             ElevatedButton.icon(
                               onPressed: _showHolidayPolicyDialog,
                               icon: Icon(Icons.calendar_today,
                                   color: appColors.whiteTextOnBlue),
                               label: Text(
-                                'Add Holiday Policy',
+                                l10n.addHolidayPolicy,
                                 style:
                                     TextStyle(color: appColors.whiteTextOnBlue),
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: appColors.primaryBlue,
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 12),
+                                    horizontal: 14, vertical: 12),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 16),
-                            // Add Time Off Policy button
+                            const SizedBox(height: 12),
                             ElevatedButton.icon(
                               onPressed: _showTimeOffPolicyDialog,
                               icon: Icon(Icons.schedule,
                                   color: appColors.whiteTextOnBlue),
                               label: Text(
-                                'Add Time Off Policy',
+                                l10n.addTimeOffPolicy,
                                 style:
                                     TextStyle(color: appColors.whiteTextOnBlue),
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: appColors.primaryBlue,
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 12),
+                                    horizontal: 14, vertical: 12),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
@@ -321,64 +408,42 @@ class _AdminPanelState extends State<AdminPanel> {
                           ],
                         );
                       } else {
-                        // Mobile layout - buttons stacked
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                        // Normal screens: policy buttons in a wrap
+                        return Wrap(
+                          spacing: 12,
+                          runSpacing: 8,
                           children: [
-                            // Add New User button
-                            ElevatedButton.icon(
-                              onPressed: _showAddUserDialog,
-                              icon: Icon(Icons.add,
-                                  color: appColors.whiteTextOnBlue),
-                              label: Text(
-                                l10n.addNewUser,
-                                style:
-                                    TextStyle(color: appColors.whiteTextOnBlue),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: appColors.primaryBlue,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            // Add Holiday Policy button
                             ElevatedButton.icon(
                               onPressed: _showHolidayPolicyDialog,
                               icon: Icon(Icons.calendar_today,
                                   color: appColors.whiteTextOnBlue),
                               label: Text(
-                                'Add Holiday Policy',
+                                l10n.addHolidayPolicy,
                                 style:
                                     TextStyle(color: appColors.whiteTextOnBlue),
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: appColors.primaryBlue,
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 12),
+                                    horizontal: 14, vertical: 12),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 12),
-                            // Add Time Off Policy button
                             ElevatedButton.icon(
                               onPressed: _showTimeOffPolicyDialog,
                               icon: Icon(Icons.schedule,
                                   color: appColors.whiteTextOnBlue),
                               label: Text(
-                                'Add Time Off Policy',
+                                l10n.addTimeOffPolicy,
                                 style:
                                     TextStyle(color: appColors.whiteTextOnBlue),
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: appColors.primaryBlue,
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 12),
+                                    horizontal: 14, vertical: 12),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),

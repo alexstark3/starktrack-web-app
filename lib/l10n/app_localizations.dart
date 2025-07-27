@@ -332,7 +332,7 @@ abstract class AppLocalizations {
   /// No description provided for @addNewUser.
   ///
   /// In en, this message translates to:
-  /// **'Add New User'**
+  /// **'New User'**
   String get addNewUser;
 
   /// No description provided for @addNewClient.
@@ -346,6 +346,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add New Project'**
   String get addNewProject;
+
+  /// No description provided for @addHolidayPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Holiday Policy'**
+  String get addHolidayPolicy;
+
+  /// No description provided for @addTimeOffPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Time Off Policy'**
+  String get addTimeOffPolicy;
 
   /// No description provided for @searchByName.
   ///
@@ -622,6 +634,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'required'**
   String get required;
+
+  /// No description provided for @createHolidayPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Holiday Policy'**
+  String get createHolidayPolicy;
+
+  /// No description provided for @editHolidayPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Holiday Policy'**
+  String get editHolidayPolicy;
+
+  /// No description provided for @policyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Policy Name'**
+  String get policyName;
+
+  /// No description provided for @color.
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get color;
+
+  /// No description provided for @customColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Color'**
+  String get customColor;
+
+  /// No description provided for @date.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get date;
+
+  /// No description provided for @selectDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Date'**
+  String get selectDate;
+
+  /// No description provided for @assignToEveryone.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign to everyone'**
+  String get assignToEveryone;
+
+  /// No description provided for @regionFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Region Filter'**
+  String get regionFilter;
+
+  /// No description provided for @filterByRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by Region'**
+  String get filterByRegion;
+
+  /// No description provided for @repeatsAnnually.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeats annually'**
+  String get repeatsAnnually;
+
+  /// No description provided for @pleaseEnterPolicyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a policy name'**
+  String get pleaseEnterPolicyName;
+
+  /// No description provided for @pleaseSelectDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a date'**
+  String get pleaseSelectDate;
+
+  /// No description provided for @pickAColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a color'**
+  String get pickAColor;
+
+  /// No description provided for @paid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get paid;
+
+  /// No description provided for @region.
+  ///
+  /// In en, this message translates to:
+  /// **'Region'**
+  String get region;
+
+  /// No description provided for @assignToUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign to Users/Groups'**
+  String get assignToUsers;
+
+  /// No description provided for @searchUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Search users...'**
+  String get searchUsers;
+
+  /// No description provided for @searchGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'Search groups...'**
+  String get searchGroups;
+
+  /// No description provided for @users.
+  ///
+  /// In en, this message translates to:
+  /// **'Users'**
+  String get users;
+
+  /// No description provided for @groups.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups'**
+  String get groups;
+
+  /// No description provided for @noUsersFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No users found matching your search'**
+  String get noUsersFound;
+
+  /// No description provided for @noGroupsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No groups found'**
+  String get noGroupsFound;
+
+  /// No description provided for @searchUsersAndGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'Search users and groups...'**
+  String get searchUsersAndGroups;
+
+  /// No description provided for @noUsersOrGroupsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No users or groups found'**
+  String get noUsersOrGroupsFound;
+
+  /// No description provided for @user.
+  ///
+  /// In en, this message translates to:
+  /// **'User'**
+  String get user;
+
+  /// No description provided for @group.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get group;
+
+  /// No description provided for @holidayPolicies.
+  ///
+  /// In en, this message translates to:
+  /// **'Holiday Policies'**
+  String get holidayPolicies;
+
+  /// No description provided for @noHolidayPoliciesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No holiday policies found'**
+  String get noHolidayPoliciesFound;
+
+  /// No description provided for @createNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Create New'**
+  String get createNew;
+
+  /// No description provided for @deleteHolidayPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Holiday Policy'**
+  String get deleteHolidayPolicy;
+
+  /// No description provided for @deleteHolidayPolicyConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete'**
+  String get deleteHolidayPolicyConfirm;
+
+  /// No description provided for @holidayPolicyDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Holiday policy deleted successfully'**
+  String get holidayPolicyDeleted;
 
   /// No description provided for @includesHistory.
   ///
@@ -1229,23 +1439,11 @@ abstract class AppLocalizations {
   /// **'Admin Panel'**
   String get adminPanel;
 
-  /// No description provided for @searchUsers.
-  ///
-  /// In en, this message translates to:
-  /// **'Search users...'**
-  String get searchUsers;
-
   /// No description provided for @noUsers.
   ///
   /// In en, this message translates to:
   /// **'No users found'**
   String get noUsers;
-
-  /// No description provided for @noUsersFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No users found matching your search'**
-  String get noUsersFound;
 
   /// No description provided for @basicInformation.
   ///

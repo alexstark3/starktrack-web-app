@@ -38,72 +38,48 @@ class MembersTab extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Search field card
+            // Search field
             Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? const Color(0xFF1E1E1E)
-                    : Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: Theme.of(context).brightness == Brightness.dark
-                    ? [
-                        BoxShadow(
-                          color: const Color(0xFF2A2A2A),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ]
-                    : [
-                        BoxShadow(
-                          color: const Color(0xFFE0E0E0),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-              ),
-              padding: const EdgeInsets.all(16),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? const Color(0xFF3D3D3D)
-                        : const Color(0xFF424242),
-                    width: 1,
-                  ),
+                border: Border.all(
                   color: Theme.of(context).brightness == Brightness.dark
-                      ? colors.lightGray
-                      : Colors.white,
-                  borderRadius: BorderRadius.circular(10),
+                      ? Colors.white24
+                      : Colors.black26,
+                  width: 1,
                 ),
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: AppLocalizations.of(context)
-                            ?.searchByNameSurnameEmail ??
-                        'Search by name, surname or email',
-                    hintStyle: TextStyle(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFFB3B3B3)
-                          : colors.textColor,
-                    ),
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFFB3B3B3)
-                          : colors.darkGray,
-                    ),
-                    isDense: true,
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 12),
-                  ),
-                  style: TextStyle(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? colors.lightGray
+                    : Colors.white,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText:
+                      AppLocalizations.of(context)?.searchByNameSurnameEmail ??
+                          'Search by name, surname or email',
+                  hintStyle: TextStyle(
                     color: Theme.of(context).brightness == Brightness.dark
-                        ? const Color(0xFFCCCCCC)
+                        ? const Color(0xFFB3B3B3)
                         : colors.textColor,
                   ),
-                  onChanged: (val) =>
-                      setState(() => _search = val.trim().toLowerCase()),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFFB3B3B3)
+                        : colors.darkGray,
+                  ),
+                  isDense: true,
+                  border: InputBorder.none,
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 ),
+                style: TextStyle(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFFCCCCCC)
+                      : colors.textColor,
+                ),
+                onChanged: (val) =>
+                    setState(() => _search = val.trim().toLowerCase()),
               ),
             ),
             const SizedBox(height: 20),
@@ -192,15 +168,19 @@ class _MembersTable extends StatelessWidget {
             final roles = _formatRoles(data['roles'] as List?, l10n);
             final modules = _formatModules(data['modules'] as List?, l10n);
 
-            return Card(
+            return Container(
               margin: const EdgeInsets.only(bottom: 12),
-              elevation:
-                  Theme.of(context).brightness == Brightness.dark ? 0 : 2,
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? const Color(0xFF1E1E1E)
-                  : null,
-              shape: RoundedRectangleBorder(
+              decoration: BoxDecoration(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF1E1E1E)
+                    : Colors.white,
                 borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white24
+                      : Colors.black26,
+                  width: 1,
+                ),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16),

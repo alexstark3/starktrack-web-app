@@ -10,6 +10,7 @@ class UserAddress extends StatefulWidget {
   final String title;
   final bool isSwissAddress;
   final bool showCard;
+  final bool showStreetAndNumber;
 
   const UserAddress({
     super.key,
@@ -18,6 +19,7 @@ class UserAddress extends StatefulWidget {
     required this.title,
     this.isSwissAddress = true,
     this.showCard = true,
+    this.showStreetAndNumber = true,
   });
 
   @override
@@ -28,7 +30,7 @@ class _UserAddressState extends State<UserAddress> {
   List<Map<String, dynamic>> _countries = [];
   List<Map<String, dynamic>> _swissData = [];
   List<String> _areas = [];
-  
+
   // Controllers for form fields
   late TextEditingController _countryController;
   late TextEditingController _areaController;
@@ -45,12 +47,19 @@ class _UserAddressState extends State<UserAddress> {
   }
 
   void _initializeControllers() {
-    _countryController = TextEditingController(text: widget.addressData['country'] ?? (widget.isSwissAddress ? 'Switzerland' : ''));
-    _areaController = TextEditingController(text: widget.addressData['area'] ?? '');
-    _cityController = TextEditingController(text: widget.addressData['city'] ?? '');
-    _postCodeController = TextEditingController(text: widget.addressData['postCode'] ?? '');
-    _streetController = TextEditingController(text: widget.addressData['street'] ?? '');
-    _streetNumberController = TextEditingController(text: widget.addressData['streetNumber'] ?? '');
+    _countryController = TextEditingController(
+        text: widget.addressData['country'] ??
+            (widget.isSwissAddress ? 'Switzerland' : ''));
+    _areaController =
+        TextEditingController(text: widget.addressData['area'] ?? '');
+    _cityController =
+        TextEditingController(text: widget.addressData['city'] ?? '');
+    _postCodeController =
+        TextEditingController(text: widget.addressData['postCode'] ?? '');
+    _streetController =
+        TextEditingController(text: widget.addressData['street'] ?? '');
+    _streetNumberController =
+        TextEditingController(text: widget.addressData['streetNumber'] ?? '');
   }
 
   Future<void> _loadData() async {
@@ -62,7 +71,8 @@ class _UserAddressState extends State<UserAddress> {
 
   Future<void> _loadCountries() async {
     try {
-      final jsonString = await rootBundle.loadString('lib/data/world_countries.json');
+      final jsonString =
+          await rootBundle.loadString('lib/data/world_countries.json');
       final data = json.decode(jsonString);
       _countries = List<Map<String, dynamic>>.from(data);
       setState(() {});
@@ -73,16 +83,22 @@ class _UserAddressState extends State<UserAddress> {
 
   Future<void> _loadSwissData() async {
     try {
-      final jsonString = await rootBundle.loadString('lib/data/swiss_cities.json');
+      final jsonString =
+          await rootBundle.loadString('lib/data/swiss_cities.json');
       final data = json.decode(jsonString);
       _swissData = List<Map<String, dynamic>>.from(data);
-      
+
       // Extract unique areas
-      final areas = _swissData.map((item) => item['area'] as String).toSet().toList();
-      
+      final areas =
+          _swissData.map((item) => item['area'] as String).toSet().toList();
+
       setState(() {
         _areas = areas..sort();
       });
+
+      // Debug output
+      print(
+          'DEBUG: Loaded ${_areas.length} areas: ${_areas.take(10).join(', ')}...');
     } catch (e) {
       debugPrint('Error loading Swiss data: $e');
     }
@@ -129,14 +145,24 @@ class _UserAddressState extends State<UserAddress> {
       'street': _streetController.text,
       'streetNumber': _streetNumberController.text,
     };
-    
+
     widget.onAddressChanged(newAddressData);
   }
 
   void _onAreaChanged(String? value) {
     if (value != null) {
       setState(() {
-        _areaController.text = value;
+        // If there's already text in the area field, append the new area
+        if (_areaController.text.isNotEmpty) {
+          final existingAreas =
+              _areaController.text.split(',').map((e) => e.trim()).toList();
+          if (!existingAreas.contains(value)) {
+            existingAreas.add(value);
+            _areaController.text = existingAreas.join(', ');
+          }
+        } else {
+          _areaController.text = value;
+        }
         _cityController.clear();
         _postCodeController.clear();
       });
@@ -181,335 +207,471 @@ class _UserAddressState extends State<UserAddress> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
+        // Country field (always show, Switzerland preselected for Swiss addresses)
+        Autocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            if (textEditingValue.text == '') {
+              return const Iterable<String>.empty();
+            }
+            return _countries
+                .map((c) => c['name'] as String)
+                .where((String option) {
+              return option
+                  .toLowerCase()
+                  .contains(textEditingValue.text.toLowerCase());
+            });
+          },
+          initialValue: TextEditingValue(text: _countryController.text),
+          onSelected: (String selection) {
+            setState(() {
+              _countryController.text = selection;
+            });
+            _updateAddressData();
+          },
+          fieldViewBuilder:
+              (context, controller, focusNode, onEditingComplete) {
+            return TextFormField(
+              controller: controller,
+              focusNode: focusNode,
+              onEditingComplete: onEditingComplete,
+              decoration: InputDecoration(
+                labelText: l10n.country,
+                filled: true,
+                fillColor: Theme.of(context).brightness == Brightness.dark
+                    ? appColors.cardColorDark
+                    : Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white24
+                        : Colors.black26,
+                    width: 1,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white24
+                        : Colors.black26,
+                    width: 1,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide:
+                      BorderSide(color: appColors.primaryBlue, width: 2),
+                ),
+              ),
+              style: TextStyle(color: appColors.textColor),
+              onChanged: (value) {
+                _countryController.text = value;
+                _updateAddressData();
+              },
+            );
+          },
+        ),
+        const SizedBox(height: 12),
 
+        // Area field (for Swiss addresses)
+        if (widget.isSwissAddress) ...[
+          Autocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              print(
+                  'DEBUG: Autocomplete called with text: "${textEditingValue.text}"');
+              print('DEBUG: Available areas count: ${_areas.length}');
 
-              // Country field (always show, Switzerland preselected for Swiss addresses)
-              Autocomplete<String>(
-                optionsBuilder: (TextEditingValue textEditingValue) {
-                  if (textEditingValue.text == '') {
-                    return const Iterable<String>.empty();
-                  }
-                  return _countries.map((c) => c['name'] as String).where((String option) {
-                    return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
-                  });
-                },
-                initialValue: TextEditingValue(text: _countryController.text),
-                onSelected: (String selection) {
-                  setState(() {
-                    _countryController.text = selection;
-                  });
+              if (textEditingValue.text == '') {
+                return const Iterable<String>.empty();
+              }
+
+              // Get the current input (after the last comma)
+              final parts = textEditingValue.text.split(',');
+              final currentInput = parts.last.trim().toLowerCase();
+
+              print('DEBUG: Current input: "$currentInput"');
+
+              if (currentInput.isEmpty) {
+                return const Iterable<String>.empty();
+              }
+
+              final filteredAreas = _areas.where((String option) {
+                return option.toLowerCase().contains(currentInput);
+              }).toList();
+
+              print('DEBUG: Filtered areas: $filteredAreas');
+
+              return filteredAreas;
+            },
+            fieldViewBuilder:
+                (context, controller, focusNode, onEditingComplete) {
+              return TextFormField(
+                controller: _areaController,
+                focusNode: focusNode,
+                onEditingComplete: onEditingComplete,
+                decoration: InputDecoration(
+                  labelText: l10n.area,
+                  hintText:
+                      'Enter areas separated by commas (e.g., LU, ZH, BE)',
+                  filled: true,
+                  fillColor: Theme.of(context).brightness == Brightness.dark
+                      ? appColors.cardColorDark
+                      : Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white24
+                          : Colors.black26,
+                      width: 1,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white24
+                          : Colors.black26,
+                      width: 1,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide:
+                        BorderSide(color: appColors.primaryBlue, width: 2),
+                  ),
+                ),
+                style: TextStyle(color: appColors.textColor),
+                onChanged: (value) {
                   _updateAddressData();
                 },
-                fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
-                  return TextFormField(
-                    controller: controller,
-                    focusNode: focusNode,
-                    onEditingComplete: onEditingComplete,
-                    decoration: InputDecoration(
-                      labelText: l10n.country,
-                      filled: true,
-                      fillColor: appColors.lightGray,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: appColors.darkGray, width: 1),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: appColors.darkGray, width: 1),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: appColors.primaryBlue, width: 2),
-                      ),
+              );
+            },
+            onSelected: (String selection) {
+              _onAreaChanged(selection);
+            },
+          ),
+          const SizedBox(height: 12),
+        ],
+
+        // City field
+        if (widget.isSwissAddress) ...[
+          Autocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              if (textEditingValue.text == '') {
+                return const Iterable<String>.empty();
+              }
+              // Filter cities based on selected area
+              final citiesForArea = _areaController.text.isNotEmpty
+                  ? _getCitiesForArea(_areaController.text)
+                  : _swissData
+                      .map((item) => item['city'] as String)
+                      .toSet()
+                      .toList();
+
+              return citiesForArea.where((String option) {
+                return option
+                    .toLowerCase()
+                    .contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            initialValue: TextEditingValue(text: _cityController.text),
+            onSelected: (String selection) {
+              _onCityChanged(selection);
+            },
+            fieldViewBuilder:
+                (context, controller, focusNode, onEditingComplete) {
+              return TextFormField(
+                controller: controller,
+                focusNode: focusNode,
+                onEditingComplete: onEditingComplete,
+                decoration: InputDecoration(
+                  labelText: l10n.city,
+                  filled: true,
+                  fillColor: Theme.of(context).brightness == Brightness.dark
+                      ? appColors.cardColorDark
+                      : Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white24
+                          : Colors.black26,
+                      width: 1,
                     ),
-                    style: TextStyle(color: appColors.textColor),
-                    onChanged: (value) {
-                      _countryController.text = value;
-                      _updateAddressData();
-                    },
-                  );
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white24
+                          : Colors.black26,
+                      width: 1,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide:
+                        BorderSide(color: appColors.primaryBlue, width: 2),
+                  ),
+                ),
+                style: TextStyle(color: appColors.textColor),
+                onChanged: (value) {
+                  _cityController.text = value;
+                  _updateAddressData();
                 },
+              );
+            },
+          ),
+        ] else ...[
+          TextFormField(
+            controller: _cityController,
+            decoration: InputDecoration(
+              labelText: l10n.city,
+              filled: true,
+              fillColor: Theme.of(context).brightness == Brightness.dark
+                  ? appColors.cardColorDark
+                  : Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white24
+                      : Colors.black26,
+                  width: 1,
+                ),
               ),
-              const SizedBox(height: 12),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white24
+                      : Colors.black26,
+                  width: 1,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: appColors.primaryBlue, width: 2),
+              ),
+            ),
+            style: TextStyle(color: appColors.textColor),
+            onChanged: (value) => _updateAddressData(),
+          ),
+        ],
+        const SizedBox(height: 12),
 
-              // Area field (for Swiss addresses)
-              if (widget.isSwissAddress) ...[
-                Autocomplete<String>(
-                  optionsBuilder: (TextEditingValue textEditingValue) {
-                    if (textEditingValue.text == '') {
-                      return const Iterable<String>.empty();
-                    }
-                    return _areas.where((String option) {
-                      return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
-                    });
-                  },
-                  initialValue: TextEditingValue(text: _areaController.text),
-                  onSelected: (String selection) {
-                    _onAreaChanged(selection);
-                  },
-                  fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
-                    return TextFormField(
-                      controller: controller,
-                      focusNode: focusNode,
-                      onEditingComplete: onEditingComplete,
-                      decoration: InputDecoration(
-                        labelText: l10n.area,
-                        filled: true,
-                        fillColor: appColors.lightGray,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: appColors.darkGray, width: 1),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: appColors.darkGray, width: 1),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: appColors.primaryBlue, width: 2),
-                        ),
-                      ),
-                      style: TextStyle(color: appColors.textColor),
-                      onChanged: (value) {
-                        _areaController.text = value;
-                        _updateAddressData();
-                      },
-                    );
-                  },
-                ),
-                const SizedBox(height: 12),
-              ],
+        // Post code field
+        if (widget.isSwissAddress) ...[
+          Autocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              if (textEditingValue.text == '') {
+                return const Iterable<String>.empty();
+              }
+              // Filter post codes based on selected area and city
+              List<String> availablePostCodes = [];
+              if (_areaController.text.isNotEmpty &&
+                  _cityController.text.isNotEmpty) {
+                availablePostCodes = _getPostCodesForCity(
+                    _areaController.text, _cityController.text);
+              } else if (_areaController.text.isNotEmpty) {
+                // If only area is selected, show all post codes for that area
+                availablePostCodes = _swissData
+                    .where((item) => item['area'] == _areaController.text)
+                    .expand((item) => item['postCodes'] as List)
+                    .cast<String>()
+                    .toSet()
+                    .toList();
+              } else {
+                // If no area selected, show all post codes
+                availablePostCodes = _swissData
+                    .expand((item) => item['postCodes'] as List)
+                    .cast<String>()
+                    .toSet()
+                    .toList();
+              }
 
-              // City field
-              if (widget.isSwissAddress) ...[
-                Autocomplete<String>(
-                  optionsBuilder: (TextEditingValue textEditingValue) {
-                    if (textEditingValue.text == '') {
-                      return const Iterable<String>.empty();
-                    }
-                    // Filter cities based on selected area
-                    final citiesForArea = _areaController.text.isNotEmpty 
-                        ? _getCitiesForArea(_areaController.text)
-                        : _swissData.map((item) => item['city'] as String).toSet().toList();
-                    
-                    return citiesForArea.where((String option) {
-                      return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
-                    });
-                  },
-                  initialValue: TextEditingValue(text: _cityController.text),
-                  onSelected: (String selection) {
-                    _onCityChanged(selection);
-                  },
-                  fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
-                    return TextFormField(
-                      controller: controller,
-                      focusNode: focusNode,
-                      onEditingComplete: onEditingComplete,
-                      decoration: InputDecoration(
-                        labelText: l10n.city,
-                        filled: true,
-                        fillColor: appColors.lightGray,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: appColors.darkGray, width: 1),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: appColors.darkGray, width: 1),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: appColors.primaryBlue, width: 2),
-                        ),
-                      ),
-                      style: TextStyle(color: appColors.textColor),
-                      onChanged: (value) {
-                        _cityController.text = value;
-                        _updateAddressData();
-                      },
-                    );
-                  },
-                ),
-              ] else ...[
-                TextFormField(
-                  controller: _cityController,
-                  decoration: InputDecoration(
-                    labelText: l10n.city,
-                    filled: true,
-                    fillColor: appColors.lightGray,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: appColors.darkGray, width: 1),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: appColors.darkGray, width: 1),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: appColors.primaryBlue, width: 2),
-                    ),
-                  ),
-                  style: TextStyle(color: appColors.textColor),
-                  onChanged: (value) => _updateAddressData(),
-                ),
-              ],
-              const SizedBox(height: 12),
-
-              // Post code field
-              if (widget.isSwissAddress) ...[
-                Autocomplete<String>(
-                  optionsBuilder: (TextEditingValue textEditingValue) {
-                    if (textEditingValue.text == '') {
-                      return const Iterable<String>.empty();
-                    }
-                    // Filter post codes based on selected area and city
-                    List<String> availablePostCodes = [];
-                    if (_areaController.text.isNotEmpty && _cityController.text.isNotEmpty) {
-                      availablePostCodes = _getPostCodesForCity(_areaController.text, _cityController.text);
-                    } else if (_areaController.text.isNotEmpty) {
-                      // If only area is selected, show all post codes for that area
-                      availablePostCodes = _swissData
-                          .where((item) => item['area'] == _areaController.text)
-                          .expand((item) => item['postCodes'] as List)
-                          .cast<String>()
-                          .toSet()
-                          .toList();
-                    } else {
-                      // If no area selected, show all post codes
-                      availablePostCodes = _swissData
-                          .expand((item) => item['postCodes'] as List)
-                          .cast<String>()
-                          .toSet()
-                          .toList();
-                    }
-                    
-                    return availablePostCodes.where((String option) {
-                      return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
-                    });
-                  },
-                  initialValue: TextEditingValue(text: _postCodeController.text),
-                  onSelected: (String selection) {
-                    _onPostCodeChanged(selection);
-                  },
-                  fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
-                    return TextFormField(
-                      controller: controller,
-                      focusNode: focusNode,
-                      onEditingComplete: onEditingComplete,
-                      decoration: InputDecoration(
-                        labelText: l10n.postCode,
-                        filled: true,
-                        fillColor: appColors.lightGray,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: appColors.darkGray, width: 1),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: appColors.darkGray, width: 1),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: appColors.primaryBlue, width: 2),
-                        ),
-                      ),
-                      style: TextStyle(color: appColors.textColor),
-                      onChanged: (value) {
-                        _postCodeController.text = value;
-                        _updateAddressData();
-                      },
-                    );
-                  },
-                ),
-              ] else ...[
-                TextFormField(
-                  controller: _postCodeController,
-                  decoration: InputDecoration(
-                    labelText: l10n.postCode,
-                    filled: true,
-                    fillColor: appColors.lightGray,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: appColors.darkGray, width: 1),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: appColors.darkGray, width: 1),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: appColors.primaryBlue, width: 2),
-                    ),
-                  ),
-                  style: TextStyle(color: appColors.textColor),
-                  onChanged: (value) => _updateAddressData(),
-                ),
-              ],
-              const SizedBox(height: 12),
-
-              // Street field
-              TextFormField(
-                controller: _streetController,
+              return availablePostCodes.where((String option) {
+                return option
+                    .toLowerCase()
+                    .contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            initialValue: TextEditingValue(text: _postCodeController.text),
+            onSelected: (String selection) {
+              _onPostCodeChanged(selection);
+            },
+            fieldViewBuilder:
+                (context, controller, focusNode, onEditingComplete) {
+              return TextFormField(
+                controller: controller,
+                focusNode: focusNode,
+                onEditingComplete: onEditingComplete,
                 decoration: InputDecoration(
-                  labelText: l10n.street,
+                  labelText: l10n.postCode,
                   filled: true,
-                  fillColor: appColors.lightGray,
+                  fillColor: Theme.of(context).brightness == Brightness.dark
+                      ? appColors.cardColorDark
+                      : Colors.white,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: appColors.darkGray, width: 1),
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white24
+                          : Colors.black26,
+                      width: 1,
+                    ),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: appColors.darkGray, width: 1),
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white24
+                          : Colors.black26,
+                      width: 1,
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: appColors.primaryBlue, width: 2),
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide:
+                        BorderSide(color: appColors.primaryBlue, width: 2),
                   ),
                 ),
                 style: TextStyle(color: appColors.textColor),
-                onChanged: (value) => _updateAddressData(),
-              ),
-              const SizedBox(height: 12),
-
-              // Street number field
-              TextFormField(
-                controller: _streetNumberController,
-                decoration: InputDecoration(
-                  labelText: l10n.streetNumber,
-                  filled: true,
-                  fillColor: appColors.lightGray,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: appColors.darkGray, width: 1),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: appColors.darkGray, width: 1),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: appColors.primaryBlue, width: 2),
-                  ),
+                onChanged: (value) {
+                  _postCodeController.text = value;
+                  _updateAddressData();
+                },
+              );
+            },
+          ),
+        ] else ...[
+          TextFormField(
+            controller: _postCodeController,
+            decoration: InputDecoration(
+              labelText: l10n.postCode,
+              filled: true,
+              fillColor: Theme.of(context).brightness == Brightness.dark
+                  ? appColors.cardColorDark
+                  : Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white24
+                      : Colors.black26,
+                  width: 1,
                 ),
-                style: TextStyle(color: appColors.textColor),
-                onChanged: (value) => _updateAddressData(),
               ),
-            ],
-          );
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white24
+                      : Colors.black26,
+                  width: 1,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: appColors.primaryBlue, width: 2),
+              ),
+            ),
+            style: TextStyle(color: appColors.textColor),
+            onChanged: (value) => _updateAddressData(),
+          ),
+        ],
+        if (widget.showStreetAndNumber) ...[
+          const SizedBox(height: 12),
 
-  if (!widget.showCard) {
-    return fields;
+          // Street field
+          TextFormField(
+            controller: _streetController,
+            decoration: InputDecoration(
+              labelText: l10n.street,
+              filled: true,
+              fillColor: Theme.of(context).brightness == Brightness.dark
+                  ? appColors.cardColorDark
+                  : Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white24
+                      : Colors.black26,
+                  width: 1,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white24
+                      : Colors.black26,
+                  width: 1,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: appColors.primaryBlue, width: 2),
+              ),
+            ),
+            style: TextStyle(color: appColors.textColor),
+            onChanged: (value) => _updateAddressData(),
+          ),
+          const SizedBox(height: 12),
+
+          // Street number field
+          TextFormField(
+            controller: _streetNumberController,
+            decoration: InputDecoration(
+              labelText: l10n.streetNumber,
+              filled: true,
+              fillColor: Theme.of(context).brightness == Brightness.dark
+                  ? appColors.cardColorDark
+                  : Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white24
+                      : Colors.black26,
+                  width: 1,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white24
+                      : Colors.black26,
+                  width: 1,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: appColors.primaryBlue, width: 2),
+              ),
+            ),
+            style: TextStyle(color: appColors.textColor),
+            onChanged: (value) => _updateAddressData(),
+          ),
+        ],
+      ],
+    );
+
+    if (!widget.showCard) {
+      return fields;
+    }
+    return Card(
+      color: appColors.backgroundDark,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: fields,
+      ),
+    );
   }
-  return Card(
-    color: appColors.backgroundDark,
-    child: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: fields,
-    ),
-  );
-}
 
   @override
   void dispose() {
