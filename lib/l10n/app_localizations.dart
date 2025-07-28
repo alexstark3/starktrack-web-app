@@ -701,6 +701,192 @@ abstract class AppLocalizations {
   /// **'Repeats annually'**
   String get repeatsAnnually;
 
+  /// No description provided for @national.
+  ///
+  /// In en, this message translates to:
+  /// **'National'**
+  String get national;
+
+  /// No description provided for @repeats.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeats'**
+  String get repeats;
+
+  /// No description provided for @assignedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned to'**
+  String get assignedTo;
+
+  /// No description provided for @accruing.
+  ///
+  /// In en, this message translates to:
+  /// **'Accruing'**
+  String get accruing;
+
+  /// No description provided for @per.
+  ///
+  /// In en, this message translates to:
+  /// **'per'**
+  String get per;
+
+  /// No description provided for @timeUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Time Unit'**
+  String get timeUnit;
+
+  /// No description provided for @doesNotCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Does not count'**
+  String get doesNotCount;
+
+  /// No description provided for @holidays.
+  ///
+  /// In en, this message translates to:
+  /// **'Holidays'**
+  String get holidays;
+
+  /// No description provided for @timeOffPolicies.
+  ///
+  /// In en, this message translates to:
+  /// **'Time Off Policies:'**
+  String get timeOffPolicies;
+
+  /// No description provided for @includeOvertime.
+  ///
+  /// In en, this message translates to:
+  /// **'Include Overtime'**
+  String get includeOvertime;
+
+  /// No description provided for @negativeBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Negative Balance'**
+  String get negativeBalance;
+
+  /// No description provided for @days.
+  ///
+  /// In en, this message translates to:
+  /// **'Days'**
+  String get days;
+
+  /// No description provided for @editTimeOffPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Time Off Policy'**
+  String get editTimeOffPolicy;
+
+  /// No description provided for @createTimeOffPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Time Off Policy'**
+  String get createTimeOffPolicy;
+
+  /// No description provided for @paid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get paid;
+
+  /// No description provided for @hours.
+  ///
+  /// In en, this message translates to:
+  /// **'Hours'**
+  String get hours;
+
+  /// No description provided for @chooseAllThatApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose all that apply:'**
+  String get chooseAllThatApply;
+
+  /// No description provided for @allHolidays.
+  ///
+  /// In en, this message translates to:
+  /// **'All Holidays'**
+  String get allHolidays;
+
+  /// No description provided for @update.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get update;
+
+  /// No description provided for @error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get error;
+
+  /// No description provided for @everyone.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone'**
+  String get everyone;
+
+  /// No description provided for @selection.
+  ///
+  /// In en, this message translates to:
+  /// **'Selection'**
+  String get selection;
+
+  /// No description provided for @enterPolicyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter policy name'**
+  String get enterPolicyName;
+
+  /// No description provided for @yearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get yearly;
+
+  /// No description provided for @monthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get monthly;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// No description provided for @weeks.
+  ///
+  /// In en, this message translates to:
+  /// **'Weeks'**
+  String get weeks;
+
+  /// No description provided for @months.
+  ///
+  /// In en, this message translates to:
+  /// **'Months'**
+  String get months;
+
+  /// No description provided for @years.
+  ///
+  /// In en, this message translates to:
+  /// **'Years'**
+  String get years;
+
+  /// No description provided for @noTimeOffPoliciesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No time off policies found'**
+  String get noTimeOffPoliciesFound;
+
+  /// No description provided for @noHolidayPoliciesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No holiday policies found'**
+  String get noHolidayPoliciesFound;
+
   /// No description provided for @pleaseEnterPolicyName.
   ///
   /// In en, this message translates to:
@@ -718,12 +904,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pick a color'**
   String get pickAColor;
-
-  /// No description provided for @paid.
-  ///
-  /// In en, this message translates to:
-  /// **'Paid'**
-  String get paid;
 
   /// No description provided for @region.
   ///
@@ -802,12 +982,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Holiday Policies'**
   String get holidayPolicies;
-
-  /// No description provided for @noHolidayPoliciesFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No holiday policies found'**
-  String get noHolidayPoliciesFound;
 
   /// No description provided for @createNew.
   ///

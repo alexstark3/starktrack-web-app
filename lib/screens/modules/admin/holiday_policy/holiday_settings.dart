@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../theme/app_colors.dart';
-import '../../../services/country_region_service.dart';
-import 'user_address.dart';
+import 'package:starktrack/theme/app_colors.dart';
+import 'package:starktrack/services/country_region_service.dart';
+import 'package:starktrack/screens/modules/admin/user_address.dart';
 import 'add_national_holidays.dart';
 import 'add_area_holidays.dart';
 
@@ -90,7 +90,7 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
       // Load national holidays if selected
       if (_includeNationalHolidays) {
         final nationalHolidays =
-            await SwissNationalHolidayCalculator.getNationalHolidaysFromApi(
+            await NationalHolidayService.getNationalHolidaysFromApi(
           countryCode: countryCode,
           year: _selectedYear,
           color: _nationalHolidayColor,

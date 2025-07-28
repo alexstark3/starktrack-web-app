@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../data/holiday_database.dart';
 
 class HolidayApiService {
   // Free holiday API endpoints
@@ -163,32 +164,4 @@ class CountryInfo {
   }
 }
 
-// Import the HolidayConfig class from the database
-class HolidayConfig {
-  final String name;
-  final DateTime date;
-  final String country;
-  final String? region;
-  final List<String>? regions;
-  final String? city;
-  final HolidayType type;
-  final bool repeatAnnually;
-  final int color;
-
-  HolidayConfig({
-    required this.name,
-    required this.date,
-    required this.country,
-    this.region,
-    this.regions,
-    this.city,
-    required this.type,
-    required this.repeatAnnually,
-    required this.color,
-  });
-}
-
-enum HolidayType {
-  national,
-  area,
-}
+// HolidayConfig and HolidayType are now imported from holiday_database.dart

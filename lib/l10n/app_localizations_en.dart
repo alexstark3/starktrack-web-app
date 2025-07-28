@@ -314,6 +314,99 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repeatsAnnually => 'Repeats annually';
 
   @override
+  String get national => 'National';
+
+  @override
+  String get repeats => 'Repeats';
+
+  @override
+  String get assignedTo => 'Assigned to';
+
+  @override
+  String get accruing => 'Accruing';
+
+  @override
+  String get per => 'per';
+
+  @override
+  String get timeUnit => 'Time Unit';
+
+  @override
+  String get doesNotCount => 'Does not count';
+
+  @override
+  String get holidays => 'Holidays';
+
+  @override
+  String get timeOffPolicies => 'Time Off Policies:';
+
+  @override
+  String get includeOvertime => 'Include Overtime';
+
+  @override
+  String get negativeBalance => 'Negative Balance';
+
+  @override
+  String get days => 'Days';
+
+  @override
+  String get editTimeOffPolicy => 'Edit Time Off Policy';
+
+  @override
+  String get createTimeOffPolicy => 'Create Time Off Policy';
+
+  @override
+  String get paid => 'Paid';
+
+  @override
+  String get hours => 'Hours';
+
+  @override
+  String get chooseAllThatApply => 'Choose all that apply:';
+
+  @override
+  String get allHolidays => 'All Holidays';
+
+  @override
+  String get update => 'Update';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get everyone => 'Everyone';
+
+  @override
+  String get selection => 'Selection';
+
+  @override
+  String get enterPolicyName => 'Enter policy name';
+
+  @override
+  String get yearly => 'Yearly';
+
+  @override
+  String get monthly => 'Monthly';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get weeks => 'Weeks';
+
+  @override
+  String get months => 'Months';
+
+  @override
+  String get years => 'Years';
+
+  @override
+  String get noTimeOffPoliciesFound => 'No time off policies found';
+
+  @override
+  String get noHolidayPoliciesFound => 'No holiday policies found';
+
+  @override
   String get pleaseEnterPolicyName => 'Please enter a policy name';
 
   @override
@@ -321,9 +414,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pickAColor => 'Pick a color';
-
-  @override
-  String get paid => 'Paid';
 
   @override
   String get region => 'Region';
@@ -363,9 +453,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get holidayPolicies => 'Holiday Policies';
-
-  @override
-  String get noHolidayPoliciesFound => 'No holiday policies found';
 
   @override
   String get createNew => 'Create New';

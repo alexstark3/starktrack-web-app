@@ -314,6 +314,99 @@ class AppLocalizationsDe extends AppLocalizations {
   String get repeatsAnnually => 'Jährlich wiederholen';
 
   @override
+  String get national => 'National';
+
+  @override
+  String get repeats => 'Wiederholt';
+
+  @override
+  String get assignedTo => 'Zugewiesen an';
+
+  @override
+  String get accruing => 'Ansparung';
+
+  @override
+  String get per => 'pro';
+
+  @override
+  String get timeUnit => 'Zeiteinheit';
+
+  @override
+  String get doesNotCount => 'Zählt nicht';
+
+  @override
+  String get holidays => 'Feiertage';
+
+  @override
+  String get timeOffPolicies => 'Urlaubsrichtlinien:';
+
+  @override
+  String get includeOvertime => 'Überstunden einschließen';
+
+  @override
+  String get negativeBalance => 'Negativer Saldo';
+
+  @override
+  String get days => 'Tage';
+
+  @override
+  String get editTimeOffPolicy => 'Urlaubsrichtlinie bearbeiten';
+
+  @override
+  String get createTimeOffPolicy => 'Urlaubsrichtlinie erstellen';
+
+  @override
+  String get paid => 'Bezahlt';
+
+  @override
+  String get hours => 'Stunden';
+
+  @override
+  String get chooseAllThatApply => 'Wählen Sie alle zutreffenden:';
+
+  @override
+  String get allHolidays => 'Alle Feiertage';
+
+  @override
+  String get update => 'Aktualisieren';
+
+  @override
+  String get error => 'Fehler';
+
+  @override
+  String get everyone => 'Alle';
+
+  @override
+  String get selection => 'Auswahl';
+
+  @override
+  String get enterPolicyName => 'Richtliniennamen eingeben';
+
+  @override
+  String get yearly => 'Jährlich';
+
+  @override
+  String get monthly => 'Monatlich';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get weeks => 'Wochen';
+
+  @override
+  String get months => 'Monate';
+
+  @override
+  String get years => 'Jahre';
+
+  @override
+  String get noTimeOffPoliciesFound => 'Keine Urlaubsrichtlinien gefunden';
+
+  @override
+  String get noHolidayPoliciesFound => 'Keine Urlaubsrichtlinien gefunden';
+
+  @override
   String get pleaseEnterPolicyName => 'Bitte geben Sie einen Richtliniennamen ein';
 
   @override
@@ -321,9 +414,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get pickAColor => 'Farbe auswählen';
-
-  @override
-  String get paid => 'Bezahlt';
 
   @override
   String get region => 'Region';
@@ -363,9 +453,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get holidayPolicies => 'Urlaubsrichtlinien';
-
-  @override
-  String get noHolidayPoliciesFound => 'Keine Urlaubsrichtlinien gefunden';
 
   @override
   String get createNew => 'Neu erstellen';
@@ -730,7 +817,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get updateUser => 'Benutzer aktualisieren';
 
   @override
-  String get area => 'Bereich';
+  String get area => 'Kanton';
 
   @override
   String get streetNumber => 'Hausnummer';

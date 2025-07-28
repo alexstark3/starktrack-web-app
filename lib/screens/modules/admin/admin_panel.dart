@@ -3,8 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'add_user.dart';
-import 'holiday_policy.dart';
-import 'timeoff_policy.dart';
+import 'holiday_policy/holiday_policy.dart';
+import 'timeoff_policy/timeoff_policy.dart';
 
 class AdminPanel extends StatefulWidget {
   final String companyId;

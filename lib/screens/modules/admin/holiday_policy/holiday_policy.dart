@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import '../../../../theme/app_colors.dart';
-import '../../../../l10n/app_localizations.dart';
-import 'user_address.dart';
+import 'package:starktrack/theme/app_colors.dart';
+import 'package:starktrack/l10n/app_localizations.dart';
+import 'package:starktrack/widgets/calendar.dart';
+import 'package:starktrack/services/holiday_translation_service.dart';
+
+import 'package:starktrack/screens/modules/admin/user_address.dart';
 import 'holiday_settings.dart';
 
 class HolidayPolicyListDialog extends StatefulWidget {
@@ -11,10 +14,10 @@ class HolidayPolicyListDialog extends StatefulWidget {
   final Function() onPolicyAdded;
 
   const HolidayPolicyListDialog({
-    Key? key,
+    super.key,
     required this.companyId,
     required this.onPolicyAdded,
-  }) : super(key: key);
+  });
 
   @override
   State<HolidayPolicyListDialog> createState() =>
@@ -72,7 +75,7 @@ class _HolidayPolicyListDialogState extends State<HolidayPolicyListDialog> {
                       if (snapshot.hasError) {
                         return Center(
                           child: Text(
-                            'Error: ${snapshot.error}',
+                            '${l10n.error}: ${snapshot.error}',
                             style: TextStyle(color: appColors.textColor),
                           ),
                         );
@@ -117,7 +120,7 @@ class _HolidayPolicyListDialogState extends State<HolidayPolicyListDialog> {
                         _showSwissHolidaysDialog();
                       },
                       icon: Icon(Icons.settings, color: appColors.primaryBlue),
-                      tooltip: 'Settings',
+                      tooltip: l10n.settings,
                     ),
 
                     // Action buttons
@@ -165,6 +168,7 @@ class _HolidayPolicyListDialogState extends State<HolidayPolicyListDialog> {
     final endDate = period?['end'] as Timestamp?;
     final paid = policy['paid'] ?? false;
     final repeatAnnually = policy['repeatAnnually'] ?? false;
+    final assignTo = policy['assignTo'] as String? ?? 'all';
 
     String dateText = '';
     if (startDate != null && endDate != null) {
@@ -218,7 +222,8 @@ class _HolidayPolicyListDialogState extends State<HolidayPolicyListDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      name,
+                      HolidayTranslationService.getLocalizedHolidayName(
+                          name, l10n),
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -230,18 +235,42 @@ class _HolidayPolicyListDialogState extends State<HolidayPolicyListDialog> {
                       dateText,
                       style: TextStyle(
                         fontSize: 14,
-                        color: appColors.textColor.withOpacity(0.7),
+                        color: appColors.textColor.withValues(alpha: 0.7),
                       ),
                     ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        if (paid)
+                        // National holiday indicator (FIRST)
+                        if (name.contains('(National)') ||
+                            policy['isNational'] == true) ...[
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.green.withOpacity(0.2),
+                              color: Colors.grey.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'N',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                        // Paid badge (SECOND)
+                        if (paid) ...[
+                          if (name.contains('(National)') ||
+                              policy['isNational'] == true)
+                            const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -252,13 +281,15 @@ class _HolidayPolicyListDialogState extends State<HolidayPolicyListDialog> {
                               ),
                             ),
                           ),
+                        ],
+                        // Repeats annually badge (THIRD)
                         if (repeatAnnually) ...[
                           const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.blue.withOpacity(0.2),
+                              color: Colors.blue.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -271,6 +302,14 @@ class _HolidayPolicyListDialogState extends State<HolidayPolicyListDialog> {
                           ),
                         ],
                       ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${l10n.assignedTo}: ${assignTo == 'all' ? l10n.everyone : l10n.selection}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: appColors.textColor.withValues(alpha: 0.6),
+                      ),
                     ),
                   ],
                 ),
@@ -338,15 +377,19 @@ class _HolidayPolicyListDialogState extends State<HolidayPolicyListDialog> {
                     .doc(policyId)
                     .delete();
 
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.holidayPolicyDeleted)),
-                );
+                if (mounted) {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.holidayPolicyDeleted)),
+                  );
+                }
               } catch (e) {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error: $e')),
-                );
+                if (mounted) {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('${l10n.error}: $e')),
+                  );
+                }
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -446,12 +489,12 @@ class HolidayPolicyDialog extends StatefulWidget {
   final Map<String, dynamic>? existingPolicy; // For editing existing policy
 
   const HolidayPolicyDialog({
-    Key? key,
+    super.key,
     required this.companyId,
     required this.onPolicyAdded,
     this.policyId,
     this.existingPolicy,
-  }) : super(key: key);
+  });
 
   @override
   State<HolidayPolicyDialog> createState() => _HolidayPolicyDialogState();
@@ -460,7 +503,7 @@ class HolidayPolicyDialog extends StatefulWidget {
 class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
   final _nameController = TextEditingController();
   Color _selectedColor = Colors.red;
-  DateTime? _selectedDate;
+  DateRange? _selectedDateRange;
   bool _assignToEveryone = true; // Pre-selected
   bool _repeatsAnnually = false;
   bool _isPaid = true; // Pre-selected
@@ -514,8 +557,12 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
       final period = policy['period'] as Map<String, dynamic>?;
       if (period != null) {
         final startDate = period['start'] as Timestamp?;
-        if (startDate != null) {
-          _selectedDate = startDate.toDate();
+        final endDate = period['end'] as Timestamp?;
+        if (startDate != null && endDate != null) {
+          _selectedDateRange = DateRange(
+            startDate: startDate.toDate(),
+            endDate: endDate.toDate(),
+          );
         }
       }
 
@@ -565,25 +612,32 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            child: Text(l10n.ok),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _selectDate() async {
-    final DateTime? picked = await showDatePicker(
+  void _onDateRangeChanged(DateRange dateRange) {
+    setState(() {
+      _selectedDateRange = dateRange;
+    });
+  }
+
+  void _showDatePicker() {
+    showDialog(
       context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: CustomCalendar(
+          initialDateRange: _selectedDateRange,
+          onDateRangeChanged: _onDateRangeChanged,
+          minDate: DateTime.now().subtract(const Duration(days: 365)),
+          maxDate: DateTime.now().add(const Duration(days: 365)),
+        ),
+      ),
     );
-    if (picked != null) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
   }
 
   void _onRegionChanged(Map<String, dynamic> newRegion) {
@@ -594,121 +648,36 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
 
   Widget _buildUserGroupSelection() {
     final appColors = Theme.of(context).extension<AppColors>()!;
-    final l10n = AppLocalizations.of(context)!;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Combined search field for users and groups
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white24
-                  : Colors.black26,
-              width: 1,
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: appColors.lightGray),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Selected Users: ${_selectedUsers.length}',
+            style: TextStyle(
+              fontSize: 14,
+              color: appColors.textColor,
             ),
-            borderRadius: BorderRadius.circular(8),
           ),
-          child: TextField(
-            decoration: InputDecoration(
-              hintText: l10n.searchUsersAndGroups,
-              hintStyle: TextStyle(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? const Color(0xFFB3B3B3)
-                    : appColors.textColor,
-              ),
-              border: InputBorder.none,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              prefixIcon:
-                  Icon(Icons.search, color: appColors.primaryBlue, size: 20),
+          const SizedBox(height: 8),
+          Text(
+            'Selected Groups: ${_selectedGroups.length}',
+            style: TextStyle(
+              fontSize: 14,
+              color: appColors.textColor,
             ),
-            style: TextStyle(color: appColors.textColor),
           ),
-        ),
-        const SizedBox(height: 8),
-
-        // Combined list of selected users and groups
-        Container(
-          height: 120,
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white24
-                  : Colors.black26,
-              width: 1,
-            ),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: (_selectedUsers.isEmpty && _selectedGroups.isEmpty)
-              ? Center(
-                  child: Text(
-                    l10n.noUsersOrGroupsFound,
-                    style: TextStyle(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFFB3B3B3)
-                          : appColors.textColor,
-                    ),
-                  ),
-                )
-              : ListView.builder(
-                  itemCount: _selectedUsers.length + _selectedGroups.length,
-                  itemBuilder: (context, index) {
-                    if (index < _selectedUsers.length) {
-                      // User item
-                      return CheckboxListTile(
-                        title: Text(
-                          _selectedUsers[index],
-                          style: TextStyle(color: appColors.textColor),
-                        ),
-                        subtitle: Text(
-                          l10n.user,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: appColors.textColor.withOpacity(0.7),
-                          ),
-                        ),
-                        value: true,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedUsers.removeAt(index);
-                          });
-                        },
-                        controlAffinity: ListTileControlAffinity.leading,
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 8),
-                      );
-                    } else {
-                      // Group item
-                      final groupIndex = index - _selectedUsers.length;
-                      return CheckboxListTile(
-                        title: Text(
-                          _selectedGroups[groupIndex],
-                          style: TextStyle(color: appColors.textColor),
-                        ),
-                        subtitle: Text(
-                          l10n.group,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: appColors.textColor.withOpacity(0.7),
-                          ),
-                        ),
-                        value: true,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedGroups.removeAt(groupIndex);
-                          });
-                        },
-                        controlAffinity: ListTileControlAffinity.leading,
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 8),
-                      );
-                    }
-                  },
-                ),
-        ),
-      ],
+          const SizedBox(height: 12),
+          // Direct search interface
+          _buildDirectSearchInterface(),
+        ],
+      ),
     );
   }
 
@@ -716,16 +685,20 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
     final l10n = AppLocalizations.of(context)!;
 
     if (_nameController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.pleaseEnterPolicyName)),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.pleaseEnterPolicyName)),
+        );
+      }
       return;
     }
 
-    if (_selectedDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.pleaseSelectDate)),
-      );
+    if (_selectedDateRange == null || !_selectedDateRange!.isComplete) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.pleaseSelectDate)),
+        );
+      }
       return;
     }
 
@@ -735,7 +708,7 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
       // Prepare the data according to Firestore structure
       final policyData = {
         'name': _nameController.text.trim(),
-        'color': _selectedColor.value,
+        'color': _selectedColor.toARGB32(),
         'assignTo':
             _assignToEveryone ? 'all' : 'selection', // 'all' or 'selection'
         'selectedUsers': _assignToEveryone ? [] : _selectedUsers,
@@ -748,8 +721,8 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
           'postCode': _regionFilter['postCode'],
         },
         'period': {
-          'start': Timestamp.fromDate(_selectedDate!),
-          'end': Timestamp.fromDate(_selectedDate!),
+          'start': Timestamp.fromDate(_selectedDateRange!.startDate!),
+          'end': Timestamp.fromDate(_selectedDateRange!.endDate!),
         },
         'repeatAnnually': _repeatsAnnually,
         'paid': _isPaid,
@@ -774,14 +747,20 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
             .add(policyData);
       }
 
-      widget.onPolicyAdded();
-      Navigator.of(context).pop();
+      if (mounted) {
+        widget.onPolicyAdded();
+        Navigator.of(context).pop();
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${l10n.error}: $e')),
+        );
+      }
     } finally {
-      setState(() => _isSubmitting = false);
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
     }
   }
 
@@ -881,7 +860,8 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
                     spacing: 8,
                     runSpacing: 8,
                     children: _predefinedColors.map((color) {
-                      final isSelected = _selectedColor.value == color.value;
+                      final isSelected =
+                          _selectedColor.toARGB32() == color.toARGB32();
                       return GestureDetector(
                         onTap: () {
                           setState(() {
@@ -915,15 +895,10 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
                     icon: Icon(Icons.color_lens, color: _selectedColor),
                     label: Text(l10n.customColor),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          Theme.of(context).brightness == Brightness.dark
-                              ? appColors.cardColorDark
-                              : Colors.white,
-                      foregroundColor: Colors.black87,
+                      backgroundColor: appColors.cardColorDark,
+                      foregroundColor: appColors.textColor,
                       side: BorderSide(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white24
-                            : Colors.black26,
+                        color: appColors.lightGray,
                         width: 1,
                       ),
                       shape: RoundedRectangleBorder(
@@ -969,7 +944,7 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
                   ),
                   const SizedBox(height: 12),
                   InkWell(
-                    onTap: _selectDate,
+                    onTap: _showDatePicker,
                     borderRadius: BorderRadius.circular(10),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
@@ -991,17 +966,21 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
                           Icon(Icons.calendar_today,
                               color: appColors.primaryBlue, size: 20),
                           const SizedBox(width: 8),
-                          Text(
-                            _selectedDate != null
-                                ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
-                                : l10n.selectDate,
-                            style: TextStyle(
-                              color: _selectedDate != null
-                                  ? appColors.textColor
-                                  : (Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? const Color(0xFFB3B3B3)
-                                      : appColors.textColor),
+                          Expanded(
+                            child: Text(
+                              _selectedDateRange != null &&
+                                      _selectedDateRange!.hasSelection
+                                  ? _selectedDateRange.toString()
+                                  : l10n.selectDate,
+                              style: TextStyle(
+                                color: _selectedDateRange != null &&
+                                        _selectedDateRange!.hasSelection
+                                    ? appColors.textColor
+                                    : (Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? const Color(0xFFB3B3B3)
+                                        : appColors.textColor),
+                              ),
                             ),
                           ),
                         ],
@@ -1085,7 +1064,8 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
                     showCard: false,
                     showStreetAndNumber: false,
                   ),
-                  const SizedBox(height: 16),
+
+                  const SizedBox(height: 24), // Add spacing before buttons
 
                   // Buttons
                   Row(
@@ -1096,7 +1076,6 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
                         child: Text(l10n.cancel,
                             style: TextStyle(color: appColors.textColor)),
                       ),
-                      const SizedBox(width: 16),
                       ElevatedButton(
                         onPressed: _isSubmitting ? null : _savePolicy,
                         style: ElevatedButton.styleFrom(
@@ -1125,6 +1104,267 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildDirectSearchInterface() {
+    return _DirectSearchInterface(
+      key: ValueKey(
+          'search_${_selectedUsers.join('_')}_${_selectedGroups.join('_')}'),
+      companyId: widget.companyId,
+      selectedUsers: _selectedUsers,
+      selectedGroups: _selectedGroups,
+      onSelectionChanged: (users, groups) {
+        setState(() {
+          _selectedUsers = users;
+          _selectedGroups = groups;
+        });
+      },
+    );
+  }
+}
+
+class _DirectSearchInterface extends StatefulWidget {
+  final String companyId;
+  final List<String> selectedUsers;
+  final List<String> selectedGroups;
+  final Function(List<String>, List<String>) onSelectionChanged;
+
+  const _DirectSearchInterface({
+    super.key,
+    required this.companyId,
+    required this.selectedUsers,
+    required this.selectedGroups,
+    required this.onSelectionChanged,
+  });
+
+  @override
+  State<_DirectSearchInterface> createState() => _DirectSearchInterfaceState();
+}
+
+class _DirectSearchInterfaceState extends State<_DirectSearchInterface> {
+  final TextEditingController _searchController = TextEditingController();
+  List<Map<String, dynamic>> _users = [];
+  List<Map<String, dynamic>> _groups = [];
+  List<Map<String, dynamic>> _filteredUsers = [];
+  List<Map<String, dynamic>> _filteredGroups = [];
+  bool _isLoading = true;
+
+  // Local selection state
+  List<String> _localSelectedUsers = [];
+  List<String> _localSelectedGroups = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _localSelectedUsers = List<String>.from(widget.selectedUsers);
+    _localSelectedGroups = List<String>.from(widget.selectedGroups);
+    _loadUsersAndGroups();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(_DirectSearchInterface oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Sync local state with parent state
+    _localSelectedUsers = List<String>.from(widget.selectedUsers);
+    _localSelectedGroups = List<String>.from(widget.selectedGroups);
+  }
+
+  Future<void> _loadUsersAndGroups() async {
+    try {
+      setState(() => _isLoading = true);
+
+      // Load users
+      final usersSnapshot = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(widget.companyId)
+          .collection('users')
+          .get();
+
+      final users = usersSnapshot.docs.map((doc) {
+        final data = doc.data();
+        final firstName = data['firstName'] ?? '';
+        final surname = data['surname'] ?? '';
+        final fullName = '$firstName $surname'.trim();
+        return {
+          'id': doc.id,
+          'name': fullName,
+          'email': data['email'] ?? '',
+        };
+      }).toList();
+
+      // Load groups
+      final groupsSnapshot = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(widget.companyId)
+          .collection('groups')
+          .get();
+
+      final groups = groupsSnapshot.docs.map((doc) {
+        final data = doc.data();
+        return {
+          'id': doc.id,
+          'name': data['name'] ?? '',
+        };
+      }).toList();
+
+      setState(() {
+        _users = users;
+        _groups = groups;
+        _filteredUsers = users;
+        _filteredGroups = groups;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+      // Error loading users and groups: $e
+    }
+  }
+
+  void _filterItems(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        _filteredUsers = _users;
+        _filteredGroups = _groups;
+      } else {
+        final lowercaseQuery = query.toLowerCase();
+        _filteredUsers = _users.where((user) {
+          return user['name'].toLowerCase().contains(lowercaseQuery) ||
+              user['email'].toLowerCase().contains(lowercaseQuery);
+        }).toList();
+        _filteredGroups = _groups.where((group) {
+          return group['name'].toLowerCase().contains(lowercaseQuery);
+        }).toList();
+      }
+    });
+  }
+
+  void _toggleUserSelection(String userId) {
+    setState(() {
+      if (_localSelectedUsers.contains(userId)) {
+        _localSelectedUsers.remove(userId);
+      } else {
+        _localSelectedUsers.add(userId);
+      }
+      // Sync with parent
+      widget.onSelectionChanged(_localSelectedUsers, _localSelectedGroups);
+    });
+  }
+
+  void _toggleGroupSelection(String groupId) {
+    setState(() {
+      if (_localSelectedGroups.contains(groupId)) {
+        _localSelectedGroups.remove(groupId);
+      } else {
+        _localSelectedGroups.add(groupId);
+      }
+      // Sync with parent
+      widget.onSelectionChanged(_localSelectedUsers, _localSelectedGroups);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColors>()!;
+    final l10n = AppLocalizations.of(context)!;
+
+    return Container(
+      height: 300,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Search bar
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: appColors.lightGray),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: l10n.searchUsersAndGroups,
+                prefixIcon: Icon(Icons.search, color: appColors.primaryBlue),
+                border: InputBorder.none,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              ),
+              onChanged: _filterItems,
+            ),
+          ),
+
+          // Results area
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: appColors.lightGray),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _filteredUsers.isEmpty && _filteredGroups.isEmpty
+                      ? Center(
+                          child: Text(
+                            l10n.noUsersOrGroupsFound,
+                            style: TextStyle(color: appColors.textColor),
+                          ),
+                        )
+                      : ListView(
+                          padding: const EdgeInsets.all(8),
+                          children: [
+                            if (_filteredUsers.isNotEmpty) ...[
+                              Text(
+                                l10n.users,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: appColors.textColor,
+                                ),
+                              ),
+                              ..._filteredUsers.map((user) => CheckboxListTile(
+                                    title: Text(user['name']),
+                                    subtitle: Text(user['email']),
+                                    value: _localSelectedUsers
+                                        .contains(user['id']),
+                                    onChanged: (value) {
+                                      _toggleUserSelection(user['id']);
+                                    },
+                                    activeColor: appColors.primaryBlue,
+                                    dense: true,
+                                  )),
+                            ],
+                            if (_filteredGroups.isNotEmpty) ...[
+                              Text(
+                                l10n.groups,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: appColors.textColor,
+                                ),
+                              ),
+                              ..._filteredGroups
+                                  .map((group) => CheckboxListTile(
+                                        title: Text(group['name']),
+                                        value: _localSelectedGroups
+                                            .contains(group['id']),
+                                        onChanged: (value) {
+                                          _toggleGroupSelection(group['id']);
+                                        },
+                                        activeColor: appColors.primaryBlue,
+                                        dense: true,
+                                      )),
+                            ],
+                          ],
+                        ),
+            ),
+          ),
+        ],
       ),
     );
   }
