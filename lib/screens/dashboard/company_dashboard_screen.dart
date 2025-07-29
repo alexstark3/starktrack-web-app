@@ -50,13 +50,13 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final initials = _initials(widget.fullName);
-    final colors   = Theme.of(context).extension<AppColors>()!;
+    final colors = Theme.of(context).extension<AppColors>()!;
     final l10n = AppLocalizations.of(context)!;
 
     // Update screen configs and labels in build method when context is available
     final screenConfigs = _getScreens(l10n);
     final tabLabels = screenConfigs.map((s) => s.label).toList();
-    
+
     // Ensure selected is always valid
     if (!tabLabels.contains(_selected) || tabLabels.isEmpty) {
       _selected = tabLabels.isNotEmpty ? tabLabels.first : '';
@@ -64,14 +64,18 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
 
     // rail width depends on compact
     final bool compact = MediaQuery.of(context).size.width < 600;
-    final double railWidth = compact ? 56 : 220; // Increased from 40 to 56 to accommodate bigger icons
+    final double railWidth = compact
+        ? 56
+        : 220; // Increased from 40 to 56 to accommodate bigger icons
     final double barHeight = CompanyTopBar.kHeight;
 
     // --- IndexedStack for persistent tab state ---
     final body = Container(
       color: colors.dashboardBackground,
       child: IndexedStack(
-        index: tabLabels.isNotEmpty ? tabLabels.indexOf(_selected).clamp(0, tabLabels.length - 1) : 0,
+        index: tabLabels.isNotEmpty
+            ? tabLabels.indexOf(_selected).clamp(0, tabLabels.length - 1)
+            : 0,
         children: [
           if (tabLabels.contains(l10n.timeTracker))
             TimeTrackerScreen(
@@ -122,10 +126,10 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
             child: CompanySideMenu(
               menuItems: screenConfigs
                   .map((s) => SideMenuItem(
-                        label   : s.label,
-                        icon    : s.icon,
+                        label: s.label,
+                        icon: s.icon,
                         selected: _selected == s.label,
-                        onTap   : () => setState(() => _selected = s.label),
+                        onTap: () => setState(() => _selected = s.label),
                       ))
                   .toList(),
               compact: compact,
@@ -139,12 +143,12 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
             left: railWidth,
             right: 0,
             child: CompanyTopBar(
-              screenTitle:   _selected,
-              fullName:      widget.fullName,
-              email:         widget.email,
-              initials:      initials,
+              screenTitle: _selected,
+              fullName: widget.fullName,
+              email: widget.email,
+              initials: initials,
               selectedScreen: _selected,
-              onSettings:    () => setState(() => _selected = l10n.settings),
+              onSettings: () => setState(() => _selected = l10n.settings),
               onLogout: () async {
                 await FirebaseAuth.instance.signOut();
                 if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
@@ -160,7 +164,7 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
     final l = <_ScreenCfg>[];
     if (widget.access['time_tracker'] == true) {
       l.add(_ScreenCfg(l10n.timeTracker, Icons.access_time));
-      l.add(_ScreenCfg(l10n.history,      Icons.history));
+      l.add(_ScreenCfg(l10n.history, Icons.history));
     }
     // TEAM MODULE: Only for roles company_admin, admin, team_leader
     if (widget.roles.contains('company_admin') ||
@@ -168,7 +172,8 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
         widget.roles.contains('team_leader')) {
       l.add(_ScreenCfg(l10n.team, Icons.group));
     }
-    if (widget.roles.contains('admin') || widget.roles.contains('company_admin')) {
+    if (widget.roles.contains('admin') ||
+        widget.roles.contains('company_admin')) {
       l.add(_ScreenCfg(l10n.admin, Icons.admin_panel_settings));
     }
     l.add(_ScreenCfg(l10n.settings, Icons.settings));

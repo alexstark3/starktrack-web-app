@@ -3,66 +3,67 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class SuperAdminAuthService {
   static const String _adminCollection = 'sadmin';
-  
+
   /// Check if the current user is an admin
   static Future<bool> isAdmin() async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return false;
-    
+    if (user == null) {
+      return false;
+    }
+
     try {
       final adminDoc = await FirebaseFirestore.instance
           .collection(_adminCollection)
           .doc(user.uid)
           .get();
-      
+
       return adminDoc.exists;
     } catch (e) {
       print('Error checking admin status: $e');
       return false;
     }
   }
-  
+
   /// Get admin user data
   static Future<Map<String, dynamic>?> getAdminData() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return null;
-    
+
     try {
       final adminDoc = await FirebaseFirestore.instance
           .collection(_adminCollection)
           .doc(user.uid)
           .get();
-      
+
       if (!adminDoc.exists) return null;
-      
+
       return adminDoc.data();
     } catch (e) {
       print('Error getting admin data: $e');
       return null;
     }
   }
-  
+
   /// Check if admin has specific role
   static Future<bool> hasAdminRole(String role) async {
     final adminData = await getAdminData();
     if (adminData == null) return false;
-    
+
     final roles = List<String>.from(adminData['roles'] ?? []);
     return roles.contains(role);
   }
-  
+
   /// Check if admin has super admin privileges
   static Future<bool> isSuperAdmin() async {
     return await hasAdminRole('super_admin');
   }
-  
+
   /// Get all admin users (for super admin management)
   static Future<List<Map<String, dynamic>>> getAllAdmins() async {
     try {
-      final querySnapshot = await FirebaseFirestore.instance
-          .collection(_adminCollection)
-          .get();
-      
+      final querySnapshot =
+          await FirebaseFirestore.instance.collection(_adminCollection).get();
+
       return querySnapshot.docs
           .map((doc) => {
                 'id': doc.id,
@@ -74,7 +75,7 @@ class SuperAdminAuthService {
       return [];
     }
   }
-  
+
   /// Create new admin user
   static Future<bool> createAdmin({
     required String email,
@@ -87,10 +88,10 @@ class SuperAdminAuthService {
       // Create Firebase Auth user
       final userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
-      
+
       final user = userCredential.user;
       if (user == null) return false;
-      
+
       // Create admin document
       await FirebaseFirestore.instance
           .collection(_adminCollection)
@@ -104,14 +105,14 @@ class SuperAdminAuthService {
         'createdAt': FieldValue.serverTimestamp(),
         'lastLogin': FieldValue.serverTimestamp(),
       });
-      
+
       return true;
     } catch (e) {
       print('Error creating admin: $e');
       return false;
     }
   }
-  
+
   /// Update admin user
   static Future<bool> updateAdmin({
     required String adminId,
@@ -125,14 +126,14 @@ class SuperAdminAuthService {
         ...data,
         'updatedAt': FieldValue.serverTimestamp(),
       });
-      
+
       return true;
     } catch (e) {
       print('Error updating admin: $e');
       return false;
     }
   }
-  
+
   /// Delete admin user
   static Future<bool> deleteAdmin(String adminId) async {
     try {
@@ -140,11 +141,11 @@ class SuperAdminAuthService {
           .collection(_adminCollection)
           .doc(adminId)
           .delete();
-      
+
       return true;
     } catch (e) {
       print('Error deleting admin: $e');
       return false;
     }
   }
-} 
+}

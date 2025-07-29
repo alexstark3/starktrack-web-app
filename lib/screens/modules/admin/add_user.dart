@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../super_admin/services/company_module_service.dart';
 import 'user_address.dart';
 
 class AddUserDialog extends StatefulWidget {
@@ -11,6 +12,7 @@ class AddUserDialog extends StatefulWidget {
   final DocumentSnapshot? editUser;
   final Function() onUserAdded;
   final List<String> currentUserRoles;
+  final List<String>? preSelectedRoles;
 
   const AddUserDialog({
     Key? key,
@@ -19,6 +21,7 @@ class AddUserDialog extends StatefulWidget {
     this.editUser,
     required this.onUserAdded,
     required this.currentUserRoles,
+    this.preSelectedRoles,
   }) : super(key: key);
 
   @override
@@ -102,6 +105,11 @@ class _AddUserDialogState extends State<AddUserDialog> {
 
       _privateAddress = {};
       _workAddress = {};
+
+      // Use pre-selected roles if provided
+      if (widget.preSelectedRoles != null) {
+        _selectedRoles = List<String>.from(widget.preSelectedRoles!);
+      }
     }
   }
 
@@ -195,6 +203,18 @@ class _AddUserDialogState extends State<AddUserDialog> {
           throw Exception('Password must be at least 6 characters long');
         }
 
+        // Check user limit before creating new user
+        final canAddUser =
+            await CompanyModuleService.canAddUser(widget.companyId);
+        if (!canAddUser) {
+          final userLimit =
+              await CompanyModuleService.getCompanyUserLimit(widget.companyId);
+          final userCount =
+              await CompanyModuleService.getCompanyUserCount(widget.companyId);
+          throw Exception(
+              'User limit reached. Current: $userCount, Limit: $userLimit. Contact your administrator to increase the limit.');
+        }
+
         // Create user in Firebase Auth
         final userCredential =
             await FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -209,6 +229,9 @@ class _AddUserDialogState extends State<AddUserDialog> {
             .collection('users')
             .doc(userCredential.user!.uid)
             .set(userData);
+
+        // Increment company user count
+        await CompanyModuleService.incrementUserCount(widget.companyId);
       }
 
       widget.onUserAdded();
@@ -260,6 +283,56 @@ class _AddUserDialogState extends State<AddUserDialog> {
               ],
             ),
             const SizedBox(height: 24),
+
+            // User Limit Indicator (only for new users)
+            if (!isEdit) ...[
+              FutureBuilder<Map<String, int>>(
+                future: _getUserLimitInfo(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    final userCount = snapshot.data!['userCount'] ?? 0;
+                    final userLimit = snapshot.data!['userLimit'] ?? 10;
+                    final isOverLimit = userCount >= userLimit;
+
+                    return Container(
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: isOverLimit
+                            ? Colors.red.withOpacity(0.1)
+                            : Colors.blue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isOverLimit ? Colors.red : Colors.blue,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            isOverLimit ? Icons.warning : Icons.info,
+                            color: isOverLimit ? Colors.red : Colors.blue,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              isOverLimit
+                                  ? 'User limit reached ($userCount/$userLimit). Cannot add more users.'
+                                  : 'User limit: $userCount/$userLimit',
+                              style: TextStyle(
+                                color: isOverLimit ? Colors.red : Colors.blue,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ],
 
             // Form
             Flexible(
@@ -812,6 +885,25 @@ class _AddUserDialogState extends State<AddUserDialog> {
         ),
       ],
     );
+  }
+
+  Future<Map<String, int>> _getUserLimitInfo() async {
+    try {
+      final userCount =
+          await CompanyModuleService.getCompanyUserCount(widget.companyId);
+      final userLimit =
+          await CompanyModuleService.getCompanyUserLimit(widget.companyId);
+      return {
+        'userCount': userCount,
+        'userLimit': userLimit,
+      };
+    } catch (e) {
+      print('Error getting user limit info: $e');
+      return {
+        'userCount': 0,
+        'userLimit': 10,
+      };
+    }
   }
 
   @override

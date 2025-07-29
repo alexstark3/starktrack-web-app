@@ -26,9 +26,15 @@ fi
 COMMIT_COUNT=$(git rev-list --count HEAD)
 BUILD_NUMBER=$((COMMIT_COUNT + 521))
 
-# Update pubspec.yaml version (cross-platform, using dart pub version if available)
-# Remove sed/OSTYPE logic for Linux/macOS
-# If you want to update the version, do it manually or with a Dart tool
+# Update pubspec.yaml with new build number
+echo "📦 Updating version in pubspec.yaml..."
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS
+    sed -i '' "s/version: .*/version: $VERSION+$BUILD_NUMBER/" pubspec.yaml
+else
+    # Linux/Windows (Git Bash)
+    sed -i "s/version: .*/version: $VERSION+$BUILD_NUMBER/" pubspec.yaml
+fi
 
 echo "📦 Updated version to: $VERSION+$BUILD_NUMBER"
 echo "   (Commit count: $COMMIT_COUNT + offset: 521)"

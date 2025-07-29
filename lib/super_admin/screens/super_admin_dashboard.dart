@@ -5,6 +5,7 @@ import '../../theme/app_colors.dart';
 import 'super_admin_login.dart';
 import '../tools/company_migration_tool.dart';
 import '../security/firestore_backup_service.dart';
+import 'company_management_screen.dart';
 import 'dart:html' as html;
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,7 +14,8 @@ class SuperAdminDashboardScreen extends StatefulWidget {
   const SuperAdminDashboardScreen({Key? key}) : super(key: key);
 
   @override
-  State<SuperAdminDashboardScreen> createState() => _SuperAdminDashboardScreenState();
+  State<SuperAdminDashboardScreen> createState() =>
+      _SuperAdminDashboardScreenState();
 }
 
 class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
@@ -31,24 +33,24 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
 
   void _listenForceLogout() {
     FirebaseFirestore.instance
-      .collection('appConfig')
-      .doc('global')
-      .snapshots()
-      .listen((doc) {
-        if (doc.exists && doc.data()?['forceLogout'] == true) {
-          setState(() => _forceLogout = true);
-        } else {
-          setState(() => _forceLogout = false);
-        }
-      });
+        .collection('appConfig')
+        .doc('global')
+        .snapshots()
+        .listen((doc) {
+      if (doc.exists && doc.data()?['forceLogout'] == true) {
+        setState(() => _forceLogout = true);
+      } else {
+        setState(() => _forceLogout = false);
+      }
+    });
   }
 
   Future<void> _setForceLogout(bool value) async {
     setState(() => _isForceLogoutLoading = true);
     await FirebaseFirestore.instance
-      .collection('appConfig')
-      .doc('global')
-      .set({'forceLogout': value}, SetOptions(merge: true));
+        .collection('appConfig')
+        .doc('global')
+        .set({'forceLogout': value}, SetOptions(merge: true));
     setState(() => _isForceLogoutLoading = false);
   }
 
@@ -211,13 +213,16 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
             // Backup Database Button
             ElevatedButton.icon(
               icon: Icon(Icons.download, color: colors.whiteTextOnBlue),
-              label: Text('Backup Database', style: TextStyle(color: colors.whiteTextOnBlue)),
+              label: Text('Backup Database',
+                  style: TextStyle(color: colors.whiteTextOnBlue)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: colors.primaryBlue,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
               ),
               onPressed: () async {
-                final json = await FirestoreBackupService.backupAllCompaniesAsJson();
+                final json =
+                    await FirestoreBackupService.backupAllCompaniesAsJson();
                 final bytes = utf8.encode(json);
                 final blob = html.Blob([bytes], 'application/json');
                 final url = html.Url.createObjectUrlFromBlob(blob);
@@ -232,10 +237,12 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
             // Restore from Backup Button
             ElevatedButton.icon(
               icon: Icon(Icons.upload_file, color: colors.whiteTextOnBlue),
-              label: Text('Restore from Backup', style: TextStyle(color: colors.whiteTextOnBlue)),
+              label: Text('Restore from Backup',
+                  style: TextStyle(color: colors.whiteTextOnBlue)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
               ),
               onPressed: () async {
                 final input = html.FileUploadInputElement();
@@ -252,7 +259,8 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                         context: context,
                         builder: (ctx) => AlertDialog(
                           title: const Text('Confirm Restore'),
-                          content: const Text('Restoring from backup will overwrite existing data for the same IDs. Are you sure you want to continue?'),
+                          content: const Text(
+                              'Restoring from backup will overwrite existing data for the same IDs. Are you sure you want to continue?'),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.of(ctx).pop(false),
@@ -270,13 +278,18 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                           await FirestoreBackupService.restoreFromJson(json);
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Restore completed successfully!'), backgroundColor: Colors.green),
+                              const SnackBar(
+                                  content:
+                                      Text('Restore completed successfully!'),
+                                  backgroundColor: Colors.green),
                             );
                           }
                         } catch (e) {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Restore failed: $e'), backgroundColor: Colors.red),
+                              SnackBar(
+                                  content: Text('Restore failed: $e'),
+                                  backgroundColor: Colors.red),
                             );
                           }
                         }
@@ -312,12 +325,16 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
               children: [
                 Switch(
                   value: _forceLogout,
-                  onChanged: _isForceLogoutLoading ? null : (val) => _setForceLogout(val),
+                  onChanged: _isForceLogoutLoading
+                      ? null
+                      : (val) => _setForceLogout(val),
                   activeColor: Colors.red,
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  _forceLogout ? 'Force Logout ON (Maintenance Mode)' : 'Force Logout OFF',
+                  _forceLogout
+                      ? 'Force Logout ON (Maintenance Mode)'
+                      : 'Force Logout OFF',
                   style: TextStyle(
                     color: _forceLogout ? Colors.red : colors.textColor,
                     fontWeight: FontWeight.bold,
@@ -326,7 +343,10 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                 if (_isForceLogoutLoading)
                   const Padding(
                     padding: EdgeInsets.only(left: 8.0),
-                    child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+                    child: SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2)),
                   ),
               ],
             ),
@@ -340,9 +360,10 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
               icon: Icons.business,
               color: colors.primaryBlue,
               onTap: () {
-                // TODO: Navigate to company management
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Company Management - Coming Soon')),
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const CompanyManagementScreen(),
+                  ),
                 );
               },
             ),
@@ -358,7 +379,8 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
               onTap: () {
                 // TODO: Navigate to admin user management
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Admin User Management - Coming Soon')),
+                  SnackBar(
+                      content: Text('Admin User Management - Coming Soon')),
                 );
               },
             ),
@@ -450,4 +472,4 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
       ),
     );
   }
-} 
+}

@@ -48,7 +48,24 @@ class _UserAddressState extends State<UserAddress> {
     _loadData();
   }
 
+  @override
+  void didUpdateWidget(UserAddress oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Only update if the address data actually changed
+    if (oldWidget.addressData != widget.addressData) {
+      print(
+          '🔍 DEBUG: UserAddress - Address data changed, updating controllers');
+      print('🔍 DEBUG: UserAddress - Old: ${oldWidget.addressData}');
+      print('🔍 DEBUG: UserAddress - New: ${widget.addressData}');
+      _updateControllersFromAddressData();
+    }
+  }
+
   void _initializeControllers() {
+    print(
+        '🔍 DEBUG: UserAddress - Initializing controllers with address data: ${widget.addressData}');
+
     _countryController.text = widget.addressData['country'] ??
         (widget.isSwissAddress ? 'Switzerland' : '');
     _areaController.text = widget.addressData['area'] ?? '';
@@ -56,6 +73,73 @@ class _UserAddressState extends State<UserAddress> {
     _postCodeController.text = widget.addressData['postCode'] ?? '';
     _streetController.text = widget.addressData['street'] ?? '';
     _numberController.text = widget.addressData['streetNumber'] ?? '';
+
+    print('🔍 DEBUG: UserAddress - Controllers initialized:');
+    print('  Country: ${_countryController.text}');
+    print('  Area: ${_areaController.text}');
+    print('  City: ${_cityController.text}');
+    print('  PostCode: ${_postCodeController.text}');
+    print('  Street: ${_streetController.text}');
+    print('  StreetNumber: ${_numberController.text}');
+  }
+
+  void _updateControllersFromAddressData() {
+    print(
+        '🔍 DEBUG: UserAddress - Updating controllers from address data: ${widget.addressData}');
+
+    // Only update if the data is actually different to avoid unnecessary rebuilds
+    final newCountry = widget.addressData['country'] ??
+        (widget.isSwissAddress ? 'Switzerland' : '');
+    final newArea = widget.addressData['area'] ?? '';
+    final newCity = widget.addressData['city'] ?? '';
+    final newPostCode = widget.addressData['postCode'] ?? '';
+    final newStreet = widget.addressData['street'] ?? '';
+    final newStreetNumber = widget.addressData['streetNumber'] ?? '';
+
+    // Check if any values actually changed
+    bool hasChanges = false;
+    if (_countryController.text != newCountry) {
+      _countryController.text = newCountry;
+      hasChanges = true;
+    }
+    if (_areaController.text != newArea) {
+      _areaController.text = newArea;
+      hasChanges = true;
+    }
+    if (_cityController.text != newCity) {
+      _cityController.text = newCity;
+      hasChanges = true;
+    }
+    if (_postCodeController.text != newPostCode) {
+      _postCodeController.text = newPostCode;
+      hasChanges = true;
+    }
+    if (_streetController.text != newStreet) {
+      _streetController.text = newStreet;
+      hasChanges = true;
+    }
+    if (_numberController.text != newStreetNumber) {
+      _numberController.text = newStreetNumber;
+      hasChanges = true;
+    }
+
+    // Only call setState if there were actual changes and we're not in the middle of user input
+    if (hasChanges) {
+      // Use a microtask to avoid rebuilding during user input
+      Future.microtask(() {
+        if (mounted) {
+          setState(() {});
+        }
+      });
+    }
+
+    print('🔍 DEBUG: UserAddress - Controllers updated:');
+    print('  Country: ${_countryController.text}');
+    print('  Area: ${_areaController.text}');
+    print('  City: ${_cityController.text}');
+    print('  PostCode: ${_postCodeController.text}');
+    print('  Street: ${_streetController.text}');
+    print('  StreetNumber: ${_numberController.text}');
   }
 
   Future<void> _loadData() async {
@@ -154,20 +238,10 @@ class _UserAddressState extends State<UserAddress> {
     return postCodes.toList()..sort();
   }
 
-  String? _getCityForPostCode(String postCode) {
-    final cityData = _swissData.firstWhere(
-      (item) => (item['postCodes'] as List).contains(postCode),
-      orElse: () => {'city': '', 'area': ''},
-    );
-    return cityData['city'] as String?;
-  }
-
-  String? _getAreaForPostCode(String postCode) {
-    final cityData = _swissData.firstWhere(
-      (item) => (item['postCodes'] as List).contains(postCode),
-      orElse: () => {'city': '', 'area': ''},
-    );
-    return cityData['area'] as String?;
+  List<Map<String, dynamic>> _getCitiesForPostCode(String postCode) {
+    return _swissData
+        .where((item) => (item['postCodes'] as List).contains(postCode))
+        .toList();
   }
 
   void _updateAddressData() {
@@ -201,21 +275,80 @@ class _UserAddressState extends State<UserAddress> {
     if (value != null) {
       setState(() {
         _postCodeController.text = value;
-        final city = _getCityForPostCode(value);
-        final area = _getAreaForPostCode(value);
-        if (city != null && area != null) {
+        final cities = _getCitiesForPostCode(value);
+
+        print('DEBUG: Found ${cities.length} cities for post code $value');
+        for (final city in cities) {
+          print('DEBUG: - ${city['city']} (${city['area']})');
+        }
+
+        if (cities.isEmpty) {
+          // No cities found for this post code
+          _areaController.text = '';
+          _cityController.text = '';
+        } else if (cities.length == 1) {
+          // Single city found
+          final city = cities.first['city'] as String;
+          final area = cities.first['area'] as String;
           _areaController.text = area;
           _cityController.text = city;
+        } else {
+          // Multiple cities found - show selection dialog
+          _showCitySelectionDialog(cities, value);
+          return; // Don't update address data yet
         }
       });
       _updateAddressData();
     }
   }
 
+  void _showCitySelectionDialog(
+      List<Map<String, dynamic>> cities, String postCode) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Multiple cities found for post code $postCode'),
+        content: SizedBox(
+          width: 300,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Please select the correct city:'),
+              const SizedBox(height: 16),
+              ...cities.map((city) => ListTile(
+                    title: Text('${city['city']} (${city['area']})'),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      setState(() {
+                        _areaController.text = city['area'] as String;
+                        _cityController.text = city['city'] as String;
+                      });
+                      _updateAddressData();
+                    },
+                  )),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final appColors = Theme.of(context).extension<AppColors>()!;
-    final l10n = AppLocalizations.of(context)!;
+    final appColors = Theme.of(context).extension<AppColors>();
+    final l10n = AppLocalizations.of(context);
+
+    // Handle null cases
+    if (appColors == null || l10n == null) {
+      return const Center(
+          child: Text('Error: Theme or localization not available'));
+    }
 
     final fields = Column(
       crossAxisAlignment: CrossAxisAlignment.start,

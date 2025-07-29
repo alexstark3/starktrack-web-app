@@ -21,7 +21,8 @@ Future<void> main() async {
   // Firebase project ID: ${Firebase.app().options.projectId}
 
   runApp(
-    ChangeNotifierProvider(create: (_) => ThemeProvider(), child: const MyApp()),
+    ChangeNotifierProvider(
+        create: (_) => ThemeProvider(), child: const MyApp()),
   );
 }
 
@@ -31,9 +32,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final tp = context.watch<ThemeProvider>();
     if (!tp.isReady) {
-      return const MaterialApp(debugShowCheckedModeBanner: false, home: Scaffold(body: Center(child: CircularProgressIndicator())));
+      return const MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: Scaffold(body: Center(child: CircularProgressIndicator())));
     }
-    
+
     // Determine locale based on language setting
     Locale locale;
     switch (tp.language) {
@@ -45,7 +48,7 @@ class MyApp extends StatelessWidget {
         locale = const Locale('en');
         break;
     }
-    
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Stark Track',
@@ -53,7 +56,7 @@ class MyApp extends StatelessWidget {
       darkTheme: darkTheme,
       themeMode: tp.themeMode,
       locale: locale, // Set the locale based on language setting
-      
+
       // Localization support
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -65,7 +68,7 @@ class MyApp extends StatelessWidget {
         Locale('en'), // English
         Locale('de'), // German
       ],
-      
+
       home: const AuthGate(),
     );
   }
@@ -90,24 +93,24 @@ class _AuthGateState extends State<AuthGate> {
 
   void _listenForceLogout() {
     FirebaseFirestore.instance
-      .collection('appConfig')
-      .doc('global')
-      .snapshots()
-      .listen((doc) async {
-        final force = doc.exists && doc.data()?['forceLogout'] == true;
-        if (force) {
-          setState(() {
-            _forceLogout = true;
-            _checkedForceLogout = true;
-          });
-          await FirebaseAuth.instance.signOut();
-        } else {
-          setState(() {
-            _forceLogout = false;
-            _checkedForceLogout = true;
-          });
-        }
-      });
+        .collection('appConfig')
+        .doc('global')
+        .snapshots()
+        .listen((doc) async {
+      final force = doc.exists && doc.data()?['forceLogout'] == true;
+      if (force) {
+        setState(() {
+          _forceLogout = true;
+          _checkedForceLogout = true;
+        });
+        await FirebaseAuth.instance.signOut();
+      } else {
+        setState(() {
+          _forceLogout = false;
+          _checkedForceLogout = true;
+        });
+      }
+    });
   }
 
   @override
@@ -120,7 +123,8 @@ class _AuthGateState extends State<AuthGate> {
         body: Center(
           child: Text(
             'The system is under maintenance. Please try again later.',
-            style: TextStyle(fontSize: 20, color: Colors.red, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontSize: 20, color: Colors.red, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
         ),
@@ -130,18 +134,23 @@ class _AuthGateState extends State<AuthGate> {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
         }
         if (!snap.hasData) return const CompanyLoginScreen();
 
         final uid = snap.data!.uid;
-        
+
         // Try to find the user's company using the new fast access structure
         return FutureBuilder<DocumentSnapshot>(
-          future: FirebaseFirestore.instance.collection('userCompany').doc(uid).get(),
+          future: FirebaseFirestore.instance
+              .collection('userCompany')
+              .doc(uid)
+              .get(),
           builder: (context, userSnap) {
             if (userSnap.connectionState == ConnectionState.waiting) {
-              return const Scaffold(body: Center(child: CircularProgressIndicator()));
+              return const Scaffold(
+                  body: Center(child: CircularProgressIndicator()));
             }
             // If user access document doesn't exist, fall back to old method
             if (!userSnap.hasData || !userSnap.data!.exists) {
@@ -161,13 +170,17 @@ class _AuthGateState extends State<AuthGate> {
                   .doc(uid)
                   .get(),
               builder: (context, companyUserSnap) {
-                if (companyUserSnap.connectionState == ConnectionState.waiting) {
-                  return const Scaffold(body: Center(child: CircularProgressIndicator()));
+                if (companyUserSnap.connectionState ==
+                    ConnectionState.waiting) {
+                  return const Scaffold(
+                      body: Center(child: CircularProgressIndicator()));
                 }
                 if (!companyUserSnap.hasData || !companyUserSnap.data!.exists) {
-                  return const Scaffold(body: Center(child: Text('User not found in company.')));
+                  return const Scaffold(
+                      body: Center(child: Text('User not found in company.')));
                 }
-                final data = companyUserSnap.data!.data() as Map<String, dynamic>;
+                final data =
+                    companyUserSnap.data!.data() as Map<String, dynamic>;
                 // Compose a safe full name
                 final full = (data['fullName'] as String?)?.trim() ?? '';
                 final first = (data['firstName'] as String?)?.trim() ?? '';
@@ -179,7 +192,9 @@ class _AuthGateState extends State<AuthGate> {
                     ? (data['roles'] as List).map((e) => e.toString()).toList()
                     : <String>[];
                 final modules = (data['modules'] is List)
-                    ? (data['modules'] as List).map((e) => e.toString()).toList()
+                    ? (data['modules'] as List)
+                        .map((e) => e.toString())
+                        .toList()
                     : <String>[];
                 final access = <String, dynamic>{
                   'time_tracker': modules.contains('time_tracker'),
@@ -207,10 +222,12 @@ class _AuthGateState extends State<AuthGate> {
       future: FirebaseFirestore.instance.collection('companies').get(),
       builder: (context, companySnap) {
         if (companySnap.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
         }
         if (!companySnap.hasData || companySnap.data!.docs.isEmpty) {
-          return const Scaffold(body: Center(child: Text('No companies found.')));
+          return const Scaffold(
+              body: Center(child: Text('No companies found.')));
         }
         // Search for user in each company
         return _findUserInCompanies(companySnap.data!.docs, uid);
@@ -218,18 +235,22 @@ class _AuthGateState extends State<AuthGate> {
     );
   }
 
-  Widget _findUserInCompanies(List<QueryDocumentSnapshot> companies, String uid) {
+  Widget _findUserInCompanies(
+      List<QueryDocumentSnapshot> companies, String uid) {
     return FutureBuilder<List<DocumentSnapshot>>(
       future: Future.wait(
-        companies.map((company) => company.reference.collection('users').doc(uid).get()),
+        companies.map(
+            (company) => company.reference.collection('users').doc(uid).get()),
       ),
       builder: (context, usersSnap) {
         if (usersSnap.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
         }
         final docs = usersSnap.data;
         if (docs == null) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
         }
         for (int i = 0; i < docs.length; i++) {
           final userDoc = docs[i];
@@ -247,12 +268,12 @@ class _AuthGateState extends State<AuthGate> {
                 ? (data['roles'] as List).map((e) => e.toString()).toList()
                 : <String>[];
             final modules = (data['modules'] is List)
-        ? (data['modules'] as List).map((e) => e.toString()).toList()
-        : <String>[];
-    final access = <String, dynamic>{
-      'time_tracker': modules.contains('time_tracker'),
-      'admin'       : modules.contains('admin'),
-    };
+                ? (data['modules'] as List).map((e) => e.toString()).toList()
+                : <String>[];
+            final access = <String, dynamic>{
+              'time_tracker': modules.contains('time_tracker'),
+              'admin': modules.contains('admin'),
+            };
             return CompanyDashboardScreen(
               companyId: companyId,
               userId: uid,
@@ -263,7 +284,8 @@ class _AuthGateState extends State<AuthGate> {
             );
           }
         }
-        return const Scaffold(body: Center(child: Text('User not assigned to any company.')));
+        return const Scaffold(
+            body: Center(child: Text('User not assigned to any company.')));
       },
     );
   }

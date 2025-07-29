@@ -18,7 +18,7 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  
+
   bool _isLoading = false;
   String _errorMessage = '';
 
@@ -38,7 +38,7 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
   Future<void> _loadSavedData() async {
     try {
       final savedEmail = await BrowserPersistence.loadSuperAdminEmail();
-      
+
       if (mounted && savedEmail != null && savedEmail.isNotEmpty) {
         _emailController.text = savedEmail;
       }
@@ -75,16 +75,16 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
 
       // Check if user is an admin
       final isAdmin = await SuperAdminAuthService.isAdmin();
-      
+
       if (!isAdmin) {
         // Sign out if not admin
         await FirebaseAuth.instance.signOut();
-              if (mounted) {
-        setState(() {
-          _errorMessage = 'Access denied. Super admin privileges required.';
-          _isLoading = false;
-        });
-      }
+        if (mounted) {
+          setState(() {
+            _errorMessage = 'Access denied. Super admin privileges required.';
+            _isLoading = false;
+          });
+        }
         return;
       }
 
@@ -121,19 +121,19 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
         default:
           errorMsg = 'Login failed. Please try again.';
       }
-      
+
       if (mounted) {
-      setState(() {
-        _errorMessage = errorMsg;
-        _isLoading = false;
-      });
+        setState(() {
+          _errorMessage = errorMsg;
+          _isLoading = false;
+        });
       }
     } catch (e) {
       if (mounted) {
-      setState(() {
-        _errorMessage = 'An unexpected error occurred.';
-        _isLoading = false;
-      });
+        setState(() {
+          _errorMessage = 'An unexpected error occurred.';
+          _isLoading = false;
+        });
       }
     }
   }
@@ -210,7 +210,8 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
                         decoration: InputDecoration(
                           labelText: 'Email',
                           hintText: 'Enter your email address',
-                          prefixIcon: Icon(Icons.email, color: colors.primaryBlue),
+                          prefixIcon:
+                              Icon(Icons.email, color: colors.primaryBlue),
                           filled: true,
                           fillColor: colors.lightGray,
                           border: OutlineInputBorder(
@@ -223,14 +224,16 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: colors.primaryBlue, width: 2),
+                            borderSide:
+                                BorderSide(color: colors.primaryBlue, width: 2),
                           ),
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'Email is required';
                           }
-                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                              .hasMatch(value)) {
                             return 'Please enter a valid email';
                           }
                           return null;
@@ -248,7 +251,8 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
                         decoration: InputDecoration(
                           labelText: 'Password',
                           hintText: 'Enter your password',
-                          prefixIcon: Icon(Icons.lock, color: colors.primaryBlue),
+                          prefixIcon:
+                              Icon(Icons.lock, color: colors.primaryBlue),
                           filled: true,
                           fillColor: colors.lightGray,
                           border: OutlineInputBorder(
@@ -261,7 +265,8 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: colors.primaryBlue, width: 2),
+                            borderSide:
+                                BorderSide(color: colors.primaryBlue, width: 2),
                           ),
                         ),
                         validator: (value) {
@@ -323,7 +328,8 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
                                   height: 20,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
                                   ),
                                 )
                               : const Text(
@@ -365,4 +371,4 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
       ),
     );
   }
-} 
+}

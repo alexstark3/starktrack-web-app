@@ -36,10 +36,10 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
 
   Future<void> _login() async {
     if (!mounted) return;
-    
+
     final userEmail = _emailController.text.trim();
     final l10n = AppLocalizations.of(context)!;
-    
+
     setState(() {
       _isLoading = true;
       _error = null;
@@ -50,7 +50,8 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
       final canAttempt = await LoginRateLimiter.canAttemptLogin(userEmail);
       if (!mounted) return;
       if (!canAttempt) {
-        final lockoutTime = await LoginRateLimiter.getRemainingLockoutTime(userEmail);
+        final lockoutTime =
+            await LoginRateLimiter.getRemainingLockoutTime(userEmail);
         if (!mounted) return;
         if (lockoutTime != null) {
           final minutes = lockoutTime.inMinutes + 1; // Round up
@@ -79,7 +80,8 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
 
       if (!userCompanyDoc.exists) {
         setState(() {
-          _error = 'You are not assigned to any company. Contact your administrator.';
+          _error =
+              'You are not assigned to any company. Contact your administrator.';
         });
         return;
       }
@@ -97,7 +99,8 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
 
       if (!userDocSnap.exists) {
         setState(() {
-          _error = 'User data not found in company. Contact your administrator.';
+          _error =
+              'User data not found in company. Contact your administrator.';
         });
         return;
       }
@@ -112,12 +115,12 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
           : <String>[];
       final access = <String, dynamic>{
         'time_tracker': modules.contains('time_tracker'),
-        'admin'       : modules.contains('admin'),
+        'admin': modules.contains('admin'),
       };
 
-      final String email    = (data['email']     ?? '') as String;
-      final String firstName= (data['firstName'] ?? '') as String;
-      final String surname  = (data['surname']   ?? '') as String;
+      final String email = (data['email'] ?? '') as String;
+      final String firstName = (data['firstName'] ?? '') as String;
+      final String surname = (data['surname'] ?? '') as String;
       final String fullName = '${firstName.trim()} ${surname.trim()}'.trim();
 
       // 4. Record successful login (reset rate limiting)
@@ -141,37 +144,38 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
           ),
         ),
       );
-     // print('LOGIN: User found! Navigating to dashboard for company $companyId');
-
+      // print('LOGIN: User found! Navigating to dashboard for company $companyId');
     } on FirebaseAuthException catch (e) {
       print('LOGIN: FirebaseAuthException: ${e.message}');
       if (!mounted) return;
-      
+
       // Record failed login attempt for rate limiting
       await LoginRateLimiter.recordFailedAttempt(userEmail);
       if (!mounted) return;
-      
+
       // Get remaining attempts for user feedback
-      final remainingAttempts = await LoginRateLimiter.getRemainingAttempts(userEmail);
+      final remainingAttempts =
+          await LoginRateLimiter.getRemainingAttempts(userEmail);
       if (!mounted) return;
-      
+
       setState(() {
         if (remainingAttempts <= 0) {
           // Account is now locked
           _error = l10n.tooManyFailedAttempts;
         } else {
           // Show remaining attempts
-          _error = '${e.message ?? 'Authentication failed'}\n${l10n.remainingAttempts(remainingAttempts)}';
+          _error =
+              '${e.message ?? 'Authentication failed'}\n${l10n.remainingAttempts(remainingAttempts)}';
         }
       });
     } catch (e) {
       print('LOGIN: Unknown error: $e');
       if (!mounted) return;
-      
+
       // Record failed login attempt for rate limiting
       await LoginRateLimiter.recordFailedAttempt(userEmail);
       if (!mounted) return;
-      
+
       setState(() {
         _error = 'Unknown error: $e';
       });

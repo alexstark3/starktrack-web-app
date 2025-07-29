@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'security/super_admin_auth_service.dart';
@@ -6,6 +7,7 @@ import 'screens/super_admin_dashboard.dart';
 import 'screens/super_admin_login.dart';
 import '../theme/app_colors.dart';
 import '../firebase_options.dart';
+import '../l10n/app_localizations.dart';
 
 // Super Admin Web App for subdomain: admin.starktrack.ch
 // This is the entry point for the admin-only interface
@@ -45,6 +47,19 @@ class SuperAdminWebApp extends StatelessWidget {
           AppColors.dark, // Add your AppColors extension here
         ],
       ),
+      
+      // Localization support
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'), // English
+        Locale('de'), // German
+      ],
+      
       home: const SuperAdminAuthGate(),
       debugShowCheckedModeBanner: false,
     );
