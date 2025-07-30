@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../security/super_admin_auth_service.dart';
 import '../../theme/app_colors.dart';
@@ -21,11 +22,13 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
 
   bool _isLoading = false;
   String _errorMessage = '';
+  String _version = '';
 
   @override
   void initState() {
     super.initState();
     _loadSavedData();
+    _loadVersion();
   }
 
   @override
@@ -55,6 +58,17 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
       }
     } catch (e) {
       print('Error saving super admin login data: $e');
+    }
+  }
+
+  Future<void> _loadVersion() async {
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      setState(() {
+        _version = '${packageInfo.version}+${packageInfo.buildNumber}';
+      });
+    } catch (e) {
+      print('Error loading version: $e');
     }
   }
 
@@ -356,6 +370,17 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 16),
+
+                      // Version Display
+                      if (_version.isNotEmpty)
+                        Text(
+                          'Version: $_version',
+                          style: TextStyle(
+                            color: colors.textColor.withOpacity(0.6),
+                            fontSize: 12,
+                          ),
+                        ),
                     ],
                   ),
                   // Add this to allow form submit on Enter
