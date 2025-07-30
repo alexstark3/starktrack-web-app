@@ -65,7 +65,8 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
     try {
       final packageInfo = await PackageInfo.fromPlatform();
       setState(() {
-        _version = '${packageInfo.version}+${packageInfo.buildNumber}';
+        // Display clean version without + symbol
+        _version = '${packageInfo.version}.${packageInfo.buildNumber}';
       });
     } catch (e) {
       print('Error loading version: $e');
@@ -81,16 +82,25 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
     });
 
     try {
+      print('🔐 Starting login process...');
+      print('📧 Email: ${_emailController.text.trim()}');
+
       // Sign in with Firebase Auth
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
 
+      print('✅ Firebase Auth successful');
+      print('👤 User ID: ${FirebaseAuth.instance.currentUser?.uid}');
+
       // Check if user is an admin
+      print('🔍 Checking admin status...');
       final isAdmin = await SuperAdminAuthService.isAdmin();
+      print('🔍 Admin check result: $isAdmin');
 
       if (!isAdmin) {
+        print('❌ User is not an admin, signing out...');
         // Sign out if not admin
         await FirebaseAuth.instance.signOut();
         if (mounted) {

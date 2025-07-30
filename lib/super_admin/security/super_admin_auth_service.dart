@@ -8,18 +8,31 @@ class SuperAdminAuthService {
   static Future<bool> isAdmin() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
+      print('❌ No authenticated user found');
       return false;
     }
 
     try {
+      print('🔍 Checking admin status for user: ${user.uid}');
+      print('🔍 Looking in collection: $_adminCollection');
+
       final adminDoc = await FirebaseFirestore.instance
           .collection(_adminCollection)
           .doc(user.uid)
           .get();
 
-      return adminDoc.exists;
+      final exists = adminDoc.exists;
+      print('🔍 Admin document exists: $exists');
+
+      if (exists) {
+        print('✅ User is an admin');
+      } else {
+        print('❌ User is not an admin - document does not exist');
+      }
+
+      return exists;
     } catch (e) {
-      print('Error checking admin status: $e');
+      print('❌ Error checking admin status: $e');
       return false;
     }
   }

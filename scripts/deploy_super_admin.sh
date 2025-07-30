@@ -21,9 +21,9 @@ if [ -z "$VERSION" ]; then
     exit 1
 fi
 
-# Get commit count and add offset to start from 521
+# Get commit count and start from 1 (no offset)
 COMMIT_COUNT=$(git rev-list --count HEAD)
-BUILD_NUMBER=$((COMMIT_COUNT + 521))
+BUILD_NUMBER=$COMMIT_COUNT
 
 # Update pubspec.yaml with new build number
 echo "📦 Updating version in pubspec.yaml..."
@@ -36,7 +36,7 @@ else
 fi
 
 echo "📦 Updated version to: $VERSION+$BUILD_NUMBER"
-echo "   (Commit count: $COMMIT_COUNT + offset: 521)"
+echo "   (Commit count: $COMMIT_COUNT)"
 
 # Get Flutter dependencies
 echo "📥 Getting Flutter dependencies..."
