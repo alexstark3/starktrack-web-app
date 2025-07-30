@@ -61,72 +61,62 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
         // Find the company admin user
         String adminEmail = '';
 
-        // First check if admin email is stored directly in company document
-        adminEmail = data['adminEmail'] ?? '';
+        // Query users from the company's subcollection to find the admin
+        try {
+          final allUsersQuery = await FirebaseFirestore.instance
+              .collection('companies')
+              .doc(doc.id)
+              .collection('users')
+              .get();
 
-        if (adminEmail.isNotEmpty) {
-          print('🔍 DEBUG: Found admin email in company document: $adminEmail');
-        } else {
-          // Fallback: query users collection
-          try {
-            print(
-                '🔍 DEBUG: Looking for admin in users collection for company ${doc.id}');
+          // Check each user's roles
+          for (final userDoc in allUsersQuery.docs) {
+            final userData = userDoc.data();
+            final roles = List<String>.from(userData['roles'] ?? []);
 
-            // First, let's test if we can read the users collection at all
-            final allUsersTest = await FirebaseFirestore.instance
-                .collection('users')
-                .limit(5)
-                .get();
+            if (roles.contains('company_admin')) {
+              final firstName = userData['firstName'] ?? '';
+              final surname = userData['surname'] ?? '';
+              final email = userData['email'] ?? '';
 
-            print(
-                '🔍 DEBUG: Can read users collection? Found ${allUsersTest.docs.length} total users in collection');
-
-            // Let's see what users exist and their companyId values
-            for (final userDoc in allUsersTest.docs) {
-              final userData = userDoc.data();
-              print(
-                  '🔍 DEBUG: User ${userData['email']} has companyId: ${userData['companyId']}');
+              // Format: "firstName Surname\nEmail: email"
+              adminEmail = firstName.isNotEmpty && surname.isNotEmpty
+                  ? '$firstName $surname\nEmail: $email'
+                  : email;
+              break;
             }
+          }
+        } catch (e) {
+          debugPrint('❌ Error fetching admin for company ${doc.id}: $e');
+        }
 
-            // Query users from the company's subcollection (correct location)
-            final allUsersQuery = await FirebaseFirestore.instance
+        // Count actual users in the company and update the company document
+        int actualUserCount = 0;
+        try {
+          final usersQuery = await FirebaseFirestore.instance
+              .collection('companies')
+              .doc(doc.id)
+              .collection('users')
+              .get();
+          actualUserCount = usersQuery.docs.length;
+          debugPrint(
+              '🔍 DEBUG: Company ${doc.id} (${data['name']}) has $actualUserCount actual users');
+
+          // Update the company document with the real user count
+          final storedUserCount = data['userCount'] ?? 0;
+          if (actualUserCount != storedUserCount) {
+            await FirebaseFirestore.instance
                 .collection('companies')
                 .doc(doc.id)
-                .collection('users')
-                .get();
-
-            print(
-                '🔍 DEBUG: Found ${allUsersQuery.docs.length} total users for company ${doc.id}');
-
-            // Check each user's roles
-            for (final userDoc in allUsersQuery.docs) {
-              final userData = userDoc.data();
-              print('🔍 DEBUG: User document data: $userData');
-
-              final roles = List<String>.from(userData['roles'] ?? []);
-              print('🔍 DEBUG: User ${userData['email']} has roles: $roles');
-
-              if (roles.contains('company_admin')) {
-                final firstName = userData['firstName'] ?? '';
-                final surname = userData['surname'] ?? '';
-                final email = userData['email'] ?? '';
-
-                // Format: "firstName Surname\nEmail: email"
-                adminEmail = firstName.isNotEmpty && surname.isNotEmpty
-                    ? '$firstName $surname\nEmail: $email'
-                    : email;
-
-                print('🔍 DEBUG: Found company admin: $adminEmail');
-                break;
-              }
-            }
-
-            if (adminEmail.isEmpty) {
-              print('🔍 DEBUG: No admin found for company ${doc.id}');
-            }
-          } catch (e) {
-            print('❌ Error fetching admin for company ${doc.id}: $e');
+                .update({
+              'userCount': actualUserCount,
+              'updatedAt': FieldValue.serverTimestamp(),
+            });
+            debugPrint(
+                '🔍 DEBUG: Updated company ${doc.id} userCount from $storedUserCount to $actualUserCount');
           }
+        } catch (e) {
+          debugPrint('❌ Error counting users for company ${doc.id}: $e');
         }
 
         companies.add({
@@ -137,7 +127,8 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
           'modules': modules,
           'active': data['active'] ?? true,
           'userLimit': data['userLimit'] ?? 10, // Default user limit
-          'userCount': data['userCount'] ?? 0, // Use Firestore userCount field
+          'userCount':
+              actualUserCount, // Use actual count from users collection
           'createdAt': data['createdAt'],
           'address': data['address'], // Include the address field
         });
@@ -713,10 +704,11 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
                   'Company Admin: ${company['adminEmail'] ?? 'Not set'}',
                   style: TextStyle(
                     color: colors.textColor.withOpacity(0.7),
+                    fontSize: 14,
                   ),
                 ),
                 const SizedBox(height: 8),
-                // Status Toggle and Action Buttons under company name
+                // Status Toggle
                 Row(
                   children: [
                     Text(
@@ -734,7 +726,12 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
                       activeColor: Colors.green,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    const Spacer(),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                // Action Buttons under the active toggle
+                Row(
+                  children: [
                     // Edit Button
                     IconButton(
                       onPressed: () => _editCompany(company),

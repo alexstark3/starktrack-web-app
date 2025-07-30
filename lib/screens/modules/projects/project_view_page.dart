@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import '../../../../theme/app_colors.dart';
-import '../../../../l10n/app_localizations.dart';
+import '../../../theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 
 // Filter styling constants
 const double kFilterHeight = 40.0;
@@ -77,7 +77,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
         .get();
     final users = usersSnapshot.docs;
 
-            final String projectId = (_currentProject['id'] ?? '').toString();
+    final String projectId = (_currentProject['id'] ?? '').toString();
 
     List<Map<String, dynamic>> allLogs = [];
     for (final userDoc in users) {
@@ -85,7 +85,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
       final userData = userDoc.data();
       final userFirstName = userData['firstName'] ?? '';
       final userSurname = userData['surname'] ?? '';
-      
+
       // Query for sessions with projectId matching the Firestore document ID
       final logsSnapshot = await FirebaseFirestore.instance
           .collection('companies')
@@ -95,16 +95,16 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
           .collection('all_logs')
           .where('projectId', isEqualTo: projectId)
           .get();
-      
+
       for (final logDoc in logsSnapshot.docs) {
-          final logData = logDoc.data();
-          allLogs.add({
-            ...logData,
-            'userFirstName': userFirstName,
-            'userSurname': userSurname,
-            'userId': userId,
-            'logId': logDoc.id,
-          });
+        final logData = logDoc.data();
+        allLogs.add({
+          ...logData,
+          'userFirstName': userFirstName,
+          'userSurname': userSurname,
+          'userId': userId,
+          'logId': logDoc.id,
+        });
       }
     }
     return allLogs;
@@ -130,7 +130,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
     final project = _currentProject;
-            final String projectRef = (project['projectRef'] ?? '').toString();
+    final String projectRef = (project['projectRef'] ?? '').toString();
     final String projectName = (project['name'] ?? '').toString();
 
     final address = project['address'];
@@ -141,31 +141,36 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
             address['post_code'],
             address['city'],
           ]
-              .where((e) => e != null && e.toString().isNotEmpty)
-              .map((e) => e.toString())
-              .join(' ')
+            .where((e) => e != null && e.toString().isNotEmpty)
+            .map((e) => e.toString())
+            .join(' ')
         : (address?.toString() ?? '');
 
     final clientId = project['client'] ?? '';
     final clientName = _clientInfo?['name'] ?? clientId;
     final contactPersonMap = _clientInfo?['contact_person'] ?? {};
-    final contactPerson = '${contactPersonMap['first_name'] ?? ''} ${contactPersonMap['surname'] ?? ''}'.trim();
+    final contactPerson =
+        '${contactPersonMap['first_name'] ?? ''} ${contactPersonMap['surname'] ?? ''}'
+            .trim();
     final phone = _clientInfo?['phone'] ?? '';
     final email = _clientInfo?['email'] ?? '';
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // --- Top section: Project details
           Padding(
-            padding: const EdgeInsets.only(left: 0, right: 0, top: 38, bottom: 10),
+            padding:
+                const EdgeInsets.only(left: 0, right: 0, top: 38, bottom: 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  projectName.isNotEmpty ? projectName : AppLocalizations.of(context)!.noProjectsFound,
+                  projectName.isNotEmpty
+                      ? projectName
+                      : AppLocalizations.of(context)!.noProjectsFound,
                   style: TextStyle(
                     fontSize: 18, // Reduced from 22 to 18
                     fontWeight: FontWeight.bold,
@@ -177,7 +182,8 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colors.primaryBlue,
                     foregroundColor: colors.whiteTextOnBlue,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
                   ),
                   onPressed: _showEditDialog,
                   child: Text(AppLocalizations.of(context)!.edit),
@@ -189,7 +195,9 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                     children: [
                       Text('${AppLocalizations.of(context)!.projectRef}: ',
                           style: TextStyle(fontWeight: FontWeight.bold)),
-                      Expanded(child: Text(projectRef, maxLines: null, softWrap: true)),
+                      Expanded(
+                          child:
+                              Text(projectRef, maxLines: null, softWrap: true)),
                     ],
                   ),
                 if (addressString.isNotEmpty)
@@ -198,41 +206,58 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                     children: [
                       Text('${AppLocalizations.of(context)!.address}: ',
                           style: TextStyle(fontWeight: FontWeight.bold)),
-                      Expanded(child: Text(addressString, maxLines: null, softWrap: true)),
+                      Expanded(
+                          child: Text(addressString,
+                              maxLines: null, softWrap: true)),
                     ],
                   ),
                 if (clientName.toString().isNotEmpty) ...[
                   const SizedBox(height: 10),
-                  Text(AppLocalizations.of(context)!.clientDetails, style: TextStyle(fontWeight: FontWeight.bold, color: colors.primaryBlue)),
+                  Text(AppLocalizations.of(context)!.clientDetails,
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: colors.primaryBlue)),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('${AppLocalizations.of(context)!.clientName}: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                      Expanded(child: Text(clientName.toString(), maxLines: null, softWrap: true)),
+                      Text('${AppLocalizations.of(context)!.clientName}: ',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      Expanded(
+                          child: Text(clientName.toString(),
+                              maxLines: null, softWrap: true)),
                     ],
                   ),
                   if (contactPerson.isNotEmpty)
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('${AppLocalizations.of(context)!.contactPerson}: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                        Expanded(child: Text(contactPerson, maxLines: null, softWrap: true)),
+                        Text('${AppLocalizations.of(context)!.contactPerson}: ',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Expanded(
+                            child: Text(contactPerson,
+                                maxLines: null, softWrap: true)),
                       ],
                     ),
                   if (phone.toString().isNotEmpty)
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('${AppLocalizations.of(context)!.phone}: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                        Expanded(child: Text(phone.toString(), maxLines: null, softWrap: true)),
+                        Text('${AppLocalizations.of(context)!.phone}: ',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Expanded(
+                            child: Text(phone.toString(),
+                                maxLines: null, softWrap: true)),
                       ],
                     ),
                   if (email.toString().isNotEmpty)
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('${AppLocalizations.of(context)!.email}: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                        Expanded(child: Text(email.toString(), maxLines: null, softWrap: true)),
+                        Text('${AppLocalizations.of(context)!.email}: ',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Expanded(
+                            child: Text(email.toString(),
+                                maxLines: null, softWrap: true)),
                       ],
                     ),
                 ]
@@ -252,17 +277,22 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                   }
                   final logs = snapshot.data ?? [];
                   if (logs.isEmpty) {
-                    return Center(child: Text(AppLocalizations.of(context)!.noTimeLogsFound));
+                    return Center(
+                        child: Text(
+                            AppLocalizations.of(context)!.noTimeLogsFound));
                   }
 
                   // ---- DATE FILTER logic ----
                   final filteredLogs = logs.where((log) {
                     DateTime? date;
                     try {
-                      date = DateFormat('yyyy-MM-dd').parse(log['sessionDate'] ?? '');
+                      date = DateFormat('yyyy-MM-dd')
+                          .parse(log['sessionDate'] ?? '');
                     } catch (_) {}
-                    final afterStart = _filterStart == null || (date != null && !date.isBefore(_filterStart!));
-                    final beforeEnd  = _filterEnd == null || (date != null && !date.isAfter(_filterEnd!));
+                    final afterStart = _filterStart == null ||
+                        (date != null && !date.isBefore(_filterStart!));
+                    final beforeEnd = _filterEnd == null ||
+                        (date != null && !date.isAfter(_filterEnd!));
                     return afterStart && beforeEnd;
                   }).toList();
 
@@ -278,7 +308,8 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                       return sum + intVal;
                     },
                   );
-                  double totalExpenses = filteredLogs.fold<double>(0.0, (sum, log) {
+                  double totalExpenses =
+                      filteredLogs.fold<double>(0.0, (sum, log) {
                     final expenses = log['expenses'];
                     if (expenses is Map) {
                       for (var value in expenses.values) {
@@ -303,22 +334,24 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                             final theme = Theme.of(context);
                             final isDark = theme.brightness == Brightness.dark;
                             final dateFormat = DateFormat('yyyy-MM-dd');
-                            
+
                             // Pill decoration
                             final pillDecoration = BoxDecoration(
-                              color: isDark ? const Color(0xFF2A2A2A) : Colors.white,
-                              borderRadius: BorderRadius.circular(kFilterRadius),
+                              color: isDark
+                                  ? const Color(0xFF2A2A2A)
+                                  : Colors.white,
+                              borderRadius:
+                                  BorderRadius.circular(kFilterRadius),
                               border: Border.all(
                                 color: isDark ? Colors.white24 : Colors.black26,
                                 width: 1,
                               ),
                             );
-                            
-
 
                             // Start date picker
                             final startDatePicker = InkWell(
-                              borderRadius: BorderRadius.circular(kFilterRadius),
+                              borderRadius:
+                                  BorderRadius.circular(kFilterRadius),
                               onTap: () async {
                                 DateTime? picked = await showDatePicker(
                                   context: context,
@@ -326,21 +359,32 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                                   firstDate: DateTime(2023),
                                   lastDate: DateTime(2100),
                                 );
-                                if (picked != null) setState(() => _filterStart = picked);
+                                if (picked != null)
+                                  setState(() => _filterStart = picked);
                               },
                               child: Container(
                                 height: kFilterHeight,
-                                padding: const EdgeInsets.symmetric(horizontal: 18),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 18),
                                 decoration: pillDecoration,
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
+                                    Icon(Icons.date_range,
+                                        color: theme.colorScheme.primary,
+                                        size: 20),
                                     const SizedBox(width: 6),
                                     Text(
-                                      _filterStart == null ? AppLocalizations.of(context)!.start : dateFormat.format(_filterStart!),
+                                      _filterStart == null
+                                          ? AppLocalizations.of(context)!.start
+                                          : dateFormat.format(_filterStart!),
                                       style: TextStyle(
-                                        color: _filterStart == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
+                                        color: _filterStart == null
+                                            ? theme.colorScheme.primary
+                                            : (isDark
+                                                ? Colors.white.withOpacity(0.87)
+                                                : Colors.black
+                                                    .withOpacity(0.87)),
                                         fontWeight: FontWeight.w500,
                                         fontSize: kFilterFontSize,
                                       ),
@@ -352,7 +396,8 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
 
                             // End date picker
                             final endDatePicker = InkWell(
-                              borderRadius: BorderRadius.circular(kFilterRadius),
+                              borderRadius:
+                                  BorderRadius.circular(kFilterRadius),
                               onTap: () async {
                                 DateTime? picked = await showDatePicker(
                                   context: context,
@@ -360,21 +405,32 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                                   firstDate: DateTime(2023),
                                   lastDate: DateTime(2100),
                                 );
-                                if (picked != null) setState(() => _filterEnd = picked);
+                                if (picked != null)
+                                  setState(() => _filterEnd = picked);
                               },
                               child: Container(
                                 height: kFilterHeight,
-                                padding: const EdgeInsets.symmetric(horizontal: 18),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 18),
                                 decoration: pillDecoration,
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
+                                    Icon(Icons.date_range,
+                                        color: theme.colorScheme.primary,
+                                        size: 20),
                                     const SizedBox(width: 6),
                                     Text(
-                                      _filterEnd == null ? AppLocalizations.of(context)!.end : dateFormat.format(_filterEnd!),
+                                      _filterEnd == null
+                                          ? AppLocalizations.of(context)!.end
+                                          : dateFormat.format(_filterEnd!),
                                       style: TextStyle(
-                                        color: _filterEnd == null ? theme.colorScheme.primary : (isDark ? Colors.white.withOpacity(0.87) : Colors.black.withOpacity(0.87)),
+                                        color: _filterEnd == null
+                                            ? theme.colorScheme.primary
+                                            : (isDark
+                                                ? Colors.white.withOpacity(0.87)
+                                                : Colors.black
+                                                    .withOpacity(0.87)),
                                         fontWeight: FontWeight.w500,
                                         fontSize: kFilterFontSize,
                                       ),
@@ -388,21 +444,27 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                             final clearButton = Container(
                               height: kFilterHeight,
                               decoration: BoxDecoration(
-                                color: isDark 
-                                  ? theme.colorScheme.primary.withOpacity(0.2)
-                                  : theme.colorScheme.primary.withOpacity(0.1),
+                                color: isDark
+                                    ? theme.colorScheme.primary.withOpacity(0.2)
+                                    : theme.colorScheme.primary
+                                        .withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(10),
-                                boxShadow: isDark ? null : [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha:0.08),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
+                                boxShadow: isDark
+                                    ? null
+                                    : [
+                                        BoxShadow(
+                                          color: Colors.black
+                                              .withValues(alpha: 0.08),
+                                          blurRadius: 4,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
                               ),
                               child: IconButton(
-                                icon: Icon(Icons.refresh, color: theme.colorScheme.primary, size: 24),
-                                tooltip: AppLocalizations.of(context)!.clearFilters,
+                                icon: Icon(Icons.refresh,
+                                    color: theme.colorScheme.primary, size: 24),
+                                tooltip:
+                                    AppLocalizations.of(context)!.clearFilters,
                                 onPressed: () {
                                   setState(() {
                                     _filterStart = null;
@@ -414,7 +476,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
 
                             // Check if we need to wrap (when screen is too narrow)
                             final needsWrap = constraints.maxWidth < 600;
-                            
+
                             if (needsWrap) {
                               // Wrap layout for small screens
                               return Wrap(
@@ -423,7 +485,9 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                                 children: [
                                   startDatePicker,
                                   endDatePicker,
-                                  if (_filterStart != null || _filterEnd != null) clearButton,
+                                  if (_filterStart != null ||
+                                      _filterEnd != null)
+                                    clearButton,
                                 ],
                               );
                             } else {
@@ -434,7 +498,9 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                                   const SizedBox(width: kFilterSpacing),
                                   endDatePicker,
                                   const SizedBox(width: kFilterSpacing),
-                                  if (_filterStart != null || _filterEnd != null) clearButton,
+                                  if (_filterStart != null ||
+                                      _filterEnd != null)
+                                    clearButton,
                                 ],
                               );
                             }
@@ -455,7 +521,8 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                                   '${AppLocalizations.of(context)!.total}: ',
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                                Text('${_formatTimeFromMinutes(totalMinutes.toInt())} h'),
+                                Text(
+                                    '${_formatTimeFromMinutes(totalMinutes.toInt())} h'),
                               ],
                             ),
                             Row(
@@ -478,63 +545,83 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                           itemCount: filteredLogs.length,
                           itemBuilder: (context, idx) {
                             final log = filteredLogs[idx];
-                            final userName = '${log['userFirstName'] ?? ''} ${log['userSurname'] ?? ''}'.trim();
+                            final userName =
+                                '${log['userFirstName'] ?? ''} ${log['userSurname'] ?? ''}'
+                                    .trim();
                             final begin = log['begin'];
                             final end = log['end'];
                             String start = '';
                             String finish = '';
                             if (begin != null && begin is Timestamp) {
                               final dt = begin.toDate();
-                              start = '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+                              start =
+                                  '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
                             }
                             if (end != null && end is Timestamp) {
                               final dt = end.toDate();
-                              finish = '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+                              finish =
+                                  '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
                             }
                             final duration = log['duration_minutes'];
                             final note = log['note'] ?? '';
                             final expenses = log['expenses'];
                             String expenseStr = '';
                             if (expenses is Map) {
-                              expenseStr = expenses.entries.map((e) => '${e.key}: ${e.value}').join(', ');
+                              expenseStr = expenses.entries
+                                  .map((e) => '${e.key}: ${e.value}')
+                                  .join(', ');
                             }
 
-                            final sessionDateRaw = log['sessionDate']?.toString() ?? '';
+                            final sessionDateRaw =
+                                log['sessionDate']?.toString() ?? '';
                             // Format date: 2025-07-11 -> 11.07.2025 (Fri)
                             String formattedDate = sessionDateRaw;
                             try {
-                              final date = DateFormat('yyyy-MM-dd').parse(sessionDateRaw);
-                              formattedDate = DateFormat('dd.MM.yyyy (EEE)', 'en').format(date);
+                              final date = DateFormat('yyyy-MM-dd')
+                                  .parse(sessionDateRaw);
+                              formattedDate =
+                                  DateFormat('dd.MM.yyyy (EEE)', 'en')
+                                      .format(date);
                             } catch (_) {}
 
                             return Container(
-                              margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                              margin: const EdgeInsets.symmetric(
+                                  vertical: 10, horizontal: 4),
                               decoration: BoxDecoration(
-                                color: Theme.of(context).brightness == Brightness.dark 
-                                  ? colors.cardColorDark 
-                                  : Colors.white,
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? colors.cardColorDark
+                                    : Colors.white,
                                 borderRadius: BorderRadius.circular(10),
-                                border: Theme.of(context).brightness == Brightness.dark 
-                                  ? Border.all(color: const Color(0xFF404040), width: 1) 
-                                  : null,
-                                boxShadow: Theme.of(context).brightness == Brightness.light ? [
-                                  BoxShadow(
-                                    color: Colors.black12,
-                                    blurRadius: 6,
-                                    spreadRadius: 0,
-                                    offset: Offset(0, 3),
-                                  ),
-                                ] : null,
+                                border: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Border.all(
+                                        color: const Color(0xFF404040),
+                                        width: 1)
+                                    : null,
+                                boxShadow: Theme.of(context).brightness ==
+                                        Brightness.light
+                                    ? [
+                                        BoxShadow(
+                                          color: Colors.black12,
+                                          blurRadius: 6,
+                                          spreadRadius: 0,
+                                          offset: Offset(0, 3),
+                                        ),
+                                      ]
+                                    : null,
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 18.0),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 12.0, horizontal: 18.0),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     // Worker name with wrapping
                                     Text(
                                       '${AppLocalizations.of(context)!.worker}: $userName',
-                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
                                       maxLines: null,
                                       softWrap: true,
                                     ),
@@ -556,34 +643,52 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                                         Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Text('${AppLocalizations.of(context)!.start}: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                            Text(
+                                                '${AppLocalizations.of(context)!.start}: ',
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold)),
                                             Text(start),
                                           ],
                                         ),
                                         Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Text('${AppLocalizations.of(context)!.end}: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                            Text(
+                                                '${AppLocalizations.of(context)!.end}: ',
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold)),
                                             Text(finish),
                                           ],
                                         ),
                                         Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Text('${AppLocalizations.of(context)!.total}: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                            Text('${_formatTimeFromMinutes(duration ?? 0)} h'),
+                                            Text(
+                                                '${AppLocalizations.of(context)!.total}: ',
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                            Text(
+                                                '${_formatTimeFromMinutes(duration ?? 0)} h'),
                                           ],
                                         ),
                                       ],
                                     ),
                                     if (expenseStr.isNotEmpty)
                                       Padding(
-                                        padding: const EdgeInsets.only(top: 4.0),
+                                        padding:
+                                            const EdgeInsets.only(top: 4.0),
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            Text('${AppLocalizations.of(context)!.expenses}: ',
-                                                style: TextStyle(fontWeight: FontWeight.bold)),
+                                            Text(
+                                                '${AppLocalizations.of(context)!.expenses}: ',
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold)),
                                             const SizedBox(height: 2),
                                             Text(
                                               expenseStr,
@@ -595,12 +700,17 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                                       ),
                                     if (note.toString().isNotEmpty)
                                       Padding(
-                                        padding: const EdgeInsets.only(top: 2.0),
+                                        padding:
+                                            const EdgeInsets.only(top: 2.0),
                                         child: Row(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            Text('${AppLocalizations.of(context)!.note}: ',
-                                                style: TextStyle(fontWeight: FontWeight.bold)),
+                                            Text(
+                                                '${AppLocalizations.of(context)!.note}: ',
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold)),
                                             Expanded(
                                               child: Text(
                                                 note.toString(),
@@ -664,7 +774,8 @@ class _EditProjectDialogState extends State<EditProjectDialog> {
     super.initState();
     final p = widget.project;
     _nameCtrl = TextEditingController(text: p['name'] ?? '');
-            _projectIdCtrl = TextEditingController(text: p['projectRef'] ?? p['id'] ?? '');
+    _projectIdCtrl =
+        TextEditingController(text: p['projectRef'] ?? p['id'] ?? '');
     final addr = p['address'] as Map<String, dynamic>? ?? {};
     _streetCtrl = TextEditingController(text: addr['street'] ?? '');
     _numberCtrl = TextEditingController(text: addr['number'] ?? '');
@@ -682,7 +793,7 @@ class _EditProjectDialogState extends State<EditProjectDialog> {
         .collection('clients')
         .get();
     setState(() {
-      _clients = { for (var doc in snap.docs) doc.id: doc.data() };
+      _clients = {for (var doc in snap.docs) doc.id: doc.data()};
     });
   }
 
@@ -690,14 +801,14 @@ class _EditProjectDialogState extends State<EditProjectDialog> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
     return Dialog(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark 
-        ? colors.cardColorDark 
-        : Colors.white,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? colors.cardColorDark
+          : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: Theme.of(context).brightness == Brightness.dark 
-          ? BorderSide(color: const Color(0xFF404040), width: 1)
-          : BorderSide.none,
+        side: Theme.of(context).brightness == Brightness.dark
+            ? BorderSide(color: const Color(0xFF404040), width: 1)
+            : BorderSide.none,
       ),
       child: Container(
         padding: const EdgeInsets.all(24),
@@ -706,34 +817,61 @@ class _EditProjectDialogState extends State<EditProjectDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(AppLocalizations.of(context)!.editProject, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: colors.primaryBlue)),
+              Text(AppLocalizations.of(context)!.editProject,
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      color: colors.primaryBlue)),
               const SizedBox(height: 18),
               TextField(
                 controller: _nameCtrl,
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.projectName),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.projectName),
               ),
               TextField(
                 controller: _projectIdCtrl,
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.projectRef),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.projectRef),
               ),
               Row(
                 children: [
-                  Expanded(child: TextField(controller: _streetCtrl, decoration: InputDecoration(labelText: AppLocalizations.of(context)!.street))),
+                  Expanded(
+                      child: TextField(
+                          controller: _streetCtrl,
+                          decoration: InputDecoration(
+                              labelText:
+                                  AppLocalizations.of(context)!.street))),
                   const SizedBox(width: 8),
-                  Expanded(child: TextField(controller: _numberCtrl, decoration: InputDecoration(labelText: AppLocalizations.of(context)!.number))),
+                  Expanded(
+                      child: TextField(
+                          controller: _numberCtrl,
+                          decoration: InputDecoration(
+                              labelText:
+                                  AppLocalizations.of(context)!.number))),
                 ],
               ),
               Row(
                 children: [
-                  Expanded(child: TextField(controller: _postCodeCtrl, decoration: InputDecoration(labelText: AppLocalizations.of(context)!.postCode))),
+                  Expanded(
+                      child: TextField(
+                          controller: _postCodeCtrl,
+                          decoration: InputDecoration(
+                              labelText:
+                                  AppLocalizations.of(context)!.postCode))),
                   const SizedBox(width: 8),
-                  Expanded(child: TextField(controller: _cityCtrl, decoration: InputDecoration(labelText: AppLocalizations.of(context)!.city))),
+                  Expanded(
+                      child: TextField(
+                          controller: _cityCtrl,
+                          decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context)!.city))),
                 ],
               ),
               const SizedBox(height: 12),
               // --- Client picker ---
               DropdownButtonFormField<String>(
-                value: _selectedClientId?.isNotEmpty == true ? _selectedClientId : null,
+                value: _selectedClientId?.isNotEmpty == true
+                    ? _selectedClientId
+                    : null,
                 items: _clients.entries.map((e) {
                   final name = e.value['name'] ?? e.key;
                   return DropdownMenuItem(
@@ -741,7 +879,8 @@ class _EditProjectDialogState extends State<EditProjectDialog> {
                     child: Text(name.toString()),
                   );
                 }).toList(),
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.client),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.client),
                 onChanged: (val) => setState(() => _selectedClientId = val),
               ),
               if (_error.isNotEmpty) ...[
@@ -811,7 +950,10 @@ class _EditProjectDialogState extends State<EditProjectDialog> {
                             }
                           },
                     child: _saving
-                        ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                        ? SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2))
                         : Text('Save'),
                   ),
                 ],

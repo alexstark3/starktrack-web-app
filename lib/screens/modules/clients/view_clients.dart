@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../../theme/app_colors.dart';
-import '../../../../l10n/app_localizations.dart';
+import '../../../theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 import 'add_client_dialog.dart';
 
 class ViewClients extends StatefulWidget {
@@ -58,116 +58,134 @@ class _ViewClientsState extends State<ViewClients> {
     final country = client['country'] ?? '';
     final email = client['email'] ?? '';
     final phone = client['phone'] ?? '';
-    final person = '${contact['first_name'] ?? ''} ${contact['surname'] ?? ''}'.trim();
+    final person =
+        '${contact['first_name'] ?? ''} ${contact['surname'] ?? ''}'.trim();
 
     return SingleChildScrollView(
-      child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Client name
-        Text(
-          client['name'] ?? '',
-          style: TextStyle(
-            fontSize: 18, // Reduced from 22 to 18
-            fontWeight: FontWeight.bold,
-            color: colors.primaryBlue,
-          ),
-        ),
-        const SizedBox(height: 10),
-        // Edit button - left aligned under name
-        ElevatedButton.icon(
-          onPressed: () async {
-            final result = await showDialog<bool>(
-              context: context,
-              builder: (ctx) => EditClientDialog(
-                companyId: widget.companyId,
-                client: widget.client,
-              ),
-            );
-            if (result == true) {
-              widget.onEdit(); // Call the callback to refresh the parent
-            }
-          },
-          icon: const Icon(Icons.edit, size: 20),
-            label: Text(AppLocalizations.of(context)!.edit),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: colors.primaryBlue,
-            foregroundColor: colors.whiteTextOnBlue,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          ),
-        ),
-        const SizedBox(height: 14),
-        // Info fields - left aligned in column
-        Column(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-              if (address.isNotEmpty) _infoRow(AppLocalizations.of(context)!.address, address),
-              if (person.isNotEmpty) _infoRow(AppLocalizations.of(context)!.contactPerson, person),
-              if (email.isNotEmpty) _infoRow(AppLocalizations.of(context)!.email, email),
-              if (phone.isNotEmpty) _infoRow(AppLocalizations.of(context)!.phone, phone),
-              if ((client['city'] ?? '').isNotEmpty) _infoRow(AppLocalizations.of(context)!.city, client['city'] ?? ''),
-              if (country.isNotEmpty) _infoRow(AppLocalizations.of(context)!.country, country),
+            // Client name
+            Text(
+              client['name'] ?? '',
+              style: TextStyle(
+                fontSize: 18, // Reduced from 22 to 18
+                fontWeight: FontWeight.bold,
+                color: colors.primaryBlue,
+              ),
+            ),
+            const SizedBox(height: 10),
+            // Edit button - left aligned under name
+            ElevatedButton.icon(
+              onPressed: () async {
+                final result = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => EditClientDialog(
+                    companyId: widget.companyId,
+                    client: widget.client,
+                  ),
+                );
+                if (result == true) {
+                  widget.onEdit(); // Call the callback to refresh the parent
+                }
+              },
+              icon: const Icon(Icons.edit, size: 20),
+              label: Text(AppLocalizations.of(context)!.edit),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colors.primaryBlue,
+                foregroundColor: colors.whiteTextOnBlue,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
+            const SizedBox(height: 14),
+            // Info fields - left aligned in column
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (address.isNotEmpty)
+                  _infoRow(AppLocalizations.of(context)!.address, address),
+                if (person.isNotEmpty)
+                  _infoRow(AppLocalizations.of(context)!.contactPerson, person),
+                if (email.isNotEmpty)
+                  _infoRow(AppLocalizations.of(context)!.email, email),
+                if (phone.isNotEmpty)
+                  _infoRow(AppLocalizations.of(context)!.phone, phone),
+                if ((client['city'] ?? '').isNotEmpty)
+                  _infoRow(
+                      AppLocalizations.of(context)!.city, client['city'] ?? ''),
+                if (country.isNotEmpty)
+                  _infoRow(AppLocalizations.of(context)!.country, country),
+              ],
+            ),
+            const SizedBox(height: 24),
+            // Projects list for this client
+            Text(
+                '${AppLocalizations.of(context)!.projects} für diesen ${AppLocalizations.of(context)!.client.toLowerCase()}',
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 19,
+                    color: colors.primaryBlue)),
+            const SizedBox(height: 10),
+            FutureBuilder<List<Map<String, dynamic>>>(
+              future: _projectsFuture,
+              builder: (context, snap) {
+                if (snap.connectionState == ConnectionState.waiting) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                final projects = snap.data ?? [];
+                if (projects.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    child: Text(
+                        '${AppLocalizations.of(context)!.noProjectsFound} für diesen ${AppLocalizations.of(context)!.client.toLowerCase()}.'),
+                  );
+                }
+                return Column(
+                  children: [
+                    // Client totals summary
+                    _ClientTotalsCard(
+                      companyId: widget.companyId,
+                      projects: projects,
+                    ),
+                    const SizedBox(height: 16),
+                    // Individual project cards
+                    ...projects.map((project) => _ProjectCard(
+                          companyId: widget.companyId,
+                          project: project,
+                        )),
+                  ],
+                );
+              },
+            ),
           ],
         ),
-        const SizedBox(height: 24),
-        // Projects list for this client
-          Text('${AppLocalizations.of(context)!.projects} für diesen ${AppLocalizations.of(context)!.client.toLowerCase()}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19, color: colors.primaryBlue)),
-        const SizedBox(height: 10),
-        FutureBuilder<List<Map<String, dynamic>>>(
-          future: _projectsFuture,
-          builder: (context, snap) {
-            if (snap.connectionState == ConnectionState.waiting) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 20.0),
-                child: Center(child: CircularProgressIndicator()),
-              );
-            }
-            final projects = snap.data ?? [];
-            if (projects.isEmpty) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  child: Text('${AppLocalizations.of(context)!.noProjectsFound} für diesen ${AppLocalizations.of(context)!.client.toLowerCase()}.'),
-              );
-            }
-            return Column(
-              children: [
-                  // Client totals summary
-                  _ClientTotalsCard(
-                    companyId: widget.companyId,
-                    projects: projects,
-                  ),
-                  const SizedBox(height: 16),
-                  // Individual project cards
-                  ...projects.map((project) => _ProjectCard(
-                  companyId: widget.companyId,
-                    project: project,
-                )),
-              ],
-            );
-          },
-        ),
-      ],
       ),
     );
   }
 
   Widget _infoRow(String label, String value) => Padding(
-    padding: const EdgeInsets.only(bottom: 8.0),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
-        Expanded(
-          child: Text(
-            value,
-            maxLines: null,
-            softWrap: true,
-          ),
+        padding: const EdgeInsets.only(bottom: 8.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('$label: ',
+                style: const TextStyle(fontWeight: FontWeight.bold)),
+            Expanded(
+              child: Text(
+                value,
+                maxLines: null,
+                softWrap: true,
+              ),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
-
+      );
 }
 
 class _ProjectCard extends StatelessWidget {
@@ -220,15 +238,16 @@ class _ProjectCard extends StatelessWidget {
       project['address']?['post_code'] ?? '',
       project['address']?['city'] ?? ''
     ].where((e) => (e as String).isNotEmpty).join(' ');
-    
+
     return FutureBuilder<Map<String, dynamic>>(
       future: _totals(),
       builder: (context, snap) {
         double hours = snap.data?['hours'] ?? 0;
         double expenses = snap.data?['expenses'] ?? 0;
         final hoursText = hours > 0 ? hours.toStringAsFixed(2) : '-';
-        final expensesText = expenses > 0 ? expenses.toStringAsFixed(2) + ' CHF' : '-';
-        
+        final expensesText =
+            expenses > 0 ? expenses.toStringAsFixed(2) + ' CHF' : '-';
+
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           elevation: 2,
@@ -326,7 +345,7 @@ class _ProjectCard extends StatelessWidget {
 class _ClientTotalsCard extends StatelessWidget {
   final String companyId;
   final List<Map<String, dynamic>> projects;
-  
+
   const _ClientTotalsCard({
     Key? key,
     required this.companyId,
@@ -336,23 +355,23 @@ class _ClientTotalsCard extends StatelessWidget {
   Future<Map<String, dynamic>> _calculateTotals() async {
     double totalHours = 0;
     double totalExpenses = 0;
-    
+
     final usersSnap = await FirebaseFirestore.instance
         .collection('companies')
         .doc(companyId)
         .collection('users')
         .get();
-        
+
     for (final userDoc in usersSnap.docs) {
-              for (final project in projects) {
-          final logsSnap = await FirebaseFirestore.instance
-              .collection('companies')
-              .doc(companyId)
-              .collection('users')
-              .doc(userDoc.id)
-              .collection('all_logs')
-              .where('projectId', isEqualTo: project['id'])
-              .get();
+      for (final project in projects) {
+        final logsSnap = await FirebaseFirestore.instance
+            .collection('companies')
+            .doc(companyId)
+            .collection('users')
+            .doc(userDoc.id)
+            .collection('all_logs')
+            .where('projectId', isEqualTo: project['id'])
+            .get();
         for (final log in logsSnap.docs) {
           final data = log.data();
           totalHours += (data['duration_minutes'] ?? 0) / 60.0;
@@ -363,7 +382,7 @@ class _ClientTotalsCard extends StatelessWidget {
         }
       }
     }
-    
+
     return {
       'hours': totalHours,
       'expenses': totalExpenses,
@@ -374,7 +393,7 @@ class _ClientTotalsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
-    
+
     return FutureBuilder<Map<String, dynamic>>(
       future: _calculateTotals(),
       builder: (context, snap) {
@@ -391,12 +410,13 @@ class _ClientTotalsCard extends StatelessWidget {
             ),
           );
         }
-        
-        final totals = snap.data ?? {'hours': 0.0, 'expenses': 0.0, 'projectCount': 0};
+
+        final totals =
+            snap.data ?? {'hours': 0.0, 'expenses': 0.0, 'projectCount': 0};
         final hours = totals['hours'] as double;
         final expenses = totals['expenses'] as double;
         final projectCount = totals['projectCount'] as int;
-        
+
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           elevation: 2,
@@ -454,7 +474,7 @@ class _ClientTotalsCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Row(
-            children: [
+                  children: [
                     Icon(
                       Icons.attach_money,
                       size: 16,
@@ -468,7 +488,7 @@ class _ClientTotalsCard extends StatelessWidget {
                         color: colors.textColor.withOpacity(0.8),
                       ),
                     ),
-            ],
+                  ],
                 ),
               ],
             ),

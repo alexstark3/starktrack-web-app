@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import '../../../../theme/app_colors.dart';
-import '../../../../l10n/app_localizations.dart';
+import '../../../theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 import 'view_clients.dart';
 import 'add_client_dialog.dart';
 
@@ -39,88 +39,107 @@ class _ClientsTabState extends State<ClientsTab> {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 0),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Search bar + Add button
-          Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? colors.lightGray
-                        : Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Theme.of(context).brightness == Brightness.dark
-                        ? null
-                        : Border.all(color: Colors.black26, width: 1),
-                    boxShadow: Theme.of(context).brightness == Brightness.dark
-                        ? null
-                        : [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.08),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                  ),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: l10n.searchByClientNamePersonEmail,
-                      hintStyle: TextStyle(
+          // Search bar + Add button in a card
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? colors.cardColorDark
+                  : colors.backgroundLight,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: Theme.of(context).brightness == Brightness.dark
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? colors.lightGray
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Theme.of(context).brightness == Brightness.dark
+                          ? null
+                          : Border.all(color: Colors.black26, width: 1),
+                      boxShadow: Theme.of(context).brightness == Brightness.dark
+                          ? null
+                          : [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                    ),
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: l10n.searchByClientNamePersonEmail,
+                        hintStyle: TextStyle(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? const Color(0xFFB3B3B3)
+                              : colors.textColor,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? const Color(0xFFB3B3B3)
+                              : colors.darkGray,
+                        ),
+                        isDense: true,
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 12),
+                      ),
+                      style: TextStyle(
                         color: Theme.of(context).brightness == Brightness.dark
-                            ? const Color(0xFFB3B3B3)
+                            ? const Color(0xFFCCCCCC)
                             : colors.textColor,
                       ),
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? const Color(0xFFB3B3B3)
-                            : colors.darkGray,
-                      ),
-                      isDense: true,
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 12),
+                      onChanged: (val) =>
+                          setState(() => _search = val.trim().toLowerCase()),
                     ),
-                    style: TextStyle(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFFCCCCCC)
-                          : colors.textColor,
-                    ),
-                    onChanged: (val) =>
-                        setState(() => _search = val.trim().toLowerCase()),
                   ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.add, size: 20),
-                label: Text(l10n.addNew),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colors.primaryBlue,
-                  foregroundColor: colors.whiteTextOnBlue,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
+                const SizedBox(width: 16),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.add, size: 20),
+                  label: Text(l10n.addNew),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colors.primaryBlue,
+                    foregroundColor: colors.whiteTextOnBlue,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 18, vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                  ),
+                  onPressed: () async {
+                    final result = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) =>
+                          AddClientDialog(companyId: widget.companyId),
+                    );
+                    if (result == true) {
+                      // Refresh the clients list
+                      setState(() {});
+                    }
+                  },
                 ),
-                onPressed: () async {
-                  final result = await showDialog<bool>(
-                    context: context,
-                    builder: (ctx) =>
-                        AddClientDialog(companyId: widget.companyId),
-                  );
-                  if (result == true) {
-                    // Refresh the clients list
-                    setState(() {});
-                  }
-                },
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(height: 20),
           Expanded(

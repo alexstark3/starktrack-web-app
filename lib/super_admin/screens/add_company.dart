@@ -63,6 +63,11 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
 
       print('🔍 DEBUG: Initializing existing company data: ${company['name']}');
 
+      // Set company ID for existing company
+      _tempCompanyId = company['id'] ?? company['secureId'];
+      print(
+          '🔍 DEBUG: Set _tempCompanyId for existing company: $_tempCompanyId');
+
       // Set company name
       _nameController.text = company['name'] ?? '';
 
@@ -93,6 +98,9 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
           _selectedModules = modulesData.keys.cast<String>().toList();
         }
       }
+
+      // Load existing admin information
+      _loadExistingAdminInfo(company['id']);
     }
   }
 
@@ -103,6 +111,74 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
       setState(() {
         _addressData = newAddressData;
       });
+    }
+  }
+
+  void _showEditAdminDialog() async {
+    if (_tempCompanyId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Company ID not found'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Find the existing admin user
+    try {
+      final usersQuery = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(_tempCompanyId)
+          .collection('users')
+          .where('roles', arrayContains: 'company_admin')
+          .limit(1)
+          .get();
+
+      if (usersQuery.docs.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No company admin found to edit'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      final adminDoc = usersQuery.docs.first;
+
+      showDialog(
+        context: context,
+        builder: (context) => AddUserDialog(
+          companyId: _tempCompanyId!,
+          teamLeaders: [], // No team leaders for super admin context
+          currentUserRoles: [
+            'super_admin'
+          ], // Super admin can edit company admins
+          editUser: adminDoc, // Pass the existing admin document for editing
+          onUserAdded: () async {
+            // Reload the admin information after editing
+            await _loadExistingAdminInfo(_tempCompanyId!);
+
+            Navigator.of(context).pop();
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Company admin updated successfully!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          },
+        ),
+      );
+    } catch (e) {
+      print('Error finding admin to edit: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error finding admin to edit: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -289,7 +365,16 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
                       ),
                     InkWell(
                       onTap: _tempCompanyId != null
-                          ? _showCreateAdminDialog
+                          ? () {
+                              if (_selectedAdminName != null &&
+                                  _selectedAdminName!.isNotEmpty) {
+                                // Edit existing admin
+                                _showEditAdminDialog();
+                              } else {
+                                // Create new admin
+                                _showCreateAdminDialog();
+                              }
+                            }
                           : null,
                       child: Container(
                         padding: const EdgeInsets.all(12),
@@ -314,7 +399,9 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
                                 style: TextStyle(
                                   color: _selectedAdminName != null
                                       ? colors.textColor
-                                      : colors.textColor.withOpacity(0.7),
+                                      : (_tempCompanyId != null
+                                          ? colors.primaryBlue
+                                          : colors.textColor.withOpacity(0.7)),
                                 ),
                               ),
                             ),
@@ -528,7 +615,34 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
     }
   }
 
-  void _showCreateAdminDialog() {
+  Future<void> _loadExistingAdminInfo(String companyId) async {
+    try {
+      final usersQuery = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(companyId)
+          .collection('users')
+          .where('roles', arrayContains: 'company_admin')
+          .limit(1)
+          .get();
+
+      if (usersQuery.docs.isNotEmpty) {
+        final adminData = usersQuery.docs.first.data();
+        final firstName = adminData['firstName'] ?? '';
+        final surname = adminData['surname'] ?? '';
+        final email = adminData['email'] ?? '';
+
+        setState(() {
+          _selectedAdminName = firstName.isNotEmpty && surname.isNotEmpty
+              ? '$firstName $surname\nEmail: $email'
+              : email;
+        });
+      }
+    } catch (e) {
+      print('Error loading existing admin info: $e');
+    }
+  }
+
+  void _showCreateAdminDialog() async {
     if (_tempCompanyId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -537,6 +651,29 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
         ),
       );
       return;
+    }
+
+    // Check if company already has an admin
+    try {
+      final usersQuery = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(_tempCompanyId)
+          .collection('users')
+          .where('roles', arrayContains: 'company_admin')
+          .limit(1)
+          .get();
+
+      if (usersQuery.docs.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Company already has an admin'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return;
+      }
+    } catch (e) {
+      print('Error checking existing admin: $e');
     }
 
     showDialog(
@@ -549,20 +686,31 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
         ], // Super admin can create company admins
         preSelectedRoles: ['company_admin'],
         onUserAdded: () async {
-          // Update company user count and add admin email
-          await FirebaseFirestore.instance
-              .collection('companies')
-              .doc(_tempCompanyId)
-              .update({
-            'userCount': 1,
-            'adminEmail':
-                'admin@company.com', // This should be the actual email
-          });
+          // Get the created admin information and update the display
+          try {
+            final usersQuery = await FirebaseFirestore.instance
+                .collection('companies')
+                .doc(_tempCompanyId)
+                .collection('users')
+                .where('roles', arrayContains: 'company_admin')
+                .limit(1)
+                .get();
 
-          // Update the admin name in the field
-          setState(() {
-            _selectedAdminName = 'Admin Created';
-          });
+            if (usersQuery.docs.isNotEmpty) {
+              final adminData = usersQuery.docs.first.data();
+              final firstName = adminData['firstName'] ?? '';
+              final surname = adminData['surname'] ?? '';
+              final email = adminData['email'] ?? '';
+
+              setState(() {
+                _selectedAdminName = firstName.isNotEmpty && surname.isNotEmpty
+                    ? '$firstName $surname\nEmail: $email'
+                    : email;
+              });
+            }
+          } catch (e) {
+            print('Error getting admin info: $e');
+          }
 
           Navigator.of(context).pop();
 

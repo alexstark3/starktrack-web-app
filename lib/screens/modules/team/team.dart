@@ -3,8 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'members/members.dart';
-import 'projects/projects.dart';
-import 'clients/clients.dart';
 
 class TeamModuleTabScreen extends StatefulWidget {
   final String companyId;
@@ -23,8 +21,6 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
   int _selectedIndex = 0;
 
   DocumentSnapshot? _selectedMemberDoc;
-  Map<String, dynamic>? _selectedProject;
-  Map<String, dynamic>? _selectedClient; // <-- Add client selection
 
   @override
   Widget build(BuildContext context) {
@@ -59,36 +55,6 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                         setState(() {
                           _selectedIndex = 0;
                           _selectedMemberDoc = null;
-                        });
-                      },
-                    ),
-                    // Projects tab
-                    _TeamTab(
-                      icon: Icons.folder_copy_rounded,
-                      title: l10n.projects,
-                      isSelected: _selectedIndex == 1,
-                      colors: colors,
-                      selectedProject: _selectedProject,
-                      showOnlyIcon: showOnlyIcons,
-                      onTap: () {
-                        setState(() {
-                          _selectedIndex = 1;
-                          _selectedProject = null;
-                        });
-                      },
-                    ),
-                    // Clients tab
-                    _TeamTab(
-                      icon: Icons.people_alt_rounded,
-                      title: l10n.clients,
-                      isSelected: _selectedIndex == 2,
-                      colors: colors,
-                      selectedClient: _selectedClient,
-                      showOnlyIcon: showOnlyIcons,
-                      onTap: () {
-                        setState(() {
-                          _selectedIndex = 2;
-                          _selectedClient = null;
                         });
                       },
                     ),
@@ -147,34 +113,6 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
           });
         },
       );
-    } else if (_selectedIndex == 1) {
-      return ProjectsTab(
-        companyId: widget.companyId,
-        selectedProject: _selectedProject,
-        onSelectProject: (project) {
-          setState(() {
-            _selectedProject = project;
-          });
-        },
-      );
-    } else if (_selectedIndex == 2) {
-      // --- Clients logic with tab navigation and detail view ---
-      return ClientsTab(
-        companyId: widget.companyId,
-        selectedClient: _selectedClient,
-        onSelectClient: (Map<String, dynamic>? clientData) {
-          // <-- now nullable!
-          setState(() {
-            if (clientData == null ||
-                clientData['id'] == null ||
-                clientData.isEmpty) {
-              _selectedClient = null;
-            } else {
-              _selectedClient = clientData;
-            }
-          });
-        },
-      );
     }
     return const SizedBox.shrink();
   }
@@ -188,8 +126,6 @@ class _TeamTab extends StatefulWidget {
   final AppColors colors;
   final VoidCallback onTap;
   final DocumentSnapshot? selectedMemberDoc;
-  final Map<String, dynamic>? selectedProject;
-  final Map<String, dynamic>? selectedClient;
   final bool showOnlyIcon;
   const _TeamTab({
     Key? key,
@@ -199,8 +135,6 @@ class _TeamTab extends StatefulWidget {
     required this.colors,
     required this.onTap,
     this.selectedMemberDoc,
-    this.selectedProject,
-    this.selectedClient,
     this.showOnlyIcon = false,
   }) : super(key: key);
 
@@ -216,9 +150,7 @@ class _TeamTabState extends State<_TeamTab> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Determine if tab has selected content
-    final hasSelectedContent = widget.selectedMemberDoc != null ||
-        widget.selectedProject != null ||
-        widget.selectedClient != null;
+    final hasSelectedContent = widget.selectedMemberDoc != null;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),

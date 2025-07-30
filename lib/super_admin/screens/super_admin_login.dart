@@ -92,6 +92,7 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
       print('📧 Email: ${_emailController.text.trim()}');
       print('🔑 Password length: ${_passwordController.text.length}');
 
+      // Try to sign in without reCAPTCHA
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text,

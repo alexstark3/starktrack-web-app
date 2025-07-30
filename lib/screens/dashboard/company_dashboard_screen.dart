@@ -5,6 +5,8 @@ import '../modules/time_tracker/time_tracker_screen.dart';
 import '../modules/history/history.dart';
 import '../modules/admin/admin_panel.dart';
 import 'package:starktrack/screens/modules/team/team.dart'; // Team Module
+import 'package:starktrack/screens/modules/projects/projects.dart'; // Projects Module
+import 'package:starktrack/screens/modules/clients/clients.dart'; // Clients Module
 import '../settings_screen.dart';
 import 'package:starktrack/widgets/company/company_side_menu.dart';
 import '../../widgets/company/company_top_bar.dart';
@@ -39,6 +41,8 @@ class CompanyDashboardScreen extends StatefulWidget {
 
 class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
   late String _selected;
+  Map<String, dynamic>? _selectedProject;
+  Map<String, dynamic>? _selectedClient;
 
   @override
   void initState() {
@@ -95,6 +99,28 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
               companyId: widget.companyId,
               userId: widget.userId,
             ),
+          if (tabLabels.contains(l10n.projects))
+            ProjectsTab(
+              key: const PageStorageKey('projects'),
+              companyId: widget.companyId,
+              selectedProject: _selectedProject,
+              onSelectProject: (project) {
+                setState(() {
+                  _selectedProject = project;
+                });
+              },
+            ),
+          if (tabLabels.contains(l10n.clients))
+            ClientsTab(
+              key: const PageStorageKey('clients'),
+              companyId: widget.companyId,
+              selectedClient: _selectedClient,
+              onSelectClient: (client) {
+                setState(() {
+                  _selectedClient = client;
+                });
+              },
+            ),
           if (tabLabels.contains(l10n.admin))
             AdminPanel(
               key: const PageStorageKey('admin'),
@@ -129,7 +155,18 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
                         label: s.label,
                         icon: s.icon,
                         selected: _selected == s.label,
-                        onTap: () => setState(() => _selected = s.label),
+                        onTap: () => setState(() {
+                          _selected = s.label;
+                          // Clear selected project/client when clicking on their respective tabs
+                          if (s.label == l10n.projects) {
+                            _selectedProject =
+                                null; // Clear when clicking Projects tab
+                          }
+                          if (s.label == l10n.clients) {
+                            _selectedClient =
+                                null; // Clear when clicking Clients tab
+                          }
+                        }),
                       ))
                   .toList(),
               compact: compact,
@@ -171,6 +208,18 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
         widget.roles.contains('admin') ||
         widget.roles.contains('team_leader')) {
       l.add(_ScreenCfg(l10n.team, Icons.group));
+    }
+    // PROJECTS MODULE: Only for roles company_admin, admin, team_leader
+    if (widget.roles.contains('company_admin') ||
+        widget.roles.contains('admin') ||
+        widget.roles.contains('team_leader')) {
+      l.add(_ScreenCfg(l10n.projects, Icons.folder));
+    }
+    // CLIENTS MODULE: Only for roles company_admin, admin, team_leader
+    if (widget.roles.contains('company_admin') ||
+        widget.roles.contains('admin') ||
+        widget.roles.contains('team_leader')) {
+      l.add(_ScreenCfg(l10n.clients, Icons.business));
     }
     if (widget.roles.contains('admin') ||
         widget.roles.contains('company_admin')) {

@@ -54,18 +54,6 @@ fi
 
 echo "✅ Super admin build completed successfully!"
 
-# Build main web app (if needed)
-echo "🏗️  Building main web app..."
-flutter build web --release --output-dir build/web
-
-# Check if build was successful
-if [ $? -ne 0 ]; then
-    echo "❌ Main build failed!"
-    exit 1
-fi
-
-echo "✅ Main build completed successfully!"
-
 # Commit changes and push to GitHub
 echo "📝 Committing changes..."
 git add .
@@ -84,15 +72,14 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Deploy to Firebase Hosting
-echo "🚀 Deploying to Firebase Hosting..."
-firebase deploy --only hosting
+# Deploy to Firebase Hosting (admin only)
+echo "🚀 Deploying Super Admin to Firebase Hosting..."
+firebase deploy --only hosting:admin
 
 if [ $? -eq 0 ]; then
-    echo "🎉 Deployment completed successfully!"
+    echo "🎉 Super Admin Deployment completed successfully!"
     echo ""
-    echo "📋 Domain Setup:"
-    echo "Main App:     https://starktrack.ch"
+    echo "📋 Super Admin Domain:"
     echo "Super Admin:  https://admin-starktracklog.web.app (temporary)"
     echo "Super Admin:  https://admin.starktrack.ch (once DNS propagates)"
     echo ""
@@ -104,7 +91,6 @@ if [ $? -eq 0 ]; then
     echo ""
     echo "🔒 Security Features:"
     echo "- Only super admin users can access admin interface"
-    echo "- Company users will be redirected to main app"
     echo "- Complete separation between admin and company data"
 else
     echo "❌ Deployment failed!"

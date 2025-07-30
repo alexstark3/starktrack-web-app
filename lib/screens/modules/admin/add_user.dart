@@ -203,7 +203,15 @@ class _AddUserDialogState extends State<AddUserDialog> {
           throw Exception('Password must be at least 6 characters long');
         }
 
-        // Check user limit before creating new user
+        // Save current user (super admin) credentials before creating new user
+        final currentUser = FirebaseAuth.instance.currentUser;
+        String? currentUserEmail;
+
+        if (currentUser != null) {
+          currentUserEmail = currentUser.email;
+        }
+
+        // Check user limit before creating new user (while super admin is still logged in)
         final canAddUser =
             await CompanyModuleService.canAddUser(widget.companyId);
         if (!canAddUser) {
@@ -222,13 +230,33 @@ class _AddUserDialogState extends State<AddUserDialog> {
           password: _passwordController.text,
         );
 
-        // Add user data to Firestore
+        // Sign out the newly created user immediately
+        await FirebaseAuth.instance.signOut();
+
+        // Re-authenticate the super admin
+        if (currentUserEmail != null) {
+          final success = await _showAdminPasswordDialog(currentUserEmail);
+          if (!success) {
+            throw Exception('Failed to re-authenticate as super admin');
+          }
+        }
+
+        // Now add user data to Firestore (with super admin authenticated)
         await FirebaseFirestore.instance
             .collection('companies')
             .doc(widget.companyId)
             .collection('users')
             .doc(userCredential.user!.uid)
             .set(userData);
+
+        // Create userCompany entry
+        await FirebaseFirestore.instance
+            .collection('userCompany')
+            .doc(userCredential.user!.uid)
+            .set({
+          'email': _emailController.text.trim(),
+          'companyId': widget.companyId,
+        });
 
         // Increment company user count
         await CompanyModuleService.incrementUserCount(widget.companyId);
@@ -904,6 +932,107 @@ class _AddUserDialogState extends State<AddUserDialog> {
         'userLimit': 10,
       };
     }
+  }
+
+  Future<bool> _showAdminPasswordDialog(String adminEmail) async {
+    final passwordController = TextEditingController();
+    bool isLoading = false;
+    String errorMessage = '';
+
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => StatefulBuilder(
+            builder: (context, setState) => AlertDialog(
+              title: const Text('Admin Authentication'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Please enter your admin password to continue:',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Admin Password',
+                      border: OutlineInputBorder(),
+                    ),
+                    onSubmitted: (_) async {
+                      if (passwordController.text.isNotEmpty) {
+                        setState(() => isLoading = true);
+                        try {
+                          // Sign in as admin
+                          await FirebaseAuth.instance
+                              .signInWithEmailAndPassword(
+                            email: adminEmail,
+                            password: passwordController.text,
+                          );
+
+                          Navigator.of(context).pop(true);
+                        } catch (e) {
+                          setState(() {
+                            errorMessage =
+                                'Invalid password. Please try again.';
+                            isLoading = false;
+                          });
+                        }
+                      }
+                    },
+                  ),
+                  if (errorMessage.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        errorMessage,
+                        style: const TextStyle(color: Colors.red, fontSize: 12),
+                      ),
+                    ),
+                ],
+              ),
+              actions: [
+                if (!isLoading) ...[
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('Cancel'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (passwordController.text.isNotEmpty) {
+                        setState(() => isLoading = true);
+                        try {
+                          // Sign in as admin
+                          await FirebaseAuth.instance
+                              .signInWithEmailAndPassword(
+                            email: adminEmail,
+                            password: passwordController.text,
+                          );
+
+                          Navigator.of(context).pop(true);
+                        } catch (e) {
+                          setState(() {
+                            errorMessage =
+                                'Invalid password. Please try again.';
+                            isLoading = false;
+                          });
+                        }
+                      }
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+                if (isLoading)
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: CircularProgressIndicator(),
+                  ),
+              ],
+            ),
+          ),
+        ) ??
+        false;
   }
 
   @override
