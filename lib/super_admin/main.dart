@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'security/super_admin_auth_service.dart';
 import 'screens/super_admin_dashboard.dart';
 import 'screens/super_admin_login.dart';
@@ -14,17 +15,24 @@ import '../l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   try {
+    print('🚀 Initializing Firebase for Super Admin...');
+    print('🌐 Platform: ${defaultTargetPlatform}');
+    print('🌐 Is Web: ${kIsWeb}');
+
     // Initialize Firebase for admin app
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+
+    print('✅ Firebase initialized successfully');
+    print('🔧 Firebase Auth instance: ${FirebaseAuth.instance}');
   } catch (e) {
-    print('Firebase initialization error: $e');
+    print('❌ Firebase initialization error: $e');
     // Continue anyway - Firebase might already be initialized
   }
-  
+
   runApp(const SuperAdminWebApp());
 }
 
@@ -47,7 +55,7 @@ class SuperAdminWebApp extends StatelessWidget {
           AppColors.dark, // Add your AppColors extension here
         ],
       ),
-      
+
       // Localization support
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -59,7 +67,7 @@ class SuperAdminWebApp extends StatelessWidget {
         Locale('en'), // English
         Locale('de'), // German
       ],
-      
+
       home: const SuperAdminAuthGate(),
       debugShowCheckedModeBanner: false,
     );
@@ -266,4 +274,4 @@ class SuperAdminAuthGate extends StatelessWidget {
       },
     );
   }
-} 
+}

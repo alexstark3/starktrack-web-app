@@ -84,6 +84,8 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
     try {
       print('🔐 Starting login process...');
       print('📧 Email: ${_emailController.text.trim()}');
+      print('🌐 Current domain: ${Uri.base.host}');
+      print('🔧 Firebase Auth instance: ${FirebaseAuth.instance}');
 
       // Sign in with Firebase Auth
       await FirebaseAuth.instance.signInWithEmailAndPassword(
