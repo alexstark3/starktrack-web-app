@@ -88,6 +88,10 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
       print('🔧 Firebase Auth instance: ${FirebaseAuth.instance}');
 
       // Sign in with Firebase Auth
+      print('🔐 Attempting Firebase Auth sign in...');
+      print('📧 Email: ${_emailController.text.trim()}');
+      print('🔑 Password length: ${_passwordController.text.length}');
+
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text,
