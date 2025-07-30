@@ -19,21 +19,7 @@
   <title>starktrack</title>
   <link rel="manifest" href="manifest.json">
 
-  <!-- ✅ ADD THIS FIREBASE CONFIG SCRIPT -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyA-Ny4FsFciXKC-jh7_SdexQi36_bewNEM",
-      authDomain: "starktracklog.firebaseapp.com",
-      projectId: "starktracklog",
-      storageBucket: "starktracklog.firebasestorage.app",
-      messagingSenderId: "831761597377",
-      appId: "1:831761597377:web:86fdc3b4268b4e3944e540"
-    };
-
-    initializeApp(firebaseConfig);
-  </script>
+  <!-- Firebase is initialized by Flutter, no need for JavaScript initialization -->
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
