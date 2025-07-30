@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 import '../security/super_admin_auth_service.dart';
+import '../services/admin_version_service.dart';
 import '../../theme/app_colors.dart';
 import 'super_admin_dashboard.dart';
 import 'package:web/web.dart' as web;
@@ -63,13 +63,16 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
 
   Future<void> _loadVersion() async {
     try {
-      final packageInfo = await PackageInfo.fromPlatform();
+      // Use the admin version service
+      final adminVersion = await AdminVersionService.getAdminVersion();
       setState(() {
-        // Display clean version without + symbol
-        _version = '${packageInfo.version}.${packageInfo.buildNumber}';
+        _version = adminVersion;
       });
     } catch (e) {
-      print('Error loading version: $e');
+      print('Error loading admin version: $e');
+      setState(() {
+        _version = '1.1.1.0'; // Fallback version
+      });
     }
   }
 

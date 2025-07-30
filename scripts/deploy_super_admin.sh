@@ -13,10 +13,10 @@ if [ -n "$(git status --porcelain)" ]; then
     echo "   The script will commit all changes with the version update"
 fi
 
-# Get current version (without build number)
-VERSION=$(grep 'version:' pubspec.yaml | cut -d' ' -f2 | cut -d'+' -f1)
+# Get current version from pubspec.yaml (for reference only)
+MAIN_VERSION=$(grep 'version:' pubspec.yaml | cut -d' ' -f2 | cut -d'+' -f1)
 
-if [ -z "$VERSION" ]; then
+if [ -z "$MAIN_VERSION" ]; then
     echo "❌ Error: Could not find version in pubspec.yaml"
     exit 1
 fi
@@ -25,17 +25,11 @@ fi
 COMMIT_COUNT=$(git rev-list --count HEAD)
 BUILD_NUMBER=$COMMIT_COUNT
 
-# Update pubspec.yaml with new build number
-echo "📦 Updating version in pubspec.yaml..."
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    # macOS
-    sed -i '' "s/version: .*/version: $VERSION+$BUILD_NUMBER/" pubspec.yaml
-else
-    # Linux/Windows (Git Bash)
-    sed -i "s/version: .*/version: $VERSION+$BUILD_NUMBER/" pubspec.yaml
-fi
+# Create admin version (separate from main app version)
+ADMIN_VERSION="${MAIN_VERSION}.${BUILD_NUMBER}"
 
-echo "📦 Updated version to: $VERSION+$BUILD_NUMBER"
+echo "📦 Admin version will be: $ADMIN_VERSION"
+echo "📦 Main app version remains: $MAIN_VERSION+$BUILD_NUMBER"
 echo "   (Commit count: $COMMIT_COUNT)"
 
 # Get Flutter dependencies
@@ -54,13 +48,24 @@ fi
 
 echo "✅ Super admin build completed successfully!"
 
+# Create a version file for the admin app
+echo "📝 Creating admin version file..."
+mkdir -p assets
+cat > assets/admin_version.txt << EOF
+Stark Track Super Admin
+Version: $ADMIN_VERSION
+Build: $BUILD_NUMBER
+Deployed: $(date)
+EOF
+
 # Commit changes and push to GitHub
 echo "📝 Committing changes..."
 git add .
-git commit -m "🚀 Update version to $VERSION+$BUILD_NUMBER
+git commit -m "🚀 Update Super Admin version to $ADMIN_VERSION
 
-- Updated build number to $BUILD_NUMBER
-- Built super admin and main apps
+- Super Admin version: $ADMIN_VERSION
+- Main app version: $MAIN_VERSION+$BUILD_NUMBER
+- Built super admin app
 - Ready for deployment"
 
 echo "📤 Pushing to GitHub..."
@@ -83,7 +88,9 @@ if [ $? -eq 0 ]; then
     echo "Super Admin:  https://admin-starktracklog.web.app (temporary)"
     echo "Super Admin:  https://admin.starktrack.ch (once DNS propagates)"
     echo ""
-    echo "📦 Version: $VERSION+$BUILD_NUMBER"
+    echo "📦 Versions:"
+    echo "Super Admin: $ADMIN_VERSION"
+    echo "Main App: $MAIN_VERSION+$BUILD_NUMBER"
     echo ""
     echo "🔧 Next Steps:"
     echo "1. Test super admin access at: https://admin-starktracklog.web.app"
