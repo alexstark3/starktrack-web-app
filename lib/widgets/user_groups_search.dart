@@ -47,6 +47,7 @@ class _UserGroupSelectionDialogState extends State<UserGroupSelectionDialog> {
   }
 
   Future<void> _loadUsersAndGroups() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       // Load users
       final usersSnapshot = await FirebaseFirestore.instance
@@ -59,7 +60,7 @@ class _UserGroupSelectionDialogState extends State<UserGroupSelectionDialog> {
         final data = doc.data();
         return {
           'id': doc.id,
-          'name': data['name'] ?? 'Unknown User',
+          'name': data['name'] ?? l10n.unknownUser,
           'email': data['email'] ?? '',
           'type': 'user',
         };
@@ -76,7 +77,7 @@ class _UserGroupSelectionDialogState extends State<UserGroupSelectionDialog> {
         final data = doc.data();
         return {
           'id': doc.id,
-          'name': data['name'] ?? 'Unknown Group',
+          'name': data['name'] ?? l10n.unknownGroup,
           'type': 'group',
         };
       }).toList();
@@ -254,19 +255,17 @@ class _UserGroupSelectionDialogState extends State<UserGroupSelectionDialog> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                ElevatedButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: appColors.primaryBlue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    l10n.save,
-                    style: TextStyle(color: appColors.whiteTextOnBlue),
-                  ),
-                ),
+                                 ElevatedButton(
+                   onPressed: () => Navigator.of(context).pop(),
+                   style: ElevatedButton.styleFrom(
+                     backgroundColor: appColors.primaryBlue,
+                     foregroundColor: appColors.whiteTextOnBlue,
+                     shape: RoundedRectangleBorder(
+                       borderRadius: BorderRadius.circular(8),
+                     ),
+                   ),
+                   child: Text(l10n.save),
+                 ),
               ],
             ),
           ],
@@ -329,6 +328,7 @@ class _EmbeddedUserGroupSearchState extends State<EmbeddedUserGroupSearch> {
   }
 
   Future<void> _loadUsersAndGroups() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       setState(() => _isLoading = true);
 
@@ -362,7 +362,7 @@ class _EmbeddedUserGroupSearchState extends State<EmbeddedUserGroupSearch> {
         final data = doc.data();
         return {
           'id': doc.id,
-          'name': data['name'] ?? 'Unknown Group',
+          'name': data['name'] ?? l10n.unknownGroup,
         };
       }).toList();
 

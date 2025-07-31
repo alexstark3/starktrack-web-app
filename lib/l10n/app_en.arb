@@ -370,5 +370,47 @@
   "security": "Security",
   "updateUser": "Update User",
   "area": "Area",
-  "streetNumber": "Street Number"
+  "streetNumber": "Street Number",
+  "projectsForThisClient": "Projects for this client",
+  "noProjectsFoundForThisClient": "No projects found for this client.",
+  "clientSummary": "Client Summary",
+  "searchGroups": "Search groups...",
+  "addGroup": "Add Group",
+  "noGroupsFound": "No groups found",
+  "createFirstGroup": "Create your first group to get started",
+  "noGroupsMatchSearch": "No groups match your search",
+  "teamLeaderLabel": "Team Leader:",
+  "member": "member",
+  "members": "members",
+  "editGroup": "Edit Group",
+  "deleteGroup": "Delete Group",
+  "groupName": "Group Name",
+  "teamLeaderOptional": "Team Leader (Optional)",
+  "noTeamLeader": "No Team Leader",
+  "membersLabel": "Members",
+  "searchMembers": "Search members...",
+  "noAvailableMembers": "No available members",
+  "noMembersMatchSearch": "No members match your search",
+  "unknownUser": "Unknown User",
+  "unknownGroup": "Unknown Group",
+  "update": "Update",
+  "create": "Create",
+  "deleteGroupTitle": "Delete Group",
+  "deleteGroupConfirmation": "Are you sure you want to delete",
+  "deleteGroupCannotBeUndone": "This action cannot be undone",
+  "groupDeletedSuccessfully": "Group deleted successfully",
+  "errorCreatingGroup": "Error creating group",
+  "errorUpdatingGroup": "Error updating group",
+  "errorDeletingGroup": "Error deleting group",
+  "errorGroupOperation": "Error {operation} group: {error}",
+  "@errorGroupOperation": {
+    "placeholders": {
+      "operation": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 } 

@@ -413,7 +413,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
         decoration: BoxDecoration(
           color: appColors.backgroundLight,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: appColors.lightGray.withOpacity(0.3)),
+          border: Border.all(color: appColors.lightGray.withValues(alpha: 0.3)),
         ),
         child: Center(
           child: Text(
@@ -444,7 +444,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -628,14 +628,14 @@ class _CustomCalendarState extends State<CustomCalendar> {
       backgroundColor = appColors.primaryBlue;
       textColor = appColors.whiteTextOnBlue;
     } else if (isInRange) {
-      backgroundColor = appColors.primaryBlue.withOpacity(0.2);
+      backgroundColor = appColors.primaryBlue.withValues(alpha: 0.2);
       textColor = appColors.primaryBlue;
     }
 
     if (isDisabled) {
       textColor = appColors.lightGray;
     } else if (isWeekend) {
-      backgroundColor = appColors.lightGray.withOpacity(0.3);
+      backgroundColor = appColors.lightGray.withValues(alpha: 0.3);
     }
 
     return Expanded(
@@ -716,7 +716,7 @@ class _MonthYearPickerDialogState extends State<MonthYearPickerDialog> {
     return GestureDetector(
       onTap: () => Navigator.of(context).pop(),
       child: Material(
-        color: Colors.black.withOpacity(0.5),
+        color: Colors.black.withValues(alpha: 0.5),
         child: Center(
           child: GestureDetector(
             onTap: () {}, // Prevent closing when tapping the dialog content

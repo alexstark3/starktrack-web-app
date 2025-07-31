@@ -130,36 +130,44 @@ class _AddUserDialogState extends State<AddUserDialog> {
   }
 
   void _onPrivateAddressChanged(Map<String, dynamic> address) {
-    setState(() {
-      _privateAddress = address;
-      if (_workplaceSame) {
-        _workAddress = Map<String, dynamic>.from(address);
-      }
-    });
+    if (mounted) {
+      setState(() {
+        _privateAddress = address;
+        if (_workplaceSame) {
+          _workAddress = Map<String, dynamic>.from(address);
+        }
+      });
+    }
   }
 
   void _onWorkAddressChanged(Map<String, dynamic> address) {
-    setState(() {
-      _workAddress = address;
-    });
+    if (mounted) {
+      setState(() {
+        _workAddress = address;
+      });
+    }
   }
 
   void _onWorkplaceSameChanged(bool value) {
-    setState(() {
-      _workplaceSame = value;
-      if (value) {
-        _workAddress = Map<String, dynamic>.from(_privateAddress);
-      }
-    });
+    if (mounted) {
+      setState(() {
+        _workplaceSame = value;
+        if (value) {
+          _workAddress = Map<String, dynamic>.from(_privateAddress);
+        }
+      });
+    }
   }
 
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _isSubmitting = true;
-      _errorText = '';
-    });
+    if (mounted) {
+      setState(() {
+        _isSubmitting = true;
+        _errorText = '';
+      });
+    }
 
     try {
       final isEdit = widget.editUser != null;
@@ -224,11 +232,38 @@ class _AddUserDialogState extends State<AddUserDialog> {
         }
 
         // Create user in Firebase Auth
-        final userCredential =
-            await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-        );
+        UserCredential userCredential;
+        try {
+          userCredential =
+              await FirebaseAuth.instance.createUserWithEmailAndPassword(
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+          );
+        } catch (authError) {
+          String errorMessage = 'Failed to create user account';
+          if (authError is FirebaseAuthException) {
+            switch (authError.code) {
+              case 'email-already-in-use':
+                errorMessage =
+                    'This email is already registered. Please use a different email.';
+                break;
+              case 'invalid-email':
+                errorMessage = 'Please enter a valid email address.';
+                break;
+              case 'weak-password':
+                errorMessage =
+                    'Password is too weak. Please choose a stronger password.';
+                break;
+              case 'operation-not-allowed':
+                errorMessage =
+                    'User registration is not enabled. Please contact your administrator.';
+                break;
+              default:
+                errorMessage = 'Authentication error: ${authError.message}';
+            }
+          }
+          throw Exception(errorMessage);
+        }
 
         // Sign out the newly created user immediately
         await FirebaseAuth.instance.signOut();
@@ -242,36 +277,67 @@ class _AddUserDialogState extends State<AddUserDialog> {
         }
 
         // Now add user data to Firestore (with super admin authenticated)
-        await FirebaseFirestore.instance
-            .collection('companies')
-            .doc(widget.companyId)
-            .collection('users')
-            .doc(userCredential.user!.uid)
-            .set(userData);
+        try {
+          await FirebaseFirestore.instance
+              .collection('companies')
+              .doc(widget.companyId)
+              .collection('users')
+              .doc(userCredential.user!.uid)
+              .set(userData);
+        } catch (firestoreError) {
+          // Clean up the Firebase Auth user if Firestore fails
+          try {
+            await userCredential.user!.delete();
+          } catch (deleteError) {
+            print('Warning: Could not delete Firebase Auth user: $deleteError');
+          }
+          throw Exception('Failed to save user data: $firestoreError');
+        }
 
         // Create userCompany entry
-        await FirebaseFirestore.instance
-            .collection('userCompany')
-            .doc(userCredential.user!.uid)
-            .set({
-          'email': _emailController.text.trim(),
-          'companyId': widget.companyId,
-        });
+        try {
+          await FirebaseFirestore.instance
+              .collection('userCompany')
+              .doc(userCredential.user!.uid)
+              .set({
+            'email': _emailController.text.trim(),
+            'companyId': widget.companyId,
+          });
+        } catch (firestoreError) {
+          // Clean up the Firebase Auth user if userCompany creation fails
+          try {
+            await userCredential.user!.delete();
+          } catch (deleteError) {
+            print('Warning: Could not delete Firebase Auth user: $deleteError');
+          }
+          throw Exception('Failed to create user mapping: $firestoreError');
+        }
 
         // Increment company user count
-        await CompanyModuleService.incrementUserCount(widget.companyId);
+        try {
+          await CompanyModuleService.incrementUserCount(widget.companyId);
+        } catch (countError) {
+          print('Warning: Could not increment user count: $countError');
+          // Don't fail the entire operation if count increment fails
+        }
       }
 
-      widget.onUserAdded();
-      Navigator.of(context).pop();
+      if (mounted) {
+        widget.onUserAdded();
+        Navigator.of(context).pop();
+      }
     } catch (e) {
-      setState(() {
-        _errorText = e.toString();
-      });
+      if (mounted) {
+        setState(() {
+          _errorText = e.toString();
+        });
+      }
     } finally {
-      setState(() {
-        _isSubmitting = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
     }
   }
 
@@ -317,6 +383,8 @@ class _AddUserDialogState extends State<AddUserDialog> {
               FutureBuilder<Map<String, int>>(
                 future: _getUserLimitInfo(),
                 builder: (context, snapshot) {
+                  if (!mounted) return const SizedBox.shrink();
+
                   if (snapshot.hasData) {
                     final userCount = snapshot.data!['userCount'] ?? 0;
                     final userLimit = snapshot.data!['userLimit'] ?? 10;
@@ -327,8 +395,8 @@ class _AddUserDialogState extends State<AddUserDialog> {
                       margin: const EdgeInsets.only(bottom: 16),
                       decoration: BoxDecoration(
                         color: isOverLimit
-                            ? Colors.red.withOpacity(0.1)
-                            : Colors.blue.withOpacity(0.1),
+                            ? Colors.red.withValues(alpha: 0.1)
+                            : Colors.blue.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: isOverLimit ? Colors.red : Colors.blue,
@@ -971,13 +1039,17 @@ class _AddUserDialogState extends State<AddUserDialog> {
                             password: passwordController.text,
                           );
 
-                          Navigator.of(context).pop(true);
+                          if (mounted) {
+                            Navigator.of(context).pop(true);
+                          }
                         } catch (e) {
-                          setState(() {
-                            errorMessage =
-                                'Invalid password. Please try again.';
-                            isLoading = false;
-                          });
+                          if (mounted) {
+                            setState(() {
+                              errorMessage =
+                                  'Invalid password. Please try again.';
+                              isLoading = false;
+                            });
+                          }
                         }
                       }
                     },
@@ -1010,13 +1082,17 @@ class _AddUserDialogState extends State<AddUserDialog> {
                             password: passwordController.text,
                           );
 
-                          Navigator.of(context).pop(true);
+                          if (mounted) {
+                            Navigator.of(context).pop(true);
+                          }
                         } catch (e) {
-                          setState(() {
-                            errorMessage =
-                                'Invalid password. Please try again.';
-                            isLoading = false;
-                          });
+                          if (mounted) {
+                            setState(() {
+                              errorMessage =
+                                  'Invalid password. Please try again.';
+                              isLoading = false;
+                            });
+                          }
                         }
                       }
                     },

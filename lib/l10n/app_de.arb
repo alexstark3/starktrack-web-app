@@ -370,5 +370,47 @@
   "security": "Sicherheit",
   "updateUser": "Benutzer aktualisieren",
   "area": "Kanton",
-  "streetNumber": "Hausnummer"
+  "streetNumber": "Hausnummer",
+  "projectsForThisClient": "Projekte für diesen Kunden",
+  "noProjectsFoundForThisClient": "Keine Projekte für diesen Kunden gefunden.",
+  "clientSummary": "Kundenübersicht",
+  "searchGroups": "Gruppen suchen...",
+  "addGroup": "Gruppe hinzufügen",
+  "noGroupsFound": "Keine Gruppen gefunden",
+  "createFirstGroup": "Erstellen Sie Ihre erste Gruppe, um zu beginnen",
+  "noGroupsMatchSearch": "Keine Gruppen entsprechen Ihrer Suche",
+  "teamLeaderLabel": "Teamleiter:",
+  "member": "Mitglied",
+  "members": "Mitglieder",
+  "editGroup": "Gruppe bearbeiten",
+  "deleteGroup": "Gruppe löschen",
+  "groupName": "Gruppenname",
+  "teamLeaderOptional": "Teamleiter (Optional)",
+  "noTeamLeader": "Kein Teamleiter",
+  "membersLabel": "Mitglieder",
+  "searchMembers": "Mitglieder suchen...",
+  "noAvailableMembers": "Keine verfügbaren Mitglieder",
+  "noMembersMatchSearch": "Keine Mitglieder entsprechen Ihrer Suche",
+  "unknownUser": "Unbekannter Benutzer",
+  "unknownGroup": "Unbekannte Gruppe",
+  "update": "Aktualisieren",
+  "create": "Erstellen",
+  "deleteGroupTitle": "Gruppe löschen",
+  "deleteGroupConfirmation": "Sind Sie sicher, dass Sie löschen möchten",
+  "deleteGroupCannotBeUndone": "Diese Aktion kann nicht rückgängig gemacht werden",
+  "groupDeletedSuccessfully": "Gruppe erfolgreich gelöscht",
+  "errorCreatingGroup": "Fehler beim Erstellen der Gruppe",
+  "errorUpdatingGroup": "Fehler beim Aktualisieren der Gruppe",
+  "errorDeletingGroup": "Fehler beim Löschen der Gruppe",
+  "errorGroupOperation": "Fehler beim {operation} der Gruppe: {error}",
+  "@errorGroupOperation": {
+    "placeholders": {
+      "operation": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 } 

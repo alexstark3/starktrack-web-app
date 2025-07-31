@@ -122,7 +122,7 @@ abstract class AppLocalizations {
   /// No description provided for @members.
   ///
   /// In en, this message translates to:
-  /// **'Members'**
+  /// **'members'**
   String get members;
 
   /// No description provided for @projects.
@@ -1690,6 +1690,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Street Number'**
   String get streetNumber;
+
+  /// No description provided for @projectsForThisClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Projects for this client'**
+  String get projectsForThisClient;
+
+  /// No description provided for @noProjectsFoundForThisClient.
+  ///
+  /// In en, this message translates to:
+  /// **'No projects found for this client.'**
+  String get noProjectsFoundForThisClient;
+
+  /// No description provided for @clientSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Client Summary'**
+  String get clientSummary;
+
+  /// No description provided for @addGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Group'**
+  String get addGroup;
+
+  /// No description provided for @createFirstGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first group to get started'**
+  String get createFirstGroup;
+
+  /// No description provided for @noGroupsMatchSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'No groups match your search'**
+  String get noGroupsMatchSearch;
+
+  /// No description provided for @teamLeaderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Team Leader:'**
+  String get teamLeaderLabel;
+
+  /// No description provided for @member.
+  ///
+  /// In en, this message translates to:
+  /// **'member'**
+  String get member;
+
+  /// No description provided for @editGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Group'**
+  String get editGroup;
+
+  /// No description provided for @deleteGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Group'**
+  String get deleteGroup;
+
+  /// No description provided for @groupName.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Name'**
+  String get groupName;
+
+  /// No description provided for @teamLeaderOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Team Leader (Optional)'**
+  String get teamLeaderOptional;
+
+  /// No description provided for @noTeamLeader.
+  ///
+  /// In en, this message translates to:
+  /// **'No Team Leader'**
+  String get noTeamLeader;
+
+  /// No description provided for @membersLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get membersLabel;
+
+  /// No description provided for @searchMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Search members...'**
+  String get searchMembers;
+
+  /// No description provided for @noAvailableMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'No available members'**
+  String get noAvailableMembers;
+
+  /// No description provided for @noMembersMatchSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'No members match your search'**
+  String get noMembersMatchSearch;
+
+  /// No description provided for @unknownUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown User'**
+  String get unknownUser;
+
+  /// No description provided for @unknownGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Group'**
+  String get unknownGroup;
+
+  /// No description provided for @create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get create;
+
+  /// No description provided for @deleteGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Group'**
+  String get deleteGroupTitle;
+
+  /// No description provided for @deleteGroupConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete'**
+  String get deleteGroupConfirmation;
+
+  /// No description provided for @deleteGroupCannotBeUndone.
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone'**
+  String get deleteGroupCannotBeUndone;
+
+  /// No description provided for @groupDeletedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Group deleted successfully'**
+  String get groupDeletedSuccessfully;
+
+  /// No description provided for @errorCreatingGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Error creating group'**
+  String get errorCreatingGroup;
+
+  /// No description provided for @errorUpdatingGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Error updating group'**
+  String get errorUpdatingGroup;
+
+  /// No description provided for @errorDeletingGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Error deleting group'**
+  String get errorDeletingGroup;
+
+  /// No description provided for @errorGroupOperation.
+  ///
+  /// In en, this message translates to:
+  /// **'Error {operation} group: {error}'**
+  String errorGroupOperation(String operation, String error);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -54,18 +54,11 @@ class _UserAddressState extends State<UserAddress> {
 
     // Only update if the address data actually changed
     if (oldWidget.addressData != widget.addressData) {
-      print(
-          '🔍 DEBUG: UserAddress - Address data changed, updating controllers');
-      print('🔍 DEBUG: UserAddress - Old: ${oldWidget.addressData}');
-      print('🔍 DEBUG: UserAddress - New: ${widget.addressData}');
       _updateControllersFromAddressData();
     }
   }
 
   void _initializeControllers() {
-    print(
-        '🔍 DEBUG: UserAddress - Initializing controllers with address data: ${widget.addressData}');
-
     _countryController.text = widget.addressData['country'] ??
         (widget.isSwissAddress ? 'Switzerland' : '');
     _areaController.text = widget.addressData['area'] ?? '';
@@ -73,20 +66,9 @@ class _UserAddressState extends State<UserAddress> {
     _postCodeController.text = widget.addressData['postCode'] ?? '';
     _streetController.text = widget.addressData['street'] ?? '';
     _numberController.text = widget.addressData['streetNumber'] ?? '';
-
-    print('🔍 DEBUG: UserAddress - Controllers initialized:');
-    print('  Country: ${_countryController.text}');
-    print('  Area: ${_areaController.text}');
-    print('  City: ${_cityController.text}');
-    print('  PostCode: ${_postCodeController.text}');
-    print('  Street: ${_streetController.text}');
-    print('  StreetNumber: ${_numberController.text}');
   }
 
   void _updateControllersFromAddressData() {
-    print(
-        '🔍 DEBUG: UserAddress - Updating controllers from address data: ${widget.addressData}');
-
     // Only update if the data is actually different to avoid unnecessary rebuilds
     final newCountry = widget.addressData['country'] ??
         (widget.isSwissAddress ? 'Switzerland' : '');
@@ -132,14 +114,6 @@ class _UserAddressState extends State<UserAddress> {
         }
       });
     }
-
-    print('🔍 DEBUG: UserAddress - Controllers updated:');
-    print('  Country: ${_countryController.text}');
-    print('  Area: ${_areaController.text}');
-    print('  City: ${_cityController.text}');
-    print('  PostCode: ${_postCodeController.text}');
-    print('  Street: ${_streetController.text}');
-    print('  StreetNumber: ${_numberController.text}');
   }
 
   Future<void> _loadData() async {
@@ -175,10 +149,6 @@ class _UserAddressState extends State<UserAddress> {
       setState(() {
         _areas = areas..sort();
       });
-
-      // Debug output
-      print(
-          'DEBUG: Loaded ${_areas.length} areas: ${_areas.take(10).join(', ')}...');
     } catch (e) {
       debugPrint('Error loading Swiss data: $e');
     }
@@ -276,11 +246,6 @@ class _UserAddressState extends State<UserAddress> {
       setState(() {
         _postCodeController.text = value;
         final cities = _getCitiesForPostCode(value);
-
-        print('DEBUG: Found ${cities.length} cities for post code $value');
-        for (final city in cities) {
-          print('DEBUG: - ${city['city']} (${city['area']})');
-        }
 
         if (cities.isEmpty) {
           // No cities found for this post code

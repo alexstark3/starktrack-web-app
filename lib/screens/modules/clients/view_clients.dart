@@ -122,8 +122,7 @@ class _ViewClientsState extends State<ViewClients> {
             ),
             const SizedBox(height: 24),
             // Projects list for this client
-            Text(
-                '${AppLocalizations.of(context)!.projects} für diesen ${AppLocalizations.of(context)!.client.toLowerCase()}',
+            Text(AppLocalizations.of(context)!.projectsForThisClient,
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 19,
@@ -142,8 +141,8 @@ class _ViewClientsState extends State<ViewClients> {
                 if (projects.isEmpty) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    child: Text(
-                        '${AppLocalizations.of(context)!.noProjectsFound} für diesen ${AppLocalizations.of(context)!.client.toLowerCase()}.'),
+                    child: Text(AppLocalizations.of(context)!
+                        .noProjectsFoundForThisClient),
                   );
                 }
                 return Column(
@@ -429,7 +428,7 @@ class _ClientTotalsCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${AppLocalizations.of(context)!.clientName} Zusammenfassung',
+                  AppLocalizations.of(context)!.clientSummary,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,

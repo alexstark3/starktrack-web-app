@@ -392,7 +392,10 @@ class _HolidayPolicyListDialogState extends State<HolidayPolicyListDialog> {
                 }
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Colors.white,
+            ),
             child: Text(l10n.delete, style: TextStyle(color: Colors.white)),
           ),
         ],

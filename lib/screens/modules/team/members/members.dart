@@ -5,7 +5,7 @@ import '../../../../theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'members_view.dart';
 
-class MembersTab extends StatelessWidget {
+class MembersTab extends StatefulWidget {
   final String companyId;
   final String? teamLeaderId;
   final DocumentSnapshot? selectedMember;
@@ -20,81 +20,85 @@ class MembersTab extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<MembersTab> createState() => _MembersTabState();
+}
+
+class _MembersTabState extends State<MembersTab> {
+  String _search = '';
+
+  @override
   Widget build(BuildContext context) {
-    if (selectedMember != null) {
+    if (widget.selectedMember != null) {
       return MemberHistoryScreen(
-        companyId: companyId,
-        memberDoc: selectedMember!,
-        onBack: () => onSelectMember(null), // <- Correct usage for back
+        companyId: widget.companyId,
+        memberDoc: widget.selectedMember!,
+        onBack: () => widget.onSelectMember(null),
       );
     }
 
     final colors = Theme.of(context).extension<AppColors>()!;
-    String _search = '';
 
-    return StatefulBuilder(builder: (context, setState) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Search field
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white24
-                      : Colors.black26,
-                  width: 1,
-                ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Search field
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(
                 color: Theme.of(context).brightness == Brightness.dark
-                    ? colors.lightGray
-                    : Colors.white,
-                borderRadius: BorderRadius.circular(10),
+                    ? Colors.white24
+                    : Colors.black26,
+                width: 1,
               ),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText:
-                      AppLocalizations.of(context)?.searchByNameSurnameEmail ??
-                          'Search by name, surname or email',
-                  hintStyle: TextStyle(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? const Color(0xFFB3B3B3)
-                        : colors.textColor,
-                  ),
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? const Color(0xFFB3B3B3)
-                        : colors.darkGray,
-                  ),
-                  isDense: true,
-                  border: InputBorder.none,
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                ),
-                style: TextStyle(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? colors.lightGray
+                  : Colors.white,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText:
+                    AppLocalizations.of(context)?.searchByNameSurnameEmail ??
+                        'Search by name, surname or email',
+                hintStyle: TextStyle(
                   color: Theme.of(context).brightness == Brightness.dark
-                      ? const Color(0xFFCCCCCC)
+                      ? const Color(0xFFB3B3B3)
                       : colors.textColor,
                 ),
-                onChanged: (val) =>
-                    setState(() => _search = val.trim().toLowerCase()),
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFFB3B3B3)
+                      : colors.darkGray,
+                ),
+                isDense: true,
+                border: InputBorder.none,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               ),
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: _MembersTable(
-                companyId: companyId,
-                search: _search,
-                teamLeaderId: teamLeaderId,
-                onView: onSelectMember,
+              style: TextStyle(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFFCCCCCC)
+                    : colors.textColor,
               ),
+              onChanged: (val) =>
+                  setState(() => _search = val.trim().toLowerCase()),
             ),
-          ],
-        ),
-      );
-    });
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: _MembersTable(
+              companyId: widget.companyId,
+              search: _search,
+              teamLeaderId: widget.teamLeaderId,
+              onView: widget.onSelectMember,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

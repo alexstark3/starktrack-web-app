@@ -94,7 +94,7 @@ class _ProjectsListState extends State<_ProjectsList> {
                   ? null
                   : [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
+                        color: Colors.black.withValues(alpha: 0.08),
                         blurRadius: 6,
                         offset: const Offset(0, 2),
                       ),
@@ -359,7 +359,7 @@ class _ProjectsListState extends State<_ProjectsList> {
                                             style: TextStyle(
                                               fontSize: 14,
                                               color: colors.textColor
-                                                  .withOpacity(0.7),
+                                                  .withValues(alpha: 0.7),
                                             ),
                                           ),
                                         ],

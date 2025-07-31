@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../super_admin/services/company_module_service.dart';
 import 'add_user.dart';
 import 'holiday_policy/holiday_policy.dart';
 import 'timeoff_policy/timeoff_policy.dart';
@@ -41,17 +42,19 @@ class _AdminPanelState extends State<AdminPanel> {
           .where('roles', arrayContains: 'team_leader')
           .get();
 
-      _teamLeaders = res.docs
-          .map((d) => {
-                'id': d.id,
-                'firstName': d['firstName'] ?? '',
-                'surname': d['surname'] ?? '',
-              })
-          .toList();
+      if (mounted) {
+        setState(() {
+          _teamLeaders = res.docs
+              .map((d) => {
+                    'id': d.id,
+                    'firstName': d['firstName'] ?? '',
+                    'surname': d['surname'] ?? '',
+                  })
+              .toList();
+        });
+      }
     } catch (e) {
       print('Error fetching team leaders: $e');
-    } finally {
-      setState(() {});
     }
   }
 
@@ -64,7 +67,9 @@ class _AdminPanelState extends State<AdminPanel> {
         teamLeaders: _teamLeaders,
         currentUserRoles: widget.currentUserRoles,
         onUserAdded: () {
-          setState(() {});
+          if (mounted) {
+            setState(() {});
+          }
         },
       ),
     );
@@ -80,7 +85,9 @@ class _AdminPanelState extends State<AdminPanel> {
         editUser: userDoc,
         currentUserRoles: widget.currentUserRoles,
         onUserAdded: () {
-          setState(() {});
+          if (mounted) {
+            setState(() {});
+          }
         },
       ),
     );
@@ -93,7 +100,9 @@ class _AdminPanelState extends State<AdminPanel> {
       builder: (context) => HolidayPolicyListDialog(
         companyId: widget.companyId,
         onPolicyAdded: () {
-          setState(() {});
+          if (mounted) {
+            setState(() {});
+          }
         },
       ),
     );
@@ -106,7 +115,9 @@ class _AdminPanelState extends State<AdminPanel> {
       builder: (context) => TimeOffPolicyListDialog(
         companyId: widget.companyId,
         onPolicyAdded: () {
-          setState(() {});
+          if (mounted) {
+            setState(() {});
+          }
         },
       ),
     );
@@ -137,8 +148,11 @@ class _AdminPanelState extends State<AdminPanel> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text(l10n.delete, style: TextStyle(color: Colors.white)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -146,7 +160,34 @@ class _AdminPanelState extends State<AdminPanel> {
 
     if (confirmed == true) {
       try {
-        // Delete from Firestore
+        // 1. Delete user's subcollections (sessions, all_logs, etc.)
+        final userDoc = FirebaseFirestore.instance
+            .collection('companies')
+            .doc(widget.companyId)
+            .collection('users')
+            .doc(userId);
+
+        // Delete sessions subcollection
+        final sessionsQuery = userDoc.collection('sessions');
+        final sessionsSnapshot = await sessionsQuery.get();
+        for (final sessionDoc in sessionsSnapshot.docs) {
+          // Delete logs subcollection within each session
+          final logsQuery = sessionDoc.reference.collection('logs');
+          final logsSnapshot = await logsQuery.get();
+          for (final logDoc in logsSnapshot.docs) {
+            await logDoc.reference.delete();
+          }
+          await sessionDoc.reference.delete();
+        }
+
+        // Delete all_logs subcollection
+        final allLogsQuery = userDoc.collection('all_logs');
+        final allLogsSnapshot = await allLogsQuery.get();
+        for (final logDoc in allLogsSnapshot.docs) {
+          await logDoc.reference.delete();
+        }
+
+        // 2. Delete the user document from company
         await FirebaseFirestore.instance
             .collection('companies')
             .doc(widget.companyId)
@@ -154,18 +195,27 @@ class _AdminPanelState extends State<AdminPanel> {
             .doc(userId)
             .delete();
 
-        // Delete from Firebase Auth
-        // Note: This requires admin SDK, so we'll just delete from Firestore for now
-        // The user will be unable to log in since their data is gone
+        // 3. Delete userCompany mapping
+        await FirebaseFirestore.instance
+            .collection('userCompany')
+            .doc(userId)
+            .delete();
 
-        setState(() {});
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.userDeleted)),
-        );
+        // 4. Decrement user count
+        await CompanyModuleService.decrementUserCount(widget.companyId);
+
+        if (mounted) {
+          setState(() {});
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.userDeleted)),
+          );
+        }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e')),
+          );
+        }
       }
     }
   }
@@ -231,8 +281,11 @@ class _AdminPanelState extends State<AdminPanel> {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: TextField(
-                                onChanged: (value) =>
-                                    setState(() => _searchText = value),
+                                onChanged: (value) {
+                                  if (mounted) {
+                                    setState(() => _searchText = value);
+                                  }
+                                },
                                 decoration: InputDecoration(
                                   hintText: l10n.searchUsers,
                                   hintStyle: TextStyle(
@@ -306,8 +359,11 @@ class _AdminPanelState extends State<AdminPanel> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: TextField(
-                                  onChanged: (value) =>
-                                      setState(() => _searchText = value),
+                                  onChanged: (value) {
+                                    if (mounted) {
+                                      setState(() => _searchText = value);
+                                    }
+                                  },
                                   decoration: InputDecoration(
                                     hintText: l10n.searchUsers,
                                     hintStyle: TextStyle(
@@ -579,7 +635,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                         horizontal: 8, vertical: 2),
                                     decoration: BoxDecoration(
                                       color: appColors.primaryBlue
-                                          .withOpacity(0.2),
+                                          .withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(

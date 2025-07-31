@@ -1,13 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:diacritic/diacritic.dart';
-import '../../../../theme/app_colors.dart';
-import '../../../../l10n/app_localizations.dart';
+import '../../../theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 import '../clients/add_client_dialog.dart';
+import '../admin/user_address.dart';
 
 class AddProjectDialog extends StatefulWidget {
   final String companyId;
-  const AddProjectDialog({Key? key, required this.companyId}) : super(key: key);
+  const AddProjectDialog({super.key, required this.companyId});
 
   @override
   State<AddProjectDialog> createState() => _AddProjectDialogState();
@@ -16,28 +17,28 @@ class AddProjectDialog extends StatefulWidget {
 class _AddProjectDialogState extends State<AddProjectDialog> {
   final _formKey = GlobalKey<FormState>();
   final _projectNameCtrl = TextEditingController();
-  final _projectRefCtrl = TextEditingController(); // Project ID (internal reference)
-  final _streetCtrl = TextEditingController();
-  final _numberCtrl = TextEditingController();
-  final _postCodeCtrl = TextEditingController();
-  final _cityCtrl = TextEditingController();
+  final _projectRefCtrl =
+      TextEditingController(); // Project Ref (internal reference)
   final _clientSearchCtrl = TextEditingController();
 
   String? _selectedClientName;
   String? _error;
   String? _suggestedId;
   bool _isSaving = false;
+  Map<String, dynamic> _addressData = {};
 
   @override
   void dispose() {
     _projectNameCtrl.dispose();
     _projectRefCtrl.dispose();
-    _streetCtrl.dispose();
-    _numberCtrl.dispose();
-    _postCodeCtrl.dispose();
-    _cityCtrl.dispose();
     _clientSearchCtrl.dispose();
     super.dispose();
+  }
+
+  void _onAddressChanged(Map<String, dynamic> addressData) {
+    setState(() {
+      _addressData = addressData;
+    });
   }
 
   String projectIdFromName(String name) {
@@ -80,11 +81,30 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
                   controller: _projectNameCtrl,
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.projectName,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                     filled: true,
-                    fillColor: colors.lightGray,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: Colors.black26,
+                        width: 1,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: Colors.black26,
+                        width: 1,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: colors.primaryBlue, width: 2),
+                    ),
                   ),
-                  validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+                  validator: (v) =>
+                      v == null || v.trim().isEmpty ? 'Required' : null,
                   enabled: !_isSaving,
                 ),
                 const SizedBox(height: 16),
@@ -92,82 +112,41 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
                 TextFormField(
                   controller: _projectRefCtrl,
                   decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.projectId,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    labelText: AppLocalizations.of(context)!.projectRef,
                     filled: true,
-                    fillColor: colors.lightGray,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: Colors.black26,
+                        width: 1,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: Colors.black26,
+                        width: 1,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: colors.primaryBlue, width: 2),
+                    ),
                   ),
-                  validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+                  validator: (v) =>
+                      v == null || v.trim().isEmpty ? 'Required' : null,
                   enabled: !_isSaving,
                 ),
                 const SizedBox(height: 16),
 
-                // --- Address fields ---
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: TextFormField(
-                        controller: _streetCtrl,
-                        decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.street,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                          filled: true,
-                          fillColor: colors.lightGray,
-                        ),
-                        validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-                        enabled: !_isSaving,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    SizedBox(
-                      width: 90,
-                      child: TextFormField(
-                        controller: _numberCtrl,
-                        decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.number,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                          filled: true,
-                          fillColor: colors.lightGray,
-                        ),
-                        validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-                        enabled: !_isSaving,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 110,
-                      child: TextFormField(
-                        controller: _postCodeCtrl,
-                        decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.postCode,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                          filled: true,
-                          fillColor: colors.lightGray,
-                        ),
-                        validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-                        enabled: !_isSaving,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _cityCtrl,
-                        decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.city,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                          filled: true,
-                          fillColor: colors.lightGray,
-                        ),
-                        validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-                        enabled: !_isSaving,
-                      ),
-                    ),
-                  ],
+                // --- Address widget ---
+                UserAddress(
+                  addressData: _addressData,
+                  onAddressChanged: _onAddressChanged,
+                  title: AppLocalizations.of(context)!.address,
+                  showCard: false,
                 ),
                 const SizedBox(height: 20),
 
@@ -251,7 +230,8 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
                                     _error = null;
                                   });
                                 },
-                                child: Text(AppLocalizations.of(context)!.cancel),
+                                child:
+                                    Text(AppLocalizations.of(context)!.cancel),
                               ),
                             ],
                           ),
@@ -264,10 +244,9 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
+                      onPressed:
+                          _isSaving ? null : () => Navigator.of(context).pop(),
                       child: Text(AppLocalizations.of(context)!.cancel),
-                      onPressed: _isSaving
-                          ? null
-                          : () => Navigator.of(context).pop(),
                     ),
                     const SizedBox(width: 18),
                     ElevatedButton(
@@ -280,6 +259,7 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
                             horizontal: 32, vertical: 14),
                         elevation: 0,
                       ),
+                      onPressed: _isSaving ? null : _save,
                       child: _isSaving
                           ? const SizedBox(
                               width: 18,
@@ -287,7 +267,6 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
                               child: CircularProgressIndicator(strokeWidth: 2))
                           : Text(AppLocalizations.of(context)!.save,
                               style: TextStyle(fontWeight: FontWeight.bold)),
-                      onPressed: _isSaving ? null : _save,
                     ),
                   ],
                 ),
@@ -306,7 +285,8 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
         TextFormField(
           controller: _clientSearchCtrl,
           decoration: InputDecoration(
-            labelText: '${AppLocalizations.of(context)!.search} ${AppLocalizations.of(context)!.clients}...',
+            labelText:
+                '${AppLocalizations.of(context)!.search} ${AppLocalizations.of(context)!.clients}...',
             suffixIcon: IconButton(
               icon: const Icon(Icons.add),
               tooltip: AppLocalizations.of(context)!.createNewClient,
@@ -319,10 +299,26 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
                 if (created == true) setState(() {});
               },
             ),
-            border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10)),
             filled: true,
-            fillColor: colors.lightGray,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(
+                color: Colors.black26,
+                width: 1,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(
+                color: Colors.black26,
+                width: 1,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(color: colors.primaryBlue, width: 2),
+            ),
           ),
           onChanged: (_) => setState(() {}),
         ),
@@ -350,7 +346,8 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
               if (filtered.isEmpty && _clientSearchCtrl.text.isNotEmpty) {
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text("${AppLocalizations.of(context)!.noClientsFound} ${AppLocalizations.of(context)!.tapToAdd}.",
+                  child: Text(
+                      "${AppLocalizations.of(context)!.noClientsFound} ${AppLocalizations.of(context)!.tapToAdd}.",
                       style: TextStyle(color: colors.darkGray)),
                 );
               }
@@ -360,17 +357,15 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
                 children: filtered.map((doc) {
                   final data = doc.data() as Map<String, dynamic>;
                   return ListTile(
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 6),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 6),
                     dense: true,
                     title: Text(data['name'] ?? '-',
                         style: TextStyle(color: colors.primaryBlue)),
-                    subtitle:
-                        (data['client_email'] ?? '').toString().isNotEmpty
-                            ? Text(data['client_email'],
-                                style: TextStyle(
-                                    color: colors.darkGray, fontSize: 13))
-                            : null,
+                    subtitle: (data['client_email'] ?? '').toString().isNotEmpty
+                        ? Text(data['client_email'],
+                            style:
+                                TextStyle(color: colors.darkGray, fontSize: 13))
+                        : null,
                     trailing: _selectedClientName == data['name']
                         ? Icon(Icons.check_circle, color: colors.success)
                         : null,
@@ -388,7 +383,8 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
         if (_selectedClientName != null)
           Padding(
             padding: const EdgeInsets.only(top: 8.0),
-            child: Text("${AppLocalizations.of(context)!.view}: $_selectedClientName",
+            child: Text(
+                "${AppLocalizations.of(context)!.view}: $_selectedClientName",
                 style: TextStyle(color: colors.primaryBlue)),
           ),
       ],
@@ -396,16 +392,20 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
   }
 
   Future<void> _save() async {
+    if (!mounted) return;
+
     setState(() {
       _isSaving = true;
       _error = null;
     });
 
     if (!_formKey.currentState!.validate() || _selectedClientName == null) {
+      if (!mounted) return;
       setState(() {
         _isSaving = false;
-        if (_selectedClientName == null)
+        if (_selectedClientName == null) {
           _error = AppLocalizations.of(context)!.clientMustBeSelectedOrCreated;
+        }
       });
       return;
     }
@@ -453,16 +453,20 @@ class _AddProjectDialogState extends State<AddProjectDialog> {
         'projectRef': _projectRefCtrl.text.trim(),
         'name': enteredProjectName,
         'address': {
-          'street': _streetCtrl.text.trim(),
-          'number': _numberCtrl.text.trim(),
-          'post_code': _postCodeCtrl.text.trim(),
-          'city': _cityCtrl.text.trim(),
+          'street': _addressData['street'] ?? '',
+          'number': _addressData['number'] ?? '',
+          'post_code': _addressData['post_code'] ?? '',
+          'city': _addressData['city'] ?? '',
+          'country': _addressData['country'] ?? '',
+          'area': _addressData['area'] ?? '',
         },
         'client': clientId,
         'created_at': FieldValue.serverTimestamp(),
       });
+      if (!mounted) return;
       Navigator.of(context).pop(true);
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = 'Failed to save project. Please try again.';
         _isSaving = false;

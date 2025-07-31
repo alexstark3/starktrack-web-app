@@ -1,6 +1,7 @@
 // lib/screens/dashboard/company_dashboard_screen.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../modules/time_tracker/time_tracker_screen.dart';
 import '../modules/history/history.dart';
 import '../modules/admin/admin_panel.dart';
@@ -43,6 +44,8 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
   late String _selected;
   Map<String, dynamic>? _selectedProject;
   Map<String, dynamic>? _selectedClient;
+  DocumentSnapshot?
+      _selectedMember; // Add selected member state like projects/clients
 
   @override
   void initState() {
@@ -98,6 +101,13 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
               key: const PageStorageKey('team'),
               companyId: widget.companyId,
               userId: widget.userId,
+              selectedMember: _selectedMember, // Pass selected member
+              onSelectMember: (member) {
+                // Add callback like projects/clients
+                setState(() {
+                  _selectedMember = member;
+                });
+              },
             ),
           if (tabLabels.contains(l10n.projects))
             ProjectsTab(
@@ -165,6 +175,10 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
                           if (s.label == l10n.clients) {
                             _selectedClient =
                                 null; // Clear when clicking Clients tab
+                          }
+                          if (s.label == l10n.team) {
+                            _selectedMember =
+                                null; // Clear when clicking Team tab - same pattern as projects/clients
                           }
                         }),
                       ))

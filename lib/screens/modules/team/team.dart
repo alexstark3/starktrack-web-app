@@ -3,14 +3,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'members/members.dart';
+import 'groups/groups.dart';
 
 class TeamModuleTabScreen extends StatefulWidget {
   final String companyId;
   final String userId;
+  final DocumentSnapshot? selectedMember; // Add selected member parameter
+  final void Function(DocumentSnapshot? member)?
+      onSelectMember; // Add callback parameter
+
   const TeamModuleTabScreen({
     Key? key,
     required this.companyId,
     required this.userId,
+    this.selectedMember,
+    this.onSelectMember,
   }) : super(key: key);
 
   @override
@@ -19,8 +26,6 @@ class TeamModuleTabScreen extends StatefulWidget {
 
 class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
   int _selectedIndex = 0;
-
-  DocumentSnapshot? _selectedMemberDoc;
 
   @override
   Widget build(BuildContext context) {
@@ -49,12 +54,46 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                       title: l10n.members,
                       isSelected: _selectedIndex == 0,
                       colors: colors,
-                      selectedMemberDoc: _selectedMemberDoc,
+                      selectedMemberDoc:
+                          widget.selectedMember, // Use widget parameter
                       showOnlyIcon: showOnlyIcons,
                       onTap: () {
                         setState(() {
                           _selectedIndex = 0;
-                          _selectedMemberDoc = null;
+                          widget.onSelectMember
+                              ?.call(null); // Clear via callback
+                        });
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    // Groups tab
+                    _TeamTab(
+                      icon: Icons.groups,
+                      title: 'Groups',
+                      isSelected: _selectedIndex == 1,
+                      colors: colors,
+                      selectedMemberDoc: null,
+                      showOnlyIcon: showOnlyIcons,
+                      onTap: () {
+                        setState(() {
+                          _selectedIndex = 1;
+                          widget.onSelectMember?.call(null);
+                        });
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    // Time Off tab
+                    _TeamTab(
+                      icon: Icons.event_busy,
+                      title: 'Time Off',
+                      isSelected: _selectedIndex == 2,
+                      colors: colors,
+                      selectedMemberDoc: null,
+                      showOnlyIcon: showOnlyIcons,
+                      onTap: () {
+                        setState(() {
+                          _selectedIndex = 2;
+                          widget.onSelectMember?.call(null);
                         });
                       },
                     ),
@@ -106,12 +145,45 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
       return MembersTab(
         companyId: widget.companyId,
         teamLeaderId: null, // Show all users, not just team members
-        selectedMember: _selectedMemberDoc,
-        onSelectMember: (doc) {
-          setState(() {
-            _selectedMemberDoc = doc;
-          });
-        },
+        selectedMember: widget.selectedMember, // Use widget parameter
+        onSelectMember:
+            widget.onSelectMember ?? (doc) {}, // Provide default callback
+      );
+    } else if (_selectedIndex == 1) {
+      // Groups tab content
+      return GroupsTab(
+        companyId: widget.companyId,
+      );
+    } else if (_selectedIndex == 2) {
+      // Time Off tab content
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.event_busy,
+              size: 64,
+              color: Theme.of(context).extension<AppColors>()!.darkGray,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Time Off',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).extension<AppColors>()!.darkGray,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Time off management coming soon...',
+              style: TextStyle(
+                fontSize: 16,
+                color: Theme.of(context).extension<AppColors>()!.darkGray,
+              ),
+            ),
+          ],
+        ),
       );
     }
     return const SizedBox.shrink();

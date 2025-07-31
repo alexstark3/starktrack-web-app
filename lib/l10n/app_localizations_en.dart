@@ -21,7 +21,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get team => 'Team';
 
   @override
-  String get members => 'Members';
+  String get members => 'members';
 
   @override
   String get projects => 'Projects';
@@ -821,4 +821,90 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get streetNumber => 'Street Number';
+
+  @override
+  String get projectsForThisClient => 'Projects for this client';
+
+  @override
+  String get noProjectsFoundForThisClient => 'No projects found for this client.';
+
+  @override
+  String get clientSummary => 'Client Summary';
+
+  @override
+  String get addGroup => 'Add Group';
+
+  @override
+  String get createFirstGroup => 'Create your first group to get started';
+
+  @override
+  String get noGroupsMatchSearch => 'No groups match your search';
+
+  @override
+  String get teamLeaderLabel => 'Team Leader:';
+
+  @override
+  String get member => 'member';
+
+  @override
+  String get editGroup => 'Edit Group';
+
+  @override
+  String get deleteGroup => 'Delete Group';
+
+  @override
+  String get groupName => 'Group Name';
+
+  @override
+  String get teamLeaderOptional => 'Team Leader (Optional)';
+
+  @override
+  String get noTeamLeader => 'No Team Leader';
+
+  @override
+  String get membersLabel => 'Members';
+
+  @override
+  String get searchMembers => 'Search members...';
+
+  @override
+  String get noAvailableMembers => 'No available members';
+
+  @override
+  String get noMembersMatchSearch => 'No members match your search';
+
+  @override
+  String get unknownUser => 'Unknown User';
+
+  @override
+  String get unknownGroup => 'Unknown Group';
+
+  @override
+  String get create => 'Create';
+
+  @override
+  String get deleteGroupTitle => 'Delete Group';
+
+  @override
+  String get deleteGroupConfirmation => 'Are you sure you want to delete';
+
+  @override
+  String get deleteGroupCannotBeUndone => 'This action cannot be undone';
+
+  @override
+  String get groupDeletedSuccessfully => 'Group deleted successfully';
+
+  @override
+  String get errorCreatingGroup => 'Error creating group';
+
+  @override
+  String get errorUpdatingGroup => 'Error updating group';
+
+  @override
+  String get errorDeletingGroup => 'Error deleting group';
+
+  @override
+  String errorGroupOperation(String operation, String error) {
+    return 'Error $operation group: $error';
+  }
 }

@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:diacritic/diacritic.dart'; // <-- Import this!
-import '../../../../theme/app_colors.dart';
-import '../../../../l10n/app_localizations.dart';
+import '../../../theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../modules/admin/user_address.dart';
 
 class AddClientDialog extends StatefulWidget {
   final String companyId;
@@ -15,15 +16,20 @@ class AddClientDialog extends StatefulWidget {
 class _AddClientDialogState extends State<AddClientDialog> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
-  final _addressCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
   final _firstNameCtrl = TextEditingController();
   final _surnameCtrl = TextEditingController();
-  final _countryCtrl = TextEditingController();
-  final _numberCtrl = TextEditingController();
-  final _postCodeCtrl = TextEditingController();
-  final _cityCtrl = TextEditingController();
+
+  // Address data for the UserAddress widget
+  Map<String, dynamic> _addressData = {
+    'country': 'Switzerland',
+    'area': '',
+    'city': '',
+    'postCode': '',
+    'street': '',
+    'streetNumber': '',
+  };
 
   String? _error;
   String? _suggestedName;
@@ -37,18 +43,19 @@ class _AddClientDialogState extends State<AddClientDialog> {
         .toLowerCase();
   }
 
+  void _onAddressChanged(Map<String, dynamic> addressData) {
+    setState(() {
+      _addressData = addressData;
+    });
+  }
+
   @override
   void dispose() {
     _nameCtrl.dispose();
-    _addressCtrl.dispose();
     _emailCtrl.dispose();
     _phoneCtrl.dispose();
     _firstNameCtrl.dispose();
     _surnameCtrl.dispose();
-    _countryCtrl.dispose();
-    _numberCtrl.dispose();
-    _postCodeCtrl.dispose();
-    _cityCtrl.dispose();
     super.dispose();
   }
 
@@ -74,114 +81,145 @@ class _AddClientDialogState extends State<AddClientDialog> {
                     )),
                 const SizedBox(height: 20),
 
+                // Client Name field
                 TextFormField(
                   controller: _nameCtrl,
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.clientName,
                     filled: true,
-                    fillColor: colors.lightGray,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: Colors.black26,
+                        width: 1,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: Colors.black26,
+                        width: 1,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: colors.primaryBlue, width: 2),
+                    ),
                   ),
-                  validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+                  validator: (v) =>
+                      v == null || v.trim().isEmpty ? 'Required' : null,
                   enabled: !_isSaving,
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
 
+                // Address widget
+                UserAddress(
+                  addressData: _addressData,
+                  onAddressChanged: _onAddressChanged,
+                  title: 'Address',
+                  isSwissAddress: true,
+                  showCard: false,
+                  showStreetAndNumber: true,
+                ),
+                const SizedBox(height: 20),
+
+                // Contact Person First Name
                 TextFormField(
                   controller: _firstNameCtrl,
                   decoration: InputDecoration(
-                    labelText: '${AppLocalizations.of(context)!.contactPerson} ${AppLocalizations.of(context)!.firstName}',
+                    labelText:
+                        '${AppLocalizations.of(context)!.contactPerson} ${AppLocalizations.of(context)!.firstName}',
                     filled: true,
-                    fillColor: colors.lightGray,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: Colors.black26,
+                        width: 1,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: Colors.black26,
+                        width: 1,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: colors.primaryBlue, width: 2),
+                    ),
                   ),
                   enabled: !_isSaving,
                 ),
                 const SizedBox(height: 10),
 
+                // Contact Person Surname
                 TextFormField(
                   controller: _surnameCtrl,
                   decoration: InputDecoration(
-                    labelText: '${AppLocalizations.of(context)!.contactPerson} ${AppLocalizations.of(context)!.surname}',
+                    labelText:
+                        '${AppLocalizations.of(context)!.contactPerson} ${AppLocalizations.of(context)!.surname}',
                     filled: true,
-                    fillColor: colors.lightGray,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: Colors.black26,
+                        width: 1,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: Colors.black26,
+                        width: 1,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: colors.primaryBlue, width: 2),
+                    ),
                   ),
                   enabled: !_isSaving,
                 ),
                 const SizedBox(height: 10),
 
-                TextFormField(
-                  controller: _addressCtrl,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.street,
-                    filled: true,
-                    fillColor: colors.lightGray,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  enabled: !_isSaving,
-                ),
-                const SizedBox(height: 10),
-
-                TextFormField(
-                  controller: _numberCtrl,
-                  decoration: InputDecoration(
-                    labelText: '${AppLocalizations.of(context)!.street} ${AppLocalizations.of(context)!.number}',
-                    filled: true,
-                    fillColor: colors.lightGray,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  enabled: !_isSaving,
-                ),
-                const SizedBox(height: 10),
-
-                TextFormField(
-                  controller: _postCodeCtrl,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.postCode,
-                    filled: true,
-                    fillColor: colors.lightGray,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  enabled: !_isSaving,
-                ),
-                const SizedBox(height: 10),
-
-                TextFormField(
-                  controller: _cityCtrl,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.city,
-                    filled: true,
-                    fillColor: colors.lightGray,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  enabled: !_isSaving,
-                ),
-                const SizedBox(height: 10),
-
-                TextFormField(
-                  controller: _countryCtrl,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.country,
-                    filled: true,
-                    fillColor: colors.lightGray,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  enabled: !_isSaving,
-                ),
-                const SizedBox(height: 10),
-
+                // Email field (simplified label)
                 TextFormField(
                   controller: _emailCtrl,
                   decoration: InputDecoration(
-                    labelText: '${AppLocalizations.of(context)!.clientName} ${AppLocalizations.of(context)!.email}',
+                    labelText: AppLocalizations.of(context)!.email,
                     filled: true,
-                    fillColor: colors.lightGray,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: Colors.black26,
+                        width: 1,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: Colors.black26,
+                        width: 1,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: colors.primaryBlue, width: 2),
+                    ),
                   ),
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) return 'Required';
-                    final emailRegex = RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
+                    final emailRegex =
+                        RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
                     if (!emailRegex.hasMatch(v.trim())) return 'Invalid email';
                     return null;
                   },
@@ -189,13 +227,32 @@ class _AddClientDialogState extends State<AddClientDialog> {
                 ),
                 const SizedBox(height: 10),
 
+                // Phone field (simplified label)
                 TextFormField(
                   controller: _phoneCtrl,
                   decoration: InputDecoration(
-                    labelText: '${AppLocalizations.of(context)!.clientName} ${AppLocalizations.of(context)!.phone}',
+                    labelText: AppLocalizations.of(context)!.phone,
                     filled: true,
-                    fillColor: colors.lightGray,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: Colors.black26,
+                        width: 1,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: Colors.black26,
+                        width: 1,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          BorderSide(color: colors.primaryBlue, width: 2),
+                    ),
                   ),
                   enabled: !_isSaving,
                 ),
@@ -203,7 +260,8 @@ class _AddClientDialogState extends State<AddClientDialog> {
 
                 if (_error != null)
                   Text(_error!,
-                      style: TextStyle(color: colors.error, fontWeight: FontWeight.bold)),
+                      style: TextStyle(
+                          color: colors.error, fontWeight: FontWeight.bold)),
 
                 if (_suggestedName != null)
                   Column(
@@ -212,7 +270,8 @@ class _AddClientDialogState extends State<AddClientDialog> {
                       Text(
                         'Suggested: $_suggestedName',
                         style: TextStyle(
-                            color: colors.primaryBlue, fontWeight: FontWeight.bold),
+                            color: colors.primaryBlue,
+                            fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       Row(
@@ -257,17 +316,25 @@ class _AddClientDialogState extends State<AddClientDialog> {
                   children: [
                     TextButton(
                         child: Text(AppLocalizations.of(context)!.cancel),
-                        onPressed: _isSaving ? null : () => Navigator.of(context).pop(false)),
+                        onPressed: _isSaving
+                            ? null
+                            : () => Navigator.of(context).pop(false)),
                     const SizedBox(width: 18),
                     ElevatedButton(
                       child: _isSaving
-                          ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                          : Text(AppLocalizations.of(context)!.save, style: TextStyle(fontWeight: FontWeight.bold)),
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2))
+                          : Text(AppLocalizations.of(context)!.save,
+                              style: TextStyle(fontWeight: FontWeight.bold)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: colors.primaryBlue,
                         foregroundColor: colors.whiteTextOnBlue,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 32, vertical: 14),
                         elevation: 0,
                       ),
                       onPressed: _isSaving ? null : _save,
@@ -323,7 +390,8 @@ class _AddClientDialogState extends State<AddClientDialog> {
       setState(() {
         _isSaving = false;
         _suggestedName = clientId;
-        _error = '${AppLocalizations.of(context)!.clientName} bereits verwendet (durch ID).';
+        _error =
+            '${AppLocalizations.of(context)!.clientName} bereits verwendet (durch ID).';
       });
       return;
     }
@@ -331,11 +399,12 @@ class _AddClientDialogState extends State<AddClientDialog> {
     try {
       await docRef.set({
         'name': enteredName,
-        'street': _addressCtrl.text.trim(),
-        'number': _numberCtrl.text.trim(),
-        'post_code': _postCodeCtrl.text.trim(),
-        'city': _cityCtrl.text.trim(),
-        'country': _countryCtrl.text.trim(),
+        'street': _addressData['street'] ?? '',
+        'number': _addressData['streetNumber'] ?? '',
+        'post_code': _addressData['postCode'] ?? '',
+        'city': _addressData['city'] ?? '',
+        'country': _addressData['country'] ?? '',
+        'area': _addressData['area'] ?? '',
         'email': _emailCtrl.text.trim(),
         'phone': _phoneCtrl.text.trim(),
         'contact_person': {
@@ -348,7 +417,8 @@ class _AddClientDialogState extends State<AddClientDialog> {
       Navigator.of(context).pop(true);
     } catch (e) {
       setState(() {
-        _error = 'Fehler beim Speichern des ${AppLocalizations.of(context)!.client.toLowerCase()}. Bitte versuchen Sie es erneut.';
+        _error =
+            'Fehler beim Speichern des ${AppLocalizations.of(context)!.client.toLowerCase()}. Bitte versuchen Sie es erneut.';
         _isSaving = false;
       });
     }
@@ -358,7 +428,9 @@ class _AddClientDialogState extends State<AddClientDialog> {
 class EditClientDialog extends StatefulWidget {
   final String companyId;
   final Map<String, dynamic> client;
-  const EditClientDialog({Key? key, required this.companyId, required this.client}) : super(key: key);
+  const EditClientDialog(
+      {Key? key, required this.companyId, required this.client})
+      : super(key: key);
 
   @override
   State<EditClientDialog> createState() => _EditClientDialogState();
@@ -367,15 +439,20 @@ class EditClientDialog extends StatefulWidget {
 class _EditClientDialogState extends State<EditClientDialog> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
-  final _addressCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
   final _firstNameCtrl = TextEditingController();
   final _surnameCtrl = TextEditingController();
-  final _countryCtrl = TextEditingController();
-  final _numberCtrl = TextEditingController();
-  final _postCodeCtrl = TextEditingController();
-  final _cityCtrl = TextEditingController();
+
+  // Address data for the UserAddress widget
+  Map<String, dynamic> _addressData = {
+    'country': 'Switzerland',
+    'area': '',
+    'city': '',
+    'postCode': '',
+    'street': '',
+    'streetNumber': '',
+  };
 
   String? _error;
   bool _isSaving = false;
@@ -386,31 +463,37 @@ class _EditClientDialogState extends State<EditClientDialog> {
     // Pre-fill all fields with existing client data
     final client = widget.client;
     _nameCtrl.text = client['name'] ?? '';
-    _addressCtrl.text = client['street'] ?? '';
-    _numberCtrl.text = client['number'] ?? '';
-    _postCodeCtrl.text = client['post_code'] ?? '';
-    _cityCtrl.text = client['city'] ?? '';
-    _countryCtrl.text = client['country'] ?? '';
     _emailCtrl.text = client['email'] ?? '';
     _phoneCtrl.text = client['phone'] ?? '';
-    
+
+    // Set address data
+    _addressData = {
+      'country': client['country'] ?? 'Switzerland',
+      'area': client['area'] ?? '',
+      'city': client['city'] ?? '',
+      'postCode': client['post_code'] ?? '',
+      'street': client['street'] ?? '',
+      'streetNumber': client['number'] ?? '',
+    };
+
     final contactPerson = client['contact_person'] ?? {};
     _firstNameCtrl.text = contactPerson['first_name'] ?? '';
     _surnameCtrl.text = contactPerson['surname'] ?? '';
   }
 
+  void _onAddressChanged(Map<String, dynamic> addressData) {
+    setState(() {
+      _addressData = addressData;
+    });
+  }
+
   @override
   void dispose() {
     _nameCtrl.dispose();
-    _addressCtrl.dispose();
     _emailCtrl.dispose();
     _phoneCtrl.dispose();
     _firstNameCtrl.dispose();
     _surnameCtrl.dispose();
-    _countryCtrl.dispose();
-    _numberCtrl.dispose();
-    _postCodeCtrl.dispose();
-    _cityCtrl.dispose();
     super.dispose();
   }
 
@@ -428,7 +511,8 @@ class _EditClientDialogState extends State<EditClientDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('${AppLocalizations.of(context)!.edit} ${AppLocalizations.of(context)!.client}',
+                Text(
+                    '${AppLocalizations.of(context)!.edit} ${AppLocalizations.of(context)!.client}',
                     style: TextStyle(
                       color: colors.primaryBlue,
                       fontWeight: FontWeight.bold,
@@ -436,114 +520,77 @@ class _EditClientDialogState extends State<EditClientDialog> {
                     )),
                 const SizedBox(height: 20),
 
+                // Client Name field
                 TextFormField(
                   controller: _nameCtrl,
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.clientName,
                     filled: true,
-                    fillColor: colors.lightGray,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10)),
                   ),
-                  validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+                  validator: (v) =>
+                      v == null || v.trim().isEmpty ? 'Required' : null,
                   enabled: !_isSaving,
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
 
+                // Address widget
+                UserAddress(
+                  addressData: _addressData,
+                  onAddressChanged: _onAddressChanged,
+                  title: 'Address',
+                  isSwissAddress: true,
+                  showCard: false,
+                  showStreetAndNumber: true,
+                ),
+                const SizedBox(height: 20),
+
+                // Contact Person First Name
                 TextFormField(
                   controller: _firstNameCtrl,
                   decoration: InputDecoration(
-                    labelText: '${AppLocalizations.of(context)!.contactPerson} ${AppLocalizations.of(context)!.firstName}',
+                    labelText:
+                        '${AppLocalizations.of(context)!.contactPerson} ${AppLocalizations.of(context)!.firstName}',
                     filled: true,
-                    fillColor: colors.lightGray,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10)),
                   ),
                   enabled: !_isSaving,
                 ),
                 const SizedBox(height: 10),
 
+                // Contact Person Surname
                 TextFormField(
                   controller: _surnameCtrl,
                   decoration: InputDecoration(
-                    labelText: '${AppLocalizations.of(context)!.contactPerson} ${AppLocalizations.of(context)!.surname}',
+                    labelText:
+                        '${AppLocalizations.of(context)!.contactPerson} ${AppLocalizations.of(context)!.surname}',
                     filled: true,
-                    fillColor: colors.lightGray,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10)),
                   ),
                   enabled: !_isSaving,
                 ),
                 const SizedBox(height: 10),
 
-                TextFormField(
-                  controller: _addressCtrl,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.street,
-                    filled: true,
-                    fillColor: colors.lightGray,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  enabled: !_isSaving,
-                ),
-                const SizedBox(height: 10),
-
-                TextFormField(
-                  controller: _numberCtrl,
-                  decoration: InputDecoration(
-                    labelText: '${AppLocalizations.of(context)!.street} ${AppLocalizations.of(context)!.number}',
-                    filled: true,
-                    fillColor: colors.lightGray,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  enabled: !_isSaving,
-                ),
-                const SizedBox(height: 10),
-
-                TextFormField(
-                  controller: _postCodeCtrl,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.postCode,
-                    filled: true,
-                    fillColor: colors.lightGray,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  enabled: !_isSaving,
-                ),
-                const SizedBox(height: 10),
-
-                TextFormField(
-                  controller: _cityCtrl,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.city,
-                    filled: true,
-                    fillColor: colors.lightGray,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  enabled: !_isSaving,
-                ),
-                const SizedBox(height: 10),
-
-                TextFormField(
-                  controller: _countryCtrl,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.country,
-                    filled: true,
-                    fillColor: colors.lightGray,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  enabled: !_isSaving,
-                ),
-                const SizedBox(height: 10),
-
+                // Email field (simplified label)
                 TextFormField(
                   controller: _emailCtrl,
                   decoration: InputDecoration(
-                    labelText: '${AppLocalizations.of(context)!.clientName} ${AppLocalizations.of(context)!.email}',
+                    labelText: AppLocalizations.of(context)!.email,
                     filled: true,
-                    fillColor: colors.lightGray,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10)),
                   ),
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) return 'Required';
-                    final emailRegex = RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
+                    final emailRegex =
+                        RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
                     if (!emailRegex.hasMatch(v.trim())) return 'Invalid email';
                     return null;
                   },
@@ -551,13 +598,15 @@ class _EditClientDialogState extends State<EditClientDialog> {
                 ),
                 const SizedBox(height: 10),
 
+                // Phone field (simplified label)
                 TextFormField(
                   controller: _phoneCtrl,
                   decoration: InputDecoration(
-                    labelText: '${AppLocalizations.of(context)!.clientName} ${AppLocalizations.of(context)!.phone}',
+                    labelText: AppLocalizations.of(context)!.phone,
                     filled: true,
-                    fillColor: colors.lightGray,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10)),
                   ),
                   enabled: !_isSaving,
                 ),
@@ -581,17 +630,25 @@ class _EditClientDialogState extends State<EditClientDialog> {
                   children: [
                     TextButton(
                         child: Text(AppLocalizations.of(context)!.cancel),
-                        onPressed: _isSaving ? null : () => Navigator.of(context).pop(false)),
+                        onPressed: _isSaving
+                            ? null
+                            : () => Navigator.of(context).pop(false)),
                     const SizedBox(width: 18),
                     ElevatedButton(
                       child: _isSaving
-                          ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                          : Text(AppLocalizations.of(context)!.save, style: TextStyle(fontWeight: FontWeight.bold)),
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2))
+                          : Text(AppLocalizations.of(context)!.save,
+                              style: TextStyle(fontWeight: FontWeight.bold)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: colors.primaryBlue,
                         foregroundColor: colors.whiteTextOnBlue,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 32, vertical: 14),
                         elevation: 0,
                       ),
                       onPressed: _isSaving ? null : _save,
@@ -626,12 +683,12 @@ class _EditClientDialogState extends State<EditClientDialog> {
 
     String enteredName = _nameCtrl.text.trim();
     String originalName = widget.client['name'] ?? '';
-    
+
     // Check if name changed and if new name would create duplicate
     if (enteredName != originalName) {
       String newClientId = clientIdFromName(enteredName);
       String currentClientId = widget.client['id'];
-      
+
       // Only check for duplicates if the new ID would be different from current
       if (newClientId != currentClientId) {
         final docRef = FirebaseFirestore.instance
@@ -641,12 +698,12 @@ class _EditClientDialogState extends State<EditClientDialog> {
             .doc(newClientId);
 
         final docSnap = await docRef.get();
-        
+
         if (docSnap.exists) {
           // Try to find a unique ID by adding numbers
           String baseClientId = newClientId;
           int counter = 1;
-          
+
           while (true) {
             newClientId = "$baseClientId$counter";
             final testDoc = FirebaseFirestore.instance
@@ -658,7 +715,7 @@ class _EditClientDialogState extends State<EditClientDialog> {
             if (!testSnap.exists) break;
             counter++;
           }
-          
+
           setState(() {
             _isSaving = false;
             _error = 'Client name already exists. Suggested ID: $newClientId';
@@ -677,11 +734,12 @@ class _EditClientDialogState extends State<EditClientDialog> {
           .doc(widget.client['id'])
           .update({
         'name': _nameCtrl.text.trim(),
-        'street': _addressCtrl.text.trim(),
-        'number': _numberCtrl.text.trim(),
-        'post_code': _postCodeCtrl.text.trim(),
-        'city': _cityCtrl.text.trim(),
-        'country': _countryCtrl.text.trim(),
+        'street': _addressData['street'] ?? '',
+        'number': _addressData['streetNumber'] ?? '',
+        'post_code': _addressData['postCode'] ?? '',
+        'city': _addressData['city'] ?? '',
+        'country': _addressData['country'] ?? '',
+        'area': _addressData['area'] ?? '',
         'email': _emailCtrl.text.trim(),
         'phone': _phoneCtrl.text.trim(),
         'contact_person': {

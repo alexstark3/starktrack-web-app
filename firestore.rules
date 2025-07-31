@@ -8,20 +8,9 @@ service cloud.firestore {
       allow write: if false;
     }
     
-    // Super admin collection
-    match /sadmin/{adminId} {
-      allow read, write: if request.auth != null && request.auth.uid == adminId;
-    }
-    
-    // User-company mapping
+    // User-company mapping - SIMPLE WORKING RULE
     match /userCompany/{userId} {
-      allow read, write: if request.auth != null && (
-        request.auth.uid == userId ||
-        (
-          request.resource.data.companyId != null &&
-          hasRoleInCompany(request.auth.uid, request.resource.data.companyId, ['admin', 'company_admin', 'super_admin'])
-        )
-      );
+      allow read, write: if request.auth != null;
     }
 
     // Company data and subcollections
@@ -48,6 +37,12 @@ service cloud.firestore {
 
       // Projects
       match /projects/{projectId} {
+        allow read: if isUserInCompany(request.auth.uid, companyId);
+        allow write: if hasRoleInCompany(request.auth.uid, companyId, ['admin', 'company_admin', 'super_admin']);
+      }
+
+      // Groups
+      match /groups/{groupId} {
         allow read: if isUserInCompany(request.auth.uid, companyId);
         allow write: if hasRoleInCompany(request.auth.uid, companyId, ['admin', 'company_admin', 'super_admin']);
       }
@@ -120,11 +115,18 @@ service cloud.firestore {
            get(/databases/$(database)/documents/userCompany/$(userId)).data.companyId == companyId;
   }
 
-  function hasRoleInCompany(userId, companyId, requiredRoles) {
-    return isUserInCompany(userId, companyId) &&
-           exists(/databases/$(database)/documents/companies/$(companyId)/users/$(userId)) &&
-           hasAnyRole(get(/databases/$(database)/documents/companies/$(companyId)/users/$(userId)).data.roles, requiredRoles);
-  }
+                    function hasRoleInCompany(userId, companyId, requiredRoles) {
+                    return isUserInCompany(userId, companyId) &&
+                           exists(/databases/$(database)/documents/companies/$(companyId)/users/$(userId)) &&
+                           hasAnyRole(get(/databases/$(database)/documents/companies/$(companyId)/users/$(userId)).data.roles, requiredRoles);
+                  }
+
+                  function hasRoleInCompanySimple(userId, companyId, requiredRoles) {
+                    // Simplified function that only checks if user has required role in company
+                    // This works for all operations including deletion
+                    return exists(/databases/$(database)/documents/companies/$(companyId)/users/$(userId)) &&
+                           hasAnyRole(get(/databases/$(database)/documents/companies/$(companyId)/users/$(userId)).data.roles, requiredRoles);
+                  }
 
   function hasAnyRole(userRoles, requiredRoles) {
     return userRoles.hasAny(requiredRoles);

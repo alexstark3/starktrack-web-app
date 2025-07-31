@@ -821,4 +821,90 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get streetNumber => 'Hausnummer';
+
+  @override
+  String get projectsForThisClient => 'Projekte für diesen Kunden';
+
+  @override
+  String get noProjectsFoundForThisClient => 'Keine Projekte für diesen Kunden gefunden.';
+
+  @override
+  String get clientSummary => 'Kundenübersicht';
+
+  @override
+  String get addGroup => 'Gruppe hinzufügen';
+
+  @override
+  String get createFirstGroup => 'Erstellen Sie Ihre erste Gruppe, um zu beginnen';
+
+  @override
+  String get noGroupsMatchSearch => 'Keine Gruppen entsprechen Ihrer Suche';
+
+  @override
+  String get teamLeaderLabel => 'Teamleiter:';
+
+  @override
+  String get member => 'Mitglied';
+
+  @override
+  String get editGroup => 'Gruppe bearbeiten';
+
+  @override
+  String get deleteGroup => 'Gruppe löschen';
+
+  @override
+  String get groupName => 'Gruppenname';
+
+  @override
+  String get teamLeaderOptional => 'Teamleiter (Optional)';
+
+  @override
+  String get noTeamLeader => 'Kein Teamleiter';
+
+  @override
+  String get membersLabel => 'Mitglieder';
+
+  @override
+  String get searchMembers => 'Mitglieder suchen...';
+
+  @override
+  String get noAvailableMembers => 'Keine verfügbaren Mitglieder';
+
+  @override
+  String get noMembersMatchSearch => 'Keine Mitglieder entsprechen Ihrer Suche';
+
+  @override
+  String get unknownUser => 'Unbekannter Benutzer';
+
+  @override
+  String get unknownGroup => 'Unbekannte Gruppe';
+
+  @override
+  String get create => 'Erstellen';
+
+  @override
+  String get deleteGroupTitle => 'Gruppe löschen';
+
+  @override
+  String get deleteGroupConfirmation => 'Sind Sie sicher, dass Sie löschen möchten';
+
+  @override
+  String get deleteGroupCannotBeUndone => 'Diese Aktion kann nicht rückgängig gemacht werden';
+
+  @override
+  String get groupDeletedSuccessfully => 'Gruppe erfolgreich gelöscht';
+
+  @override
+  String get errorCreatingGroup => 'Fehler beim Erstellen der Gruppe';
+
+  @override
+  String get errorUpdatingGroup => 'Fehler beim Aktualisieren der Gruppe';
+
+  @override
+  String get errorDeletingGroup => 'Fehler beim Löschen der Gruppe';
+
+  @override
+  String errorGroupOperation(String operation, String error) {
+    return 'Fehler beim $operation der Gruppe: $error';
+  }
 }

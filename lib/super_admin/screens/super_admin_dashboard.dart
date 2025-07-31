@@ -37,29 +37,37 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
         .doc('global')
         .snapshots()
         .listen((doc) {
-      if (doc.exists && doc.data()?['forceLogout'] == true) {
-        setState(() => _forceLogout = true);
-      } else {
-        setState(() => _forceLogout = false);
+      if (mounted) {
+        if (doc.exists && doc.data()?['forceLogout'] == true) {
+          setState(() => _forceLogout = true);
+        } else {
+          setState(() => _forceLogout = false);
+        }
       }
     });
   }
 
   Future<void> _setForceLogout(bool value) async {
-    setState(() => _isForceLogoutLoading = true);
+    if (mounted) {
+      setState(() => _isForceLogoutLoading = true);
+    }
     await FirebaseFirestore.instance
         .collection('appConfig')
         .doc('global')
         .set({'forceLogout': value}, SetOptions(merge: true));
-    setState(() => _isForceLogoutLoading = false);
+    if (mounted) {
+      setState(() => _isForceLogoutLoading = false);
+    }
   }
 
   Future<void> _loadAdminData() async {
     final adminData = await SuperAdminAuthService.getAdminData();
-    setState(() {
-      _adminData = adminData;
-      _isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        _adminData = adminData;
+        _isLoading = false;
+      });
+    }
   }
 
   @override

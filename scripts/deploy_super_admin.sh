@@ -61,11 +61,11 @@ EOF
 # Commit changes and push to GitHub
 echo "📝 Committing changes..."
 git add .
-git commit -m "🚀 Update Super Admin version to $ADMIN_VERSION
+git commit -m "🔐 [SUPER ADMIN] Update version to $ADMIN_VERSION
 
 - Super Admin version: $ADMIN_VERSION
 - Main app version: $MAIN_VERSION+$BUILD_NUMBER
-- Built super admin app
+- Built super admin app only
 - Ready for deployment"
 
 echo "📤 Pushing to GitHub..."
