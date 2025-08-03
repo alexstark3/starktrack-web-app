@@ -659,6 +659,7 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
                 // Company List
                 Expanded(
                   child: ListView.builder(
+                    key: ValueKey('companies_management_list_$_searchQuery'),
                     padding: const EdgeInsets.all(16.0),
                     itemCount: _filteredCompanies.length,
                     itemBuilder: (context, index) {

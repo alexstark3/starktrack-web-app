@@ -29,7 +29,7 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
 
   // Holiday type selection
   bool _includeNationalHolidays = true;
-  bool _includeAreaHolidays = false;
+  bool _includeAreaHolidays = true;
 
   // Area selection
   Map<String, dynamic> _regionFilter = {
@@ -111,6 +111,14 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
         setState(() {
           _areaHolidays = areaHolidays;
         });
+
+        // Debug logging
+        print('DEBUG: Selected areas: $_selectedAreas');
+        print('DEBUG: Area holidays loaded: ${areaHolidays.length}');
+        for (final holiday in areaHolidays) {
+          print(
+              'DEBUG: Area holiday: ${holiday['name']} - Regions: ${holiday['regions']}');
+        }
       }
 
       setState(() {
@@ -145,6 +153,11 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
       // Clear holiday lists when region changes
       _nationalHolidays.clear();
       _areaHolidays.clear();
+
+      // Debug logging
+      print(
+          'DEBUG: Region changed - Country: ${regionData['country']}, Area: ${regionData['area']}');
+      print('DEBUG: Selected areas: $_selectedAreas');
     });
   }
 
@@ -195,9 +208,10 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
       setState(() => _isLoading = false);
       _showSuccessSnackBar('Added $addedCount national holidays');
 
-      if (widget.onHolidaysAdded != null) {
-        widget.onHolidaysAdded!();
-      }
+      // Don't close the dialog automatically - let user add area holidays too
+      // if (widget.onHolidaysAdded != null) {
+      //   widget.onHolidaysAdded!();
+      // }
     } catch (e) {
       setState(() => _isLoading = false);
       _showErrorSnackBar('Failed to add national holidays: $e');
@@ -251,9 +265,10 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
       setState(() => _isLoading = false);
       _showSuccessSnackBar('Added $addedCount area holidays');
 
-      if (widget.onHolidaysAdded != null) {
-        widget.onHolidaysAdded!();
-      }
+      // Don't close the dialog automatically - let user add more holidays
+      // if (widget.onHolidaysAdded != null) {
+      //   widget.onHolidaysAdded!();
+      // }
     } catch (e) {
       setState(() => _isLoading = false);
       _showErrorSnackBar('Failed to add area holidays: $e');
@@ -559,10 +574,13 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
                       SizedBox(
                         height: 200,
                         child: ListView.builder(
+                          key: ValueKey('national_holidays_list'),
                           itemCount: _nationalHolidays.length,
                           itemBuilder: (context, index) {
                             final holiday = _nationalHolidays[index];
                             return ListTile(
+                              key: ValueKey(
+                                  'national_holiday_${holiday['date']}'),
                               leading: Container(
                                 width: 20,
                                 height: 20,
@@ -595,7 +613,7 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _addNationalHolidays,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
+                            backgroundColor: appColors.primaryBlue,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -643,10 +661,12 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
                       SizedBox(
                         height: 200,
                         child: ListView.builder(
+                          key: ValueKey('area_holidays_list'),
                           itemCount: _areaHolidays.length,
                           itemBuilder: (context, index) {
                             final holiday = _areaHolidays[index];
                             return ListTile(
+                              key: ValueKey('area_holiday_${holiday['date']}'),
                               leading: Container(
                                 width: 20,
                                 height: 20,
@@ -693,7 +713,7 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _addAreaHolidays,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
+                            backgroundColor: appColors.primaryBlue,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),

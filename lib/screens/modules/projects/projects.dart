@@ -283,6 +283,7 @@ class _ProjectsListState extends State<_ProjectsList> {
                     final clientsMap = clientSnapshot.data ?? {};
 
                     return ListView.builder(
+                      key: ValueKey('projects_list_$_searchProject'),
                       itemCount: filtered.length,
                       itemBuilder: (context, index) {
                         final doc = filtered[index];
@@ -313,6 +314,7 @@ class _ProjectsListState extends State<_ProjectsList> {
                         final isActive = data['active'] == true;
 
                         return Card(
+                          key: ValueKey('project_item_${doc.id}'),
                           margin: const EdgeInsets.only(bottom: 12),
                           elevation: 2,
                           shape: RoundedRectangleBorder(

@@ -580,6 +580,7 @@ class _AdminPanelState extends State<AdminPanel> {
                 }
 
                 return ListView.builder(
+                  key: ValueKey('admin_users_list_$_searchText'),
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   itemCount: filteredUsers.length,
                   itemBuilder: (context, index) {
@@ -589,6 +590,7 @@ class _AdminPanelState extends State<AdminPanel> {
                         data['roles']?.contains('super_admin') == true;
 
                     return Card(
+                      key: ValueKey('admin_user_item_${doc.id}'),
                       color: appColors.backgroundLight,
                       margin: const EdgeInsets.only(bottom: 12),
                       child: Padding(

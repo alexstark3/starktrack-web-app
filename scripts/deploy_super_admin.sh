@@ -1,4 +1,5 @@
 #!/bin/bash
+#.scripts\deploy_super_admin.sh
 echo "🚀 Starting Super Admin version update and deployment..."
 
 # Check if we're in a git repository

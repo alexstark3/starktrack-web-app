@@ -25,6 +25,13 @@ class MembersTab extends StatefulWidget {
 
 class _MembersTabState extends State<MembersTab> {
   String _search = '';
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +65,7 @@ class _MembersTabState extends State<MembersTab> {
               borderRadius: BorderRadius.circular(10),
             ),
             child: TextField(
+              controller: _searchController,
               decoration: InputDecoration(
                 hintText:
                     AppLocalizations.of(context)?.searchByNameSurnameEmail ??
@@ -162,6 +170,7 @@ class _MembersTable extends StatelessWidget {
         }
 
         return ListView.builder(
+          key: ValueKey('members_list_$search'),
           itemCount: filtered.length,
           itemBuilder: (context, index) {
             final doc = filtered[index];
@@ -173,6 +182,7 @@ class _MembersTable extends StatelessWidget {
             final modules = _formatModules(data['modules'] as List?, l10n);
 
             return Container(
+              key: ValueKey('member_item_${doc.id}'),
               margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
                 color: Theme.of(context).brightness == Brightness.dark

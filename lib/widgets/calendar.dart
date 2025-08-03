@@ -408,11 +408,11 @@ class _CustomCalendarState extends State<CustomCalendar> {
     return SizedBox(
       width: 40,
       child: Container(
-        height: 40,
-        margin: const EdgeInsets.all(2),
+        height: 32, // Reduced from 40 to match day cells
+        margin: const EdgeInsets.all(1), // Reduced from 2 to match day cells
         decoration: BoxDecoration(
           color: appColors.backgroundLight,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(6), // Reduced from 8
           border: Border.all(color: appColors.lightGray.withValues(alpha: 0.3)),
         ),
         child: Center(
@@ -437,7 +437,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
       constraints: const BoxConstraints(
         maxWidth: 400,
         minWidth: 350,
-        maxHeight: 500,
+        maxHeight: 400, // Reduced from 500 to prevent overflow
       ),
       decoration: BoxDecoration(
         color: appColors.cardColorDark,
@@ -493,76 +493,85 @@ class _CustomCalendarState extends State<CustomCalendar> {
           ),
 
           // Calendar Grid
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                // Day headers
-                Row(
-                  children: [
-                    if (_showWeekNumbers)
-                      SizedBox(
-                        width: 40,
-                        child: Text(
-                          'Wk',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: appColors.midGray,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ..._getDayHeaders().map((day) => Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: Text(
-                              day,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: appColors.midGray,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              textAlign: TextAlign.center,
+          Flexible(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Day headers
+                  Row(
+                    children: [
+                      if (_showWeekNumbers)
+                        SizedBox(
+                          width: 40,
+                          child: Text(
+                            'Wk',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: appColors.midGray,
+                              fontWeight: FontWeight.w500,
                             ),
+                            textAlign: TextAlign.center,
                           ),
-                        )),
-                  ],
-                ),
+                        ),
+                      ..._getDayHeaders().map((day) => Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Text(
+                                day,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: appColors.midGray,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          )),
+                    ],
+                  ),
 
-                // Calendar days
-                ..._buildCalendarDays(appColors, theme),
-
-                const SizedBox(height: 16),
-
-                // Action buttons
-                Row(
-                  children: [
-                    // Settings cog button
-                    IconButton(
-                      onPressed: _showSettings,
-                      icon: Icon(Icons.settings, color: appColors.primaryBlue),
-                      tooltip: 'Calendar Settings',
+                  // Calendar days
+                  Flexible(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: _buildCalendarDays(appColors, theme),
                     ),
-                    const Spacer(),
-                    TextButton(
-                      onPressed: _goToToday,
-                      child: Text(
-                        'Today',
-                        style: TextStyle(color: appColors.primaryBlue),
+                  ),
+
+                  const SizedBox(height: 8), // Reduced from 16
+
+                  // Action buttons
+                  Row(
+                    children: [
+                      // Settings cog button
+                      IconButton(
+                        onPressed: _showSettings,
+                        icon:
+                            Icon(Icons.settings, color: appColors.primaryBlue),
+                        tooltip: 'Calendar Settings',
                       ),
-                    ),
-                    if (_dateRange?.hasSelection == true) ...[
-                      const SizedBox(width: 8),
+                      const Spacer(),
                       TextButton(
-                        onPressed: _clearSelection,
+                        onPressed: _goToToday,
                         child: Text(
-                          'Clear',
-                          style: TextStyle(color: appColors.red),
+                          'Today',
+                          style: TextStyle(color: appColors.primaryBlue),
                         ),
                       ),
+                      if (_dateRange?.hasSelection == true) ...[
+                        const SizedBox(width: 8),
+                        TextButton(
+                          onPressed: _clearSelection,
+                          child: Text(
+                            'Clear',
+                            style: TextStyle(color: appColors.red),
+                          ),
+                        ),
+                      ],
                     ],
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -642,11 +651,11 @@ class _CustomCalendarState extends State<CustomCalendar> {
       child: GestureDetector(
         onTap: isDisabled ? null : () => _onDateSelected(date),
         child: Container(
-          height: 40,
-          margin: const EdgeInsets.all(2),
+          height: 32, // Reduced from 40 to save space
+          margin: const EdgeInsets.all(1), // Reduced from 2 to save space
           decoration: BoxDecoration(
             color: backgroundColor,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(6), // Reduced from 8
             border: isToday && widget.showTodayIndicator
                 ? Border.all(color: appColors.primaryBlue, width: 2)
                 : null,
@@ -654,7 +663,8 @@ class _CustomCalendarState extends State<CustomCalendar> {
           child: Center(
             child: Text(
               '${date.day}',
-              style: theme.textTheme.bodyMedium?.copyWith(
+              style: theme.textTheme.bodySmall?.copyWith(
+                // Changed from bodyMedium to bodySmall
                 color: textColor,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),

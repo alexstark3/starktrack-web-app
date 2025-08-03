@@ -21,17 +21,37 @@ class AreaHolidayService {
       final areaHolidays =
           holidays.where((holiday) => !holiday.isNational).toList();
 
+      print('DEBUG: Total holidays from API: ${holidays.length}');
+      print(
+          'DEBUG: National holidays: ${holidays.where((h) => h.isNational).length}');
+      print('DEBUG: Area holidays: ${areaHolidays.length}');
+
       // Filter by selected areas if specified
       List<ApiHoliday> filteredHolidays;
       if (selectedAreas.isNotEmpty && selectedAreas.first != 'all') {
         filteredHolidays = areaHolidays.where((holiday) {
           // Check if holiday applies to any of the selected areas
+          // Simple direct match since all regions are now in the same format
           return holiday.regions
                   ?.any((region) => selectedAreas.contains(region)) ??
               false;
         }).toList();
       } else {
+        // If no specific areas selected, show all area holidays
         filteredHolidays = areaHolidays;
+      }
+
+      // Debug logging
+      print('DEBUG: Total area holidays from API: ${areaHolidays.length}');
+      print('DEBUG: Selected areas: $selectedAreas');
+      print('DEBUG: Filtered area holidays: ${filteredHolidays.length}');
+
+      // Show which holidays match the selected areas
+      if (selectedAreas.isNotEmpty && selectedAreas.first != 'all') {
+        print('DEBUG: Matching holidays for areas $selectedAreas:');
+        for (final holiday in filteredHolidays) {
+          print('DEBUG: - ${holiday.name}: ${holiday.regions}');
+        }
       }
 
       return filteredHolidays.map((holiday) {
@@ -84,7 +104,7 @@ class AreaHolidayService {
           'assignTo': 'region',
           'region': {
             'country': countryCode,
-            'area': holiday['regions'],
+            'area': holiday['regions'], // Already cleaned without CH- prefix
             'city': '',
             'postCode': '',
           },

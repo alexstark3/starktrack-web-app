@@ -97,6 +97,7 @@ class _HolidayPolicyListDialogState extends State<HolidayPolicyListDialog> {
                       }
 
                       return ListView.builder(
+                        key: ValueKey('holiday_policies_list'),
                         itemCount: policies.length,
                         itemBuilder: (context, index) {
                           final policy =

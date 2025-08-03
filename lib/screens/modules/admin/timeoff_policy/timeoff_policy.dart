@@ -94,6 +94,7 @@ class _TimeOffPolicyListDialogState extends State<TimeOffPolicyListDialog> {
                       }
 
                       return ListView.builder(
+                        key: ValueKey('timeoff_policies_list'),
                         itemCount: policies.length,
                         itemBuilder: (context, index) {
                           final policy =
@@ -131,6 +132,7 @@ class _TimeOffPolicyListDialogState extends State<TimeOffPolicyListDialog> {
                           }
 
                           return Card(
+                            key: ValueKey('timeoff_policy_item_$policyId'),
                             margin: const EdgeInsets.only(bottom: 12),
                             color: appColors.cardColorDark,
                             shape: RoundedRectangleBorder(

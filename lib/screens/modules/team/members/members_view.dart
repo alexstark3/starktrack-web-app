@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../services/overtime_calculation_service.dart';
 import 'add_new_session.dart';
 
 const double kFilterHeight = 38;
@@ -36,7 +37,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
   GroupType groupType = GroupType.day;
   bool _isCardExpanded = false; // New state for card expansion
 
-  final dateFormat = DateFormat('yyyy-MM-dd');
+  final dateFormat = DateFormat('dd/MM/yyyy');
   final TextEditingController _projectController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
 
@@ -543,7 +544,7 @@ class _StatusIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final todayStr = DateFormat('dd/MM/yyyy').format(DateTime.now());
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('companies')
@@ -707,7 +708,7 @@ class _LogsTableState extends State<_LogsTable> {
     final end = (sessionData['end'] as Timestamp?)?.toDate();
     final project = sessionData['project'] ?? '';
     final sessionDate =
-        begin != null ? DateFormat('yyyy-MM-dd').format(begin) : '';
+        begin != null ? DateFormat('dd/MM/yyyy').format(begin) : '';
     final timeRange = begin != null && end != null
         ? '${DateFormat('HH:mm').format(begin)} - ${DateFormat('HH:mm').format(end)}'
         : '';
@@ -794,6 +795,14 @@ class _LogsTableState extends State<_LogsTable> {
     return '${m}m';
   }
 
+  // Helper for formatting overtime hours consistently
+  String _formatOvertimeHours(double hours) {
+    final h = hours.floor();
+    final m = ((hours - h) * 60).round();
+    if (h > 0) return '${h}h ${m.toString().padLeft(2, '0')}m';
+    return '${m}m';
+  }
+
   int _weekNumber(DateTime date) {
     // ISO 8601: Week 1 is the week containing January 4th
     final jan4 = DateTime(date.year, 1, 4);
@@ -812,6 +821,255 @@ class _LogsTableState extends State<_LogsTable> {
         return l10n.perDiem;
       default:
         return key;
+    }
+  }
+
+  String _getDayIndicator(String dateKey) {
+    try {
+      final date = DateFormat('dd/MM/yyyy').parse(dateKey);
+      final weekday = date.weekday;
+      switch (weekday) {
+        case 1:
+          return 'Mo';
+        case 2:
+          return 'Tu';
+        case 3:
+          return 'We';
+        case 4:
+          return 'Th';
+        case 5:
+          return 'Fr';
+        case 6:
+          return 'Sa';
+        case 7:
+          return 'Su';
+        default:
+          return '';
+      }
+    } catch (e) {
+      return '';
+    }
+  }
+
+  bool _isWeekend(String dateKey) {
+    try {
+      final date = DateFormat('dd/MM/yyyy').parse(dateKey);
+      return date.weekday >= 6; // Saturday = 6, Sunday = 7
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<Map<String, dynamic>?> _calculateDailyOvertime(
+      String userId, String date) async {
+    try {
+      // Convert EU date format (dd/MM/yyyy) to ISO format (yyyy-MM-dd) for the service
+      final euDate = DateFormat('dd/MM/yyyy').parse(date);
+      final isoDate = DateFormat('yyyy-MM-dd').format(euDate);
+
+      final result = await OvertimeCalculationService.calculateOvertimeFromLogs(
+        widget.companyId,
+        userId,
+        fromDate: euDate,
+        toDate: euDate.add(const Duration(days: 1)),
+      );
+
+      // Find the calculation details for this specific date
+      final calculationDetails =
+          result['calculationDetails'] as List<Map<String, dynamic>>? ?? [];
+      for (final dayDetail in calculationDetails) {
+        if (dayDetail['date'] == isoDate) {
+          return {
+            'overtimeMinutes': dayDetail['overtimeMinutes'] ?? 0,
+            'overtimeHours': dayDetail['overtimeHours'] ?? '0.00',
+            'reason': '',
+            'expectedHours': dayDetail['expectedHours'] ?? '8.00',
+          };
+        }
+      }
+      return null;
+    } catch (e) {
+      print('Error calculating daily overtime: $e');
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> _calculateWeeklyOvertime(
+      String userId, String weekKey) async {
+    try {
+      // Parse week key format: "Week X, YYYY"
+      final parts = weekKey.split(', ');
+      final year = int.parse(parts[1]);
+      final weekNumber = int.parse(parts[0].split(' ')[1]);
+
+      // Calculate the start date of the week
+      final jan4 = DateTime(year, 1, 4);
+      final startOfYear = jan4.subtract(Duration(days: jan4.weekday - 1));
+      final weekStart = startOfYear.add(Duration(days: (weekNumber - 1) * 7));
+      final weekEnd = weekStart.add(const Duration(days: 7));
+
+      print('DEBUG: Calculating overtime for week $weekNumber, year $year');
+      print('DEBUG: Week start: ${DateFormat('yyyy-MM-dd').format(weekStart)}');
+      print('DEBUG: Week end: ${DateFormat('yyyy-MM-dd').format(weekEnd)}');
+
+      // Additional debug for week calculation
+      if (weekNumber == 27) {
+        print('DEBUG: WEEK 27 - Week key: $weekKey');
+        print('DEBUG: WEEK 27 - Parsed year: $year, week number: $weekNumber');
+        print(
+            'DEBUG: WEEK 27 - Jan 4 date: ${DateFormat('yyyy-MM-dd').format(jan4)}');
+        print(
+            'DEBUG: WEEK 27 - Start of year: ${DateFormat('yyyy-MM-dd').format(startOfYear)}');
+        print(
+            'DEBUG: WEEK 27 - Week start calculation: ${DateFormat('yyyy-MM-dd').format(weekStart)}');
+        print(
+            'DEBUG: WEEK 27 - Week end calculation: ${DateFormat('yyyy-MM-dd').format(weekEnd)}');
+      }
+
+      // Calculate overtime for the entire week at once (not from user start date)
+      final result = await OvertimeCalculationService.calculateOvertimeFromLogs(
+        widget.companyId,
+        userId,
+        fromDate: weekStart,
+        toDate: weekEnd,
+      );
+
+      final calculationDetails =
+          result['calculationDetails'] as List<Map<String, dynamic>>? ?? [];
+      int totalOvertimeMinutes = 0;
+
+      print(
+          'DEBUG: Found ${calculationDetails.length} days with data for week $weekNumber');
+
+      for (final dayDetail in calculationDetails) {
+        final dayOvertimeMinutes = dayDetail['overtimeMinutes'] as int? ?? 0;
+        totalOvertimeMinutes += dayOvertimeMinutes;
+        print(
+            'DEBUG: Day ${dayDetail['date']} - overtime: ${dayOvertimeMinutes} minutes');
+      }
+
+      final totalOvertimeHours = (totalOvertimeMinutes / 60).toStringAsFixed(2);
+      final reason = '';
+
+      print(
+          'DEBUG: Total overtime for week $weekNumber: $totalOvertimeMinutes minutes ($totalOvertimeHours hours)');
+
+      // Special debug for week 27
+      if (weekNumber == 27) {
+        print('DEBUG: WEEK 27 - Result: SUCCESS');
+        print(
+            'DEBUG: WEEK 27 - Calculation details length: ${calculationDetails.length}');
+        print('DEBUG: WEEK 27 - Total overtime minutes: $totalOvertimeMinutes');
+        print('DEBUG: WEEK 27 - Total overtime hours: $totalOvertimeHours');
+
+        // Additional debug for week 27
+        print('DEBUG: WEEK 27 - Raw result keys: ${result.keys.toList()}');
+        print('DEBUG: WEEK 27 - Current overtime: ${result['current']}');
+        print(
+            'DEBUG: WEEK 27 - Transferred overtime: ${result['transferred']}');
+        print('DEBUG: WEEK 27 - Used overtime: ${result['used']}');
+
+        // Check if the calculation details have the expected data
+        for (int i = 0; i < calculationDetails.length; i++) {
+          final detail = calculationDetails[i];
+          print(
+              'DEBUG: WEEK 27 - Day $i: date=${detail['date']}, worked=${detail['minutesWorked']}, expected=${detail['expectedMinutes']}, overtime=${detail['overtimeMinutes']}');
+
+          // Additional debug for null worked minutes
+          if (detail['minutesWorked'] == null) {
+            print(
+                'DEBUG: WEEK 27 - WARNING: minutesWorked is null for date ${detail['date']}');
+            print('DEBUG: WEEK 27 - Full detail: $detail');
+          }
+        }
+      }
+
+      return {
+        'overtimeMinutes': totalOvertimeMinutes,
+        'overtimeHours': totalOvertimeHours,
+        'reason': reason,
+      };
+    } catch (e) {
+      print('Error calculating weekly overtime: $e');
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> _calculateMonthlyOvertime(
+      String userId, String monthKey) async {
+    try {
+      // Parse month key format: "MMMM YYYY"
+      final monthDate = DateFormat('MMMM yyyy').parse(monthKey);
+      final monthStart = DateTime(monthDate.year, monthDate.month, 1);
+      final monthEnd = DateTime(monthDate.year, monthDate.month + 1, 1);
+
+      // Calculate overtime for the entire month at once (not from user start date)
+      final result = await OvertimeCalculationService.calculateOvertimeFromLogs(
+        widget.companyId,
+        userId,
+        fromDate: monthStart,
+        toDate: monthEnd,
+      );
+
+      final calculationDetails =
+          result['calculationDetails'] as List<Map<String, dynamic>>? ?? [];
+      int totalOvertimeMinutes = 0;
+
+      for (final dayDetail in calculationDetails) {
+        final dayOvertimeMinutes = dayDetail['overtimeMinutes'] as int? ?? 0;
+        totalOvertimeMinutes += dayOvertimeMinutes;
+      }
+
+      final totalOvertimeHours = (totalOvertimeMinutes / 60).toStringAsFixed(2);
+      final reason = '';
+
+      return {
+        'overtimeMinutes': totalOvertimeMinutes,
+        'overtimeHours': totalOvertimeHours,
+        'reason': reason,
+      };
+    } catch (e) {
+      print('Error calculating monthly overtime: $e');
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> _calculateYearlyOvertime(
+      String userId, String yearKey) async {
+    try {
+      // Parse year key format: "YYYY"
+      final year = int.parse(yearKey);
+      final yearStart = DateTime(year, 1, 1);
+      final yearEnd = DateTime(year + 1, 1, 1);
+
+      // Calculate overtime for the entire year at once (not from user start date)
+      final result = await OvertimeCalculationService.calculateOvertimeFromLogs(
+        widget.companyId,
+        userId,
+        fromDate: yearStart,
+        toDate: yearEnd,
+      );
+
+      final calculationDetails =
+          result['calculationDetails'] as List<Map<String, dynamic>>? ?? [];
+      int totalOvertimeMinutes = 0;
+
+      for (final dayDetail in calculationDetails) {
+        final dayOvertimeMinutes = dayDetail['overtimeMinutes'] as int? ?? 0;
+        totalOvertimeMinutes += dayOvertimeMinutes;
+      }
+
+      final totalOvertimeHours = (totalOvertimeMinutes / 60).toStringAsFixed(2);
+      final reason = '';
+
+      return {
+        'overtimeMinutes': totalOvertimeMinutes,
+        'overtimeHours': totalOvertimeHours,
+        'reason': reason,
+      };
+    } catch (e) {
+      print('Error calculating yearly overtime: $e');
+      return null;
     }
   }
 
@@ -938,7 +1196,7 @@ class _LogsTableState extends State<_LogsTable> {
           else {
             switch (widget.groupType) {
               case GroupType.day:
-                key = DateFormat('yyyy-MM-dd').format(entry.begin!);
+                key = DateFormat('dd/MM/yyyy').format(entry.begin!);
                 break;
               case GroupType.week:
                 final week = _weekNumber(entry.begin!);
@@ -960,7 +1218,10 @@ class _LogsTableState extends State<_LogsTable> {
           ..sort((a, b) {
             if (widget.groupType == GroupType.day) {
               try {
-                return DateTime.parse(b).compareTo(DateTime.parse(a));
+                // Parse EU date format (dd/MM/yyyy) for sorting
+                final dateA = DateFormat('dd/MM/yyyy').parse(a);
+                final dateB = DateFormat('dd/MM/yyyy').parse(b);
+                return dateB.compareTo(dateA);
               } catch (_) {}
             } else if (widget.groupType == GroupType.year) {
               return int.parse(b).compareTo(int.parse(a));
@@ -988,6 +1249,7 @@ class _LogsTableState extends State<_LogsTable> {
             NumberFormat.currency(symbol: "CHF ", decimalDigits: 2);
 
         return ListView.builder(
+          key: ValueKey('member_history_list_${widget.userId}'),
           physics: const AlwaysScrollableScrollPhysics(),
           cacheExtent: 1000,
           addAutomaticKeepAlives: false,
@@ -1005,6 +1267,7 @@ class _LogsTableState extends State<_LogsTable> {
             });
 
             return Card(
+              key: ValueKey('member_history_group_$groupKey'),
               margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
               elevation: isDark ? 0 : 4,
               color: isDark ? appColors.cardColorDark : Colors.white,
@@ -1027,12 +1290,44 @@ class _LogsTableState extends State<_LogsTable> {
                         topRight: Radius.circular(12),
                       ),
                     ),
-                    child: Text(
-                      groupKey,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.primary,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            // Day indicator
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: _isWeekend(groupKey)
+                                    ? Colors.red.withValues(alpha: 0.2)
+                                    : theme.colorScheme.primary
+                                        .withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                _getDayIndicator(groupKey),
+                                style: TextStyle(
+                                  color: _isWeekend(groupKey)
+                                      ? Colors.red
+                                      : theme.colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              groupKey,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                   // Group entries
@@ -1055,8 +1350,8 @@ class _LogsTableState extends State<_LogsTable> {
                     return ListTile(
                       title: Text(
                         (entry.begin != null && entry.end != null)
-                            ? '${DateFormat('yyyy-MM-dd').format(entry.begin!)}  ${DateFormat('HH:mm').format(entry.begin!)} - ${DateFormat('HH:mm').format(entry.end!)}'
-                            : entry.sessionDate,
+                            ? '${_getDayIndicator(DateFormat('dd/MM/yyyy').format(entry.begin!))} ${DateFormat('dd/MM/yyyy').format(entry.begin!)}  ${DateFormat('HH:mm').format(entry.begin!)} - ${DateFormat('HH:mm').format(entry.end!)}'
+                            : '${DateFormat('HH:mm').format(entry.begin!)} - ${DateFormat('HH:mm').format(entry.end!)}',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color:
@@ -1272,35 +1567,183 @@ class _LogsTableState extends State<_LogsTable> {
                           ),
                         ];
 
-                        // Add overtime calculation for week groupings
-                        if (widget.groupType == GroupType.week &&
-                            userSnapshot.hasData) {
-                          final userData = userSnapshot.data!.data()
-                              as Map<String, dynamic>?;
-                          final weeklyHours =
-                              (userData?['weeklyHours'] ?? 40) as int;
-                          final weeklyMinutes = weeklyHours * 60;
-                          final overtimeMinutes =
-                              groupTotal.inMinutes - weeklyMinutes;
-
-                          if (overtimeMinutes != 0) {
-                            final isOvertime = overtimeMinutes > 0;
-                            final color =
-                                isOvertime ? Colors.green : Colors.red;
-                            final sign = isOvertime ? '+' : '-';
-
-                            totalWidgets.add(
-                              Text(
-                                '${AppLocalizations.of(context)!.overtime}: $sign${_formatDuration(Duration(minutes: overtimeMinutes.abs()))}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  color: color,
+                        // Add overtime calculation for all grouping types
+                        if (userSnapshot.hasData) {
+                          // If date range filtering is active, calculate overtime for entire range
+                          if (widget.fromDate != null ||
+                              widget.toDate != null) {
+                            print(
+                                'DEBUG: Date range filtering active - fromDate: ${widget.fromDate}, toDate: ${widget.toDate}');
+                            // Only show overtime for the first group when date range filtering is active
+                            if (groupIdx == 0) {
+                              return FutureBuilder<Map<String, dynamic>?>(
+                                future: OvertimeCalculationService
+                                    .calculateOvertimeFromLogs(
+                                  widget.companyId,
+                                  widget.userId,
+                                  fromDate: widget.fromDate,
+                                  toDate: widget.toDate,
                                 ),
-                              ),
+                                builder: (context, overtimeSnapshot) {
+                                  if (overtimeSnapshot.hasData &&
+                                      overtimeSnapshot.data != null) {
+                                    final overtimeData = overtimeSnapshot.data!;
+                                    final overtimeMinutes =
+                                        overtimeData['current'] as int? ?? 0;
+                                    final overtimeHours = (overtimeMinutes / 60)
+                                        .toStringAsFixed(2);
+
+                                    // Show overtime even when 0 for debugging
+                                    final isOvertime = overtimeMinutes > 0;
+                                    final color =
+                                        isOvertime ? Colors.green : Colors.red;
+                                    final sign = isOvertime ? '+' : '-';
+
+                                    print(
+                                        'DEBUG: Adding overtime to totalWidgets (date range): $sign${overtimeHours}h for group $groupIdx');
+                                    totalWidgets.add(
+                                      Text(
+                                        'Overtime: $sign${_formatOvertimeHours(overtimeMinutes / 60)}',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          color: color,
+                                        ),
+                                      ),
+                                    );
+                                  }
+
+                                  print(
+                                      'DEBUG: totalWidgets count (date range): ${totalWidgets.length}');
+                                  return Wrap(
+                                    spacing: 16,
+                                    runSpacing: 4,
+                                    children: totalWidgets,
+                                  );
+                                },
+                              );
+                            } else {
+                              // For other groups when date range filtering is active, don't show overtime
+                              print(
+                                  'DEBUG: Date range filtering - not showing overtime for group $groupIdx');
+                              return Wrap(
+                                spacing: 16,
+                                runSpacing: 4,
+                                children: totalWidgets,
+                              );
+                            }
+                          } else {
+                            // Calculate overtime based on grouping type (only when no date range filtering)
+                            print(
+                                'DEBUG: No date range filtering - using group type calculation for group $groupIdx');
+                            Future<Map<String, dynamic>?> overtimeFuture;
+
+                            switch (widget.groupType) {
+                              case GroupType.day:
+                                overtimeFuture = _calculateDailyOvertime(
+                                    widget.userId, groupKey);
+                                break;
+                              case GroupType.week:
+                                print(
+                                    'DEBUG: Calling _calculateWeeklyOvertime for groupKey: $groupKey');
+                                overtimeFuture = _calculateWeeklyOvertime(
+                                    widget.userId, groupKey);
+                                break;
+                              case GroupType.month:
+                                overtimeFuture = _calculateMonthlyOvertime(
+                                    widget.userId, groupKey);
+                                break;
+                              case GroupType.year:
+                                overtimeFuture = _calculateYearlyOvertime(
+                                    widget.userId, groupKey);
+                                break;
+                            }
+
+                            return FutureBuilder<Map<String, dynamic>?>(
+                              future: overtimeFuture,
+                              builder: (context, overtimeSnapshot) {
+                                if (overtimeSnapshot.hasData &&
+                                    overtimeSnapshot.data != null) {
+                                  final overtimeData = overtimeSnapshot.data!;
+                                  final overtimeMinutes =
+                                      overtimeData['overtimeMinutes'] as int? ??
+                                          0;
+                                  final overtimeHours =
+                                      overtimeData['overtimeHours']
+                                              as String? ??
+                                          '0.00';
+
+                                  // Show overtime even when 0 for debugging
+                                  final isOvertime = overtimeMinutes > 0;
+                                  final color =
+                                      isOvertime ? Colors.green : Colors.red;
+                                  final sign = isOvertime ? '+' : '-';
+
+                                  print(
+                                      'DEBUG: Adding overtime to totalWidgets (group type): $sign${overtimeHours}h for group $groupIdx');
+
+                                  // Check if overtime is already added to prevent duplicates
+                                  bool overtimeAlreadyAdded = false;
+                                  for (final widget in totalWidgets) {
+                                    if (widget is Text &&
+                                        widget.data
+                                                ?.toString()
+                                                .contains('Overtime:') ==
+                                            true) {
+                                      overtimeAlreadyAdded = true;
+                                      break;
+                                    }
+                                  }
+
+                                  if (!overtimeAlreadyAdded) {
+                                    totalWidgets.add(
+                                      Text(
+                                        'Overtime: $sign${_formatOvertimeHours(overtimeMinutes / 60)}',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          color: color,
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    print(
+                                        'DEBUG: Overtime already added for group $groupIdx - skipping duplicate');
+                                  }
+
+                                  // For week 27, let's show the breakdown
+                                  if (groupKey.contains('Week 27')) {
+                                    print('DEBUG: WEEK 27 BREAKDOWN:');
+                                    final calculationDetails = overtimeData[
+                                                'calculationDetails']
+                                            as List<Map<String, dynamic>>? ??
+                                        [];
+                                    for (final dayDetail
+                                        in calculationDetails) {
+                                      final dayOvertime =
+                                          dayDetail['overtimeMinutes']
+                                                  as int? ??
+                                              0;
+                                      final date =
+                                          dayDetail['date'] as String? ??
+                                              'unknown';
+                                      print(
+                                          'DEBUG: WEEK 27 - $date: $dayOvertime minutes');
+                                    }
+                                  }
+                                }
+
+                                print(
+                                    'DEBUG: totalWidgets count (group type): ${totalWidgets.length}');
+                                return Wrap(
+                                  spacing: 16,
+                                  runSpacing: 4,
+                                  children: totalWidgets,
+                                );
+                              },
                             );
                           }
                         }
 
+                        // Return default totals if no user data
                         return Wrap(
                           spacing: 16,
                           runSpacing: 4,
@@ -1388,7 +1831,7 @@ class _EditLogDialogState extends State<_EditLogDialog> {
     final data = widget.logDoc.data() as Map<String, dynamic>;
     final begin = (data['begin'] as Timestamp?)?.toDate();
     final sessionDate =
-        begin != null ? DateFormat('yyyy-MM-dd').format(begin) : '';
+        begin != null ? DateFormat('dd/MM/yyyy').format(begin) : '';
 
     bool perDiemUsedElsewhere = false;
     if (sessionDate.isNotEmpty) {

@@ -541,6 +541,8 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                       // Data list (not table): every log in a Card
                       Expanded(
                         child: ListView.builder(
+                          key: ValueKey(
+                              'project_logs_list_${widget.project['id']}'),
                           padding: const EdgeInsets.only(bottom: 24, top: 8),
                           itemCount: filteredLogs.length,
                           itemBuilder: (context, idx) {
@@ -585,6 +587,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                             } catch (_) {}
 
                             return Container(
+                              key: ValueKey('project_log_${log['id'] ?? idx}'),
                               margin: const EdgeInsets.symmetric(
                                   vertical: 10, horizontal: 4),
                               decoration: BoxDecoration(

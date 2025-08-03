@@ -93,13 +93,28 @@ class ApiHoliday {
   });
 
   factory ApiHoliday.fromNagerJson(Map<String, dynamic> json) {
+    final isNational = json['global'] == true;
+    final rawRegions =
+        json['counties'] != null ? List<String>.from(json['counties']) : null;
+
+    // Remove country code prefix (e.g., "CH-LU" becomes "LU")
+    final regions = rawRegions?.map((region) {
+      if (region.startsWith('CH-')) {
+        return region.substring(3); // Remove "CH-" prefix
+      }
+      return region;
+    }).toList();
+
+    // Debug logging for API response
+    print(
+        'DEBUG: API Holiday - Name: ${json['name']}, Global: ${json['global']}, Counties: $regions');
+
     return ApiHoliday(
       name: json['name'] ?? '',
       date: DateTime.parse(json['date']),
       countryCode: json['countryCode'] ?? '',
-      regions:
-          json['counties'] != null ? List<String>.from(json['counties']) : null,
-      isNational: json['global'] == true,
+      regions: regions,
+      isNational: isNational,
       type: json['types']?.first,
     );
   }

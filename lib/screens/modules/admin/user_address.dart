@@ -490,6 +490,7 @@ class _UserAddressState extends State<UserAddress> {
                                         const SizedBox(height: 12),
                                         Flexible(
                                           child: ListView.builder(
+                                            key: ValueKey('areas_list'),
                                             shrinkWrap: true,
                                             itemCount: _areas.length,
                                             itemBuilder: (context, index) {
@@ -499,6 +500,8 @@ class _UserAddressState extends State<UserAddress> {
                                                       .contains(area);
 
                                               return Column(
+                                                key:
+                                                    ValueKey('area_item_$area'),
                                                 children: [
                                                   InkWell(
                                                     onTap: () {

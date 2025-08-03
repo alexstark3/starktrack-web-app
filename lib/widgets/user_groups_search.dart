@@ -58,9 +58,12 @@ class _UserGroupSelectionDialogState extends State<UserGroupSelectionDialog> {
 
       _users = usersSnapshot.docs.map((doc) {
         final data = doc.data();
+        final firstName = data['firstName'] ?? '';
+        final surname = data['surname'] ?? '';
+        final fullName = '$firstName $surname'.trim();
         return {
           'id': doc.id,
-          'name': data['name'] ?? l10n.unknownUser,
+          'name': fullName.isNotEmpty ? fullName : l10n.unknownUser,
           'email': data['email'] ?? '',
           'type': 'user',
         };
@@ -255,17 +258,17 @@ class _UserGroupSelectionDialogState extends State<UserGroupSelectionDialog> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                                 ElevatedButton(
-                   onPressed: () => Navigator.of(context).pop(),
-                   style: ElevatedButton.styleFrom(
-                     backgroundColor: appColors.primaryBlue,
-                     foregroundColor: appColors.whiteTextOnBlue,
-                     shape: RoundedRectangleBorder(
-                       borderRadius: BorderRadius.circular(8),
-                     ),
-                   ),
-                   child: Text(l10n.save),
-                 ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: appColors.primaryBlue,
+                    foregroundColor: appColors.whiteTextOnBlue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(l10n.save),
+                ),
               ],
             ),
           ],

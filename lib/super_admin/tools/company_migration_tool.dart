@@ -23,15 +23,14 @@ class _CompanyMigrationToolState extends State<CompanyMigrationTool> {
 
   Future<void> _loadCompanies() async {
     setState(() => _isLoading = true);
-    
+
     try {
       // Get all companies from Firestore
-      final companiesSnapshot = await FirebaseFirestore.instance
-          .collection('companies')
-          .get();
-      
+      final companiesSnapshot =
+          await FirebaseFirestore.instance.collection('companies').get();
+
       final companies = <Map<String, dynamic>>[];
-      
+
       for (final doc in companiesSnapshot.docs) {
         final companyData = doc.data();
         // Only include companies that do NOT have a secureId
@@ -44,7 +43,7 @@ class _CompanyMigrationToolState extends State<CompanyMigrationTool> {
           'newCompanyId': null,
         });
       }
-      
+
       setState(() {
         _companies = companies;
         _isLoading = false;
@@ -61,21 +60,21 @@ class _CompanyMigrationToolState extends State<CompanyMigrationTool> {
 
   Future<void> _migrateCompany(String companyId) async {
     setState(() => _isMigrating = true);
-    
+
     try {
       final result = await CompanyMigrationService.migrateCompany(companyId);
-      
+
       if (mounted) {
         final success = result['status'] == 'success';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(success 
-              ? 'Company migrated successfully!' 
-              : 'Migration failed: ${result['error'] ?? 'Unknown error'}'),
+            content: Text(success
+                ? 'Company migrated successfully!'
+                : 'Migration failed: ${result['error'] ?? 'Unknown error'}'),
             backgroundColor: success ? Colors.green : Colors.red,
           ),
         );
-        
+
         if (success) {
           _loadCompanies(); // Refresh the list
         }
@@ -93,21 +92,23 @@ class _CompanyMigrationToolState extends State<CompanyMigrationTool> {
 
   Future<void> _migrateAllCompanies() async {
     setState(() => _isMigrating = true);
-    
+
     try {
       final results = await CompanyMigrationService.migrateAllCompanies();
-      
+
       if (mounted) {
-        final successCount = results.where((r) => r['status'] == 'success').length;
+        final successCount =
+            results.where((r) => r['status'] == 'success').length;
         final failureCount = results.length - successCount;
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Migration complete: $successCount successful, $failureCount failed'),
+            content: Text(
+                'Migration complete: $successCount successful, $failureCount failed'),
             backgroundColor: failureCount == 0 ? Colors.green : Colors.orange,
           ),
         );
-        
+
         _loadCompanies(); // Refresh the list
       }
     } catch (e) {
@@ -178,14 +179,18 @@ class _CompanyMigrationToolState extends State<CompanyMigrationTool> {
                             children: [
                               Expanded(
                                 child: ElevatedButton.icon(
-                                  icon: Icon(Icons.security, color: colors.whiteTextOnBlue),
+                                  icon: Icon(Icons.security,
+                                      color: colors.whiteTextOnBlue),
                                   label: Text('Migrate All Companies',
-                                      style: TextStyle(color: colors.whiteTextOnBlue)),
+                                      style: TextStyle(
+                                          color: colors.whiteTextOnBlue)),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.orange,
                                     disabledBackgroundColor: colors.darkGray,
                                   ),
-                                  onPressed: _isMigrating ? null : _migrateAllCompanies,
+                                  onPressed: _isMigrating
+                                      ? null
+                                      : _migrateAllCompanies,
                                 ),
                               ),
                             ],
@@ -209,15 +214,19 @@ class _CompanyMigrationToolState extends State<CompanyMigrationTool> {
 
                   Expanded(
                     child: ListView.builder(
+                      key: ValueKey('companies_migration_list'),
                       itemCount: _companies.length,
                       itemBuilder: (context, index) {
                         final company = _companies[index];
                         final companyId = company['id'] as String;
-                        final companyName = company['name'] as String? ?? 'Unknown';
-                        final isMigrated = company['isMigrated'] as bool? ?? false;
+                        final companyName =
+                            company['name'] as String? ?? 'Unknown';
+                        final isMigrated =
+                            company['isMigrated'] as bool? ?? false;
                         final newCompanyId = company['newCompanyId'] as String?;
 
                         return Card(
+                          key: ValueKey('company_migration_$companyId'),
                           color: colors.cardColorDark,
                           margin: const EdgeInsets.only(bottom: 8),
                           child: ListTile(
@@ -233,7 +242,8 @@ class _CompanyMigrationToolState extends State<CompanyMigrationTool> {
                               children: [
                                 Text(
                                   'Old ID: $companyId',
-                                  style: TextStyle(color: colors.textColor.withOpacity(0.7)),
+                                  style: TextStyle(
+                                      color: colors.textColor.withOpacity(0.7)),
                                 ),
                                 if (newCompanyId != null)
                                   Text(
@@ -249,9 +259,11 @@ class _CompanyMigrationToolState extends State<CompanyMigrationTool> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 if (isMigrated)
-                                  Icon(Icons.check_circle, color: Colors.green, size: 24)
+                                  Icon(Icons.check_circle,
+                                      color: Colors.green, size: 24)
                                 else
-                                  Icon(Icons.pending, color: Colors.orange, size: 24),
+                                  Icon(Icons.pending,
+                                      color: Colors.orange, size: 24),
                                 const SizedBox(width: 8),
                                 if (!isMigrated && !_isMigrating)
                                   ElevatedButton(
@@ -274,4 +286,4 @@ class _CompanyMigrationToolState extends State<CompanyMigrationTool> {
             ),
     );
   }
-} 
+}

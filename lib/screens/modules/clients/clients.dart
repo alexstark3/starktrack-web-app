@@ -208,6 +208,7 @@ class _ClientsTable extends StatelessWidget {
         }
 
         return ListView.builder(
+          key: ValueKey('clients_list_$search'),
           itemCount: filtered.length,
           itemBuilder: (context, index) {
             final doc = filtered[index];
@@ -229,6 +230,7 @@ class _ClientsTable extends StatelessWidget {
             final country = data['country'] ?? '';
 
             return Card(
+              key: ValueKey('client_item_${doc.id}'),
               margin: const EdgeInsets.only(bottom: 12),
               elevation: 2,
               shape: RoundedRectangleBorder(
@@ -316,7 +318,7 @@ class _ClientsTable extends StatelessWidget {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              '${l10n.contact}: $person',
+                              person,
                               style: TextStyle(
                                 fontSize: 14,
                                 color: colors.textColor.withOpacity(0.8),
@@ -327,36 +329,44 @@ class _ClientsTable extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                     ],
-                    if (email.isNotEmpty || phone.isNotEmpty) ...[
+                    if (email.isNotEmpty) ...[
                       Row(
                         children: [
                           Icon(
-                            Icons.contact_phone,
+                            Icons.email,
                             size: 16,
                             color: colors.textColor.withOpacity(0.6),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (email.isNotEmpty)
-                                  Text(
-                                    email,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: colors.textColor.withOpacity(0.8),
-                                    ),
-                                  ),
-                                if (phone.isNotEmpty)
-                                  Text(
-                                    phone,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: colors.textColor.withOpacity(0.8),
-                                    ),
-                                  ),
-                              ],
+                            child: Text(
+                              email,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: colors.textColor.withOpacity(0.8),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    if (phone.isNotEmpty) ...[
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.phone,
+                            size: 16,
+                            color: colors.textColor.withOpacity(0.6),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              phone,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: colors.textColor.withOpacity(0.8),
+                              ),
                             ),
                           ),
                         ],

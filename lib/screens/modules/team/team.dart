@@ -4,6 +4,7 @@ import '../../../../theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'members/members.dart';
 import 'groups/groups.dart';
+import 'balance/balance.dart';
 
 class TeamModuleTabScreen extends StatefulWidget {
   final String companyId;
@@ -13,12 +14,12 @@ class TeamModuleTabScreen extends StatefulWidget {
       onSelectMember; // Add callback parameter
 
   const TeamModuleTabScreen({
-    Key? key,
+    super.key,
     required this.companyId,
     required this.userId,
     this.selectedMember,
     this.onSelectMember,
-  }) : super(key: key);
+  });
 
   @override
   State<TeamModuleTabScreen> createState() => _TeamModuleTabScreenState();
@@ -82,10 +83,10 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                       },
                     ),
                     const SizedBox(width: 8),
-                    // Time Off tab
+                    // Balance tab
                     _TeamTab(
-                      icon: Icons.event_busy,
-                      title: 'Time Off',
+                      icon: Icons.balance,
+                      title: 'Balance',
                       isSelected: _selectedIndex == 2,
                       colors: colors,
                       selectedMemberDoc: null,
@@ -155,35 +156,9 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
         companyId: widget.companyId,
       );
     } else if (_selectedIndex == 2) {
-      // Time Off tab content
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.event_busy,
-              size: 64,
-              color: Theme.of(context).extension<AppColors>()!.darkGray,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Time Off',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).extension<AppColors>()!.darkGray,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Time off management coming soon...',
-              style: TextStyle(
-                fontSize: 16,
-                color: Theme.of(context).extension<AppColors>()!.darkGray,
-              ),
-            ),
-          ],
-        ),
+      // Balance tab content
+      return BalanceTab(
+        companyId: widget.companyId,
       );
     }
     return const SizedBox.shrink();
@@ -200,7 +175,6 @@ class _TeamTab extends StatefulWidget {
   final DocumentSnapshot? selectedMemberDoc;
   final bool showOnlyIcon;
   const _TeamTab({
-    Key? key,
     required this.icon,
     required this.title,
     required this.isSelected,
@@ -208,7 +182,7 @@ class _TeamTab extends StatefulWidget {
     required this.onTap,
     this.selectedMemberDoc,
     this.showOnlyIcon = false,
-  }) : super(key: key);
+  });
 
   @override
   State<_TeamTab> createState() => _TeamTabState();

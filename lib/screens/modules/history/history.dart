@@ -561,6 +561,8 @@ class _HistoryLogsState extends State<HistoryLogs> {
 
                   // Grouped list view
                   return ListView.builder(
+                    key: ValueKey(
+                        'history_list_${widget.companyId}_${widget.userId}'),
                     physics: const AlwaysScrollableScrollPhysics(),
                     cacheExtent: 1000,
                     addAutomaticKeepAlives: false,
@@ -586,6 +588,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                       }
 
                       return Container(
+                        key: ValueKey('history_group_$groupKey'),
                         margin: const EdgeInsets.only(bottom: 8),
                         decoration: BoxDecoration(
                           color: isDark

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../super_admin/services/company_module_service.dart';
+import '../../../../widgets/calendar.dart';
 import 'user_address.dart';
 
 class AddUserDialog extends StatefulWidget {
@@ -45,6 +47,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
   late TextEditingController _weeklyHoursController;
   late TextEditingController _annualLeaveController;
   late TextEditingController _passwordController;
+  late TextEditingController _startDateController;
 
   // Form state
   List<String> _selectedRoles = [];
@@ -96,6 +99,12 @@ class _AddUserDialogState extends State<AddUserDialog> {
         'workPercent': 100,
         'weeklyHours': 40,
         'annualLeaveDays': 25,
+        'overtime': {
+          'transferred': 0,
+          'current': 0,
+          'bonus': 0,
+          'used': 0,
+        },
         'teamLeaderId': '',
         'showBreaks': true,
         'workplaceSame': true,
@@ -124,9 +133,141 @@ class _AddUserDialogState extends State<AddUserDialog> {
         TextEditingController(text: '${_userData['workPercent'] ?? 100}');
     _weeklyHoursController =
         TextEditingController(text: '${_userData['weeklyHours'] ?? 40}');
-    _annualLeaveController =
-        TextEditingController(text: '${_userData['annualLeaveDays'] ?? 25}');
+    // Handle both old (integer) and new (map) annualLeaveDays structure
+    final annualLeaveDays = _userData['annualLeaveDays'];
+    String annualLeaveText = '25.0';
+    if (annualLeaveDays is Map<String, dynamic>) {
+      final currentValue = annualLeaveDays['current'] ?? 25;
+      if (currentValue is double) {
+        annualLeaveText = currentValue.toStringAsFixed(1);
+      } else {
+        annualLeaveText = '${currentValue.toDouble()}';
+      }
+    } else if (annualLeaveDays is int) {
+      annualLeaveText = '${annualLeaveDays.toDouble()}';
+    }
+    _annualLeaveController = TextEditingController(text: annualLeaveText);
     _passwordController = TextEditingController();
+
+    // Initialize start date controller
+    final startDate = _userData['startDate'] ?? '';
+    _startDateController = TextEditingController(text: startDate);
+  }
+
+  Map<String, dynamic> _buildAnnualLeaveDays() {
+    final isEdit = widget.editUser != null;
+    final currentValue = double.tryParse(_annualLeaveController.text) ?? 25.0;
+
+    if (isEdit) {
+      // Preserve existing transferred, bonus, and used values when editing
+      final existingAnnualLeaveDays = _userData['annualLeaveDays'];
+      if (existingAnnualLeaveDays is Map<String, dynamic>) {
+        return {
+          'transferred':
+              _convertToDouble(existingAnnualLeaveDays['transferred'] ?? 0),
+          'current': currentValue,
+          'bonus': _convertToDouble(existingAnnualLeaveDays['bonus'] ?? 0),
+          'used': _convertToDouble(existingAnnualLeaveDays['used'] ?? 0),
+        };
+      } else if (existingAnnualLeaveDays is int) {
+        // Convert old integer format to new map format
+        return {
+          'transferred': 0.0,
+          'current': currentValue,
+          'bonus': 0.0,
+          'used': 0.0,
+        };
+      }
+    }
+
+    // For new users, start with default values
+    return {
+      'transferred': 0.0,
+      'current': currentValue,
+      'bonus': 0.0,
+      'used': 0.0,
+    };
+  }
+
+  double _convertToDouble(dynamic value) {
+    if (value is double) {
+      return value;
+    } else if (value is int) {
+      return value.toDouble();
+    } else if (value is String) {
+      return double.tryParse(value) ?? 0.0;
+    }
+    return 0.0;
+  }
+
+  void _showDatePicker(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          constraints: const BoxConstraints(maxWidth: 400, maxHeight: 500),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Select Start Date',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).extension<AppColors>()!.textColor,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Flexible(
+                child: CustomCalendar(
+                  initialDateRange: _startDateController.text.isNotEmpty
+                      ? DateRange(
+                          startDate: DateTime.parse(_startDateController.text))
+                      : null,
+                  onDateRangeChanged: (dateRange) {
+                    if (dateRange.startDate != null) {
+                      setState(() {
+                        _startDateController.text = DateFormat('yyyy-MM-dd')
+                            .format(dateRange.startDate!);
+                      });
+                      Navigator.of(context)
+                          .pop(); // Close dialog after selection
+                    }
+                  },
+                  maxDate: DateTime.now(), // Can't select future dates
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Map<String, dynamic> _buildOvertimeDays() {
+    final isEdit = widget.editUser != null;
+
+    if (isEdit) {
+      // Preserve existing overtime values when editing
+      final existingOvertimeDays = _userData['overtime'];
+      if (existingOvertimeDays is Map<String, dynamic>) {
+        return {
+          'transferred': existingOvertimeDays['transferred'] ?? 0,
+          'current': existingOvertimeDays['current'] ?? 0,
+          'bonus': existingOvertimeDays['bonus'] ?? 0,
+          'used': existingOvertimeDays['used'] ?? 0,
+        };
+      }
+    }
+
+    // For new users, start with default values
+    return {
+      'transferred': 0,
+      'current': 0,
+      'bonus': 0,
+      'used': 0,
+    };
   }
 
   void _onPrivateAddressChanged(Map<String, dynamic> address) {
@@ -183,7 +324,11 @@ class _AddUserDialogState extends State<AddUserDialog> {
         'active': _isActive,
         'workPercent': int.tryParse(_workloadController.text) ?? 100,
         'weeklyHours': int.tryParse(_weeklyHoursController.text) ?? 40,
-        'annualLeaveDays': int.tryParse(_annualLeaveController.text) ?? 25,
+        'annualLeaveDays': _buildAnnualLeaveDays(),
+        'overtime': _buildOvertimeDays(),
+        'startDate': _startDateController.text.trim().isEmpty
+            ? null
+            : _startDateController.text.trim(),
         'teamLeaderId':
             _selectedTeamLeaderId.isEmpty ? null : _selectedTeamLeaderId,
         'showBreaks': _showBreaks,
@@ -610,15 +755,61 @@ class _AddUserDialogState extends State<AddUserDialog> {
                               label: l10n.annualLeave,
                               keyboardType: TextInputType.number,
                               validator: (value) {
-                                final num = int.tryParse(value ?? '');
+                                final num = double.tryParse(value ?? '');
                                 if (num == null || num < 0) {
-                                  return '${l10n.annualLeave} must be positive';
+                                  return '${l10n.annualLeave} must be a positive number';
                                 }
                                 return null;
                               },
                             ),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Start Date field
+                      GestureDetector(
+                        onTap: () => _showDatePicker(context),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 16),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.white24
+                                  : Colors.black26,
+                              width: 1,
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? appColors.cardColorDark
+                                    : Colors.white,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  _startDateController.text.isEmpty
+                                      ? 'Select Start Date'
+                                      : 'Start Date: ${_startDateController.text}',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.copyWith(
+                                        color: appColors.textColor,
+                                      ),
+                                ),
+                              ),
+                              Icon(
+                                Icons.calendar_today,
+                                color: appColors.primaryBlue,
+                                size: 20,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 16),
 
@@ -630,22 +821,36 @@ class _AddUserDialogState extends State<AddUserDialog> {
                         decoration: InputDecoration(
                           labelText: l10n.assignToTeamLeader,
                           filled: true,
-                          fillColor: appColors.lightGray,
+                          fillColor:
+                              Theme.of(context).brightness == Brightness.dark
+                                  ? appColors.cardColorDark
+                                  : Colors.white,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide:
-                                BorderSide(color: appColors.darkGray, width: 1),
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.white24
+                                  : Colors.black26,
+                              width: 1,
+                            ),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide:
-                                BorderSide(color: appColors.darkGray, width: 1),
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.white24
+                                  : Colors.black26,
+                              width: 1,
+                            ),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(10),
                             borderSide: BorderSide(
                                 color: appColors.primaryBlue, width: 2),
                           ),
+                          labelStyle: TextStyle(color: appColors.textColor),
                         ),
                         items: [
                           DropdownMenuItem(
@@ -665,6 +870,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
                         ],
                         onChanged: (value) =>
                             setState(() => _selectedTeamLeaderId = value ?? ''),
+                        style: TextStyle(color: appColors.textColor),
                       ),
                       const SizedBox(height: 16),
 
@@ -714,6 +920,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
                           onPressed: _isSubmitting ? null : _submitForm,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: appColors.primaryBlue,
+                            foregroundColor: appColors.whiteTextOnBlue,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
@@ -726,13 +933,13 @@ class _AddUserDialogState extends State<AddUserDialog> {
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
                                     valueColor: AlwaysStoppedAnimation<Color>(
-                                        appColors.backgroundDark),
+                                        appColors.whiteTextOnBlue),
                                   ),
                                 )
                               : Text(
                                   isEdit ? l10n.updateUser : l10n.createUser,
                                   style: TextStyle(
-                                    color: appColors.backgroundDark,
+                                    color: appColors.whiteTextOnBlue,
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -769,19 +976,32 @@ class _AddUserDialogState extends State<AddUserDialog> {
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: appColors.backgroundLight,
+        fillColor: Theme.of(context).brightness == Brightness.dark
+            ? appColors.cardColorDark
+            : Colors.white,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: appColors.darkGray, width: 1),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white24
+                : Colors.black26,
+            width: 1,
+          ),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: appColors.darkGray, width: 1),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white24
+                : Colors.black26,
+            width: 1,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: appColors.primaryBlue, width: 2),
         ),
+        labelStyle: TextStyle(color: appColors.textColor),
       ),
       style: TextStyle(color: appColors.textColor),
     );
@@ -1007,6 +1227,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
     bool isLoading = false;
     String errorMessage = '';
 
+    final appColors = Theme.of(context).extension<AppColors>()!;
     return await showDialog<bool>(
           context: context,
           barrierDismissible: false,
@@ -1096,6 +1317,10 @@ class _AddUserDialogState extends State<AddUserDialog> {
                         }
                       }
                     },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: appColors.primaryBlue,
+                      foregroundColor: appColors.whiteTextOnBlue,
+                    ),
                     child: const Text('OK'),
                   ),
                 ],
@@ -1121,6 +1346,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
     _weeklyHoursController.dispose();
     _annualLeaveController.dispose();
     _passwordController.dispose();
+    _startDateController.dispose();
     super.dispose();
   }
 }
