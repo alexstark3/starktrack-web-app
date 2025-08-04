@@ -4,10 +4,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../modules/time_tracker/time_tracker_screen.dart';
 import '../modules/history/history.dart';
-import '../modules/admin/admin_panel.dart';
-import 'package:starktrack/screens/modules/team/team.dart'; // Team Module
+import '../modules/time_off/time_off_module.dart';
+import '../modules/team/team.dart'; // Team Module
 import 'package:starktrack/screens/modules/projects/projects.dart'; // Projects Module
 import 'package:starktrack/screens/modules/clients/clients.dart'; // Clients Module
+import '../modules/admin/admin_panel.dart';
 import '../settings_screen.dart';
 import 'package:starktrack/widgets/company/company_side_menu.dart';
 import '../../widgets/company/company_top_bar.dart';
@@ -93,6 +94,12 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
           if (tabLabels.contains(l10n.history))
             HistoryLogs(
               key: const PageStorageKey('history'),
+              companyId: widget.companyId,
+              userId: widget.userId,
+            ),
+          if (tabLabels.contains('Time Off'))
+            TimeOffModule(
+              key: const PageStorageKey('timeOff'),
               companyId: widget.companyId,
               userId: widget.userId,
             ),
@@ -213,33 +220,47 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
 
   List<_ScreenCfg> _getScreens(AppLocalizations l10n) {
     final l = <_ScreenCfg>[];
-    if (widget.access['time_tracker'] == true) {
-      l.add(_ScreenCfg(l10n.timeTracker, Icons.access_time));
-      l.add(_ScreenCfg(l10n.history, Icons.history));
-    }
+    // Time Tracker should be available to all users
+    l.add(_ScreenCfg(l10n.timeTracker, Icons.access_time));
+    l.add(_ScreenCfg(l10n.history, Icons.history));
+    l.add(_ScreenCfg('Time Off', Icons.calendar_month));
+
+    print('DEBUG: Available tabs for user:');
+    print('DEBUG: - Time Tracker: ${l10n.timeTracker}');
+    print('DEBUG: - History: ${l10n.history}');
+    print('DEBUG: - User roles: ${widget.roles}');
+    print('DEBUG: - User access: ${widget.access}');
+
     // TEAM MODULE: Only for roles company_admin, admin, team_leader
     if (widget.roles.contains('company_admin') ||
         widget.roles.contains('admin') ||
         widget.roles.contains('team_leader')) {
       l.add(_ScreenCfg(l10n.team, Icons.group));
+      print('DEBUG: - Team: ${l10n.team} (added)');
     }
     // PROJECTS MODULE: Only for roles company_admin, admin, team_leader
     if (widget.roles.contains('company_admin') ||
         widget.roles.contains('admin') ||
         widget.roles.contains('team_leader')) {
       l.add(_ScreenCfg(l10n.projects, Icons.folder));
+      print('DEBUG: - Projects: ${l10n.projects} (added)');
     }
     // CLIENTS MODULE: Only for roles company_admin, admin, team_leader
     if (widget.roles.contains('company_admin') ||
         widget.roles.contains('admin') ||
         widget.roles.contains('team_leader')) {
       l.add(_ScreenCfg(l10n.clients, Icons.business));
+      print('DEBUG: - Clients: ${l10n.clients} (added)');
     }
     if (widget.roles.contains('admin') ||
         widget.roles.contains('company_admin')) {
       l.add(_ScreenCfg(l10n.admin, Icons.admin_panel_settings));
+      print('DEBUG: - Admin: ${l10n.admin} (added)');
     }
     l.add(_ScreenCfg(l10n.settings, Icons.settings));
+    print('DEBUG: - Settings: ${l10n.settings} (added)');
+
+    print('DEBUG: Total tabs: ${l.length}');
     return l;
   }
 }

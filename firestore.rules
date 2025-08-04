@@ -2,147 +2,190 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // App config (read-only)
+    /* ────────── 1. SINGLE SUPER-ADMIN ────────── */
+    match /{document=**} {
+      allow read, write: if request.auth != null &&
+                         request.auth.uid == 'KxJqwhobV5T8RBZhXKaHYHlLxaA3';
+    }
+
+    /* ────────── 2. READ-ONLY APP CONFIG ────────── */
     match /appConfig/{document=**} {
-      allow read: if true;
+      allow read : if true;
       allow write: if false;
     }
-    
-    // User-company mapping - SIMPLE WORKING RULE
+
+    /* ────────── 3. USER ⇄ COMPANY MAPPING ────────── */
     match /userCompany/{userId} {
-      allow read, write: if request.auth != null;
+
+      /* CREATE / UPDATE */
+      allow write: if request.resource != null &&
+                   request.resource.data.companyId != null &&
+                   hasRoleInCompany(request.auth.uid,
+                                    request.resource.data.companyId,
+                                    ['admin','company_admin','super_admin']);
+
+      /* DELETE */
+      allow delete: if hasRoleInCompanySimple(request.auth.uid,
+                                              resource.data.companyId,
+                                              ['admin','company_admin','super_admin']);
+
+      /* READ (self or privileged) */
+      allow read: if request.auth != null &&
+                  (request.auth.uid == userId ||
+                   hasRoleInCompanySimple(request.auth.uid,
+                                          resource.data.companyId,
+                                          ['admin','company_admin','super_admin']));
     }
 
-    // Company data and subcollections
+    /* ────────── 4. COMPANY DATA TREE ────────── */
     match /companies/{companyId} {
-      allow read: if isUserInCompany(request.auth.uid, companyId);
-      allow write: if hasRoleInCompany(request.auth.uid, companyId, ['admin', 'company_admin', 'super_admin']);
 
-      // Users
+      /* Company root doc ------------- */
+      allow read : if isUserInCompany(request.auth.uid, companyId);
+
+      /* Added OR-clause so admin can write even
+         if their own userCompany doc is momentarily absent */
+      allow write: if hasRoleInCompany(request.auth.uid, companyId,
+                                       ['admin','company_admin','super_admin']) ||
+                   hasRoleInCompanySimple(request.auth.uid, companyId,
+                                          ['admin','company_admin','super_admin']);
+
+      /* Users sub-collection ---------- */
       match /users/{userId} {
-        allow read: if request.auth != null && (
-          request.auth.uid == userId ||
-          hasRoleInCompany(request.auth.uid, companyId, ['admin', 'company_admin', 'super_admin'])
-        );
-        allow write: if hasRoleInCompany(request.auth.uid, companyId, ['admin', 'company_admin', 'super_admin']) &&
-                      !request.resource.data.roles.hasAny(['super_admin']) &&
-                      !isAssigningSuperAdminRole(request.auth.uid, companyId);
+
+        /* READ (self or privileged) */
+        allow read: if request.auth != null &&
+                    (request.auth.uid == userId ||
+                     hasRoleInCompany(request.auth.uid, companyId,
+                                      ['admin','company_admin','super_admin']));
+
+        /* CREATE / UPDATE */
+        allow create, update: if hasRoleInCompany(request.auth.uid, companyId,
+                                                  ['admin','company_admin','super_admin']) &&
+                              !request.resource.data.roles.hasAny(['super_admin']) &&
+                              !isAssigningSuperAdminRole(request.auth.uid, companyId);
+
+        /* DELETE — uses *Simple* so it works after mapping is gone */
+        allow delete: if hasRoleInCompanySimple(request.auth.uid, companyId,
+                                                ['admin','company_admin','super_admin']) &&
+                      !resource.data.roles.hasAny(['super_admin']);
       }
 
-      // Clients
-      match /clients/{clientId} {
-        allow read: if isUserInCompany(request.auth.uid, companyId);
-        allow write: if hasRoleInCompany(request.auth.uid, companyId, ['admin', 'company_admin', 'super_admin']);
+      /* ----- Projects collection - only for users with time_tracker module ----- */
+      match /projects/{docId} {
+        allow read: if request.auth != null &&
+                     hasModuleAccess(request.auth.uid, companyId, 'time_tracker');
       }
 
-      // Projects
-      match /projects/{projectId} {
-        allow read: if isUserInCompany(request.auth.uid, companyId);
-        allow write: if hasRoleInCompany(request.auth.uid, companyId, ['admin', 'company_admin', 'super_admin']);
+      /* ----- Other company sub-collections ----- */
+      match /{subCol}/{docId} {
+        allow read, write: if ['clients','groups',
+                               'holiday_policies','timeoff_policies']
+                               .hasAny([subCol]) &&
+                           (
+                             /* READ - All collections for authenticated users in company */
+                             (request.method == 'get' && 
+                              request.auth != null &&
+                              companyCanRead()) ||
+
+                             /* WRITE — uses the new helper that tries *Simple* first */
+                             (request.method != 'get' && companyCanWriteSimple())
+                           );
       }
 
-      // Groups
-      match /groups/{groupId} {
-        allow read: if isUserInCompany(request.auth.uid, companyId);
-        allow write: if hasRoleInCompany(request.auth.uid, companyId, ['admin', 'company_admin', 'super_admin']);
-      }
-
-      // Holiday Policies
-      match /holiday_policies/{policyId} {
-        allow read: if isUserInCompany(request.auth.uid, companyId);
-        allow write: if hasRoleInCompany(request.auth.uid, companyId, ['admin', 'company_admin', 'super_admin']);
-      }
-
-      // Time Off Policies
-      match /timeoff_policies/{policyId} {
-        allow read: if isUserInCompany(request.auth.uid, companyId);
-        allow write: if hasRoleInCompany(request.auth.uid, companyId, ['admin', 'company_admin', 'super_admin']);
-      }
-
-      // User logs and sessions (example, keep your existing logic)
+      /* ----- Time-tracking logs ----- */
       match /users/{userId}/all_logs/{logId} {
-        allow read: if request.auth != null && (
-          request.auth.uid == userId ||
-          hasRoleInCompany(request.auth.uid, companyId, ['admin', 'company_admin', 'super_admin', 'team_leader'])
-        );
-        allow write: if request.auth != null && (
-          request.auth.uid == userId ||
-          hasRoleInCompany(request.auth.uid, companyId, ['admin', 'company_admin', 'super_admin'])
-        );
+        allow read : if request.auth != null &&
+                     (request.auth.uid == userId ||
+                      hasRoleInCompany(request.auth.uid, companyId,
+                                       ['admin','company_admin','super_admin','team_leader']));
+        allow write: if request.auth != null &&
+                     (request.auth.uid == userId ||
+                      hasRoleInCompany(request.auth.uid, companyId,
+                                       ['admin','company_admin','super_admin']));
       }
 
       match /users/{userId}/sessions/{sessionId} {
-        allow read: if request.auth != null && (
-          request.auth.uid == userId ||
-          hasRoleInCompany(request.auth.uid, companyId, ['admin', 'company_admin', 'super_admin', 'team_leader'])
-        );
-        allow write: if request.auth != null && (
-          request.auth.uid == userId ||
-          hasRoleInCompany(request.auth.uid, companyId, ['admin', 'company_admin', 'super_admin'])
-        );
+        allow read, write: if request.auth != null &&
+                           (request.auth.uid == userId ||
+                            hasRoleInCompany(request.auth.uid, companyId,
+                                             ['admin','company_admin','super_admin']));
+
         match /logs/{logId} {
-          allow read: if request.auth != null && (
-            request.auth.uid == userId ||
-            hasRoleInCompany(request.auth.uid, companyId, ['admin', 'company_admin', 'super_admin', 'team_leader'])
-          );
-          allow write: if request.auth != null && (
-            request.auth.uid == userId ||
-            hasRoleInCompany(request.auth.uid, companyId, ['admin', 'company_admin', 'super_admin'])
-          );
+          allow read : if request.auth != null &&
+                       (request.auth.uid == userId ||
+                        hasRoleInCompany(request.auth.uid, companyId,
+                                         ['admin','company_admin','super_admin','team_leader']));
+          allow write: if request.auth != null &&
+                       (request.auth.uid == userId ||
+                        hasRoleInCompany(request.auth.uid, companyId,
+                                         ['admin','company_admin','super_admin']));
         }
       }
-    }
 
-    // Admin users
+      /* Helper shortcuts scoped to company */
+      function companyCanRead() {
+        return isUserInCompany(request.auth.uid, companyId);
+      }
+      function companyCanWriteSimple() {
+        /* Try Simple first, fall back to full check */
+        return hasRoleInCompanySimple(request.auth.uid, companyId,
+                                      ['admin','company_admin','super_admin']) ||
+               hasRoleInCompany(request.auth.uid, companyId,
+                                ['admin','company_admin','super_admin']);
+      }
+    } /* ← end /companies/{companyId} */
+
+    /* ────────── 5. ADMIN PROFILES & MISC ────────── */
     match /admin_users/{adminId} {
       allow read, write: if request.auth != null && request.auth.uid == adminId;
     }
 
-    // Rate limiting (for login attempts)
     match /login_attempts/{emailKey} {
-      allow read, write: if true;
+      allow read, write: if true;   /* public for rate-limiting */
     }
 
-    // Migrations (read-only)
     match /migrations/{migrationId} {
-      allow read: if request.auth != null;
+      allow read : if request.auth != null;
       allow write: if false;
     }
 
-    // === Helper Functions ===
-  function isUserInCompany(userId, companyId) {
-    return exists(/databases/$(database)/documents/userCompany/$(userId)) &&
-           get(/databases/$(database)/documents/userCompany/$(userId)).data.companyId == companyId;
-  }
+    /* ────────── 6. HELPER FUNCTIONS ────────── */
+    function isUserInCompany(userId, companyId) {
+      return exists(/databases/$(database)/documents/userCompany/$(userId)) &&
+             get(/databases/$(database)/documents/userCompany/$(userId)).data.companyId == companyId;
+    }
 
-                    function hasRoleInCompany(userId, companyId, requiredRoles) {
-                    return isUserInCompany(userId, companyId) &&
-                           exists(/databases/$(database)/documents/companies/$(companyId)/users/$(userId)) &&
-                           hasAnyRole(get(/databases/$(database)/documents/companies/$(companyId)/users/$(userId)).data.roles, requiredRoles);
-                  }
+    function hasAnyRole(userRoles, requiredRoles) {
+      return userRoles.hasAny(requiredRoles);
+    }
 
-                  function hasRoleInCompanySimple(userId, companyId, requiredRoles) {
-                    // Simplified function that only checks if user has required role in company
-                    // This works for all operations including deletion
-                    return exists(/databases/$(database)/documents/companies/$(companyId)/users/$(userId)) &&
-                           hasAnyRole(get(/databases/$(database)/documents/companies/$(companyId)/users/$(userId)).data.roles, requiredRoles);
-                  }
+    function hasRoleInCompany(userId, companyId, requiredRoles) {
+      return isUserInCompany(userId, companyId) &&
+             exists(/databases/$(database)/documents/companies/$(companyId)/users/$(userId)) &&
+             hasAnyRole(
+               get(/databases/$(database)/documents/companies/$(companyId)/users/$(userId)).data.roles,
+               requiredRoles);
+    }
 
-  function hasAnyRole(userRoles, requiredRoles) {
-    return userRoles.hasAny(requiredRoles);
-  }
+    /* Simpler variant — no userCompany lookup */
+    function hasRoleInCompanySimple(userId, companyId, requiredRoles) {
+      return exists(/databases/$(database)/documents/companies/$(companyId)/users/$(userId)) &&
+             hasAnyRole(
+               get(/databases/$(database)/documents/companies/$(companyId)/users/$(userId)).data.roles,
+               requiredRoles);
+    }
 
-    function isAssigningSuperAdminRole(userId, companyId) {
-      // Check if the current user is trying to assign super_admin role
-      // Only allow if the current user is already a super_admin
+    /* Check if user has specific module access */
+    function hasModuleAccess(userId, companyId, moduleName) {
+      return exists(/databases/$(database)/documents/companies/$(companyId)/users/$(userId)) &&
+             get(/databases/$(database)/documents/companies/$(companyId)/users/$(userId)).data.modules.hasAny([moduleName]);
+    }
+
+    /* Prevent privilege escalation */
+    function isAssigningSuperAdminRole(callerId, companyId) {
       return request.resource.data.roles.hasAny(['super_admin']) &&
-             !hasRoleInCompany(userId, companyId, ['super_admin']);
-    }
-    
-    // ===== SUPER ADMIN FULL ACCESS (TEMPORARY) =====
-    // This rule MUST be at the end to override all other rules
-    match /{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == 'KxJqwhobV5T8RBZhXKaHYHlLxaA3';
+             !hasRoleInCompany(callerId, companyId, ['super_admin']);
     }
   }
-} 
+}

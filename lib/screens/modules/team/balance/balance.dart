@@ -40,304 +40,299 @@ class _BalanceTabState extends State<BalanceTab> {
     final colors = Theme.of(context).extension<AppColors>()!;
     final l10n = AppLocalizations.of(context)!;
 
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Search bar and radio buttons in a card
-          Card(
-            elevation: Theme.of(context).brightness == Brightness.dark ? 0 : 2,
-            color: Theme.of(context).brightness == Brightness.dark
-                ? colors.cardColorDark
-                : colors.backgroundLight,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _searchController,
-                          decoration: InputDecoration(
-                            hintText: l10n.searchMembers,
-                            hintStyle: TextStyle(
-                              color: Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? Theme.of(context).colorScheme.onSurface
-                                  : colors.textColor,
-                            ),
-                            prefixIcon: Icon(
-                              Icons.search,
-                              color: Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? Theme.of(context).colorScheme.onSurface
-                                  : colors.darkGray,
-                            ),
-                            filled: true,
-                            fillColor:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? colors.lightGray
-                                    : Theme.of(context).colorScheme.surface,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(
-                                color: Colors.black.withValues(alpha: 0.26),
-                                width: 1,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(
-                                color: Colors.black.withValues(alpha: 0.26),
-                                width: 1,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(
-                                  color: colors.primaryBlue, width: 2),
-                            ),
-                          ),
-                          style: TextStyle(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Search bar and radio buttons in a card
+        Card(
+          elevation: Theme.of(context).brightness == Brightness.dark ? 0 : 2,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? colors.cardColorDark
+              : colors.backgroundLight,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          hintText: l10n.searchMembers,
+                          hintStyle: TextStyle(
                             color:
                                 Theme.of(context).brightness == Brightness.dark
                                     ? Theme.of(context).colorScheme.onSurface
                                     : colors.textColor,
                           ),
-                          onChanged: (value) {
-                            setState(() {
-                              _searchQuery = value.trim().toLowerCase();
-                            });
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        onPressed: _recalculateOvertime,
-                        icon: Icon(Icons.refresh, color: colors.primaryBlue),
-                        tooltip: 'Recalculate overtime',
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: 120,
-                        child: RadioListTile<String>(
-                          title: Text(
-                            'Vacations',
-                            style: TextStyle(
-                              color: colors.textColor,
-                              fontWeight: FontWeight.w500,
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Theme.of(context).colorScheme.onSurface
+                                    : colors.darkGray,
+                          ),
+                          filled: true,
+                          fillColor:
+                              Theme.of(context).brightness == Brightness.dark
+                                  ? colors.lightGray
+                                  : Theme.of(context).colorScheme.surface,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(
+                              color: Colors.black.withValues(alpha: 0.26),
+                              width: 1,
                             ),
                           ),
-                          value: 'vacations',
-                          groupValue: _selectedType,
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedType = value!;
-                              // Reset all edit states when switching types
-                              _editingBonus.clear();
-                              // Clear all controllers to force re-initialization
-                              for (final controller
-                                  in _bonusControllers.values) {
-                                controller.dispose();
-                              }
-                              _bonusControllers.clear();
-                            });
-                          },
-                          activeColor: colors.primaryBlue,
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                      ),
-                      SizedBox(
-                        width: 120,
-                        child: RadioListTile<String>(
-                          title: Text(
-                            'Overtime',
-                            style: TextStyle(
-                              color: colors.textColor,
-                              fontWeight: FontWeight.w500,
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(
+                              color: Colors.black.withValues(alpha: 0.26),
+                              width: 1,
                             ),
                           ),
-                          value: 'overtime',
-                          groupValue: _selectedType,
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedType = value!;
-                              // Reset all edit states when switching types
-                              _editingBonus.clear();
-                              // Clear all controllers to force re-initialization
-                              for (final controller
-                                  in _bonusControllers.values) {
-                                controller.dispose();
-                              }
-                              _bonusControllers.clear();
-                            });
-                          },
-                          activeColor: colors.primaryBlue,
-                          contentPadding: EdgeInsets.zero,
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide:
+                                BorderSide(color: colors.primaryBlue, width: 2),
+                          ),
                         ),
+                        style: TextStyle(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Theme.of(context).colorScheme.onSurface
+                              : colors.textColor,
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            _searchQuery = value.trim().toLowerCase();
+                          });
+                        },
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed: _recalculateOvertime,
+                      icon: Icon(Icons.refresh, color: colors.primaryBlue),
+                      tooltip: 'Recalculate overtime',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.start,
+                  alignment: WrapAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 120,
+                      child: RadioListTile<String>(
+                        title: Text(
+                          'Vacations',
+                          style: TextStyle(
+                            color: colors.textColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        value: 'vacations',
+                        groupValue: _selectedType,
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedType = value!;
+                            // Reset all edit states when switching types
+                            _editingBonus.clear();
+                            // Clear all controllers to force re-initialization
+                            for (final controller in _bonusControllers.values) {
+                              controller.dispose();
+                            }
+                            _bonusControllers.clear();
+                          });
+                        },
+                        activeColor: colors.primaryBlue,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 120,
+                      child: RadioListTile<String>(
+                        title: Text(
+                          'Overtime',
+                          style: TextStyle(
+                            color: colors.textColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        value: 'overtime',
+                        groupValue: _selectedType,
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedType = value!;
+                            // Reset all edit states when switching types
+                            _editingBonus.clear();
+                            // Clear all controllers to force re-initialization
+                            for (final controller in _bonusControllers.values) {
+                              controller.dispose();
+                            }
+                            _bonusControllers.clear();
+                          });
+                        },
+                        activeColor: colors.primaryBlue,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 20),
-          // Workers list with time off balance
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('companies')
-                  .doc(widget.companyId)
-                  .collection('users')
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+        ),
+        const SizedBox(height: 8),
+        // Workers list with time off balance
+        Expanded(
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('companies')
+                .doc(widget.companyId)
+                .collection('users')
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.people,
-                          size: 64,
-                          color: colors.darkGray,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          l10n.noMembersFound,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: colors.darkGray,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                final allUsers = snapshot.data!.docs;
-                final filteredUsers = allUsers.where((doc) {
-                  final data = doc.data() as Map<String, dynamic>;
-                  final firstName =
-                      (data['firstName'] ?? '').toString().toLowerCase();
-                  final surname =
-                      (data['surname'] ?? '').toString().toLowerCase();
-                  final fullName = '$firstName $surname'.toLowerCase();
-                  return fullName.contains(_searchQuery);
-                }).toList();
-
-                if (filteredUsers.isEmpty) {
-                  return Center(
-                    child: Text(
-                      l10n.noMembersMatchSearch,
-                      style: TextStyle(
-                        fontSize: 16,
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.people,
+                        size: 64,
                         color: colors.darkGray,
                       ),
-                    ),
-                  );
-                }
-
-                return ListView.builder(
-                  key:
-                      ValueKey('balance_list_${_selectedType}_${_searchQuery}'),
-                  itemCount: filteredUsers.length,
-                  itemBuilder: (context, index) {
-                    final doc = filteredUsers[index];
-                    final data = doc.data() as Map<String, dynamic>;
-                    final firstName = data['firstName'] ?? '';
-                    final surname = data['surname'] ?? '';
-                    final fullName = '$firstName $surname'.trim();
-
-                    return Card(
-                      key: ValueKey('balance_item_${doc.id}'),
-                      margin: const EdgeInsets.only(bottom: 12),
-                      elevation: Theme.of(context).brightness == Brightness.dark
-                          ? 0
-                          : 2,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? colors.cardColorDark
-                          : colors.backgroundLight,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Worker name and type
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  backgroundColor: colors.primaryBlue,
-                                  child: Text(
-                                    fullName.isNotEmpty
-                                        ? fullName[0].toUpperCase()
-                                        : '?',
-                                    style: TextStyle(
-                                      color: colors.whiteTextOnBlue,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        fullName,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                          color: colors.textColor,
-                                        ),
-                                      ),
-                                      Text(
-                                        'Type: ${_selectedType == 'vacations' ? 'Vacations' : 'Overtime'}',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: colors.darkGray,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            // Balance data based on selected type
-                            _selectedType == 'vacations'
-                                ? _buildVacationsBalance(doc.id, colors)
-                                : _buildOvertimeBalance(doc.id, colors),
-                          ],
+                      const SizedBox(height: 16),
+                      Text(
+                        l10n.noMembersFound,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: colors.darkGray,
                         ),
                       ),
-                    );
-                  },
+                    ],
+                  ),
                 );
-              },
-            ),
+              }
+
+              final allUsers = snapshot.data!.docs;
+              final filteredUsers = allUsers.where((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                final firstName =
+                    (data['firstName'] ?? '').toString().toLowerCase();
+                final surname =
+                    (data['surname'] ?? '').toString().toLowerCase();
+                final fullName = '$firstName $surname'.toLowerCase();
+                return fullName.contains(_searchQuery);
+              }).toList();
+
+              if (filteredUsers.isEmpty) {
+                return Center(
+                  child: Text(
+                    l10n.noMembersMatchSearch,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: colors.darkGray,
+                    ),
+                  ),
+                );
+              }
+
+              return ListView.builder(
+                key: ValueKey('balance_list_${_selectedType}_${_searchQuery}'),
+                itemCount: filteredUsers.length,
+                itemBuilder: (context, index) {
+                  final doc = filteredUsers[index];
+                  final data = doc.data() as Map<String, dynamic>;
+                  final firstName = data['firstName'] ?? '';
+                  final surname = data['surname'] ?? '';
+                  final fullName = '$firstName $surname'.trim();
+
+                  return Card(
+                    key: ValueKey('balance_item_${doc.id}'),
+                    margin: const EdgeInsets.only(bottom: 12),
+                    elevation:
+                        Theme.of(context).brightness == Brightness.dark ? 0 : 2,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? colors.cardColorDark
+                        : colors.backgroundLight,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Worker name and type
+                          Row(
+                            children: [
+                              CircleAvatar(
+                                backgroundColor: colors.primaryBlue,
+                                child: Text(
+                                  fullName.isNotEmpty
+                                      ? fullName[0].toUpperCase()
+                                      : '?',
+                                  style: TextStyle(
+                                    color: colors.whiteTextOnBlue,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      fullName,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color: colors.textColor,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Type: ${_selectedType == 'vacations' ? 'Vacations' : 'Overtime'}',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: colors.darkGray,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          // Balance data based on selected type
+                          _selectedType == 'vacations'
+                              ? _buildVacationsBalance(doc.id, colors)
+                              : _buildOvertimeBalance(doc.id, colors),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -720,9 +715,6 @@ class _BalanceTabState extends State<BalanceTab> {
 
         final overtimeData = overtimeSnapshot.data!;
 
-        // Debug logging
-        print('DEBUG: Calculated overtime for user $userId: $overtimeData');
-
         final transferred = overtimeData['transferred'] ?? 0;
         final current = overtimeData['current'] ?? 0;
         final bonus = overtimeData['bonus'] ?? 0;
@@ -782,9 +774,8 @@ class _BalanceTabState extends State<BalanceTab> {
             fromDate: DateTime.now().subtract(const Duration(days: 28)),
             toDate: DateTime.now(),
           );
-          print('DEBUG: Recalculated overtime for user $userId');
         } catch (e) {
-          print('ERROR: Failed to recalculate overtime for user $userId: $e');
+          // Silently handle individual user recalculation errors
         }
       }
 

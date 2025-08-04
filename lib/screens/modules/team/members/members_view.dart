@@ -606,12 +606,12 @@ class _TotalsHeader extends StatelessWidget {
         if (snapshot.hasData) {
           for (var doc in snapshot.data!.docs) {
             final data = doc.data() as Map<String, dynamic>;
-            final workMinutes = (data['duration_minutes'] ?? 0).toDouble();
+            final workMinutes = (data['duration_minutes'] as int?) ?? 0;
             totalWork += workMinutes;
 
             final expenses = (data['expenses'] ?? {}) as Map<String, dynamic>;
-            totalExpenses += expenses.values
-                .fold<double>(0, (sum, e) => sum + (e is num ? e : 0));
+            totalExpenses += expenses.values.fold<double>(
+                0, (sum, e) => sum + (e is num ? e.toDouble() : 0));
 
             final approvedRaw = data['approved'];
             final rejectedRaw = data['rejected'];
@@ -797,10 +797,19 @@ class _LogsTableState extends State<_LogsTable> {
 
   // Helper for formatting overtime hours consistently
   String _formatOvertimeHours(double hours) {
-    final h = hours.floor();
-    final m = ((hours - h) * 60).round();
-    if (h > 0) return '${h}h ${m.toString().padLeft(2, '0')}m';
-    return '${m}m';
+    if (hours == 0) {
+      return '0m';
+    }
+
+    final isNegative = hours < 0;
+    final absHours = hours.abs();
+    final h = absHours.floor();
+    final m = ((absHours - h) * 60).round();
+
+    if (h > 0) {
+      return '${isNegative ? '-' : ''}${h}h ${m.toString().padLeft(2, '0')}m';
+    }
+    return '${isNegative ? '-' : ''}${m}m';
   }
 
   int _weekNumber(DateTime date) {
@@ -906,24 +915,24 @@ class _LogsTableState extends State<_LogsTable> {
       final jan4 = DateTime(year, 1, 4);
       final startOfYear = jan4.subtract(Duration(days: jan4.weekday - 1));
       final weekStart = startOfYear.add(Duration(days: (weekNumber - 1) * 7));
-      final weekEnd = weekStart.add(const Duration(days: 7));
+      final weekEnd = weekStart.add(const Duration(days: 6));
 
       print('DEBUG: Calculating overtime for week $weekNumber, year $year');
-      print('DEBUG: Week start: ${DateFormat('yyyy-MM-dd').format(weekStart)}');
-      print('DEBUG: Week end: ${DateFormat('yyyy-MM-dd').format(weekEnd)}');
+      print('DEBUG: Week start: ${DateFormat('dd/MM/yyyy').format(weekStart)}');
+      print('DEBUG: Week end: ${DateFormat('dd/MM/yyyy').format(weekEnd)}');
 
       // Additional debug for week calculation
       if (weekNumber == 27) {
         print('DEBUG: WEEK 27 - Week key: $weekKey');
         print('DEBUG: WEEK 27 - Parsed year: $year, week number: $weekNumber');
         print(
-            'DEBUG: WEEK 27 - Jan 4 date: ${DateFormat('yyyy-MM-dd').format(jan4)}');
+            'DEBUG: WEEK 27 - Jan 4 date: ${DateFormat('dd/MM/yyyy').format(jan4)}');
         print(
-            'DEBUG: WEEK 27 - Start of year: ${DateFormat('yyyy-MM-dd').format(startOfYear)}');
+            'DEBUG: WEEK 27 - Start of year: ${DateFormat('dd/MM/yyyy').format(startOfYear)}');
         print(
-            'DEBUG: WEEK 27 - Week start calculation: ${DateFormat('yyyy-MM-dd').format(weekStart)}');
+            'DEBUG: WEEK 27 - Week start calculation: ${DateFormat('dd/MM/yyyy').format(weekStart)}');
         print(
-            'DEBUG: WEEK 27 - Week end calculation: ${DateFormat('yyyy-MM-dd').format(weekEnd)}');
+            'DEBUG: WEEK 27 - Week end calculation: ${DateFormat('dd/MM/yyyy').format(weekEnd)}');
       }
 
       // Calculate overtime for the entire week at once (not from user start date)
@@ -942,10 +951,25 @@ class _LogsTableState extends State<_LogsTable> {
           'DEBUG: Found ${calculationDetails.length} days with data for week $weekNumber');
 
       for (final dayDetail in calculationDetails) {
-        final dayOvertimeMinutes = dayDetail['overtimeMinutes'] as int? ?? 0;
-        totalOvertimeMinutes += dayOvertimeMinutes;
-        print(
-            'DEBUG: Day ${dayDetail['date']} - overtime: ${dayOvertimeMinutes} minutes');
+        final dateStr = dayDetail['date'] as String?;
+        if (dateStr != null) {
+          // Parse the date for proper comparison
+          final dayDate = DateTime.parse(dateStr);
+          // Convert to EU format for display
+          final euDateStr = DateFormat('dd/MM/yyyy').format(dayDate);
+          // Only include days that are within the week range
+          if (dayDate.isAfter(weekStart.subtract(const Duration(days: 1))) &&
+              dayDate.isBefore(weekEnd)) {
+            final dayOvertimeMinutes =
+                dayDetail['overtimeMinutes'] as int? ?? 0;
+            totalOvertimeMinutes += dayOvertimeMinutes;
+            print(
+                'DEBUG: Day $euDateStr - overtime: ${dayOvertimeMinutes} minutes (INCLUDED in week $weekNumber)');
+          } else {
+            print(
+                'DEBUG: Day $euDateStr - EXCLUDED from week $weekNumber (outside date range)');
+          }
+        }
       }
 
       final totalOvertimeHours = (totalOvertimeMinutes / 60).toStringAsFixed(2);
@@ -972,13 +996,17 @@ class _LogsTableState extends State<_LogsTable> {
         // Check if the calculation details have the expected data
         for (int i = 0; i < calculationDetails.length; i++) {
           final detail = calculationDetails[i];
+          final dateStr = detail['date'] as String?;
+          final euDateStr = dateStr != null
+              ? DateFormat('dd/MM/yyyy').format(DateTime.parse(dateStr))
+              : 'unknown';
           print(
-              'DEBUG: WEEK 27 - Day $i: date=${detail['date']}, worked=${detail['minutesWorked']}, expected=${detail['expectedMinutes']}, overtime=${detail['overtimeMinutes']}');
+              'DEBUG: WEEK 27 - Day $i: date=$euDateStr, worked=${detail['minutesWorked']}, expected=${detail['expectedMinutes']}, overtime=${detail['overtimeMinutes']}');
 
           // Additional debug for null worked minutes
           if (detail['minutesWorked'] == null) {
             print(
-                'DEBUG: WEEK 27 - WARNING: minutesWorked is null for date ${detail['date']}');
+                'DEBUG: WEEK 27 - WARNING: minutesWorked is null for date $euDateStr');
             print('DEBUG: WEEK 27 - Full detail: $detail');
           }
         }
@@ -1603,7 +1631,7 @@ class _LogsTableState extends State<_LogsTable> {
                                         'DEBUG: Adding overtime to totalWidgets (date range): $sign${overtimeHours}h for group $groupIdx');
                                     totalWidgets.add(
                                       Text(
-                                        'Overtime: $sign${_formatOvertimeHours(overtimeMinutes / 60)}',
+                                        'Overtime: ${_formatOvertimeHours(overtimeMinutes / 60)}',
                                         style: TextStyle(
                                           fontWeight: FontWeight.w700,
                                           color: color,
@@ -1697,7 +1725,7 @@ class _LogsTableState extends State<_LogsTable> {
                                   if (!overtimeAlreadyAdded) {
                                     totalWidgets.add(
                                       Text(
-                                        'Overtime: $sign${_formatOvertimeHours(overtimeMinutes / 60)}',
+                                        'Overtime: ${_formatOvertimeHours(overtimeMinutes / 60)}',
                                         style: TextStyle(
                                           fontWeight: FontWeight.w700,
                                           color: color,
@@ -1722,11 +1750,15 @@ class _LogsTableState extends State<_LogsTable> {
                                           dayDetail['overtimeMinutes']
                                                   as int? ??
                                               0;
-                                      final date =
+                                      final dateStr =
                                           dayDetail['date'] as String? ??
                                               'unknown';
+                                      final euDateStr = dateStr != 'unknown'
+                                          ? DateFormat('dd/MM/yyyy')
+                                              .format(DateTime.parse(dateStr))
+                                          : 'unknown';
                                       print(
-                                          'DEBUG: WEEK 27 - $date: $dayOvertime minutes');
+                                          'DEBUG: WEEK 27 - $euDateStr: $dayOvertime minutes');
                                     }
                                   }
                                 }
@@ -1940,7 +1972,7 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                     ),
                     const Spacer(),
                     Text(
-                      '${(tempExpenses[key] as num).toStringAsFixed(2)} CHF',
+                      '${(tempExpenses[key] as num?)?.toStringAsFixed(2) ?? '0.00'} CHF',
                       style: const TextStyle(
                           fontWeight: FontWeight.normal, fontSize: 16),
                     ),
@@ -2178,7 +2210,7 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                                       ),
                                     ),
                                     child: Text(
-                                        '${entry.key} ${(entry.value as num).toStringAsFixed(2)} CHF',
+                                        '${entry.key} ${(entry.value as num?)?.toStringAsFixed(2) ?? '0.00'} CHF',
                                         style: const TextStyle(fontSize: 13)),
                                   ),
                               if (_expenses.containsKey('Per diem'))
@@ -2198,8 +2230,9 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                                   child: Text(
                                       AppLocalizations.of(context)!
                                           .perDiemLabel(
-                                              (_expenses['Per diem'] as num)
-                                                  .toStringAsFixed(2)),
+                                              (_expenses['Per diem'] as num?)
+                                                      ?.toStringAsFixed(2) ??
+                                                  '0.00'),
                                       style: const TextStyle(fontSize: 13)),
                                 ),
                             ],
