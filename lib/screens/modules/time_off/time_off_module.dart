@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../theme/app_colors.dart';
-import 'timeoff_calendar.dart';
+import 'package:starktrack/screens/modules/time_off/timeline/timeoff_calendar.dart';
 import 'balance.dart';
 
 class TimeOffModule extends StatefulWidget {

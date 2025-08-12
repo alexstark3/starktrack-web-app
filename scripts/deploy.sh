@@ -60,14 +60,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Build main web app
-echo "🏗️  Building main web app..."
-flutter build web --release --output-dir build/web
-
-# Deploy to Firebase Hosting
-echo "🚀 Deploying to Firebase Hosting..."
-firebase deploy --only hosting:main --project starktracklog
-
 echo "✅ Version update complete!"
 echo "📦 Version $VERSION+$BUILD_NUMBER committed and pushed to GitHub"
-echo "🚀 Deployment will be triggered automatically by your CI/CD pipeline"
+echo "🚀 GitHub Actions will automatically build and deploy both apps"
+echo "📋 Check deployment status at: https://github.com/alexstark3/starktrack-web-app/actions"

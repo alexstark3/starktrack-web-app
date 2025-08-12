@@ -80,7 +80,7 @@ service cloud.firestore {
       /* ----- Other company sub-collections ----- */
       match /{subCol}/{docId} {
         allow read, write: if ['clients','groups',
-                               'holiday_policies','timeoff_policies']
+                               'holiday_policies','timeoff_policies','timeoff_requests']
                                .hasAny([subCol]) &&
                            (
                              /* READ - All collections for authenticated users in company */
