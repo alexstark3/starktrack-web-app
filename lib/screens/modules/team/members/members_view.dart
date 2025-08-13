@@ -1,5 +1,3 @@
-library team_members_view;
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
@@ -27,11 +25,11 @@ class MemberHistoryScreen extends StatefulWidget {
   final VoidCallback? onBack;
 
   const MemberHistoryScreen({
-    Key? key,
+    super.key,
     required this.companyId,
     required this.memberDoc,
     this.onBack,
-  }) : super(key: key);
+  });
 
   @override
   State<MemberHistoryScreen> createState() => _MemberHistoryScreenState();
@@ -113,7 +111,9 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
             children: [
               // Header with name and expand/collapse button
               InkWell(
-                onTap: () => setState(() => _isCardExpanded = !_isCardExpanded),
+                onTap: () {
+                  setState(() => _isCardExpanded = !_isCardExpanded);
+                },
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(12),
                   topRight: Radius.circular(12),
@@ -190,7 +190,9 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                                   companyId: widget.companyId,
                                   userId: userId,
                                   userName: userName,
-                                  onSessionAdded: () => setState(() {}),
+                                  onSessionAdded: () {
+                                    setState(() {});
+                                  },
                                 ),
                               );
                             },
@@ -223,8 +225,9 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                                 firstDate: DateTime(2023),
                                 lastDate: DateTime(2100),
                               );
-                              if (picked != null)
+                              if (picked != null) {
                                 setState(() => fromDate = picked);
+                              }
                             },
                             child: Container(
                               height: kFilterHeight,
@@ -268,8 +271,9 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                                 firstDate: DateTime(2023),
                                 lastDate: DateTime(2100),
                               );
-                              if (picked != null)
+                              if (picked != null) {
                                 setState(() => toDate = picked);
+                              }
                             },
                             child: Container(
                               height: kFilterHeight,
@@ -338,8 +342,9 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                                   ),
                                 ],
                                 onChanged: (val) {
-                                  if (val != null)
+                                  if (val != null) {
                                     setState(() => groupType = val);
+                                  }
                                 },
                               ),
                             ),
@@ -542,7 +547,9 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
             searchProject: searchProject,
             searchNote: searchNote,
             groupType: groupType,
-            onAction: () => setState(() {}),
+            onAction: () {
+              setState(() {});
+            },
           ),
         ),
       ],
@@ -700,7 +707,7 @@ class _LogsTableState extends State<_LogsTable> {
                   controller: ctrl,
                   maxLines: 3,
                   decoration: InputDecoration(
-                    labelText: 'Note',
+                    labelText: AppLocalizations.of(context)!.note,
                     errorText: showError ? 'Note Required !' : null,
                   ),
                   onChanged: (_) {
@@ -713,7 +720,9 @@ class _LogsTableState extends State<_LogsTable> {
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.of(context).pop(null),
+                onPressed: () {
+                  Navigator.of(context).pop(null);
+                },
                 child: Text(AppLocalizations.of(context)!.cancel,
                     style: TextStyle(color: colors.textColor)),
               ),
@@ -747,7 +756,9 @@ class _LogsTableState extends State<_LogsTable> {
     try {
       final userRef = logRef.parent.parent; // users/{userId}
       final companyRef = userRef?.parent; // companies/{companyId}/users
-      if (userRef == null || companyRef == null || note.isEmpty) return;
+      if (userRef == null || companyRef == null || note.isEmpty) {
+        return;
+      }
       await userRef.collection('manager_notes').add({
         'note': note,
         'type': type, // rejected | deleted
@@ -759,10 +770,14 @@ class _LogsTableState extends State<_LogsTable> {
 
   // Helper for formatting Duration as HH:MMh
   String _formatDuration(Duration d) {
-    if (d == Duration.zero) return '';
+    if (d == Duration.zero) {
+      return '';
+    }
     final h = d.inHours;
     final m = d.inMinutes % 60;
-    if (h > 0) return '${h}h ${m.toString().padLeft(2, '0')}m';
+    if (h > 0) {
+      return '${h}h ${m.toString().padLeft(2, '0')}m';
+    }
     return '${m}m';
   }
 
@@ -869,7 +884,6 @@ class _LogsTableState extends State<_LogsTable> {
       }
       return null;
     } catch (e) {
-      print('Error calculating daily overtime: $e');
       return null;
     }
   }
@@ -929,7 +943,6 @@ class _LogsTableState extends State<_LogsTable> {
         'reason': reason,
       };
     } catch (e) {
-      print('Error calculating weekly overtime: $e');
       return null;
     }
   }
@@ -968,7 +981,6 @@ class _LogsTableState extends State<_LogsTable> {
         'reason': reason,
       };
     } catch (e) {
-      print('Error calculating monthly overtime: $e');
       return null;
     }
   }
@@ -1007,7 +1019,6 @@ class _LogsTableState extends State<_LogsTable> {
         'reason': reason,
       };
     } catch (e) {
-      print('Error calculating yearly overtime: $e');
       return null;
     }
   }
@@ -1096,7 +1107,9 @@ class _LogsTableState extends State<_LogsTable> {
               totalExpense += v.toDouble();
             } else if (v is String) {
               final parsed = double.tryParse(v);
-              if (parsed != null) totalExpense += parsed;
+              if (parsed != null) {
+                totalExpense += parsed;
+              }
             } else if (v is bool) {
               // Skip boolean values
               continue;
@@ -1119,8 +1132,12 @@ class _LogsTableState extends State<_LogsTable> {
 
         // Sort by begin date descending
         entries.sort((a, b) {
-          if (a.begin == null) return 1;
-          if (b.begin == null) return -1;
+          if (a.begin == null) {
+            return 1;
+          }
+          if (b.begin == null) {
+            return -1;
+          }
           return b.begin!.compareTo(a.begin!);
         });
 
@@ -1199,10 +1216,12 @@ class _LogsTableState extends State<_LogsTable> {
             final groupList = grouped[groupKey]!;
 
             final groupTotal = groupList.fold<Duration>(
-                Duration.zero, (sum, e) => sum + e.duration);
-            final groupExpense = groupList.fold<double>(0.0, (sum, e) {
-              if (e.expense.isNaN) return sum;
-              return sum + e.expense;
+                Duration.zero, (accDuration, e) => accDuration + e.duration);
+            final groupExpense = groupList.fold<double>(0.0, (accAmount, e) {
+              if (e.expense.isNaN) {
+                return accAmount;
+              }
+              return accAmount + e.expense;
             });
 
             return Card(
@@ -1450,6 +1469,9 @@ class _LogsTableState extends State<_LogsTable> {
                                             context, data);
                                     String? note;
                                     if (confirmed == true) {
+                                      if (!context.mounted) {
+                                        return;
+                                      }
                                       note = await _promptManagerNote(context,
                                           AppLocalizations.of(context)!.delete);
                                     }

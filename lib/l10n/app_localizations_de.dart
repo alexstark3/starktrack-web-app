@@ -21,7 +21,49 @@ class AppLocalizationsDe extends AppLocalizations {
   String get team => 'Team';
 
   @override
+  String get timeOff => 'Abwesenheit';
+
+  @override
   String get members => 'Mitglieder';
+
+  @override
+  String get calendar => 'Kalender';
+
+  @override
+  String get balance => 'Saldo';
+
+  @override
+  String get requests => 'Anfragen';
+
+  @override
+  String get searchRequests => 'Anfragen suchen';
+
+  @override
+  String get requestButton => 'Anfrage';
+
+  @override
+  String get failedToLoadRequests => 'Anfragen konnten nicht geladen werden';
+
+  @override
+  String get noRequests => 'Keine Anfragen';
+
+  @override
+  String get unknownPolicy => 'Unbekannte Richtlinie';
+
+  @override
+  String get newTimeOffRequest => 'Neue Abwesenheitsanfrage';
+
+  @override
+  String get policy => 'Richtlinie';
+
+  @override
+  String get descriptionOptional => 'Beschreibung (optional)';
+
+  @override
+  String get submitRequest => 'Anfrage senden';
+
+  @override
+  String get pickDates => 'Daten auswählen';
 
   @override
   String get projects => 'Projekte';
@@ -30,7 +72,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get clients => 'Kunden';
 
   @override
-  String get admin => 'Administration';
+  String get admin => 'Admin';
 
   @override
   String get settings => 'Einstellungen';
@@ -231,7 +273,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get passwordManualEntry => 'Passwort (manuelle Eingabe)';
 
   @override
-  String get passwordMinLength => 'Das Passwort muss mindestens 6 Zeichen lang sein.';
+  String get passwordMinLength =>
+      'Das Passwort muss mindestens 6 Zeichen lang sein.';
 
   @override
   String get editUser => 'Benutzer bearbeiten';
@@ -252,7 +295,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noClientsFound => 'Keine Kunden gefunden.';
 
   @override
-  String get noTimeLogsFound => 'Keine Zeiteinträge für diesen Mitarbeiter gefunden.';
+  String get noTimeLogsFound =>
+      'Keine Zeiteinträge für diesen Mitarbeiter gefunden.';
 
   @override
   String errorLoadingProjects(String error) {
@@ -260,7 +304,8 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get noProjectsFoundInFirestore => 'Keine Projekte in Firestore gefunden.';
+  String get noProjectsFoundInFirestore =>
+      'Keine Projekte in Firestore gefunden.';
 
   @override
   String get projectId => 'Projekt-ID';
@@ -275,7 +320,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get optional => 'optional';
 
   @override
-  String get companyAdmin => 'Firmenadministrator';
+  String get companyAdmin => 'Firmenadmin';
 
   @override
   String get required => 'erforderlich';
@@ -407,7 +452,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noHolidayPoliciesFound => 'Keine Urlaubsrichtlinien gefunden';
 
   @override
-  String get pleaseEnterPolicyName => 'Bitte geben Sie einen Richtliniennamen ein';
+  String get pleaseEnterPolicyName =>
+      'Bitte geben Sie einen Richtliniennamen ein';
 
   @override
   String get pleaseSelectDate => 'Bitte wählen Sie ein Datum';
@@ -434,7 +480,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get groups => 'Gruppen';
 
   @override
-  String get noUsersFound => 'Keine Benutzer gefunden, die Ihrer Suche entsprechen';
+  String get noUsersFound =>
+      'Keine Benutzer gefunden, die Ihrer Suche entsprechen';
 
   @override
   String get noGroupsFound => 'Keine Gruppen gefunden';
@@ -461,7 +508,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get deleteHolidayPolicy => 'Urlaubsrichtlinie löschen';
 
   @override
-  String get deleteHolidayPolicyConfirm => 'Sind Sie sicher, dass Sie löschen möchten';
+  String get deleteHolidayPolicyConfirm =>
+      'Sind Sie sicher, dass Sie löschen möchten';
 
   @override
   String get holidayPolicyDeleted => 'Urlaubsrichtlinie erfolgreich gelöscht';
@@ -507,25 +555,32 @@ class AppLocalizationsDe extends AppLocalizations {
   String get confirmDelete => 'Löschen bestätigen';
 
   @override
-  String get confirmDeleteMessage => 'Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?';
+  String get confirmDeleteMessage =>
+      'Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?';
 
   @override
-  String get firstNameSurnameEmailRequired => 'Vorname, Nachname und E-Mail sind erforderlich!';
+  String get firstNameSurnameEmailRequired =>
+      'Vorname, Nachname und E-Mail sind erforderlich!';
 
   @override
-  String get atLeastOneRoleRequired => 'Mindestens eine Rolle ist erforderlich!';
+  String get atLeastOneRoleRequired =>
+      'Mindestens eine Rolle ist erforderlich!';
 
   @override
-  String get atLeastOneModuleRequired => 'Mindestens ein Modul ist erforderlich!';
+  String get atLeastOneModuleRequired =>
+      'Mindestens ein Modul ist erforderlich!';
 
   @override
-  String get passwordMustBeAtLeast6Characters => 'Das Passwort muss mindestens 6 Zeichen lang sein!';
+  String get passwordMustBeAtLeast6Characters =>
+      'Das Passwort muss mindestens 6 Zeichen lang sein!';
 
   @override
-  String get userWithThisEmailAlreadyExists => 'Ein Benutzer mit dieser E-Mail existiert bereits.';
+  String get userWithThisEmailAlreadyExists =>
+      'Ein Benutzer mit dieser E-Mail existiert bereits.';
 
   @override
-  String get onlySuperAdminCanEditCompanyAdmin => 'Nur Super-Admin kann den Firmenadministrator bearbeiten.';
+  String get onlySuperAdminCanEditCompanyAdmin =>
+      'Nur Super-Admin kann den Firmenadmin bearbeiten.';
 
   @override
   String get authError => 'Authentifizierungsfehler';
@@ -559,10 +614,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get perDiemAlreadyEntered => 'Spesen bereits heute eingegeben';
 
   @override
-  String get startAndEndTimesCannotBeEmpty => 'Start- und Endzeiten dürfen nicht leer sein';
+  String get startAndEndTimesCannotBeEmpty =>
+      'Start- und Endzeiten dürfen nicht leer sein';
 
   @override
-  String get endTimeMustBeAfterStartTime => 'Endzeit muss nach Startzeit liegen';
+  String get endTimeMustBeAfterStartTime =>
+      'Endzeit muss nach Startzeit liegen';
 
   @override
   String get timeOverlap => 'Fehler: Zeitüberschneidung';
@@ -574,7 +631,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noLogsFound => 'Keine Einträge gefunden.';
 
   @override
-  String get noEntriesMatchFilters => 'Keine Einträge entsprechen Ihren Filtern.';
+  String get noEntriesMatchFilters =>
+      'Keine Einträge entsprechen Ihren Filtern.';
 
   @override
   String get unknown => 'Unbekannt';
@@ -589,13 +647,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get addNew => 'Hinzufügen';
 
   @override
-  String get searchByClientNamePersonEmail => 'Nach Kundenname, Person oder E-Mail suchen';
+  String get searchByClientNamePersonEmail =>
+      'Nach Kundenname, Person oder E-Mail suchen';
 
   @override
   String get contact => 'Kontakt';
 
   @override
-  String get searchByNameSurnameEmail => 'Nach Name, Nachname oder E-Mail suchen';
+  String get searchByNameSurnameEmail =>
+      'Nach Name, Nachname oder E-Mail suchen';
 
   @override
   String get role_admin => 'Admin';
@@ -646,7 +706,17 @@ class AppLocalizationsDe extends AppLocalizations {
   String get tapToAdd => 'Tippen zum Hinzufügen';
 
   @override
-  String get perDiemAlreadyUsedInAnotherSession => 'Spesen bereits in einer anderen Sitzung heute verwendet';
+  String get perDiemAlreadyUsedInAnotherSession =>
+      'Spesen bereits in einer anderen Sitzung heute verwendet';
+
+  @override
+  String get all => 'Alle';
+
+  @override
+  String get denyRequest => 'Anfrage ablehnen';
+
+  @override
+  String get deny => 'Ablehnen';
 
   @override
   String get projectName => 'Projektname';
@@ -667,7 +737,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get createNewClient => 'Neuen Kunden erstellen';
 
   @override
-  String get clientMustBeSelectedOrCreated => 'Kunde muss ausgewählt oder erstellt werden';
+  String get clientMustBeSelectedOrCreated =>
+      'Kunde muss ausgewählt oder erstellt werden';
 
   @override
   String get editProject => 'Projekt bearbeiten';
@@ -726,7 +797,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get deleteEntry => 'Eintrag löschen';
 
   @override
-  String get deleteEntryMessage => 'Sind Sie sicher, dass Sie diesen Eintrag löschen möchten? Dies kann nicht rückgängig gemacht werden.';
+  String get deleteEntryMessage =>
+      'Sind Sie sicher, dass Sie diesen Eintrag löschen möchten? Dies kann nicht rückgängig gemacht werden.';
 
   @override
   String get work => 'Arbeit';
@@ -744,7 +816,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get accountLocked => 'Konto vorübergehend gesperrt';
 
   @override
-  String get tooManyFailedAttempts => 'Zu viele fehlgeschlagene Anmeldeversuche';
+  String get tooManyFailedAttempts =>
+      'Zu viele fehlgeschlagene Anmeldeversuche';
 
   @override
   String accountLockedMessage(int minutes) {
@@ -760,13 +833,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get accountUnlocked => 'Konto entsperrt';
 
   @override
-  String get accountUnlockedMessage => 'Ihr Konto wurde entsperrt. Sie können sich jetzt erneut anmelden.';
+  String get accountUnlockedMessage =>
+      'Ihr Konto wurde entsperrt. Sie können sich jetzt erneut anmelden.';
 
   @override
   String get adminPasswordRequired => 'Admin-Passwort erforderlich';
 
   @override
   String get enterYourPassword => 'Geben Sie Ihr Passwort ein';
+  @override
+  String get enterYourEmail => 'Geben Sie Ihre E-Mail-Adresse ein';
 
   @override
   String get confirm => 'Bestätigen';
@@ -775,7 +851,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get deleteUser => 'Benutzer löschen';
 
   @override
-  String get deleteUserConfirmation => 'Sind Sie sicher, dass Sie diesen Benutzer löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.';
+  String get deleteUserConfirmation =>
+      'Sind Sie sicher, dass Sie diesen Benutzer löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.';
 
   @override
   String get userDeleted => 'Benutzer erfolgreich gelöscht';
@@ -826,7 +903,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get projectsForThisClient => 'Projekte für diesen Kunden';
 
   @override
-  String get noProjectsFoundForThisClient => 'Keine Projekte für diesen Kunden gefunden.';
+  String get noProjectsFoundForThisClient =>
+      'Keine Projekte für diesen Kunden gefunden.';
 
   @override
   String get clientSummary => 'Kundenübersicht';
@@ -835,7 +913,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get addGroup => 'Gruppe hinzufügen';
 
   @override
-  String get createFirstGroup => 'Erstellen Sie Ihre erste Gruppe, um zu beginnen';
+  String get createFirstGroup =>
+      'Erstellen Sie Ihre erste Gruppe, um zu beginnen';
 
   @override
   String get noGroupsMatchSearch => 'Keine Gruppen entsprechen Ihrer Suche';
@@ -886,10 +965,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get deleteGroupTitle => 'Gruppe löschen';
 
   @override
-  String get deleteGroupConfirmation => 'Sind Sie sicher, dass Sie löschen möchten';
+  String get deleteGroupConfirmation =>
+      'Sind Sie sicher, dass Sie löschen möchten';
 
   @override
-  String get deleteGroupCannotBeUndone => 'Diese Aktion kann nicht rückgängig gemacht werden';
+  String get deleteGroupCannotBeUndone =>
+      'Diese Aktion kann nicht rückgängig gemacht werden';
 
   @override
   String get groupDeletedSuccessfully => 'Gruppe erfolgreich gelöscht';
@@ -916,4 +997,43 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get resetToThisWeek => 'Auf diese Woche zurücksetzen';
+
+  // App shell/system
+  @override
+  String get systemMaintenance =>
+      'Das System wird gewartet. Bitte versuchen Sie es später erneut.';
+  @override
+  String get userNotFoundInCompany => 'Benutzer in Firma nicht gefunden.';
+  @override
+  String get noCompaniesFound => 'Keine Firmen gefunden.';
+  @override
+  String get userNotAssigned => 'Benutzer keiner Firma zugewiesen.';
+
+  // Calendar widget strings
+  @override
+  String get startingDayOfWeek => 'Erster Wochentag';
+  @override
+  String get monday => 'Montag';
+  @override
+  String get tuesday => 'Dienstag';
+  @override
+  String get wednesday => 'Mittwoch';
+  @override
+  String get thursday => 'Donnerstag';
+  @override
+  String get friday => 'Freitag';
+  @override
+  String get saturday => 'Samstag';
+  @override
+  String get sunday => 'Sonntag';
+  @override
+  String get calendarSettings => 'Kalendereinstellungen';
+  @override
+  String get clear => 'Leeren';
+  @override
+  String get showWeekNumbers => 'Wochennummern anzeigen';
+  @override
+  String get manager => 'Manager';
+  @override
+  String get changesSaved => 'Änderungen erfolgreich gespeichert!';
 }

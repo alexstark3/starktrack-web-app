@@ -5,7 +5,7 @@ import 'package:starktrack/theme/app_colors.dart';
 import 'package:starktrack/l10n/app_localizations.dart';
 
 class TodayLine extends StatefulWidget {
-  const TodayLine({Key? key}) : super(key: key);
+  const TodayLine({super.key});
 
   @override
   State<TodayLine> createState() => _TodayLineState();
@@ -43,28 +43,33 @@ class _TodayLineState extends State<TodayLine> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: isDark ? appColors.cardColorDark : theme.cardColor,
-          border: isDark ? Border.all(color: const Color(0xFF404040), width: 1) : null,
-          boxShadow: isDark ? null : [
-            BoxShadow(
-              color: Colors.black.withValues(alpha:0.15),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          border: isDark
+              ? Border.all(color: const Color(0xFF404040), width: 1)
+              : null,
+          boxShadow: isDark
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.15),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
         ),
         child: Card(
           color: Colors.transparent,
           elevation: 0,
           margin: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           child: Padding(
             padding: const EdgeInsets.all(10),
             child: Text(
               '${l10n.today}: ${DateFormat('dd MMM yyyy – HH:mm').format(_now)}',
               style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w400,
-                    color: appColors.textColor,
-                  ),
+                fontWeight: FontWeight.w400,
+                color: appColors.textColor,
+              ),
             ),
           ),
         ),

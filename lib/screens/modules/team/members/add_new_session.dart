@@ -11,12 +11,12 @@ class AddNewSessionDialog extends StatefulWidget {
   final VoidCallback onSessionAdded;
 
   const AddNewSessionDialog({
-    Key? key,
+    super.key,
     required this.companyId,
     required this.userId,
     required this.userName,
     required this.onSessionAdded,
-  }) : super(key: key);
+  });
 
   @override
   State<AddNewSessionDialog> createState() => _AddNewSessionDialogState();
@@ -65,9 +65,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
             .where((name) => name.isNotEmpty)
             .toList();
       });
-    } catch (e) {
-      //  print('Error loading projects: $e');
-    }
+    } catch (e) {}
   }
 
   Future<void> _selectDate() async {
@@ -125,7 +123,6 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
       }
       return false;
     } catch (e) {
-      print('Error checking per diem: $e');
       return false;
     }
   }
@@ -484,6 +481,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
           .set(sessionData);
 
       widget.onSessionAdded();
+      if (!mounted) return;
       Navigator.pop(context);
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -493,6 +491,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error adding session: $e'),
@@ -500,9 +499,11 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
         ),
       );
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 

@@ -12,12 +12,12 @@ class MembersTab extends StatefulWidget {
   final void Function(DocumentSnapshot?) onSelectMember;
 
   const MembersTab({
-    Key? key,
+    super.key,
     required this.companyId,
     this.teamLeaderId,
     required this.selectedMember,
     required this.onSelectMember,
-  }) : super(key: key);
+  });
 
   @override
   State<MembersTab> createState() => _MembersTabState();
@@ -322,7 +322,9 @@ class _MembersTable extends StatelessWidget {
   }
 
   String _formatRoles(List? roles, AppLocalizations? l10n) {
-    if (roles == null || roles.isEmpty) return '';
+    if (roles == null || roles.isEmpty) {
+      return '';
+    }
 
     return roles.map((role) {
       switch (role.toString()) {
@@ -343,7 +345,9 @@ class _MembersTable extends StatelessWidget {
   }
 
   String _formatModules(List? modules, AppLocalizations? l10n) {
-    if (modules == null || modules.isEmpty) return '';
+    if (modules == null || modules.isEmpty) {
+      return '';
+    }
 
     return modules.map((module) {
       switch (module.toString()) {

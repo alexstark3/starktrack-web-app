@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../../../theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../utils/app_logger.dart';
 
 const double kFilterHeight = 38;
 const double kFilterRadius = 9;
@@ -16,10 +17,10 @@ class HistoryLogs extends StatefulWidget {
   final String userId;
 
   const HistoryLogs({
-    Key? key,
+    super.key,
     required this.companyId,
     required this.userId,
-  }) : super(key: key);
+  });
 
   @override
   State<HistoryLogs> createState() => _HistoryLogsState();
@@ -103,7 +104,9 @@ class _HistoryLogsState extends State<HistoryLogs> {
           firstDate: DateTime(2023),
           lastDate: DateTime(2100),
         );
-        if (picked != null) setState(() => fromDate = picked);
+        if (picked != null) {
+          setState(() => fromDate = picked);
+        }
       },
       child: Container(
         height: kFilterHeight,
@@ -140,7 +143,9 @@ class _HistoryLogsState extends State<HistoryLogs> {
           firstDate: DateTime(2023),
           lastDate: DateTime(2100),
         );
-        if (picked != null) setState(() => toDate = picked);
+        if (picked != null) {
+          setState(() => toDate = picked);
+        }
       },
       child: Container(
         height: kFilterHeight,
@@ -197,7 +202,9 @@ class _HistoryLogsState extends State<HistoryLogs> {
             ),
           ],
           onChanged: (val) {
-            if (val != null) setState(() => groupType = val);
+            if (val != null) {
+              setState(() => groupType = val);
+            }
           },
         ),
       ),
@@ -470,14 +477,14 @@ class _HistoryLogsState extends State<HistoryLogs> {
                                 continue;
                               }
                             } catch (e) {
-                              print(
+                              AppLogger.error(
                                   'Error processing expense entry ${entry.key}: $e');
                               continue;
                             }
                           }
                         }
                       } catch (e) {
-                        print('Error processing log data: $e');
+                        AppLogger.error('Error processing log data: $e');
                       }
 
                       entries.add(_HistoryEntry(
@@ -492,7 +499,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                         expensesMap: expensesMap,
                       ));
                     } catch (e) {
-                      print('Error creating history entry: $e');
+                      AppLogger.error('Error creating history entry: $e');
                       continue;
                     }
                   }
@@ -583,7 +590,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                             groupExpense += e.expense;
                           }
                         } catch (error) {
-                          print('Error in group calculation: $error');
+                          AppLogger.error('Error in group calculation: $error');
                         }
                       }
 

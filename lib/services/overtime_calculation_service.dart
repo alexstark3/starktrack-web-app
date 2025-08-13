@@ -41,9 +41,7 @@ class OvertimeCalculationService {
       if (startDateString != null) {
         try {
           userStartDate = DateTime.parse(startDateString);
-        } catch (e) {
-          print('Error parsing start date: $e');
-        }
+        } catch (e) {}
       }
 
       // Use reasonable date range (last 4 weeks by default)

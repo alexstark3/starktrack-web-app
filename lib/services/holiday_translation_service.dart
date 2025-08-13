@@ -97,6 +97,36 @@ class HolidayTranslationService {
       'Neuchâtel Independence Day': 'Neuenburger Unabhängigkeitstag',
       'Valais Independence Day': 'Walliser Unabhängigkeitstag',
     },
+    'fr': {
+      'New Year\'s Day': 'Nouvel An',
+      'Christmas Day': 'Noël',
+      'Labour Day': 'Fête du Travail',
+      'Easter Sunday': 'Pâques',
+      'Good Friday': 'Vendredi saint',
+      'Easter Monday': 'Lundi de Pâques',
+      'Ascension Day': 'Ascension',
+      'Whit Monday': 'Lundi de Pentecôte',
+      'Assumption Day': 'Assomption',
+      'All Saints\' Day': 'La Toussaint',
+      'Boxing Day': 'Lendemain de Noël',
+      'Epiphany': 'Épiphanie',
+      'Swiss National Day': 'Fête nationale suisse',
+    },
+    'it': {
+      'New Year\'s Day': 'Capodanno',
+      'Christmas Day': 'Natale',
+      'Labour Day': 'Festa dei Lavoratori',
+      'Easter Sunday': 'Pasqua',
+      'Good Friday': 'Venerdì santo',
+      'Easter Monday': 'Lunedì dell\'Angelo',
+      'Ascension Day': 'Ascensione',
+      'Whit Monday': 'Lunedì di Pentecoste',
+      'Assumption Day': 'Ferragosto',
+      'All Saints\' Day': 'Ognissanti',
+      'Boxing Day': 'Santo Stefano',
+      'Epiphany': 'Epifania',
+      'Swiss National Day': 'Festa nazionale svizzera',
+    },
   };
 
   // Get translated holiday name
@@ -120,10 +150,10 @@ class HolidayTranslationService {
 
   // Helper method to determine language code from l10n
   static String _getLanguageCodeFromL10n(AppLocalizations l10n) {
-    // Check if it's German by testing a German-specific translation
-    if (l10n.area == 'Kanton') {
-      return 'de';
-    }
+    final locale = l10n.localeName.toLowerCase();
+    if (locale.startsWith('de')) return 'de';
+    if (locale.startsWith('fr')) return 'fr';
+    if (locale.startsWith('it')) return 'it';
     return 'en';
   }
 

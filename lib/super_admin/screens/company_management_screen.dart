@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/app_logger.dart';
 import '../services/company_module_service.dart';
 import 'add_company.dart';
 
 class CompanyManagementScreen extends StatefulWidget {
-  const CompanyManagementScreen({Key? key}) : super(key: key);
+  const CompanyManagementScreen({super.key});
 
   @override
   State<CompanyManagementScreen> createState() =>
@@ -128,7 +129,7 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print('❌ Error loading companies: $e');
+      AppLogger.error('Error loading companies: $e');
       setState(() => _isLoading = false);
 
       // Show error to user
@@ -217,7 +218,7 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
         );
       }
     } catch (e) {
-      print('Error updating company status: $e');
+      AppLogger.error('Error updating company status: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -256,7 +257,7 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
         );
       }
     } catch (e) {
-      print('Error updating user limit: $e');
+      AppLogger.error('Error updating user limit: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -409,7 +410,7 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
         );
       }
     } catch (e) {
-      print('❌ Error deleting company: $e');
+      AppLogger.error('Error deleting company: $e');
       setState(() => _isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

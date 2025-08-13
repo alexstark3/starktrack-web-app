@@ -5,6 +5,7 @@ import '../security/company_id_generator.dart';
 import '../services/company_module_service.dart';
 import '../../screens/modules/admin/add_user.dart';
 import '../../screens/modules/admin/user_address.dart';
+import '../../utils/app_logger.dart';
 
 class AddCompanyDialog extends StatefulWidget {
   final Function() onCompanyAdded;
@@ -128,6 +129,7 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
           .get();
 
       if (usersQuery.docs.isEmpty) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('No company admin found to edit'),
@@ -139,9 +141,10 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
 
       final adminDoc = usersQuery.docs.first;
 
+      if (!mounted) return;
       showDialog(
         context: context,
-        builder: (context) => AddUserDialog(
+        builder: (dialogContext) => AddUserDialog(
           companyId: _tempCompanyId!,
           teamLeaders: [], // No team leaders for super admin context
           currentUserRoles: [
@@ -152,8 +155,10 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
             // Reload the admin information after editing
             await _loadExistingAdminInfo(_tempCompanyId!);
 
+            if (!mounted) return;
             Navigator.of(context).pop();
 
+            if (!mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Company admin updated successfully!'),
@@ -164,7 +169,7 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
         ),
       );
     } catch (e) {
-      print('Error finding admin to edit: $e');
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error finding admin to edit: $e'),
@@ -519,8 +524,8 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
           'updatedAt': FieldValue.serverTimestamp(),
         });
 
-        setState(() => _isLoading = false);
-
+        if (mounted) setState(() => _isLoading = false);
+        if (!mounted) return;
         Navigator.of(context).pop();
         widget.onCompanyAdded();
 
@@ -553,9 +558,11 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
         // Store company ID for admin creation
         _tempCompanyId = companyId;
 
-        setState(() {
-          _isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
 
         // Force a rebuild to ensure UI updates
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -564,6 +571,7 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
           }
         });
 
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
@@ -573,9 +581,10 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
         );
       }
     } catch (e) {
-      setState(() => _isLoading = false);
-      print(
-          '❌ Error ${widget.existingCompany != null ? 'updating' : 'creating'} company: $e');
+      if (mounted) setState(() => _isLoading = false);
+      AppLogger.error(
+          'Error ${widget.existingCompany != null ? 'updating' : 'creating'} company: $e');
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -609,7 +618,7 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
         });
       }
     } catch (e) {
-      print('Error loading existing admin info: $e');
+      AppLogger.error('Error loading existing admin info: $e');
     }
   }
 
@@ -635,6 +644,7 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
           .get();
 
       if (usersQuery.docs.isNotEmpty) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Company already has an admin'),
@@ -644,12 +654,13 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
         return;
       }
     } catch (e) {
-      print('Error checking existing admin: $e');
+      AppLogger.error('Error checking existing admin: $e');
     }
 
+    if (!mounted) return;
     showDialog(
       context: context,
-      builder: (context) => AddUserDialog(
+      builder: (dialogContext) => AddUserDialog(
         companyId: _tempCompanyId!,
         teamLeaders: [], // No team leaders for super admin context
         currentUserRoles: [
@@ -680,11 +691,13 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
               });
             }
           } catch (e) {
-            print('Error getting admin info: $e');
+            AppLogger.error('Error getting admin info: $e');
           }
 
+          if (!mounted) return;
           Navigator.of(context).pop();
 
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Company admin created successfully!'),

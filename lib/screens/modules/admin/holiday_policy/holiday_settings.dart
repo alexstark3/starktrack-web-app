@@ -5,6 +5,7 @@ import 'package:starktrack/services/country_region_service.dart';
 import 'package:starktrack/screens/modules/admin/user_address.dart';
 import 'add_national_holidays.dart';
 import 'add_area_holidays.dart';
+import 'package:starktrack/utils/app_logger.dart';
 
 class HolidaySettingsScreen extends StatefulWidget {
   final String companyId;
@@ -147,10 +148,7 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
       _nationalHolidays.clear();
       _areaHolidays.clear();
 
-      // Debug logging
-      print(
-          'DEBUG: Region changed - Country: ${regionData['country']}, Area: ${regionData['area']}');
-      print('DEBUG: Selected areas: $_selectedAreas');
+      // Debug logging removed
     });
   }
 
@@ -194,7 +192,7 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
 
           addedCount++;
         } catch (e) {
-          print('Error adding ${holiday['name']}: $e');
+          AppLogger.error('Error adding ${holiday['name']}: $e');
         }
       }
 
@@ -251,7 +249,7 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
 
           addedCount++;
         } catch (e) {
-          print('Error adding ${holiday['name']}: $e');
+          AppLogger.error('Error adding ${holiday['name']}: $e');
         }
       }
 

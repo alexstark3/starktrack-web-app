@@ -16,12 +16,12 @@ class TimeEntryCard extends StatefulWidget {
       projects; // List of project names (adjust if structure changes)
 
   const TimeEntryCard({
-    Key? key,
+    super.key,
     required this.companyId,
     required this.userId,
     required this.selectedDay,
     required this.projects,
-  }) : super(key: key);
+  });
 
   @override
   State<TimeEntryCard> createState() => _TimeEntryCardState();
@@ -475,11 +475,15 @@ class _TimeEntryCardState extends State<TimeEntryCard>
         _expenses = {};
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+        );
+      }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 

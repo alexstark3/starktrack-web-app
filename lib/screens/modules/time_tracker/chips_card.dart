@@ -8,11 +8,11 @@ class ChipsCard extends StatelessWidget {
   final bool showBreaks; // <-- NEW
 
   const ChipsCard({
-    Key? key,
+    super.key,
     required this.worked,
     required this.breaks,
     this.showBreaks = true, // default to true for backwards compatibility
-  }) : super(key: key);
+  });
 
   String _formatDuration(Duration d) {
     if (d.inMinutes == 0) return '00:00h';

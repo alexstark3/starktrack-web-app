@@ -6,12 +6,14 @@ import 'super_admin_login.dart';
 import '../tools/company_migration_tool.dart';
 import '../security/firestore_backup_service.dart';
 import 'company_management_screen.dart';
-import 'dart:html' as html;
+import 'dart:typed_data';
+import 'package:file_saver/file_saver.dart';
+import 'package:file_picker/file_picker.dart';
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SuperAdminDashboardScreen extends StatefulWidget {
-  const SuperAdminDashboardScreen({Key? key}) : super(key: key);
+  const SuperAdminDashboardScreen({super.key});
 
   @override
   State<SuperAdminDashboardScreen> createState() =>
@@ -232,12 +234,12 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                 final json =
                     await FirestoreBackupService.backupAllCompaniesAsJson();
                 final bytes = utf8.encode(json);
-                final blob = html.Blob([bytes], 'application/json');
-                final url = html.Url.createObjectUrlFromBlob(blob);
-                html.AnchorElement(href: url)
-                  ..setAttribute('download', 'firestore_backup.json')
-                  ..click();
-                html.Url.revokeObjectUrl(url);
+                await FileSaver.instance.saveFile(
+                  name: 'firestore_backup',
+                  ext: 'json',
+                  bytes: Uint8List.fromList(bytes),
+                  mimeType: MimeType.json,
+                );
               },
             ),
             const SizedBox(height: 16),
@@ -253,58 +255,53 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                     borderRadius: BorderRadius.circular(8)),
               ),
               onPressed: () async {
-                final input = html.FileUploadInputElement();
-                input.accept = '.json';
-                input.click();
-                input.onChange.listen((event) async {
-                  if (input.files != null && input.files!.isNotEmpty) {
-                    final file = input.files!.first;
-                    final reader = html.FileReader();
-                    reader.readAsText(file);
-                    reader.onLoadEnd.listen((event) async {
-                      final json = reader.result as String;
-                      final confirmed = await showDialog<bool>(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: const Text('Confirm Restore'),
-                          content: const Text(
-                              'Restoring from backup will overwrite existing data for the same IDs. Are you sure you want to continue?'),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(ctx).pop(false),
-                              child: const Text('Cancel'),
-                            ),
-                            ElevatedButton(
-                              onPressed: () => Navigator.of(ctx).pop(true),
-                              child: const Text('Restore'),
-                            ),
-                          ],
+                final result = await FilePicker.platform.pickFiles(
+                  type: FileType.custom,
+                  allowedExtensions: ['json'],
+                  withData: true,
+                );
+                if (result != null && result.files.isNotEmpty) {
+                  final file = result.files.first;
+                  final json = utf8.decode(file.bytes ?? []);
+                  final confirmed = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text('Confirm Restore'),
+                      content: const Text(
+                          'Restoring from backup will overwrite existing data for the same IDs. Are you sure you want to continue?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(ctx).pop(false),
+                          child: const Text('Cancel'),
                         ),
-                      );
-                      if (confirmed == true) {
-                        try {
-                          await FirestoreBackupService.restoreFromJson(json);
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content:
-                                      Text('Restore completed successfully!'),
-                                  backgroundColor: Colors.green),
-                            );
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text('Restore failed: $e'),
-                                  backgroundColor: Colors.red),
-                            );
-                          }
-                        }
+                        ElevatedButton(
+                          onPressed: () => Navigator.of(ctx).pop(true),
+                          child: const Text('Restore'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirmed == true) {
+                    try {
+                      await FirestoreBackupService.restoreFromJson(json);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Restore completed successfully!'),
+                              backgroundColor: Colors.green),
+                        );
                       }
-                    });
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text('Restore failed: $e'),
+                              backgroundColor: Colors.red),
+                        );
+                      }
+                    }
                   }
-                });
+                }
               },
             ),
             const SizedBox(height: 16),

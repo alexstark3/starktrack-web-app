@@ -556,7 +556,6 @@ class _BalanceTabState extends State<BalanceTab> {
   void _saveBonusValue(String userId, dynamic newValue) {
     // TODO: Save the bonus value to Firestore
     // This will update the bonus field in the user's document
-    print('Save bonus value for user: $userId, new value: $newValue');
 
     // Update Firestore
     final field = _selectedType == 'vacations' ? 'annualLeaveDays' : 'overtime';

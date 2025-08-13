@@ -9,6 +9,7 @@ import 'screens/super_admin_login.dart';
 import '../theme/app_colors.dart';
 import '../firebase_options.dart';
 import '../l10n/app_localizations.dart';
+import '../utils/app_logger.dart';
 
 // Super Admin Web App for subdomain: admin.starktrack.ch
 // This is the entry point for the admin-only interface
@@ -17,19 +18,19 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    print('🚀 Initializing Firebase for Super Admin...');
-    print('🌐 Platform: ${defaultTargetPlatform}');
-    print('🌐 Is Web: ${kIsWeb}');
+    AppLogger.info('Initializing Firebase for Super Admin...');
+    AppLogger.debug('Platform: ${defaultTargetPlatform}');
+    AppLogger.debug('Is Web: ${kIsWeb}');
 
     // Initialize Firebase for admin app
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
 
-    print('✅ Firebase initialized successfully');
-    print('🔧 Firebase Auth instance: ${FirebaseAuth.instance}');
+    AppLogger.info('Firebase initialized successfully');
+    AppLogger.debug('Firebase Auth instance: ${FirebaseAuth.instance}');
   } catch (e) {
-    print('❌ Firebase initialization error: $e');
+    AppLogger.error('Firebase initialization error: $e');
     // Continue anyway - Firebase might already be initialized
   }
 
@@ -37,7 +38,7 @@ void main() async {
 }
 
 class SuperAdminWebApp extends StatelessWidget {
-  const SuperAdminWebApp({Key? key}) : super(key: key);
+  const SuperAdminWebApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +76,7 @@ class SuperAdminWebApp extends StatelessWidget {
 }
 
 class SuperAdminAuthGate extends StatelessWidget {
-  const SuperAdminAuthGate({Key? key}) : super(key: key);
+  const SuperAdminAuthGate({super.key});
 
   @override
   Widget build(BuildContext context) {

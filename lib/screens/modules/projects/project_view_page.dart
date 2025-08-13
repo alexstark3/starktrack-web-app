@@ -23,11 +23,11 @@ class ProjectViewPage extends StatefulWidget {
   final VoidCallback onClose;
 
   const ProjectViewPage({
-    Key? key,
+    super.key,
     required this.companyId,
     required this.project,
     required this.onClose,
-  }) : super(key: key);
+  });
 
   @override
   State<ProjectViewPage> createState() => _ProjectViewPageState();
@@ -359,8 +359,9 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                                   firstDate: DateTime(2023),
                                   lastDate: DateTime(2100),
                                 );
-                                if (picked != null)
+                                if (picked != null) {
                                   setState(() => _filterStart = picked);
+                                }
                               },
                               child: Container(
                                 height: kFilterHeight,
@@ -406,8 +407,9 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                                   firstDate: DateTime(2023),
                                   lastDate: DateTime(2100),
                                 );
-                                if (picked != null)
+                                if (picked != null) {
                                   setState(() => _filterEnd = picked);
+                                }
                               },
                               child: Container(
                                 height: kFilterHeight,
@@ -752,10 +754,10 @@ class EditProjectDialog extends StatefulWidget {
   final Map<String, dynamic> project;
 
   const EditProjectDialog({
-    Key? key,
+    super.key,
     required this.companyId,
     required this.project,
-  }) : super(key: key);
+  });
 
   @override
   State<EditProjectDialog> createState() => _EditProjectDialogState();

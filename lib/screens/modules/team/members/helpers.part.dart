@@ -1,4 +1,4 @@
-part of team_members_view;
+part of 'members_view.dart';
 
 String _fmtH(num mins) {
   final h = (mins ~/ 60).toString().padLeft(2, '0');

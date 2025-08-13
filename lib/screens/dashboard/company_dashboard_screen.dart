@@ -97,7 +97,7 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
               companyId: widget.companyId,
               userId: widget.userId,
             ),
-          if (tabLabels.contains('Time Off'))
+          if (tabLabels.contains(l10n.timeOff))
             TimeOffModule(
               key: const PageStorageKey('timeOff'),
               companyId: widget.companyId,
@@ -223,7 +223,7 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
     // Time Tracker should be available to all users
     l.add(_ScreenCfg(l10n.timeTracker, Icons.access_time));
     l.add(_ScreenCfg(l10n.history, Icons.history));
-    l.add(_ScreenCfg('Time Off', Icons.calendar_month));
+    l.add(_ScreenCfg(l10n.timeOff, Icons.calendar_month));
 
     // Debug prints removed to keep console clean
 

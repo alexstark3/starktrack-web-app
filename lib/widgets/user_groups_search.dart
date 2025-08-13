@@ -88,7 +88,6 @@ class _UserGroupSelectionDialogState extends State<UserGroupSelectionDialog> {
       _filteredUsers = List.from(_users);
       _filteredGroups = List.from(_groups);
     } catch (e) {
-      print('Error loading users and groups: $e');
     } finally {
       setState(() {
         _isLoading = false;

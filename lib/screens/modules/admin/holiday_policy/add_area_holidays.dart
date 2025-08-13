@@ -21,10 +21,7 @@ class AreaHolidayService {
       final areaHolidays =
           holidays.where((holiday) => !holiday.isNational).toList();
 
-      print('DEBUG: Total holidays from API: ${holidays.length}');
-      print(
-          'DEBUG: National holidays: ${holidays.where((h) => h.isNational).length}');
-      print('DEBUG: Area holidays: ${areaHolidays.length}');
+      // debug logs removed
 
       // Filter by selected areas if specified
       List<ApiHoliday> filteredHolidays;
@@ -42,16 +39,11 @@ class AreaHolidayService {
       }
 
       // Debug logging
-      print('DEBUG: Total area holidays from API: ${areaHolidays.length}');
-      print('DEBUG: Selected areas: $selectedAreas');
-      print('DEBUG: Filtered area holidays: ${filteredHolidays.length}');
+      // debug logs removed
 
       // Show which holidays match the selected areas
       if (selectedAreas.isNotEmpty && selectedAreas.first != 'all') {
-        print('DEBUG: Matching holidays for areas $selectedAreas:');
-        for (final holiday in filteredHolidays) {
-          print('DEBUG: - ${holiday.name}: ${holiday.regions}');
-        }
+        // debug logs removed
       }
 
       return filteredHolidays.map((holiday) {

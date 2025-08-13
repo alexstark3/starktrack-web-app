@@ -1,5 +1,5 @@
-
 import 'package:flutter/services.dart';
+import '../../utils/app_logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class AdminVersionService {
@@ -19,7 +19,7 @@ class AdminVersionService {
       }
     } catch (e) {
       // If version file doesn't exist, fall back to package info
-      print('Admin version file not found, using package info: $e');
+      AppLogger.warn('Admin version file not found, using package info: $e');
     }
 
     // Fallback: use package info with admin format
@@ -31,7 +31,7 @@ class AdminVersionService {
       // Format: 1.1.1.152 (main version + build number as fourth segment)
       return '${mainVersion}.${buildNumber}';
     } catch (e) {
-      print('Error getting package info: $e');
+      AppLogger.error('Error getting package info: $e');
       return '1.1.1.0'; // Fallback version
     }
   }

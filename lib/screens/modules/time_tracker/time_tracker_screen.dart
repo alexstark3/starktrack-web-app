@@ -7,16 +7,17 @@ import 'chips_card.dart';
 import 'package:starktrack/screens/modules/time_tracker/logs_list.dart';
 import '../../../theme/app_colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../../l10n/app_localizations.dart';
 
 class TimeTrackerScreen extends StatefulWidget {
   final String companyId;
   final String userId;
 
   const TimeTrackerScreen({
-    Key? key,
+    super.key,
     required this.companyId,
     required this.userId,
-  }) : super(key: key);
+  });
 
   @override
   State<TimeTrackerScreen> createState() => _TimeTrackerScreenState();
@@ -111,8 +112,8 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
                 }
                 if (projectSnap.hasError) {
                   return Center(
-                      child:
-                          Text('Error loading projects: ${projectSnap.error}'));
+                      child: Text(AppLocalizations.of(context)!
+                          .errorLoadingProjects(projectSnap.error.toString())));
                 }
                 // Allow Time Tracker to function even if there are no projects
                 final projects = projectSnap.data ?? <Map<String, String>>[];

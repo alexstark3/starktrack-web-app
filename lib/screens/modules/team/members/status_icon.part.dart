@@ -1,4 +1,4 @@
-part of team_members_view;
+part of 'members_view.dart';
 
 class _StatusIcon extends StatelessWidget {
   final String companyId;

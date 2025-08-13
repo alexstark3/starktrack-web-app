@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import '../utils/calendar_storage.dart';
 import '../theme/app_colors.dart';
@@ -71,7 +72,7 @@ class _CalendarSettingsDialogState extends State<CalendarSettingsDialog> {
           children: [
             // Starting day of week
             Text(
-              'Starting day of week',
+              AppLocalizations.of(context)!.startingDayOfWeek,
               style: theme.textTheme.titleMedium?.copyWith(
                 color: appColors.textColor,
                 fontWeight: FontWeight.w600,
@@ -89,13 +90,27 @@ class _CalendarSettingsDialogState extends State<CalendarSettingsDialog> {
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
               items: [
-                DropdownMenuItem(value: 1, child: Text('Monday')),
-                DropdownMenuItem(value: 2, child: Text('Tuesday')),
-                DropdownMenuItem(value: 3, child: Text('Wednesday')),
-                DropdownMenuItem(value: 4, child: Text('Thursday')),
-                DropdownMenuItem(value: 5, child: Text('Friday')),
-                DropdownMenuItem(value: 6, child: Text('Saturday')),
-                DropdownMenuItem(value: 7, child: Text('Sunday')),
+                DropdownMenuItem(
+                    value: 1,
+                    child: Text(AppLocalizations.of(context)!.monday)),
+                DropdownMenuItem(
+                    value: 2,
+                    child: Text(AppLocalizations.of(context)!.tuesday)),
+                DropdownMenuItem(
+                    value: 3,
+                    child: Text(AppLocalizations.of(context)!.wednesday)),
+                DropdownMenuItem(
+                    value: 4,
+                    child: Text(AppLocalizations.of(context)!.thursday)),
+                DropdownMenuItem(
+                    value: 5,
+                    child: Text(AppLocalizations.of(context)!.friday)),
+                DropdownMenuItem(
+                    value: 6,
+                    child: Text(AppLocalizations.of(context)!.saturday)),
+                DropdownMenuItem(
+                    value: 7,
+                    child: Text(AppLocalizations.of(context)!.sunday)),
               ],
               onChanged: (value) {
                 setState(() {
@@ -109,7 +124,7 @@ class _CalendarSettingsDialogState extends State<CalendarSettingsDialog> {
             Row(
               children: [
                 Text(
-                  'Show week numbers',
+                  AppLocalizations.of(context)!.showWeekNumbers,
                   style: theme.textTheme.titleMedium?.copyWith(
                     color: appColors.textColor,
                     fontWeight: FontWeight.w600,
@@ -136,7 +151,7 @@ class _CalendarSettingsDialogState extends State<CalendarSettingsDialog> {
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text(
-                    'Cancel',
+                    AppLocalizations.of(context)!.cancel,
                     style: TextStyle(color: appColors.textColor),
                   ),
                 ),
@@ -153,7 +168,7 @@ class _CalendarSettingsDialogState extends State<CalendarSettingsDialog> {
                     ),
                   ),
                   child: Text(
-                    'Save',
+                    AppLocalizations.of(context)!.save,
                     style: TextStyle(color: appColors.whiteTextOnBlue),
                   ),
                 ),
@@ -535,13 +550,13 @@ class _CustomCalendarState extends State<CustomCalendar> {
                         onPressed: _showSettings,
                         icon:
                             Icon(Icons.settings, color: appColors.primaryBlue),
-                        tooltip: 'Calendar Settings',
+                        tooltip: AppLocalizations.of(context)!.calendarSettings,
                       ),
                       const Spacer(),
                       TextButton(
                         onPressed: _goToToday,
                         child: Text(
-                          'Today',
+                          AppLocalizations.of(context)!.today,
                           style: TextStyle(color: appColors.primaryBlue),
                         ),
                       ),
@@ -550,7 +565,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
                         TextButton(
                           onPressed: _clearSelection,
                           child: Text(
-                            'Clear',
+                            AppLocalizations.of(context)!.clear,
                             style: TextStyle(color: appColors.red),
                           ),
                         ),

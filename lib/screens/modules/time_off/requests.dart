@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:starktrack/theme/app_colors.dart';
 import 'package:starktrack/widgets/calendar.dart';
+import 'package:starktrack/l10n/app_localizations.dart';
 
 class TimeOffRequests extends StatefulWidget {
   final String companyId;
@@ -44,9 +45,10 @@ class _TimeOffRequestsState extends State<TimeOffRequests> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: TextField(
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                               border: InputBorder.none,
-                              hintText: 'Search requests'),
+                              hintText:
+                                  AppLocalizations.of(context)!.searchRequests),
                           onChanged: (v) =>
                               setState(() => _search = v.trim().toLowerCase()),
                         ),
@@ -61,7 +63,7 @@ class _TimeOffRequestsState extends State<TimeOffRequests> {
                 child: ElevatedButton.icon(
                   onPressed: () => _openNewRequestDialog(colors),
                   icon: const Icon(Icons.add),
-                  label: const Text('Request'),
+                  label: Text(AppLocalizations.of(context)!.requestButton),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colors.primaryBlue,
                     foregroundColor: colors.whiteTextOnBlue,
@@ -86,7 +88,9 @@ class _TimeOffRequestsState extends State<TimeOffRequests> {
                 .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return Center(child: Text('Failed to load requests'));
+                return Center(
+                    child: Text(
+                        AppLocalizations.of(context)!.failedToLoadRequests));
               }
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
@@ -115,7 +119,8 @@ class _TimeOffRequestsState extends State<TimeOffRequests> {
               }).toList();
 
               if (docs.isEmpty) {
-                return const Center(child: Text('No requests'));
+                return Center(
+                    child: Text(AppLocalizations.of(context)!.noRequests));
               }
 
               return ListView.separated(
@@ -134,7 +139,8 @@ class _TimeOffRequestsState extends State<TimeOffRequests> {
                           : '${DateFormat('dd/MM/yyyy').format(start)} - ${DateFormat('dd/MM/yyyy').format(end)}';
 
                   return ListTile(
-                    title: Text(data['policyName'] ?? 'Unknown policy'),
+                    title: Text(data['policyName'] ??
+                        AppLocalizations.of(context)!.unknownPolicy),
                     subtitle: Text(dateText),
                     trailing: _statusChip(status, colors),
                   );
@@ -150,25 +156,30 @@ class _TimeOffRequestsState extends State<TimeOffRequests> {
   Widget _statusChip(String status, AppColors colors) {
     Color bg;
     Color fg;
+    final l10n = AppLocalizations.of(context)!;
+    String label;
     switch (status) {
       case 'approved':
         bg = colors.green;
         fg = Colors.white;
+        label = l10n.approved;
         break;
       case 'rejected':
         bg = colors.red;
         fg = Colors.white;
+        label = l10n.rejected;
         break;
       default:
         bg = colors.orange;
         fg = Colors.white;
+        label = l10n.pending;
         break;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration:
           BoxDecoration(color: bg, borderRadius: BorderRadius.circular(16)),
-      child: Text(status.toUpperCase(),
+      child: Text(label.toUpperCase(),
           style:
               TextStyle(color: fg, fontWeight: FontWeight.w600, fontSize: 12)),
     );
@@ -213,7 +224,7 @@ class _NewRequestDialogState extends State<_NewRequestDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('New Time Off Request',
+            Text(AppLocalizations.of(context)!.newTimeOffRequest,
                 style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -248,7 +259,7 @@ class _NewRequestDialogState extends State<_NewRequestDialog> {
                       .toList(),
                   onChanged: (v) => setState(() => _selectedPolicyName = v),
                   decoration: InputDecoration(
-                    labelText: 'Policy',
+                    labelText: AppLocalizations.of(context)!.policy,
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8)),
                   ),
@@ -310,7 +321,7 @@ class _NewRequestDialogState extends State<_NewRequestDialog> {
 
             TextField(
               decoration: InputDecoration(
-                labelText: 'Description (optional)',
+                labelText: AppLocalizations.of(context)!.descriptionOptional,
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
               ),
@@ -327,7 +338,7 @@ class _NewRequestDialogState extends State<_NewRequestDialog> {
                 TextButton(
                   onPressed:
                       _submitting ? null : () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
+                  child: Text(AppLocalizations.of(context)!.cancel),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
@@ -342,7 +353,7 @@ class _NewRequestDialogState extends State<_NewRequestDialog> {
                           width: 18,
                           child: CircularProgressIndicator(
                               strokeWidth: 2, color: Colors.white))
-                      : const Text('Submit Request'),
+                      : Text(AppLocalizations.of(context)!.submitRequest),
                 ),
               ],
             ),

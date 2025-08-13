@@ -10,7 +10,7 @@ import '../../utils/browser_persistence.dart';
 import '../../utils/app_logger.dart';
 
 class CompanyLoginScreen extends StatefulWidget {
-  const CompanyLoginScreen({Key? key}) : super(key: key);
+  const CompanyLoginScreen({super.key});
 
   @override
   State<CompanyLoginScreen> createState() => _CompanyLoginScreenState();

@@ -7,9 +7,10 @@ import '../../theme/app_colors.dart';
 import 'super_admin_dashboard.dart';
 import 'package:web/web.dart' as web;
 import '../../utils/browser_persistence.dart';
+import '../../utils/app_logger.dart';
 
 class SuperAdminLoginScreen extends StatefulWidget {
-  const SuperAdminLoginScreen({Key? key}) : super(key: key);
+  const SuperAdminLoginScreen({super.key});
 
   @override
   State<SuperAdminLoginScreen> createState() => _SuperAdminLoginScreenState();
@@ -46,7 +47,7 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
         _emailController.text = savedEmail;
       }
     } catch (e) {
-      print('Error loading saved super admin login data: $e');
+      AppLogger.error('Error loading saved super admin login data: $e');
     }
   }
 
@@ -57,7 +58,7 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
         await BrowserPersistence.saveSuperAdminEmail(email, true);
       }
     } catch (e) {
-      print('Error saving super admin login data: $e');
+      AppLogger.error('Error saving super admin login data: $e');
     }
   }
 
@@ -69,7 +70,7 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
         _version = adminVersion;
       });
     } catch (e) {
-      print('Error loading admin version: $e');
+      AppLogger.error('Error loading admin version: $e');
       setState(() {
         _version = '1.1.1.0'; // Fallback version
       });
@@ -85,15 +86,15 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
     });
 
     try {
-      print('🔐 Starting login process...');
-      print('📧 Email: ${_emailController.text.trim()}');
-      print('🌐 Current domain: ${Uri.base.host}');
-      print('🔧 Firebase Auth instance: ${FirebaseAuth.instance}');
+      AppLogger.debug('Starting super admin login');
+      AppLogger.debug('Email: ${_emailController.text.trim()}');
+      AppLogger.debug('Domain: ${Uri.base.host}');
+      AppLogger.debug('FirebaseAuth instance: ${FirebaseAuth.instance}');
 
       // Sign in with Firebase Auth
-      print('🔐 Attempting Firebase Auth sign in...');
-      print('📧 Email: ${_emailController.text.trim()}');
-      print('🔑 Password length: ${_passwordController.text.length}');
+      AppLogger.debug('Attempting Firebase Auth sign in');
+      AppLogger.debug('Email: ${_emailController.text.trim()}');
+      AppLogger.debug('Password length: ${_passwordController.text.length}');
 
       // Try to sign in without reCAPTCHA
       await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -101,16 +102,16 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
         password: _passwordController.text,
       );
 
-      print('✅ Firebase Auth successful');
-      print('👤 User ID: ${FirebaseAuth.instance.currentUser?.uid}');
+      AppLogger.info(
+          'Firebase Auth successful, uid: ${FirebaseAuth.instance.currentUser?.uid}');
 
       // Check if user is an admin
-      print('🔍 Checking admin status...');
+      AppLogger.debug('Checking admin status');
       final isAdmin = await SuperAdminAuthService.isAdmin();
-      print('🔍 Admin check result: $isAdmin');
+      AppLogger.debug('Admin check result: $isAdmin');
 
       if (!isAdmin) {
-        print('❌ User is not an admin, signing out...');
+        AppLogger.warn('User is not an admin, signing out');
         // Sign out if not admin
         await FirebaseAuth.instance.signOut();
         if (mounted) {
@@ -163,6 +164,7 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
         });
       }
     } catch (e) {
+      AppLogger.error('Unexpected super admin login error: $e');
       if (mounted) {
         setState(() {
           _errorMessage = 'An unexpected error occurred.';
@@ -403,10 +405,11 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
                         ),
                     ],
                   ),
-                  // Add this to allow form submit on Enter
-                  onWillPop: () async {
-                    if (!_isLoading) await _login();
-                    return false;
+                  // Replace deprecated onWillPop by handling back pop intent
+                  onPopInvokedWithResult: (didPop, result) async {
+                    if (!didPop && !_isLoading) {
+                      await _login();
+                    }
                   },
                 ),
               ),

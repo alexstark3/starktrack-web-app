@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../utils/app_logger.dart';
 
 class SuperAdminAuthService {
   static const String _adminCollection = 'sadmin';
@@ -8,13 +9,13 @@ class SuperAdminAuthService {
   static Future<bool> isAdmin() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      print('❌ No authenticated user found');
+      AppLogger.warn('No authenticated user found');
       return false;
     }
 
     try {
-      print('🔍 Checking admin status for user: ${user.uid}');
-      print('🔍 Looking in collection: $_adminCollection');
+      AppLogger.debug('Checking admin status for user: ${user.uid}');
+      AppLogger.debug('Looking in collection: $_adminCollection');
 
       final adminDoc = await FirebaseFirestore.instance
           .collection(_adminCollection)
@@ -22,17 +23,17 @@ class SuperAdminAuthService {
           .get();
 
       final exists = adminDoc.exists;
-      print('🔍 Admin document exists: $exists');
+      AppLogger.debug('Admin document exists: $exists');
 
       if (exists) {
-        print('✅ User is an admin');
+        AppLogger.info('User is an admin');
       } else {
-        print('❌ User is not an admin - document does not exist');
+        AppLogger.warn('User is not an admin - document does not exist');
       }
 
       return exists;
     } catch (e) {
-      print('❌ Error checking admin status: $e');
+      AppLogger.error('Error checking admin status: $e');
       return false;
     }
   }
@@ -52,7 +53,7 @@ class SuperAdminAuthService {
 
       return adminDoc.data();
     } catch (e) {
-      print('Error getting admin data: $e');
+      AppLogger.error('Error getting admin data: $e');
       return null;
     }
   }
@@ -84,7 +85,7 @@ class SuperAdminAuthService {
               })
           .toList();
     } catch (e) {
-      print('Error getting all admins: $e');
+      AppLogger.error('Error getting all admins: $e');
       return [];
     }
   }
@@ -121,7 +122,7 @@ class SuperAdminAuthService {
 
       return true;
     } catch (e) {
-      print('Error creating admin: $e');
+      AppLogger.error('Error creating admin: $e');
       return false;
     }
   }
@@ -142,7 +143,7 @@ class SuperAdminAuthService {
 
       return true;
     } catch (e) {
-      print('Error updating admin: $e');
+      AppLogger.error('Error updating admin: $e');
       return false;
     }
   }
@@ -157,7 +158,7 @@ class SuperAdminAuthService {
 
       return true;
     } catch (e) {
-      print('Error deleting admin: $e');
+      AppLogger.error('Error deleting admin: $e');
       return false;
     }
   }

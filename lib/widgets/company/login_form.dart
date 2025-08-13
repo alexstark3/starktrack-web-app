@@ -1,5 +1,6 @@
 // lib/company/widgets/login_form.dart
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/browser_persistence.dart';
 
@@ -44,9 +45,7 @@ class _LoginFormState extends State<LoginForm> {
       if (mounted && savedEmail != null && savedEmail.isNotEmpty) {
         widget.emailController.text = savedEmail;
       }
-    } catch (e) {
-      print('Error loading saved login data: $e');
-    }
+    } catch (e) {}
   }
 
   void _submit() {
@@ -73,24 +72,26 @@ class _LoginFormState extends State<LoginForm> {
                 padding: const EdgeInsets.all(32.0),
                 child: Form(
                   key: _formKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Stark Track',
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Stark Track',
                         style: TextStyle(
                           fontSize: 32,
-              fontWeight: FontWeight.bold,
-                          color: colors?.primaryBlue ?? Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                          color: colors?.primaryBlue ??
+                              Theme.of(context).colorScheme.primary,
                         ),
                       ),
                       const SizedBox(height: 32),
-                _buildFields(),
+                      _buildFields(),
                       const SizedBox(height: 8),
                       if (widget.error != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                          child: Text(widget.error!, style: const TextStyle(color: Colors.red)),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Text(widget.error!,
+                              style: const TextStyle(color: Colors.red)),
                         ),
                       _AnimatedLoginButton(
                         loading: widget.loading,
@@ -99,15 +100,15 @@ class _LoginFormState extends State<LoginForm> {
                       ),
                       const SizedBox(height: 16),
                       TextButton(
-                        onPressed: () {},
-                        child: Text(
-                          'Forgot my password',
-                          style: TextStyle(
-                            color: colors?.primaryBlue ?? Theme.of(context).colorScheme.primary,
-                            fontSize: 14,
-                          ),
-                        )
-                      ),
+                          onPressed: () {},
+                          child: Text(
+                            'Forgot my password',
+                            style: TextStyle(
+                              color: colors?.primaryBlue ??
+                                  Theme.of(context).colorScheme.primary,
+                              fontSize: 14,
+                            ),
+                          )),
                     ],
                   ),
                 ),
@@ -133,13 +134,19 @@ class _LoginFormState extends State<LoginForm> {
           textInputAction: TextInputAction.next,
           onFieldSubmitted: (_) => widget.passwordFocus.requestFocus(),
           autofocus: true,
-          validator: (value) => (value == null || value.isEmpty) ? 'Please enter your email' : null,
+          validator: (value) => (value == null || value.isEmpty)
+              ? 'Please enter your email'
+              : null,
           decoration: InputDecoration(
-            labelText: 'Email',
-            hintText: 'Enter your email address',
-            prefixIcon: Icon(Icons.email, color: colors?.primaryBlue ?? Theme.of(context).colorScheme.primary),
+            labelText: AppLocalizations.of(context)!.email,
+            hintText: AppLocalizations.of(context)!.enterYourEmail,
+            prefixIcon: Icon(Icons.email,
+                color: colors?.primaryBlue ??
+                    Theme.of(context).colorScheme.primary),
             filled: true,
-            fillColor: isDark ? colors?.lightGray ?? Colors.grey[800] : Colors.grey[100],
+            fillColor: isDark
+                ? colors?.lightGray ?? Colors.grey[800]
+                : Colors.grey[100],
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide.none,
@@ -151,9 +158,9 @@ class _LoginFormState extends State<LoginForm> {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(
-                color: colors?.primaryBlue ?? Theme.of(context).colorScheme.primary, 
-                width: 2
-              ),
+                  color: colors?.primaryBlue ??
+                      Theme.of(context).colorScheme.primary,
+                  width: 2),
             ),
           ),
         ),
@@ -167,13 +174,19 @@ class _LoginFormState extends State<LoginForm> {
           autofillHints: const [AutofillHints.password],
           textInputAction: TextInputAction.done,
           onFieldSubmitted: (_) => _submit(),
-          validator: (value) => (value == null || value.isEmpty) ? 'Please enter your password' : null,
+          validator: (value) => (value == null || value.isEmpty)
+              ? 'Please enter your password'
+              : null,
           decoration: InputDecoration(
-            labelText: 'Password',
-            hintText: 'Enter your password',
-            prefixIcon: Icon(Icons.lock, color: colors?.primaryBlue ?? Theme.of(context).colorScheme.primary),
+            labelText: AppLocalizations.of(context)!.password,
+            hintText: AppLocalizations.of(context)!.enterYourPassword,
+            prefixIcon: Icon(Icons.lock,
+                color: colors?.primaryBlue ??
+                    Theme.of(context).colorScheme.primary),
             filled: true,
-            fillColor: isDark ? colors?.lightGray ?? Colors.grey[800] : Colors.grey[100],
+            fillColor: isDark
+                ? colors?.lightGray ?? Colors.grey[800]
+                : Colors.grey[100],
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide.none,
@@ -185,9 +198,9 @@ class _LoginFormState extends State<LoginForm> {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(
-                color: colors?.primaryBlue ?? Theme.of(context).colorScheme.primary, 
-                width: 2
-              ),
+                  color: colors?.primaryBlue ??
+                      Theme.of(context).colorScheme.primary,
+                  width: 2),
             ),
           ),
         ),
@@ -197,7 +210,8 @@ class _LoginFormState extends State<LoginForm> {
 }
 
 class _AnimatedLoginButton extends StatelessWidget {
-  const _AnimatedLoginButton({required this.loading, required this.onTap, this.isSubmit = false});
+  const _AnimatedLoginButton(
+      {required this.loading, required this.onTap, this.isSubmit = false});
 
   final bool loading;
   final VoidCallback onTap;
@@ -224,7 +238,10 @@ class _AnimatedLoginButton extends StatelessWidget {
               : RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           child: InkWell(
             onTap: loading ? null : onTap,
-            customBorder: loading ? const CircleBorder() : RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            customBorder: loading
+                ? const CircleBorder()
+                : RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
             child: SizedBox(
               width: loading ? _circle : double.infinity,
               height: loading ? _circle : _idleH,
@@ -239,8 +256,10 @@ class _AnimatedLoginButton extends StatelessWidget {
                         ),
                       )
                     : isSubmit
-                      ? const Text('Login', style: TextStyle(color: Colors.white))
-                    : const Text('Login', style: TextStyle(color: Colors.white)),
+                        ? Text(AppLocalizations.of(context)!.login,
+                            style: const TextStyle(color: Colors.white))
+                        : Text(AppLocalizations.of(context)!.login,
+                            style: const TextStyle(color: Colors.white)),
               ),
             ),
           ),

@@ -21,7 +21,94 @@ class AppLocalizationsEn extends AppLocalizations {
   String get team => 'Team';
 
   @override
-  String get members => 'members';
+  String get timeOff => 'Time Off';
+
+  @override
+  String get members => 'Members';
+
+  @override
+  String get calendar => 'Calendar';
+
+  @override
+  String get balance => 'Balance';
+
+  @override
+  String get requests => 'Requests';
+
+  @override
+  String get searchRequests => 'Search requests';
+
+  @override
+  String get requestButton => 'Request';
+
+  @override
+  String get failedToLoadRequests => 'Failed to load requests';
+
+  @override
+  String get noRequests => 'No requests';
+
+  @override
+  String get unknownPolicy => 'Unknown policy';
+  @override
+  String get all => 'All';
+  @override
+  String get denyRequest => 'Deny request';
+  @override
+  String get deny => 'Deny';
+
+  @override
+  String get newTimeOffRequest => 'New Time Off Request';
+
+  @override
+  String get policy => 'Policy';
+
+  @override
+  String get descriptionOptional => 'Description (optional)';
+
+  @override
+  String get submitRequest => 'Submit Request';
+
+  @override
+  String get pickDates => 'Pick dates';
+
+  // App shell/system
+  @override
+  String get systemMaintenance =>
+      'The system is under maintenance. Please try again later.';
+  @override
+  String get userNotFoundInCompany => 'User not found in company.';
+  @override
+  String get noCompaniesFound => 'No companies found.';
+  @override
+  String get userNotAssigned => 'User not assigned to any company.';
+
+  // Calendar widget strings
+  @override
+  String get startingDayOfWeek => 'Starting day of week';
+  @override
+  String get monday => 'Monday';
+  @override
+  String get tuesday => 'Tuesday';
+  @override
+  String get wednesday => 'Wednesday';
+  @override
+  String get thursday => 'Thursday';
+  @override
+  String get friday => 'Friday';
+  @override
+  String get saturday => 'Saturday';
+  @override
+  String get sunday => 'Sunday';
+  @override
+  String get calendarSettings => 'Calendar Settings';
+  @override
+  String get clear => 'Clear';
+  @override
+  String get showWeekNumbers => 'Show week numbers';
+  @override
+  String get manager => 'Manager';
+  @override
+  String get changesSaved => 'Changes saved successfully!';
 
   @override
   String get projects => 'Projects';
@@ -507,10 +594,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmDelete => 'Confirm Delete';
 
   @override
-  String get confirmDeleteMessage => 'Are you sure you want to delete this user?';
+  String get confirmDeleteMessage =>
+      'Are you sure you want to delete this user?';
 
   @override
-  String get firstNameSurnameEmailRequired => 'First Name, Surname, and Email are required!';
+  String get firstNameSurnameEmailRequired =>
+      'First Name, Surname, and Email are required!';
 
   @override
   String get atLeastOneRoleRequired => 'At least one role is required!';
@@ -519,13 +608,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get atLeastOneModuleRequired => 'At least one module is required!';
 
   @override
-  String get passwordMustBeAtLeast6Characters => 'Password must be at least 6 characters!';
+  String get passwordMustBeAtLeast6Characters =>
+      'Password must be at least 6 characters!';
 
   @override
-  String get userWithThisEmailAlreadyExists => 'A user with this email already exists.';
+  String get userWithThisEmailAlreadyExists =>
+      'A user with this email already exists.';
 
   @override
-  String get onlySuperAdminCanEditCompanyAdmin => 'Only super admin can edit the company admin.';
+  String get onlySuperAdminCanEditCompanyAdmin =>
+      'Only super admin can edit the company admin.';
 
   @override
   String get authError => 'Auth error';
@@ -559,7 +651,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get perDiemAlreadyEntered => 'Per Diem already entered today';
 
   @override
-  String get startAndEndTimesCannotBeEmpty => 'Start and End times cannot be empty';
+  String get startAndEndTimesCannotBeEmpty =>
+      'Start and End times cannot be empty';
 
   @override
   String get endTimeMustBeAfterStartTime => 'End time must be after start time';
@@ -589,7 +682,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addNew => 'Add New';
 
   @override
-  String get searchByClientNamePersonEmail => 'Search by client name, person, or email';
+  String get searchByClientNamePersonEmail =>
+      'Search by client name, person, or email';
 
   @override
   String get contact => 'Contact';
@@ -646,7 +740,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tapToAdd => 'Tap to add';
 
   @override
-  String get perDiemAlreadyUsedInAnotherSession => 'Per diem already used in another session today';
+  String get perDiemAlreadyUsedInAnotherSession =>
+      'Per diem already used in another session today';
 
   @override
   String get projectName => 'Project Name';
@@ -667,7 +762,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createNewClient => 'Create new client';
 
   @override
-  String get clientMustBeSelectedOrCreated => 'Client must be selected or created';
+  String get clientMustBeSelectedOrCreated =>
+      'Client must be selected or created';
 
   @override
   String get editProject => 'Edit Project';
@@ -726,7 +822,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteEntry => 'Delete Entry';
 
   @override
-  String get deleteEntryMessage => 'Are you sure you want to delete this entry? This cannot be undone.';
+  String get deleteEntryMessage =>
+      'Are you sure you want to delete this entry? This cannot be undone.';
 
   @override
   String get work => 'Work';
@@ -760,13 +857,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountUnlocked => 'Account unlocked';
 
   @override
-  String get accountUnlockedMessage => 'Your account has been unlocked. You can now try logging in again.';
+  String get accountUnlockedMessage =>
+      'Your account has been unlocked. You can now try logging in again.';
 
   @override
   String get adminPasswordRequired => 'Admin password required';
 
   @override
   String get enterYourPassword => 'Enter your password';
+  @override
+  String get enterYourEmail => 'Enter your email address';
 
   @override
   String get confirm => 'Confirm';
@@ -775,7 +875,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteUser => 'Delete User';
 
   @override
-  String get deleteUserConfirmation => 'Are you sure you want to delete this user? This action cannot be undone.';
+  String get deleteUserConfirmation =>
+      'Are you sure you want to delete this user? This action cannot be undone.';
 
   @override
   String get userDeleted => 'User deleted successfully';
@@ -826,7 +927,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get projectsForThisClient => 'Projects for this client';
 
   @override
-  String get noProjectsFoundForThisClient => 'No projects found for this client.';
+  String get noProjectsFoundForThisClient =>
+      'No projects found for this client.';
 
   @override
   String get clientSummary => 'Client Summary';

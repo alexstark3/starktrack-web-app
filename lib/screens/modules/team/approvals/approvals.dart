@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:starktrack/l10n/app_localizations.dart';
 import 'package:starktrack/theme/app_colors.dart';
 import 'package:starktrack/widgets/calendar.dart';
 
@@ -42,9 +43,10 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: TextField(
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                               border: InputBorder.none,
-                              hintText: 'Search requests'),
+                              hintText:
+                                  AppLocalizations.of(context)!.searchRequests),
                           onChanged: (v) =>
                               setState(() => _search = v.trim().toLowerCase()),
                         ),
@@ -67,14 +69,21 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
                     ),
                     child: DropdownButton<String>(
                       value: _statusFilter,
-                      items: const [
+                      items: [
                         DropdownMenuItem(
-                            value: 'pending', child: Text('Pending')),
+                            value: 'pending',
+                            child: Text(AppLocalizations.of(context)!.pending)),
                         DropdownMenuItem(
-                            value: 'approved', child: Text('Approved')),
+                            value: 'approved',
+                            child:
+                                Text(AppLocalizations.of(context)!.approved)),
                         DropdownMenuItem(
-                            value: 'rejected', child: Text('Rejected')),
-                        DropdownMenuItem(value: 'all', child: Text('All')),
+                            value: 'rejected',
+                            child:
+                                Text(AppLocalizations.of(context)!.rejected)),
+                        DropdownMenuItem(
+                            value: 'all',
+                            child: Text(AppLocalizations.of(context)!.all)),
                       ],
                       onChanged: (v) =>
                           setState(() => _statusFilter = v ?? 'pending'),
@@ -94,7 +103,7 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
                 .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return Center(child: Text('Failed to load'));
+                return Center(child: Text(AppLocalizations.of(context)!.error));
               }
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
@@ -121,7 +130,9 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
                   return 0;
                 });
 
-              if (docs.isEmpty) return const Center(child: Text('No requests'));
+              if (docs.isEmpty)
+                return Center(
+                    child: Text(AppLocalizations.of(context)!.noRequests));
 
               return ListView.separated(
                 itemCount: docs.length,
@@ -139,7 +150,8 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
                           : '${DateFormat('dd/MM/yyyy').format(start)} - ${DateFormat('dd/MM/yyyy').format(end)}';
 
                   return ListTile(
-                    title: Text(data['policyName'] ?? 'Unknown policy'),
+                    title: Text(data['policyName'] ??
+                        AppLocalizations.of(context)!.unknownPolicy),
                     subtitle: Text(dateText),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -148,18 +160,18 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
                           IconButton(
                             icon: const Icon(Icons.check_circle,
                                 color: Colors.green),
-                            tooltip: 'Approve',
+                            tooltip: AppLocalizations.of(context)!.approve,
                             onPressed: () => _updateStatus(ref, 'approved'),
                           ),
                           IconButton(
                             icon: const Icon(Icons.edit,
                                 color: Colors.blueAccent),
-                            tooltip: 'Edit dates',
+                            tooltip: AppLocalizations.of(context)!.edit,
                             onPressed: () => _editDates(ref, start, end),
                           ),
                           IconButton(
                             icon: const Icon(Icons.cancel, color: Colors.red),
-                            tooltip: 'Deny',
+                            tooltip: AppLocalizations.of(context)!.deny,
                             onPressed: () => _denyWithNote(ref),
                           ),
                         ] else ...[
@@ -216,22 +228,22 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
       builder: (context) {
         final colors = Theme.of(context).extension<AppColors>()!;
         return AlertDialog(
-          title: const Text('Deny request'),
+          title: Text(AppLocalizations.of(context)!.denyRequest),
           content: TextField(
             controller: ctrl,
             maxLines: 3,
-            decoration:
-                const InputDecoration(hintText: 'Add a note (optional)'),
+            decoration: InputDecoration(
+                hintText: AppLocalizations.of(context)!.descriptionOptional),
           ),
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel')),
+                child: Text(AppLocalizations.of(context)!.cancel)),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
               style: ElevatedButton.styleFrom(
                   backgroundColor: colors.red, foregroundColor: Colors.white),
-              child: const Text('Deny'),
+              child: Text(AppLocalizations.of(context)!.deny),
             )
           ],
         );

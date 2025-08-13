@@ -11,11 +11,11 @@ class ClientsTab extends StatefulWidget {
   final void Function(Map<String, dynamic> client)? onSelectClient;
 
   const ClientsTab({
-    Key? key,
+    super.key,
     required this.companyId,
     this.selectedClient,
     this.onSelectClient,
-  }) : super(key: key);
+  });
 
   @override
   State<ClientsTab> createState() => _ClientsTabState();

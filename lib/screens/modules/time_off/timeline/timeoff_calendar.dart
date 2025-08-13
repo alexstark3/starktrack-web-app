@@ -4,16 +4,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../widgets/calendar.dart';
 import 'timeline_view.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class TimeOffCalendar extends StatefulWidget {
   final String companyId;
   final String userId;
 
   const TimeOffCalendar({
-    Key? key,
+    super.key,
     required this.companyId,
     required this.userId,
-  }) : super(key: key);
+  });
 
   @override
   State<TimeOffCalendar> createState() => _TimeOffCalendarState();
@@ -180,7 +181,7 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
                           ),
                           // Period Dropdown - Fixed width to match content
                           Container(
-                            constraints: const BoxConstraints(maxWidth: 100),
+                            constraints: const BoxConstraints(maxWidth: 120),
                             child: Container(
                               height: 38, // Match history page filter height
                               padding: const EdgeInsets.symmetric(
@@ -207,7 +208,17 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
                                   items: _periods.map((String period) {
                                     return DropdownMenuItem<String>(
                                       value: period,
-                                      child: Text(period,
+                                      child: Text(
+                                          period == 'Week'
+                                              ? AppLocalizations.of(context)!
+                                                  .week
+                                              : period == 'Month'
+                                                  ? AppLocalizations.of(
+                                                          context)!
+                                                      .month
+                                                  : AppLocalizations.of(
+                                                          context)!
+                                                      .year,
                                           style: TextStyle(
                                               fontSize:
                                                   16)), // Match history page font size
@@ -238,7 +249,8 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
                               icon: Icon(Icons.refresh,
                                   color: Colors.white,
                                   size: 24), // Match history page icon size
-                              tooltip: 'Reset to this week',
+                              tooltip:
+                                  AppLocalizations.of(context)!.resetToThisWeek,
                               padding: EdgeInsets
                                   .zero, // Remove default padding to fit 38px height
                               constraints: const BoxConstraints(
@@ -307,7 +319,7 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
                                   10), // Changed from 8 to 10px to match new spacing
                           // Period Dropdown - Fixed width to match content
                           Container(
-                            constraints: const BoxConstraints(maxWidth: 100),
+                            constraints: const BoxConstraints(maxWidth: 120),
                             child: Container(
                               height: 38, // Match history page filter height
                               padding: const EdgeInsets.symmetric(
@@ -334,7 +346,17 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
                                   items: _periods.map((String period) {
                                     return DropdownMenuItem<String>(
                                       value: period,
-                                      child: Text(period,
+                                      child: Text(
+                                          period == 'Week'
+                                              ? AppLocalizations.of(context)!
+                                                  .week
+                                              : period == 'Month'
+                                                  ? AppLocalizations.of(
+                                                          context)!
+                                                      .month
+                                                  : AppLocalizations.of(
+                                                          context)!
+                                                      .year,
                                           style: TextStyle(
                                               fontSize:
                                                   16)), // Match history page font size
@@ -367,7 +389,8 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
                               icon: Icon(Icons.refresh,
                                   color: Colors.white,
                                   size: 24), // Match history page icon size
-                              tooltip: 'Reset to this week',
+                              tooltip:
+                                  AppLocalizations.of(context)!.resetToThisWeek,
                               padding: EdgeInsets
                                   .zero, // Remove default padding to fit 38px height
                               constraints: const BoxConstraints(
@@ -424,7 +447,7 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
                               ),
                               child: Center(
                                 child: Text(
-                                  'Personal',
+                                  AppLocalizations.of(context)!.personal,
                                   style: TextStyle(
                                     color: !_showTeam
                                         ? Colors.white
@@ -466,7 +489,7 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
                               ),
                               child: Center(
                                 child: Text(
-                                  'Team',
+                                  AppLocalizations.of(context)!.team,
                                   style: TextStyle(
                                     color: _showTeam
                                         ? Colors.white
@@ -624,7 +647,7 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
                 Icon(Icons.error_outline, size: 48, color: colors.error),
                 const SizedBox(height: 16),
                 Text(
-                  'Error loading time off data',
+                  AppLocalizations.of(context)!.error,
                   style: TextStyle(color: colors.error, fontSize: 16),
                 ),
                 const SizedBox(height: 8),
@@ -678,7 +701,7 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
                     Icon(Icons.error_outline, size: 48, color: colors.error),
                     const SizedBox(height: 16),
                     Text(
-                      'Error loading policies',
+                      AppLocalizations.of(context)!.error,
                       style: TextStyle(color: colors.error, fontSize: 16),
                     ),
                     const SizedBox(height: 8),
@@ -725,7 +748,7 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
                             size: 48, color: colors.error),
                         const SizedBox(height: 16),
                         Text(
-                          'Error loading holiday policies',
+                          AppLocalizations.of(context)!.error,
                           style: TextStyle(color: colors.error, fontSize: 16),
                         ),
                         const SizedBox(height: 8),
@@ -759,7 +782,9 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
                     final teamMembers = teamSnapshot.data!;
 
                     if (teamMembers.isEmpty) {
-                      return const Center(child: Text('No team members found'));
+                      return Center(
+                          child: Text(
+                              AppLocalizations.of(context)!.noMembersFound));
                     }
 
                     // Use TimelineView for both Week and Month views
@@ -805,7 +830,7 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
               data['firstName'] ??
               data['fullName'] ??
               data['userName'] ??
-              'Unknown User';
+              AppLocalizations.of(context)!.unknownUser;
           return [
             {
               'id': doc.id,
@@ -832,22 +857,22 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
         )
         .get()
         .then((snapshot) {
-      final members = snapshot.docs.map((doc) {
+      final membersIterable = snapshot.docs.map((doc) {
         final data = doc.data();
         final name = data['name'] ??
             data['displayName'] ??
             data['firstName'] ??
             data['fullName'] ??
             data['userName'] ??
-            'Unknown User';
+            AppLocalizations.of(context)!.unknownUser;
         return {
           'id': doc.id,
           'name': name,
           'lastName': data['surname'] ?? '',
           'email': data['email'] ?? '',
         };
-      }).toList();
-      return members;
+      });
+      return membersIterable.toList();
     }).catchError((error) {
       return <Map<String, dynamic>>[];
     });

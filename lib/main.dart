@@ -43,6 +43,12 @@ class MyApp extends StatelessWidget {
       case 'DE':
         locale = const Locale('de');
         break;
+      case 'FR':
+        locale = const Locale('fr');
+        break;
+      case 'IT':
+        locale = const Locale('it');
+        break;
       case 'EN':
       default:
         locale = const Locale('en');
@@ -67,6 +73,8 @@ class MyApp extends StatelessWidget {
       supportedLocales: const [
         Locale('en'), // English
         Locale('de'), // German
+        Locale('fr'), // French
+        Locale('it'), // Italian
       ],
 
       home: const AuthGate(),
@@ -119,11 +127,12 @@ class _AuthGateState extends State<AuthGate> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     if (_forceLogout) {
-      return const Scaffold(
+      final l10n = AppLocalizations.of(context)!;
+      return Scaffold(
         body: Center(
           child: Text(
-            'The system is under maintenance. Please try again later.',
-            style: TextStyle(
+            l10n.systemMaintenance,
+            style: const TextStyle(
                 fontSize: 20, color: Colors.red, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
@@ -176,8 +185,10 @@ class _AuthGateState extends State<AuthGate> {
                       body: Center(child: CircularProgressIndicator()));
                 }
                 if (!companyUserSnap.hasData || !companyUserSnap.data!.exists) {
-                  return const Scaffold(
-                      body: Center(child: Text('User not found in company.')));
+                  return Scaffold(
+                      body: Center(
+                          child: Text(AppLocalizations.of(context)!
+                              .userNotFoundInCompany)));
                 }
                 final data =
                     companyUserSnap.data!.data() as Map<String, dynamic>;
@@ -226,8 +237,9 @@ class _AuthGateState extends State<AuthGate> {
               body: Center(child: CircularProgressIndicator()));
         }
         if (!companySnap.hasData || companySnap.data!.docs.isEmpty) {
-          return const Scaffold(
-              body: Center(child: Text('No companies found.')));
+          return Scaffold(
+              body: Center(
+                  child: Text(AppLocalizations.of(context)!.noCompaniesFound)));
         }
         // Search for user in each company
         return _findUserInCompanies(companySnap.data!.docs, uid);
@@ -284,8 +296,9 @@ class _AuthGateState extends State<AuthGate> {
             );
           }
         }
-        return const Scaffold(
-            body: Center(child: Text('User not assigned to any company.')));
+        return Scaffold(
+            body: Center(
+                child: Text(AppLocalizations.of(context)!.userNotAssigned)));
       },
     );
   }

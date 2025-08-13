@@ -24,13 +24,13 @@ class LogsList extends StatefulWidget {
   final bool showBreakCards;
 
   const LogsList({
-    Key? key,
+    super.key,
     required this.companyId,
     required this.userId,
     required this.selectedDay,
     required this.projects,
     this.showBreakCards = true,
-  }) : super(key: key);
+  });
 
   @override
   State<LogsList> createState() => _LogsListState();
@@ -83,7 +83,9 @@ class _LogsListState extends State<LogsList> {
   }
 
   String _projectNameFromId(String id) {
-    if (id.isEmpty) return '';
+    if (id.isEmpty) {
+      return '';
+    }
     final p = widget.projects.where((proj) => proj['id'] == id).toList();
     return p.isNotEmpty ? (p.first['name'] ?? '') : id;
   }
@@ -154,7 +156,9 @@ class _LogsListState extends State<LogsList> {
               Map<String, dynamic>.from(log['expenses'] ?? {});
           final List<String> expenseLines = [];
           for (var entry in expensesMap.entries) {
-            if (entry.key == 'Per diem') continue;
+            if (entry.key == 'Per diem') {
+              continue;
+            }
             expenseLines.add(
                 '${entry.key} ${(entry.value as num).toStringAsFixed(2)} CHF');
           }
@@ -280,11 +284,15 @@ class _LogsListState extends State<LogsList> {
                             .get();
                         bool overlaps = false;
                         for (final od in others.docs) {
-                          if (od.id == doc.id) continue;
+                          if (od.id == doc.id) {
+                            continue;
+                          }
                           final odata = od.data() as Map<String, dynamic>;
                           final ob = (odata['begin'] as Timestamp?)?.toDate();
                           final oe = (odata['end'] as Timestamp?)?.toDate();
-                          if (ob == null || oe == null) continue;
+                          if (ob == null || oe == null) {
+                            continue;
+                          }
                           // Overlap if newStart < otherEnd AND newEnd > otherStart (boundaries equal are allowed)
                           if (nb.isBefore(oe) && nn.isAfter(ob)) {
                             overlaps = true;
@@ -399,7 +407,7 @@ class _LogEditRow extends StatefulWidget {
   final bool isEdited;
 
   const _LogEditRow({
-    Key? key,
+    super.key,
     required this.logId,
     required this.begin,
     required this.end,
@@ -430,7 +438,7 @@ class _LogEditRow extends StatefulWidget {
     required this.isRejected,
     required this.isApprovedAfterEdit,
     required this.isEdited,
-  }) : super(key: key);
+  });
 
   @override
   State<_LogEditRow> createState() => _LogEditRowState();
@@ -492,7 +500,7 @@ class _LogEditRowState extends State<_LogEditRow>
       useRootNavigator:
           false, // <-- Use local navigator for mobile compatibility
       builder: (ctx) => AlertDialog(
-        title: const Text('Note'),
+        title: Text(AppLocalizations.of(context)!.note),
         content: SizedBox(
           width: MediaQuery.of(ctx).size.width * 0.8,
           child: TextField(
@@ -530,7 +538,7 @@ class _LogEditRowState extends State<_LogEditRow>
         actions: [
           TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Cancel')),
+              child: Text(AppLocalizations.of(context)!.cancel)),
           TextButton(
               onPressed: () {
                 final newNote = ctrl.text.trim();
@@ -538,12 +546,14 @@ class _LogEditRowState extends State<_LogEditRow>
                 widget.updateNote(widget.logId, newNote);
                 Navigator.of(ctx).pop(newNote);
               },
-              child: const Text('Save')),
+              child: Text(AppLocalizations.of(context)!.save)),
         ],
       ),
     );
 
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
     setState(() {
       _dialogOpen = false;
     });
@@ -663,7 +673,7 @@ class _LogEditRowState extends State<_LogEditRow>
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4)),
                   ),
-                  const Text('Per Diem'),
+                  Text(AppLocalizations.of(context)!.perDiem),
                   if (perDiemUsedElsewhere)
                     Padding(
                       padding: const EdgeInsets.only(left: 6),
@@ -675,7 +685,7 @@ class _LogEditRowState extends State<_LogEditRow>
                       ),
                     ),
                   const Spacer(),
-                  const Text('16.00 CHF',
+                  Text(AppLocalizations.of(context)!.perDiemAmount,
                       style: TextStyle(
                           fontWeight: FontWeight.normal, fontSize: 16)),
                 ],
@@ -685,7 +695,7 @@ class _LogEditRowState extends State<_LogEditRow>
             return AlertDialog(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(18)),
-              title: const Text('Expenses'),
+              title: Text(AppLocalizations.of(context)!.expensesTitle),
               content: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -786,7 +796,7 @@ class _LogEditRowState extends State<_LogEditRow>
                               ),
                             ),
                             onPressed: canAddExpense() ? addExpense : null,
-                            child: const Text('Add'),
+                            child: Text(AppLocalizations.of(context)!.add),
                           ),
                         ),
                       ],
@@ -807,7 +817,7 @@ class _LogEditRowState extends State<_LogEditRow>
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: Text('Cancel',
+                  child: Text(AppLocalizations.of(context)!.cancel,
                       style: TextStyle(color: primaryColor, fontSize: 16)),
                 ),
                 ElevatedButton(
@@ -829,7 +839,7 @@ class _LogEditRowState extends State<_LogEditRow>
 
                     Navigator.pop(context, result);
                   },
-                  child: const Text('Save'),
+                  child: Text(AppLocalizations.of(context)!.save),
                 ),
               ],
             );
@@ -838,7 +848,9 @@ class _LogEditRowState extends State<_LogEditRow>
       },
     );
 
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
 
     // Expenses should already be updated at parent level
     setState(() {
@@ -859,7 +871,7 @@ class _LogEditRowState extends State<_LogEditRow>
             child: Text(proj['name'] ?? proj['id']!, style: s),
           );
         }).toList(),
-        hint: const Text('Select project'),
+        hint: Text(AppLocalizations.of(context)!.selectProject),
         onChanged: (value) {
           setState(() {
             selectedProjectId = value;
@@ -951,7 +963,7 @@ class _LogEditRowState extends State<_LogEditRow>
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Manager:',
+                  Text(AppLocalizations.of(context)!.manager + ':',
                       style: style.copyWith(fontWeight: FontWeight.w600)),
                   const SizedBox(width: 8),
                   Expanded(
@@ -1200,7 +1212,9 @@ class _LogEditRowState extends State<_LogEditRow>
           child: Row(
             children: [
               _iconBtn(Icons.save, widget.appColors.green, () async {
-                if (_saving) return;
+                if (_saving) {
+                  return;
+                }
                 setState(() => _saving = true);
                 try {
                   final expensesToSave =
@@ -1219,8 +1233,9 @@ class _LogEditRowState extends State<_LogEditRow>
                   widget.clearPendingNote(widget.logId);
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Changes saved successfully!'),
+                      SnackBar(
+                          content:
+                              Text(AppLocalizations.of(context)!.changesSaved),
                           backgroundColor: Colors.green),
                     );
                   }

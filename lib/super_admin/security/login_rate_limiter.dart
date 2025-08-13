@@ -1,13 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../utils/app_logger.dart';
 
 /// Rate limiting system to prevent brute force attacks
 class LoginRateLimiter {
   // Maximum failed attempts allowed
   static const int maxFailedAttempts = 5;
-  
+
   // Time window for counting attempts (15 minutes)
   static const Duration attemptWindow = Duration(minutes: 15);
-  
+
   // Lockout duration after max attempts (15 minutes)
   static const Duration lockoutDuration = Duration(minutes: 15);
 
@@ -16,7 +17,7 @@ class LoginRateLimiter {
     try {
       final emailKey = _normalizeEmail(email);
       final now = DateTime.now();
-      
+
       // Get the user's login attempts from Firestore
       final attemptsDoc = await FirebaseFirestore.instance
           .collection('login_attempts')
@@ -34,8 +35,8 @@ class LoginRateLimiter {
           .map((e) => (e as Timestamp).toDate())
           .toList();
       final isLocked = data['isLocked'] ?? false;
-      final lockoutUntil = data['lockoutUntil'] != null 
-          ? (data['lockoutUntil'] as Timestamp).toDate() 
+      final lockoutUntil = data['lockoutUntil'] != null
+          ? (data['lockoutUntil'] as Timestamp).toDate()
           : null;
 
       // Check if account is currently locked
@@ -50,8 +51,9 @@ class LoginRateLimiter {
       }
 
       // Filter attempts within the time window
-      final recentAttempts = attempts.where((attempt) => 
-          now.difference(attempt) <= attemptWindow).toList();
+      final recentAttempts = attempts
+          .where((attempt) => now.difference(attempt) <= attemptWindow)
+          .toList();
 
       // Check if too many recent attempts
       if (recentAttempts.length >= maxFailedAttempts) {
@@ -63,7 +65,7 @@ class LoginRateLimiter {
       return true;
     } catch (e) {
       // If there's an error, allow login (fail open for user experience)
-      print('Rate limiter error: $e');
+      AppLogger.warn('Rate limiter error: $e');
       return true;
     }
   }
@@ -73,7 +75,7 @@ class LoginRateLimiter {
     try {
       final emailKey = _normalizeEmail(email);
       final now = DateTime.now();
-      
+
       final attemptsDoc = await FirebaseFirestore.instance
           .collection('login_attempts')
           .doc(emailKey)
@@ -90,15 +92,16 @@ class LoginRateLimiter {
 
       // Add new attempt
       attempts.add(now);
-      
+
       // Keep only recent attempts (within window)
-      attempts = attempts.where((attempt) => 
-          now.difference(attempt) <= attemptWindow).toList();
+      attempts = attempts
+          .where((attempt) => now.difference(attempt) <= attemptWindow)
+          .toList();
 
       // Check if we should lock the account
       bool isLocked = false;
       DateTime? lockoutUntil;
-      
+
       if (attempts.length >= maxFailedAttempts) {
         isLocked = true;
         lockoutUntil = now.add(lockoutDuration);
@@ -112,11 +115,12 @@ class LoginRateLimiter {
         'email': email,
         'attempts': attempts.map((d) => Timestamp.fromDate(d)).toList(),
         'isLocked': isLocked,
-        'lockoutUntil': lockoutUntil != null ? Timestamp.fromDate(lockoutUntil) : null,
+        'lockoutUntil':
+            lockoutUntil != null ? Timestamp.fromDate(lockoutUntil) : null,
         'lastUpdated': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print('Error recording failed attempt: $e');
+      AppLogger.error('Error recording failed attempt: $e');
     }
   }
 
@@ -124,11 +128,11 @@ class LoginRateLimiter {
   static Future<void> recordSuccessfulLogin(String email) async {
     try {
       final emailKey = _normalizeEmail(email);
-      
+
       // Reset the account on successful login
       await _resetAccount(emailKey);
     } catch (e) {
-      print('Error recording successful login: $e');
+      AppLogger.error('Error recording successful login: $e');
     }
   }
 
@@ -175,8 +179,8 @@ class LoginRateLimiter {
 
       final data = attemptsDoc.data()!;
       final isLocked = data['isLocked'] ?? false;
-      final lockoutUntil = data['lockoutUntil'] != null 
-          ? (data['lockoutUntil'] as Timestamp).toDate() 
+      final lockoutUntil = data['lockoutUntil'] != null
+          ? (data['lockoutUntil'] as Timestamp).toDate()
           : null;
 
       if (!isLocked || lockoutUntil == null) return null;
@@ -186,7 +190,7 @@ class LoginRateLimiter {
 
       return lockoutUntil.difference(now);
     } catch (e) {
-      print('Error getting lockout time: $e');
+      AppLogger.error('Error getting lockout time: $e');
       return null;
     }
   }
@@ -196,7 +200,7 @@ class LoginRateLimiter {
     try {
       final emailKey = _normalizeEmail(email);
       final now = DateTime.now();
-      
+
       final attemptsDoc = await FirebaseFirestore.instance
           .collection('login_attempts')
           .doc(emailKey)
@@ -209,15 +213,16 @@ class LoginRateLimiter {
           .where((e) => e != null)
           .map((e) => (e as Timestamp).toDate())
           .toList();
-      
+
       // Filter attempts within the time window
-      final recentAttempts = attempts.where((attempt) => 
-          now.difference(attempt) <= attemptWindow).toList();
+      final recentAttempts = attempts
+          .where((attempt) => now.difference(attempt) <= attemptWindow)
+          .toList();
 
       return maxFailedAttempts - recentAttempts.length;
     } catch (e) {
-      print('Error getting remaining attempts: $e');
+      AppLogger.error('Error getting remaining attempts: $e');
       return maxFailedAttempts;
     }
   }
-} 
+}

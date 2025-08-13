@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../../services/holiday_translation_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../theme/app_colors.dart';
 
@@ -14,7 +16,7 @@ class TimelineView extends StatelessWidget {
   final bool showYearView; // Add parameter to control year view
 
   const TimelineView({
-    Key? key,
+    super.key,
     required this.weekStart,
     required this.weekEnd,
     required this.teamMembers,
@@ -23,7 +25,7 @@ class TimelineView extends StatelessWidget {
     required this.holidayPolicies,
     required this.colors,
     this.showYearView = false, // Default to false
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +83,7 @@ class TimelineView extends StatelessWidget {
                       horizontal: 4, vertical: 4), // Add consistent padding
                   child: Center(
                     child: Text(
-                      'Team Member',
+                      AppLocalizations.of(context)!.teamMember,
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -133,7 +135,7 @@ class TimelineView extends StatelessWidget {
                   children: [
                     // Month spans row
                     Row(
-                      children: _buildMonthSpans(days, colors),
+                      children: _buildMonthSpans(context, days, colors),
                     ),
                     // Week spans row
                     Row(
@@ -171,13 +173,34 @@ class TimelineView extends StatelessWidget {
                               // Day abbreviation
                               Text(
                                 [
-                                  'Mo',
-                                  'Tu',
-                                  'We',
-                                  'Th',
-                                  'Fr',
-                                  'Sa',
-                                  'Su'
+                                  DateFormat.E(AppLocalizations.of(context)!
+                                          .localeName)
+                                      .format(DateTime(2000, 1, 3))
+                                      .substring(0, 2),
+                                  DateFormat.E(AppLocalizations.of(context)!
+                                          .localeName)
+                                      .format(DateTime(2000, 1, 4))
+                                      .substring(0, 2),
+                                  DateFormat.E(AppLocalizations.of(context)!
+                                          .localeName)
+                                      .format(DateTime(2000, 1, 5))
+                                      .substring(0, 2),
+                                  DateFormat.E(AppLocalizations.of(context)!
+                                          .localeName)
+                                      .format(DateTime(2000, 1, 6))
+                                      .substring(0, 2),
+                                  DateFormat.E(AppLocalizations.of(context)!
+                                          .localeName)
+                                      .format(DateTime(2000, 1, 7))
+                                      .substring(0, 2),
+                                  DateFormat.E(AppLocalizations.of(context)!
+                                          .localeName)
+                                      .format(DateTime(2000, 1, 8))
+                                      .substring(0, 2),
+                                  DateFormat.E(AppLocalizations.of(context)!
+                                          .localeName)
+                                      .format(DateTime(2000, 1, 9))
+                                      .substring(0, 2)
                                 ][day.weekday - 1],
                                 style: TextStyle(
                                   fontSize: 10,
@@ -249,59 +272,64 @@ class TimelineView extends StatelessWidget {
   }
 
   Widget _buildYearView() {
-    final currentYear = DateTime.now().year;
-    final List<DateTime> months =
-        List.generate(12, (index) => DateTime(currentYear, index + 1, 1));
-    final List<String> monthNames =
-        List.generate(12, (index) => DateFormat('MMMM').format(months[index]));
+    // Create a local context using a Builder
+    return Builder(builder: (context) {
+      final l10n = AppLocalizations.of(context)!;
+      final currentYear = DateTime.now().year;
+      final List<DateTime> months =
+          List.generate(12, (index) => DateTime(currentYear, index + 1, 1));
+      final localeName = l10n.localeName;
+      final List<String> monthNames = List.generate(
+          12, (index) => DateFormat.MMMM(localeName).format(months[index]));
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ...List.generate(12, (index) {
-            final month = months[index];
-            final monthName = monthNames[index];
-            final monthStart = DateTime(month.year, month.month, 1);
-            final monthEnd = DateTime(month.year, month.month + 1, 0);
+      return SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...List.generate(12, (index) {
+              final month = months[index];
+              final monthName = monthNames[index];
+              final monthStart = DateTime(month.year, month.month, 1);
+              final monthEnd = DateTime(month.year, month.month + 1, 0);
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.only(left: 16.0, top: 24.0, bottom: 8.0),
-                  child: Text(
-                    monthName,
-                    style: TextStyle(
-                      fontSize:
-                          16, // Reduced from 16 to match table month spans
-                      fontWeight: FontWeight
-                          .bold, // Changed to bold to match table month spans
-                      color: colors.darkGray,
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        left: 16.0, top: 24.0, bottom: 8.0),
+                    child: Text(
+                      monthName,
+                      style: TextStyle(
+                        fontSize:
+                            16, // Reduced from 16 to match table month spans
+                        fontWeight: FontWeight
+                            .bold, // Changed to bold to match table month spans
+                        color: colors.darkGray,
+                      ),
                     ),
                   ),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(bottom: 16.0),
-                  child: TimelineView(
-                    weekStart: monthStart,
-                    weekEnd: monthEnd,
-                    teamMembers: teamMembers,
-                    timeOffRequests: timeOffRequests,
-                    policies: policies,
-                    holidayPolicies: holidayPolicies,
-                    colors: colors,
-                    showYearView:
-                        false, // Set to false to prevent infinite loop - show individual month view
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 16.0),
+                    child: TimelineView(
+                      weekStart: monthStart,
+                      weekEnd: monthEnd,
+                      teamMembers: teamMembers,
+                      timeOffRequests: timeOffRequests,
+                      policies: policies,
+                      holidayPolicies: holidayPolicies,
+                      colors: colors,
+                      showYearView:
+                          false, // Set to false to prevent infinite loop - show individual month view
+                    ),
                   ),
-                ),
-              ],
-            );
-          }),
-        ],
-      ),
-    );
+                ],
+              );
+            }),
+          ],
+        ),
+      );
+    });
   }
 
   int _getWeekNumber(DateTime date) {
@@ -312,12 +340,15 @@ class TimelineView extends StatelessWidget {
     return weekNumber;
   }
 
-  List<Widget> _buildMonthSpans(List<DateTime> days, AppColors colors) {
+  List<Widget> _buildMonthSpans(
+      BuildContext context, List<DateTime> days, AppColors colors) {
+    final localeName = Localizations.localeOf(context).toLanguageTag();
     final monthSpans = <Widget>[];
     int currentIndex = 0;
 
     while (currentIndex < days.length) {
-      final currentMonth = DateFormat('MMMM').format(days[currentIndex]);
+      final currentMonth =
+          DateFormat.MMMM(localeName).format(days[currentIndex]);
       int monthEndIndex = currentIndex;
 
       // Find where this month ends (at month boundary)
@@ -552,7 +583,7 @@ class TimelineView extends StatelessWidget {
     String tooltipText = '';
 
     // Helper to coerce to DateTime
-    DateTime? _toDate(dynamic value) {
+    DateTime? toDate(dynamic value) {
       if (value == null) return null;
       if (value is DateTime) return value;
       if (value is Timestamp) return value.toDate();
@@ -560,8 +591,8 @@ class TimelineView extends StatelessWidget {
     }
 
     // Resolve dates from request map
-    final startDate = _toDate(timeOff['startDate']);
-    final endDate = _toDate(timeOff['endDate']);
+    final startDate = toDate(timeOff['startDate']);
+    final endDate = toDate(timeOff['endDate']);
     final description = (timeOff['description'] ?? '').toString();
 
     if (policy != null) {
@@ -667,19 +698,22 @@ class TimelineView extends StatelessWidget {
           : '${DateFormat('dd/MM/yyyy').format(startDate)} - ${DateFormat('dd/MM/yyyy').format(endDate)}';
     }
 
-    return Tooltip(
-      message: '${holiday['name']}\n$formattedDate',
-      child: Container(
-        margin: const EdgeInsets.all(2),
-        decoration: BoxDecoration(
-          color: barColor,
-          borderRadius: BorderRadius.circular(2),
+    return Builder(builder: (context) {
+      return Tooltip(
+        message:
+            '${HolidayTranslationService.getLocalizedHolidayName((holiday['name'] ?? '').toString(), AppLocalizations.of(context)!)}\n$formattedDate',
+        child: Container(
+          margin: const EdgeInsets.all(2),
+          decoration: BoxDecoration(
+            color: barColor,
+            borderRadius: BorderRadius.circular(2),
+          ),
+          child: const SizedBox(
+            width: 36,
+            height: 16,
+          ),
         ),
-        child: const SizedBox(
-          width: 36,
-          height: 16,
-        ),
-      ),
-    );
+      );
+    });
   }
 }

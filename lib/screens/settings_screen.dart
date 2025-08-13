@@ -91,6 +91,8 @@ class SettingsScreen extends StatelessWidget {
                         items: const [
                           DropdownMenuItem(value: 'EN', child: Text('EN')),
                           DropdownMenuItem(value: 'DE', child: Text('DE')),
+                          DropdownMenuItem(value: 'FR', child: Text('FR')),
+                          DropdownMenuItem(value: 'IT', child: Text('IT')),
                         ],
                         onChanged: (lang) {
                           if (lang != null) {

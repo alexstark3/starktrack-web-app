@@ -7,6 +7,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../super_admin/services/company_module_service.dart';
 import '../../../../widgets/calendar.dart';
 import 'user_address.dart';
+import '../../../../utils/app_logger.dart';
 
 class AddUserDialog extends StatefulWidget {
   final String companyId;
@@ -17,14 +18,14 @@ class AddUserDialog extends StatefulWidget {
   final List<String>? preSelectedRoles;
 
   const AddUserDialog({
-    Key? key,
+    super.key,
     required this.companyId,
     required this.teamLeaders,
     this.editUser,
     required this.onUserAdded,
     required this.currentUserRoles,
     this.preSelectedRoles,
-  }) : super(key: key);
+  });
 
   @override
   State<AddUserDialog> createState() => _AddUserDialogState();
@@ -434,7 +435,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
           try {
             await userCredential.user!.delete();
           } catch (deleteError) {
-            print('Warning: Could not delete Firebase Auth user: $deleteError');
+            AppLogger.warn('Could not delete Firebase Auth user: $deleteError');
           }
           throw Exception('Failed to save user data: $firestoreError');
         }
@@ -453,7 +454,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
           try {
             await userCredential.user!.delete();
           } catch (deleteError) {
-            print('Warning: Could not delete Firebase Auth user: $deleteError');
+            AppLogger.warn('Could not delete Firebase Auth user: $deleteError');
           }
           throw Exception('Failed to create user mapping: $firestoreError');
         }
@@ -462,7 +463,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
         try {
           await CompanyModuleService.incrementUserCount(widget.companyId);
         } catch (countError) {
-          print('Warning: Could not increment user count: $countError');
+          AppLogger.warn('Could not increment user count: $countError');
           // Don't fail the entire operation if count increment fails
         }
       }
@@ -1214,7 +1215,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
         'userLimit': userLimit,
       };
     } catch (e) {
-      print('Error getting user limit info: $e');
+      AppLogger.error('Error getting user limit info: $e');
       return {
         'userCount': 0,
         'userLimit': 10,

@@ -7,7 +7,7 @@ void main() async {
 
   final lines = await inputFile.readAsLines();
   if (lines.isEmpty) {
-    print('Input file is empty.');
+    stderr.writeln('Input file is empty.');
     return;
   }
 
@@ -31,7 +31,7 @@ void main() async {
     if (kanton.isEmpty || gemeinde.isEmpty || postCode.isEmpty) continue;
 
     final key = '$kanton|$gemeinde';
-    
+
     if (!cityMap.containsKey(key)) {
       cityMap[key] = {
         'area': kanton,
@@ -39,7 +39,7 @@ void main() async {
         'postCodes': <String>{},
       };
     }
-    
+
     cityMap[key]!['postCodes'].add(postCode);
   }
 
@@ -61,17 +61,19 @@ void main() async {
   });
 
   await outputFile.writeAsString(JsonEncoder.withIndent('  ').convert(result));
-  print('Generated ${result.length} municipalities with their post codes.');
-  
-  // Print some examples
-  print('\nExamples:');
+  stdout.writeln(
+      'Generated ${result.length} municipalities with their post codes.');
+
+  // Examples (write to stdout for CLI script)
+  stdout.writeln('\nExamples:');
   for (final city in result.take(10)) {
-    print('${city['area']} - ${city['city']}: ${city['postCodes'].join(', ')}');
+    stdout.writeln(
+        '${city['area']} - ${city['city']}: ${city['postCodes'].join(', ')}');
   }
-  
-  // Print Luzern specifically
+
+  // Luzern specifically
   final luzern = result.where((city) => city['city'] == 'Luzern').firstOrNull;
   if (luzern != null) {
-    print('\nLuzern post codes: ${luzern['postCodes'].join(', ')}');
+    stdout.writeln('\nLuzern post codes: ${luzern['postCodes'].join(', ')}');
   }
-} 
+}

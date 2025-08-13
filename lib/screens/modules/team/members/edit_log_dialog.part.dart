@@ -1,4 +1,4 @@
-part of team_members_view;
+part of 'members_view.dart';
 
 class _EditLogDialog extends StatefulWidget {
   final DocumentSnapshot logDoc;
@@ -78,7 +78,9 @@ class _EditLogDialogState extends State<_EditLogDialog> {
         final userRef = logRef.parent.parent;
         final companyRef = userRef?.parent;
 
-        if (userRef == null || companyRef == null) return;
+        if (userRef == null || companyRef == null) {
+          return;
+        }
 
         final companyId = companyRef.id;
         final userId = userRef.id;
@@ -399,7 +401,8 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                   ])),
           const SizedBox(height: 12),
           TextField(
-              decoration: const InputDecoration(labelText: 'Approval Note'),
+              decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.approvalNote),
               onChanged: (v) => _approvalNote = v.trim()),
         ]),
       ),
@@ -436,11 +439,15 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                     .where('sessionDate', isEqualTo: sessionId)
                     .get();
                 for (final d in dayLogs.docs) {
-                  if (d.id == widget.logDoc.id) continue;
+                  if (d.id == widget.logDoc.id) {
+                    continue;
+                  }
                   final data = d.data() as Map<String, dynamic>;
                   final ob = (data['begin'] as Timestamp?)?.toDate();
                   final oe = (data['end'] as Timestamp?)?.toDate();
-                  if (ob == null || oe == null) continue;
+                  if (ob == null || oe == null) {
+                    continue;
+                  }
                   if (start.isBefore(oe) && end.isAfter(ob)) {
                     throw Exception('Time overlaps another entry on this day');
                   }

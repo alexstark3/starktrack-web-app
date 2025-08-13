@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../utils/app_logger.dart';
 
 class CompanyModuleService {
   static const String _companiesCollection = 'companies';
@@ -68,7 +69,7 @@ class CompanyModuleService {
       });
       return true;
     } catch (e) {
-      print('Error updating company modules: $e');
+      AppLogger.error('Error updating company modules: $e');
       return false;
     }
   }
@@ -96,7 +97,7 @@ class CompanyModuleService {
       }
       return [];
     } catch (e) {
-      print('Error getting company modules: $e');
+      AppLogger.error('Error getting company modules: $e');
       return [];
     }
   }
@@ -118,7 +119,7 @@ class CompanyModuleService {
       }
       return true; // Module already exists
     } catch (e) {
-      print('Error adding module to company: $e');
+      AppLogger.error('Error adding module to company: $e');
       return false;
     }
   }
@@ -131,7 +132,7 @@ class CompanyModuleService {
       currentModules.remove(module);
       return await updateCompanyModules(companyId, currentModules);
     } catch (e) {
-      print('Error removing module from company: $e');
+      AppLogger.error('Error removing module from company: $e');
       return false;
     }
   }
@@ -169,7 +170,7 @@ class CompanyModuleService {
         };
       }).toList();
     } catch (e) {
-      print('Error getting companies with modules: $e');
+      AppLogger.error('Error getting companies with modules: $e');
       return [];
     }
   }
@@ -187,7 +188,7 @@ class CompanyModuleService {
       });
       return true;
     } catch (e) {
-      print('Error updating company user limit: $e');
+      AppLogger.error('Error updating company user limit: $e');
       return false;
     }
   }
@@ -206,7 +207,7 @@ class CompanyModuleService {
       }
       return 10; // Default limit
     } catch (e) {
-      print('Error getting company user limit: $e');
+      AppLogger.error('Error getting company user limit: $e');
       return 10;
     }
   }
@@ -218,7 +219,7 @@ class CompanyModuleService {
       final userCount = await getCompanyUserCount(companyId);
       return userCount < userLimit;
     } catch (e) {
-      print('Error checking if company can add user: $e');
+      AppLogger.error('Error checking if company can add user: $e');
       return false;
     }
   }
@@ -237,7 +238,7 @@ class CompanyModuleService {
       }
       return 0;
     } catch (e) {
-      print('Error getting company user count: $e');
+      AppLogger.error('Error getting company user count: $e');
       return 0;
     }
   }
@@ -255,7 +256,7 @@ class CompanyModuleService {
       });
       return true;
     } catch (e) {
-      print('Error updating company user count: $e');
+      AppLogger.error('Error updating company user count: $e');
       return false;
     }
   }
@@ -267,7 +268,7 @@ class CompanyModuleService {
       final newCount = currentCount > 0 ? currentCount - 1 : 0;
       return await updateCompanyUserCount(companyId, newCount);
     } catch (e) {
-      print('Error decrementing user count: $e');
+      AppLogger.error('Error decrementing user count: $e');
       return false;
     }
   }
@@ -278,7 +279,7 @@ class CompanyModuleService {
       final currentCount = await getCompanyUserCount(companyId);
       return await updateCompanyUserCount(companyId, currentCount + 1);
     } catch (e) {
-      print('Error incrementing user count: $e');
+      AppLogger.error('Error incrementing user count: $e');
       return false;
     }
   }

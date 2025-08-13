@@ -6,16 +6,17 @@ import '../../../../super_admin/services/company_module_service.dart';
 import 'add_user.dart';
 import 'holiday_policy/holiday_policy.dart';
 import 'timeoff_policy/timeoff_policy.dart';
+import '../../../../utils/app_logger.dart';
 
 class AdminPanel extends StatefulWidget {
   final String companyId;
   final List<String> currentUserRoles;
 
   const AdminPanel({
-    Key? key,
+    super.key,
     required this.companyId,
     required this.currentUserRoles,
-  }) : super(key: key);
+  });
 
   @override
   State<AdminPanel> createState() => _AdminPanelState();
@@ -54,7 +55,7 @@ class _AdminPanelState extends State<AdminPanel> {
         });
       }
     } catch (e) {
-      print('Error fetching team leaders: $e');
+      AppLogger.error('Error fetching team leaders: $e');
     }
   }
 

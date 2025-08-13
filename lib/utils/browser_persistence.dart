@@ -1,11 +1,12 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'app_logger.dart';
 
 /// Utility class for managing browser login data persistence
 class BrowserPersistence {
   // Keys for regular user login
   static const String _rememberMeKey = 'remember_me';
   static const String _savedEmailKey = 'saved_email';
-  
+
   // Keys for super admin login
   static const String _superAdminRememberMeKey = 'super_admin_remember_me';
   static const String _superAdminSavedEmailKey = 'super_admin_saved_email';
@@ -15,14 +16,14 @@ class BrowserPersistence {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_rememberMeKey, rememberMe);
-      
+
       if (rememberMe && email.isNotEmpty) {
         await prefs.setString(_savedEmailKey, email);
       } else {
         await prefs.remove(_savedEmailKey);
       }
     } catch (e) {
-      print('Error saving user email: $e');
+      AppLogger.error('Error saving user email: $e');
     }
   }
 
@@ -31,13 +32,13 @@ class BrowserPersistence {
     try {
       final prefs = await SharedPreferences.getInstance();
       final rememberMe = prefs.getBool(_rememberMeKey) ?? false;
-      
+
       if (rememberMe) {
         return prefs.getString(_savedEmailKey);
       }
       return null;
     } catch (e) {
-      print('Error loading user email: $e');
+      AppLogger.error('Error loading user email: $e');
       return null;
     }
   }
@@ -48,7 +49,7 @@ class BrowserPersistence {
       final prefs = await SharedPreferences.getInstance();
       return prefs.getBool(_rememberMeKey) ?? false;
     } catch (e) {
-      print('Error loading user remember me preference: $e');
+      AppLogger.error('Error loading user remember me preference: $e');
       return false;
     }
   }
@@ -58,14 +59,14 @@ class BrowserPersistence {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_superAdminRememberMeKey, rememberMe);
-      
+
       if (rememberMe && email.isNotEmpty) {
         await prefs.setString(_superAdminSavedEmailKey, email);
       } else {
         await prefs.remove(_superAdminSavedEmailKey);
       }
     } catch (e) {
-      print('Error saving super admin email: $e');
+      AppLogger.error('Error saving super admin email: $e');
     }
   }
 
@@ -74,13 +75,13 @@ class BrowserPersistence {
     try {
       final prefs = await SharedPreferences.getInstance();
       final rememberMe = prefs.getBool(_superAdminRememberMeKey) ?? false;
-      
+
       if (rememberMe) {
         return prefs.getString(_superAdminSavedEmailKey);
       }
       return null;
     } catch (e) {
-      print('Error loading super admin email: $e');
+      AppLogger.error('Error loading super admin email: $e');
       return null;
     }
   }
@@ -91,7 +92,7 @@ class BrowserPersistence {
       final prefs = await SharedPreferences.getInstance();
       return prefs.getBool(_superAdminRememberMeKey) ?? false;
     } catch (e) {
-      print('Error loading super admin remember me preference: $e');
+      AppLogger.error('Error loading super admin remember me preference: $e');
       return false;
     }
   }
@@ -105,7 +106,7 @@ class BrowserPersistence {
       await prefs.remove(_superAdminRememberMeKey);
       await prefs.remove(_superAdminSavedEmailKey);
     } catch (e) {
-      print('Error clearing login data: $e');
+      AppLogger.error('Error clearing login data: $e');
     }
   }
 
@@ -116,7 +117,7 @@ class BrowserPersistence {
       await prefs.remove(_rememberMeKey);
       await prefs.remove(_savedEmailKey);
     } catch (e) {
-      print('Error clearing user login data: $e');
+      AppLogger.error('Error clearing user login data: $e');
     }
   }
 
@@ -127,7 +128,7 @@ class BrowserPersistence {
       await prefs.remove(_superAdminRememberMeKey);
       await prefs.remove(_superAdminSavedEmailKey);
     } catch (e) {
-      print('Error clearing super admin login data: $e');
+      AppLogger.error('Error clearing super admin login data: $e');
     }
   }
-} 
+}

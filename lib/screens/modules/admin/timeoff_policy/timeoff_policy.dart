@@ -449,12 +449,13 @@ class _TimeOffPolicyListDialogState extends State<TimeOffPolicyListDialog> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Policy'),
-        content: Text('Are you sure you want to delete "$name"?'),
+        title: Text(AppLocalizations.of(context)!.deleteHolidayPolicy),
+        content: Text(
+            '${AppLocalizations.of(context)!.deleteHolidayPolicyConfirm} "$name"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -470,7 +471,8 @@ class _TimeOffPolicyListDialogState extends State<TimeOffPolicyListDialog> {
                 widget.onPolicyAdded();
               }
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(AppLocalizations.of(context)!.delete,
+                style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -662,7 +664,7 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Pick a Color'),
+        title: Text(AppLocalizations.of(context)!.pickAColor),
         content: SingleChildScrollView(
           child: ColorPicker(
             pickerColor: _selectedColor,
@@ -677,7 +679,7 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            child: Text(AppLocalizations.of(context)!.ok),
           ),
         ],
       ),
@@ -707,7 +709,9 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
     if (_nameController.text.trim().isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please enter a policy name')),
+          SnackBar(
+              content:
+                  Text(AppLocalizations.of(context)!.pleaseEnterPolicyName)),
         );
       }
       return;
@@ -716,7 +720,8 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
     if (_selectedDateRange == null || !_selectedDateRange!.isComplete) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a date range')),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!.pleaseSelectDate)),
         );
       }
       return;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:starktrack/screens/modules/time_off/timeline/timeoff_calendar.dart';
 import 'balance.dart';
 import 'requests.dart';
@@ -9,10 +10,10 @@ class TimeOffModule extends StatefulWidget {
   final String userId;
 
   const TimeOffModule({
-    Key? key,
+    super.key,
     required this.companyId,
     required this.userId,
-  }) : super(key: key);
+  });
 
   @override
   State<TimeOffModule> createState() => _TimeOffModuleState();
@@ -25,6 +26,7 @@ class _TimeOffModuleState extends State<TimeOffModule> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
 
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       color: colors.backgroundDark,
       child: Column(
@@ -42,7 +44,7 @@ class _TimeOffModuleState extends State<TimeOffModule> {
                     // Calendar tab
                     _TimeOffTab(
                       icon: Icons.calendar_month,
-                      title: 'Calendar',
+                      title: l10n.calendar,
                       isSelected: _selectedIndex == 0,
                       colors: colors,
                       showOnlyIcon: showOnlyIcons,
@@ -56,7 +58,7 @@ class _TimeOffModuleState extends State<TimeOffModule> {
                     // Balance tab
                     _TimeOffTab(
                       icon: Icons.balance,
-                      title: 'Balance',
+                      title: l10n.balance,
                       isSelected: _selectedIndex == 1,
                       colors: colors,
                       showOnlyIcon: showOnlyIcons,
@@ -70,7 +72,7 @@ class _TimeOffModuleState extends State<TimeOffModule> {
                     // Requests tab
                     _TimeOffTab(
                       icon: Icons.inbox_outlined,
-                      title: 'Requests',
+                      title: l10n.requests,
                       isSelected: _selectedIndex == 2,
                       colors: colors,
                       showOnlyIcon: showOnlyIcons,
