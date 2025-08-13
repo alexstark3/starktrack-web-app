@@ -114,12 +114,8 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
                       child:
                           Text('Error loading projects: ${projectSnap.error}'));
                 }
-                if (!projectSnap.hasData || projectSnap.data!.isEmpty) {
-                  return const Center(
-                      child: Text('No projects found in Firestore.'));
-                }
-
-                final projects = projectSnap.data!;
+                // Allow Time Tracker to function even if there are no projects
+                final projects = projectSnap.data ?? <Map<String, String>>[];
 
                 // === NEW: Listen to user document for showBreaks toggle ===
                 return StreamBuilder<DocumentSnapshot>(
