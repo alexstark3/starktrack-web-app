@@ -271,7 +271,7 @@ class _ProjectCard extends StatelessWidget {
                   'ID: ${project['projectRef'] ?? ''}',
                   style: TextStyle(
                     fontSize: 14,
-                    color: colors.textColor.withOpacity(0.7),
+                    color: colors.textColor.withValues(alpha: 0.7),
                   ),
                 ),
                 if (address.isNotEmpty) ...[
@@ -281,7 +281,7 @@ class _ProjectCard extends StatelessWidget {
                       Icon(
                         Icons.location_on,
                         size: 16,
-                        color: colors.textColor.withOpacity(0.6),
+                        color: colors.textColor.withValues(alpha: 0.6),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
@@ -289,7 +289,7 @@ class _ProjectCard extends StatelessWidget {
                           address,
                           style: TextStyle(
                             fontSize: 14,
-                            color: colors.textColor.withOpacity(0.8),
+                            color: colors.textColor.withValues(alpha: 0.8),
                           ),
                         ),
                       ),
@@ -302,14 +302,14 @@ class _ProjectCard extends StatelessWidget {
                     Icon(
                       Icons.access_time,
                       size: 16,
-                      color: colors.textColor.withOpacity(0.6),
+                      color: colors.textColor.withValues(alpha: 0.6),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       '${AppLocalizations.of(context)!.totalTime}: $hoursText',
                       style: TextStyle(
                         fontSize: 14,
-                        color: colors.textColor.withOpacity(0.8),
+                        color: colors.textColor.withValues(alpha: 0.8),
                       ),
                     ),
                   ],
@@ -320,14 +320,14 @@ class _ProjectCard extends StatelessWidget {
                     Icon(
                       Icons.attach_money,
                       size: 16,
-                      color: colors.textColor.withOpacity(0.6),
+                      color: colors.textColor.withValues(alpha: 0.6),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       '${AppLocalizations.of(context)!.totalExpenses}: $expensesText',
                       style: TextStyle(
                         fontSize: 14,
-                        color: colors.textColor.withOpacity(0.8),
+                        color: colors.textColor.withValues(alpha: 0.8),
                       ),
                     ),
                   ],
@@ -441,14 +441,14 @@ class _ClientTotalsCard extends StatelessWidget {
                     Icon(
                       Icons.folder,
                       size: 16,
-                      color: colors.textColor.withOpacity(0.6),
+                      color: colors.textColor.withValues(alpha: 0.6),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       '${AppLocalizations.of(context)!.total} ${AppLocalizations.of(context)!.projects}: $projectCount',
                       style: TextStyle(
                         fontSize: 14,
-                        color: colors.textColor.withOpacity(0.8),
+                        color: colors.textColor.withValues(alpha: 0.8),
                       ),
                     ),
                   ],

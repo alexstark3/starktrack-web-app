@@ -101,188 +101,395 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
       children: [
         // Filter Card
         Card(
-          margin: const EdgeInsets.all(16),
+          margin: EdgeInsets
+              .zero, // Remove outer margin - let inner padding create the spacing
           child: Padding(
-            padding: const EdgeInsets.all(16), // Equal padding all around
+            padding: const EdgeInsets.all(10), // Equal padding all around
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    // Date Selection - Proper Calendar Widget
-                    Expanded(
-                      flex: 2, // Reduced from 3 to make it less wide
-                      child: InkWell(
-                        onTap: () => _selectDate(context),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 12),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                                color: colors.darkGray.withValues(alpha: 0.3)),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.calendar_today,
-                                  size: 20, color: colors.darkGray),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  '${DateFormat('dd/MM/yyyy').format(_startDate)} - ${DateFormat('dd/MM/yyyy').format(_endDate)}',
-                                  style: TextStyle(
-                                      color: colors.textColor, fontSize: 14),
+                // Date Selection and Controls - Wrap gracefully only when needed
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    // Calculate if we need to wrap based on available width
+                    final availableWidth = constraints.maxWidth;
+                    final needsWrap =
+                        availableWidth < 600; // Breakpoint for wrapping
+
+                    if (needsWrap) {
+                      // Compact mode - use Wrap for responsive layout
+                      return Wrap(
+                        spacing:
+                            10, // 10px spacing between elements on the same line
+                        runSpacing:
+                            10, // 10px spacing between lines when wrapping
+                        alignment: WrapAlignment
+                            .start, // Ensure elements start from left
+                        crossAxisAlignment:
+                            WrapCrossAlignment.start, // Align elements to top
+                        children: [
+                          // Date Selection - Proper Calendar Widget (full width in compact mode)
+                          SizedBox(
+                            width: availableWidth, // Take full available width
+                            child: InkWell(
+                              onTap: () => _selectDate(context),
+                              child: IntrinsicHeight(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, // Reduced from 18 to 10px
+                                      vertical: 0), // Back to 0 for 38px height
+                                  constraints: const BoxConstraints(
+                                    minHeight: 38, // Minimum 38px height
+                                    maxHeight: double
+                                        .infinity, // Allow expansion when needed
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: colors.darkGray
+                                            .withValues(alpha: 0.3)),
+                                    borderRadius: BorderRadius.circular(
+                                        9), // Match history page radius
+                                  ),
+                                  child: Row(
+                                    // Change back to Row for proper layout
+                                    children: [
+                                      Icon(Icons.calendar_today,
+                                          size: 20, color: colors.darkGray),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Align(
+                                          // Left align the text instead of center
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            '${DateFormat('dd/MM/yyyy').format(_startDate)} - ${DateFormat('dd/MM/yyyy').format(_endDate)}',
+                                            style: TextStyle(
+                                                color: colors.textColor,
+                                                fontSize:
+                                                    16), // Match history page font size
+                                            overflow: TextOverflow.visible,
+                                            softWrap: true,
+                                          ),
+                                        ),
+                                      ),
+                                      // Removed the dropdown arrow icon
+                                    ],
+                                  ),
                                 ),
                               ),
-                              Icon(Icons.arrow_drop_down,
-                                  size: 16, color: colors.darkGray),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    // Period Dropdown - Fixed width to match content
-                    Container(
-                      constraints: const BoxConstraints(maxWidth: 100),
-                      child: Container(
-                        height: 48, // Fixed height to match date field
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 0), // Remove vertical padding
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                              color: colors.darkGray.withValues(alpha: 0.3)),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: _selectedPeriod,
-                            isExpanded: true,
-                            icon: Icon(Icons.arrow_drop_down,
-                                color: colors.darkGray, size: 16),
-                            style: TextStyle(
-                                color: colors.textColor, fontSize: 14),
-                            items: _periods.map((String period) {
-                              return DropdownMenuItem<String>(
-                                value: period,
-                                child: Text(period,
-                                    style: TextStyle(fontSize: 14)),
-                              );
-                            }).toList(),
-                            onChanged: (String? newValue) {
-                              if (newValue != null) {
-                                setState(() {
-                                  _selectedPeriod = newValue;
-                                  _updateDateRange();
-                                });
-                              }
-                            },
+                          // Period Dropdown - Fixed width to match content
+                          Container(
+                            constraints: const BoxConstraints(maxWidth: 100),
+                            child: Container(
+                              height: 38, // Match history page filter height
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 0), // Match history page padding
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                    color:
+                                        colors.darkGray.withValues(alpha: 0.3)),
+                                borderRadius: BorderRadius.circular(
+                                    9), // Match history page radius
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  value: _selectedPeriod,
+                                  isExpanded: true,
+                                  icon: Icon(Icons.arrow_drop_down,
+                                      color: colors.darkGray,
+                                      size: 22), // Match history page icon size
+                                  style: TextStyle(
+                                      color: colors.textColor,
+                                      fontSize:
+                                          16), // Match history page font size
+                                  items: _periods.map((String period) {
+                                    return DropdownMenuItem<String>(
+                                      value: period,
+                                      child: Text(period,
+                                          style: TextStyle(
+                                              fontSize:
+                                                  16)), // Match history page font size
+                                    );
+                                  }).toList(),
+                                  onChanged: (String? newValue) {
+                                    if (newValue != null) {
+                                      setState(() {
+                                        _selectedPeriod = newValue;
+                                        _updateDateRange();
+                                      });
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    // Reset Button
-                    Container(
-                      decoration: BoxDecoration(
-                        color: colors.primaryBlue,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: IconButton(
-                        onPressed: _resetToThisWeek,
-                        icon:
-                            Icon(Icons.refresh, color: Colors.white, size: 20),
-                        tooltip: 'Reset to this week',
-                      ),
-                    ),
-                  ],
+                          // Reset Button
+                          Container(
+                            height: 38, // Match history page filter height
+                            decoration: BoxDecoration(
+                              color: colors.primaryBlue,
+                              borderRadius: BorderRadius.circular(
+                                  9), // Match history page radius
+                            ),
+                            child: IconButton(
+                              onPressed: _resetToThisWeek,
+                              icon: Icon(Icons.refresh,
+                                  color: Colors.white,
+                                  size: 24), // Match history page icon size
+                              tooltip: 'Reset to this week',
+                              padding: EdgeInsets
+                                  .zero, // Remove default padding to fit 38px height
+                              constraints: const BoxConstraints(
+                                  minWidth: 38,
+                                  minHeight: 38), // Ensure proper sizing
+                            ),
+                          ),
+                        ],
+                      );
+                    } else {
+                      // Full mode - use Row for single-line layout
+                      return Row(
+                        children: [
+                          // Date Selection - Proper Calendar Widget
+                          Expanded(
+                            flex: 2, // Reduced from 3 to make it less wide
+                            child: InkWell(
+                              onTap: () => _selectDate(context),
+                              child: IntrinsicHeight(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, // Reduced from 18 to 10px
+                                      vertical: 0), // Back to 0 for 38px height
+                                  constraints: const BoxConstraints(
+                                    minHeight: 38, // Minimum 38px height
+                                    maxHeight: double
+                                        .infinity, // Allow expansion when needed
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: colors.darkGray
+                                            .withValues(alpha: 0.3)),
+                                    borderRadius: BorderRadius.circular(
+                                        9), // Match history page radius
+                                  ),
+                                  child: Row(
+                                    // Change back to Row for proper layout
+                                    children: [
+                                      Icon(Icons.calendar_today,
+                                          size: 20, color: colors.darkGray),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Align(
+                                          // Left align the text instead of center
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            '${DateFormat('dd/MM/yyyy').format(_startDate)} - ${DateFormat('dd/MM/yyyy').format(_endDate)}',
+                                            style: TextStyle(
+                                                color: colors.textColor,
+                                                fontSize:
+                                                    16), // Match history page font size
+                                            overflow: TextOverflow.visible,
+                                            softWrap: true,
+                                          ),
+                                        ),
+                                      ),
+                                      // Removed the dropdown arrow icon
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                              width:
+                                  10), // Changed from 8 to 10px to match new spacing
+                          // Period Dropdown - Fixed width to match content
+                          Container(
+                            constraints: const BoxConstraints(maxWidth: 100),
+                            child: Container(
+                              height: 38, // Match history page filter height
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 0), // Match history page padding
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                    color:
+                                        colors.darkGray.withValues(alpha: 0.3)),
+                                borderRadius: BorderRadius.circular(
+                                    9), // Match history page radius
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  value: _selectedPeriod,
+                                  isExpanded: true,
+                                  icon: Icon(Icons.arrow_drop_down,
+                                      color: colors.darkGray,
+                                      size: 22), // Match history page icon size
+                                  style: TextStyle(
+                                      color: colors.textColor,
+                                      fontSize:
+                                          16), // Match history page font size
+                                  items: _periods.map((String period) {
+                                    return DropdownMenuItem<String>(
+                                      value: period,
+                                      child: Text(period,
+                                          style: TextStyle(
+                                              fontSize:
+                                                  16)), // Match history page font size
+                                    );
+                                  }).toList(),
+                                  onChanged: (String? newValue) {
+                                    if (newValue != null) {
+                                      setState(() {
+                                        _selectedPeriod = newValue;
+                                        _updateDateRange();
+                                      });
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                              width: 8), // Match history page spacing
+                          // Reset Button
+                          Container(
+                            height: 38, // Match history page filter height
+                            decoration: BoxDecoration(
+                              color: colors.primaryBlue,
+                              borderRadius: BorderRadius.circular(
+                                  9), // Match history page radius
+                            ),
+                            child: IconButton(
+                              onPressed: _resetToThisWeek,
+                              icon: Icon(Icons.refresh,
+                                  color: Colors.white,
+                                  size: 24), // Match history page icon size
+                              tooltip: 'Reset to this week',
+                              padding: EdgeInsets
+                                  .zero, // Remove default padding to fit 38px height
+                              constraints: const BoxConstraints(
+                                  minWidth: 38,
+                                  minHeight: 38), // Ensure proper sizing
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+                  },
                 ),
                 const SizedBox(height: 16),
-                // Team Toggle - Squared buttons like other forms
-                Row(
-                  children: [
-                    // Personal button - 120px width
-                    SizedBox(
-                      width: 120,
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _showTeam = false;
-                          });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: !_showTeam
-                                ? colors.primaryBlue
-                                : colors.darkGray.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: !_showTeam
-                                  ? colors.primaryBlue
-                                  : colors.darkGray.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: Center(
-                            child: Text(
-                              'Personal',
-                              style: TextStyle(
-                                color:
-                                    !_showTeam ? Colors.white : colors.darkGray,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
+                // Team Toggle - Wrap gracefully
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final availableWidth = constraints.maxWidth;
+                    final needsWrap =
+                        availableWidth < 600; // Same breakpoint as above
+
+                    return Wrap(
+                      spacing: needsWrap
+                          ? 10
+                          : 8, // 10px in compact mode, 8px in full mode
+                      runSpacing: needsWrap
+                          ? 10
+                          : 8, // 10px in compact mode, 8px in full mode
+                      children: [
+                        // Personal button - 120px width
+                        SizedBox(
+                          width: 120,
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _showTeam = false;
+                              });
+                            },
+                            child: Container(
+                              height: 38, // Match history page filter height
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 18,
+                                  vertical: 0), // Match history page padding
+                              decoration: BoxDecoration(
+                                color: !_showTeam
+                                    ? colors.primaryBlue
+                                    : colors.darkGray.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(
+                                    9), // Match history page radius
+                                border: Border.all(
+                                  color: !_showTeam
+                                      ? colors.primaryBlue
+                                      : colors.darkGray.withValues(alpha: 0.3),
+                                ),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Personal',
+                                  style: TextStyle(
+                                    color: !_showTeam
+                                        ? Colors.white
+                                        : colors.darkGray,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize:
+                                        16, // Match history page font size
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    // Team button - 120px width
-                    SizedBox(
-                      width: 120,
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _showTeam = true;
-                          });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: _showTeam
-                                ? colors.primaryBlue
-                                : colors.darkGray.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: _showTeam
-                                  ? colors.primaryBlue
-                                  : colors.darkGray.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: Center(
-                            child: Text(
-                              'Team',
-                              style: TextStyle(
-                                color:
-                                    _showTeam ? Colors.white : colors.darkGray,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
+                        // Team button - 120px width
+                        SizedBox(
+                          width: 120,
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _showTeam = true;
+                              });
+                            },
+                            child: Container(
+                              height: 38, // Match history page filter height
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 18,
+                                  vertical: 0), // Match history page padding
+                              decoration: BoxDecoration(
+                                color: _showTeam
+                                    ? colors.primaryBlue
+                                    : colors.darkGray.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(
+                                    9), // Match history page radius
+                                border: Border.all(
+                                  color: _showTeam
+                                      ? colors.primaryBlue
+                                      : colors.darkGray.withValues(alpha: 0.3),
+                                ),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Team',
+                                  style: TextStyle(
+                                    color: _showTeam
+                                        ? Colors.white
+                                        : colors.darkGray,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize:
+                                        16, // Match history page font size
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                  ],
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
           ),
         ),
+        // Add spacing between filter card and table
+        const SizedBox(height: 10),
         // Timeline View
         Expanded(
           child: Align(
@@ -321,8 +528,8 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
                   fromFirestore: (doc, _) => doc.data() ?? {},
                   toFirestore: (data, _) => data,
                 )
-                .where('status', isEqualTo: 'approved')
-                .snapshots(),
+                // Show approved and pending in calendar; rejected are hidden
+                .where('status', whereIn: ['approved', 'pending']).snapshots(),
             builder: (context, timeOffSnapshot) {
               if (!timeOffSnapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
@@ -385,6 +592,7 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
                         policies: policiesMap,
                         holidayPolicies: holidayPoliciesMap,
                         colors: colors,
+                        showYearView: true, // Explicitly show year view
                       );
                     },
                   );
@@ -405,8 +613,8 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
             fromFirestore: (doc, _) => doc.data() ?? {},
             toFirestore: (data, _) => data,
           )
-          .where('status', isEqualTo: 'approved')
-          .snapshots(),
+          // Show approved and pending in calendar; rejected are hidden
+          .where('status', whereIn: ['approved', 'pending']).snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(
@@ -563,6 +771,8 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
                       policies: policiesMap,
                       holidayPolicies: holidayPoliciesMap,
                       colors: colors,
+                      showYearView:
+                          false, // Explicitly set to false for week/month views
                     );
                   },
                 );

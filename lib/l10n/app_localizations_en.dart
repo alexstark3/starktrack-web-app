@@ -907,4 +907,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String errorGroupOperation(String operation, String error) {
     return 'Error $operation group: $error';
   }
+
+  @override
+  String get teamMember => 'Team Member';
+
+  @override
+  String get personal => 'Personal';
+
+  @override
+  String get resetToThisWeek => 'Reset to this week';
 }

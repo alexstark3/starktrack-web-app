@@ -112,21 +112,14 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
           _areaHolidays = areaHolidays;
         });
 
-        // Debug logging
-        print('DEBUG: Selected areas: $_selectedAreas');
-        print('DEBUG: Area holidays loaded: ${areaHolidays.length}');
-        for (final holiday in areaHolidays) {
-          print(
-              'DEBUG: Area holiday: ${holiday['name']} - Regions: ${holiday['regions']}');
-        }
+        // Debug logging removed
       }
 
       setState(() {
         _isLoading = false;
       });
 
-      print('DEBUG: Loaded ${_nationalHolidays.length} national holidays');
-      print('DEBUG: Loaded ${_areaHolidays.length} area holidays');
+      // Debug logging removed
     } catch (e) {
       setState(() {
         _isLoading = false;

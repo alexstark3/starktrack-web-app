@@ -31,18 +31,13 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
     try {
       setState(() => _isLoading = true);
 
-      print('🔍 DEBUG: Loading companies...');
-
       final querySnapshot =
           await FirebaseFirestore.instance.collection('companies').get();
-
-      print('🔍 DEBUG: Found ${querySnapshot.docs.length} companies');
 
       final companies = <Map<String, dynamic>>[];
 
       for (final doc in querySnapshot.docs) {
         final data = doc.data();
-        print('🔍 DEBUG: Company ${doc.id} data: $data');
 
         // Handle modules field - could be Map or List
         List<String> modules = [];
@@ -55,8 +50,6 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
             modules = modulesData.keys.cast<String>().toList();
           }
         }
-
-        print('🔍 DEBUG: Company ${doc.id} modules: $modules');
 
         // Find the company admin user
         String adminEmail = '';
@@ -99,8 +92,6 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
               .collection('users')
               .get();
           actualUserCount = usersQuery.docs.length;
-          debugPrint(
-              '🔍 DEBUG: Company ${doc.id} (${data['name']}) has $actualUserCount actual users');
 
           // Update the company document with the real user count
           final storedUserCount = data['userCount'] ?? 0;
@@ -112,8 +103,6 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
               'userCount': actualUserCount,
               'updatedAt': FieldValue.serverTimestamp(),
             });
-            debugPrint(
-                '🔍 DEBUG: Updated company ${doc.id} userCount from $storedUserCount to $actualUserCount');
           }
         } catch (e) {
           debugPrint('❌ Error counting users for company ${doc.id}: $e');
@@ -138,8 +127,6 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
         _companies = companies;
         _isLoading = false;
       });
-
-      print('🔍 DEBUG: Loaded ${companies.length} companies successfully');
     } catch (e) {
       print('❌ Error loading companies: $e');
       setState(() => _isLoading = false);
@@ -322,9 +309,6 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
     try {
       setState(() => _isLoading = true);
 
-      print(
-          '🔍 DEBUG: Starting comprehensive deletion for company: $companyName ($companyId)');
-
       // Step 1: Get all users in the company
       final usersQuery = await FirebaseFirestore.instance
           .collection('companies')
@@ -333,7 +317,6 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
           .get();
 
       final userIds = usersQuery.docs.map((doc) => doc.id).toList();
-      print('🔍 DEBUG: Found ${userIds.length} users to delete');
 
       // Step 2: Delete all time logs for all users
       if (userIds.isNotEmpty) {
@@ -347,7 +330,6 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
           timeLogsBatch.delete(doc.reference);
         }
         await timeLogsBatch.commit();
-        print('🔍 DEBUG: Deleted ${timeLogsQuery.docs.length} time logs');
       }
 
       // Step 3: Delete all projects for this company
@@ -361,7 +343,6 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
         projectsBatch.delete(doc.reference);
       }
       await projectsBatch.commit();
-      print('🔍 DEBUG: Deleted ${projectsQuery.docs.length} projects');
 
       // Step 4: Delete all clients for this company
       final clientsQuery = await FirebaseFirestore.instance
@@ -374,7 +355,6 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
         clientsBatch.delete(doc.reference);
       }
       await clientsBatch.commit();
-      print('🔍 DEBUG: Deleted ${clientsQuery.docs.length} clients');
 
       // Step 5: Delete all holiday policies for this company
       final holidayPoliciesQuery = await FirebaseFirestore.instance
@@ -387,8 +367,6 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
         holidayBatch.delete(doc.reference);
       }
       await holidayBatch.commit();
-      print(
-          '🔍 DEBUG: Deleted ${holidayPoliciesQuery.docs.length} holiday policies');
 
       // Step 6: Delete all time-off policies for this company
       final timeOffPoliciesQuery = await FirebaseFirestore.instance
@@ -401,8 +379,6 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
         timeOffBatch.delete(doc.reference);
       }
       await timeOffBatch.commit();
-      print(
-          '🔍 DEBUG: Deleted ${timeOffPoliciesQuery.docs.length} time-off policies');
 
       // Step 7: Delete all users in the company
       final usersBatch = FirebaseFirestore.instance.batch();
@@ -410,14 +386,12 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
         usersBatch.delete(userDoc.reference);
       }
       await usersBatch.commit();
-      print('🔍 DEBUG: Deleted ${usersQuery.docs.length} users');
 
       // Step 8: Finally delete the company document
       await FirebaseFirestore.instance
           .collection('companies')
           .doc(companyId)
           .delete();
-      print('🔍 DEBUG: Deleted company document');
 
       // Update local state
       setState(() {
@@ -530,7 +504,7 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
+                  color: Colors.orange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: Colors.orange),
                 ),
@@ -704,7 +678,7 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
                 Text(
                   'Company Admin: ${company['adminEmail'] ?? 'Not set'}',
                   style: TextStyle(
-                    color: colors.textColor.withOpacity(0.7),
+                    color: colors.textColor.withValues(alpha: 0.7),
                     fontSize: 14,
                   ),
                 ),
@@ -715,7 +689,7 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
                     Text(
                       'Active:',
                       style: TextStyle(
-                        color: colors.textColor.withOpacity(0.7),
+                        color: colors.textColor.withValues(alpha: 0.7),
                         fontSize: 12,
                       ),
                     ),
@@ -805,7 +779,7 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
               Text(
                 'No modules assigned',
                 style: TextStyle(
-                  color: colors.textColor.withOpacity(0.7),
+                  color: colors.textColor.withValues(alpha: 0.7),
                   fontStyle: FontStyle.italic,
                 ),
               )
@@ -816,7 +790,8 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
                 children: modules
                     .map((module) => Chip(
                           label: Text(_getModuleDisplayName(module)),
-                          backgroundColor: colors.primaryBlue.withOpacity(0.2),
+                          backgroundColor:
+                              colors.primaryBlue.withValues(alpha: 0.2),
                           labelStyle: TextStyle(color: colors.primaryBlue),
                         ))
                     .toList(),

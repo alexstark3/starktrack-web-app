@@ -116,7 +116,7 @@ class _ProjectsListState extends State<_ProjectsList> {
                           ? null
                           : [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.08),
+                                color: Colors.black.withValues(alpha: 0.08),
                                 blurRadius: 6,
                                 offset: const Offset(0, 2),
                               ),
@@ -166,7 +166,7 @@ class _ProjectsListState extends State<_ProjectsList> {
                           ? null
                           : [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.08),
+                                color: Colors.black.withValues(alpha: 0.08),
                                 blurRadius: 6,
                                 offset: const Offset(0, 2),
                               ),
@@ -376,8 +376,8 @@ class _ProjectsListState extends State<_ProjectsList> {
                                       Icon(
                                         Icons.location_on,
                                         size: 16,
-                                        color:
-                                            colors.textColor.withOpacity(0.6),
+                                        color: colors.textColor
+                                            .withValues(alpha: 0.6),
                                       ),
                                       const SizedBox(width: 8),
                                       Expanded(
@@ -386,7 +386,7 @@ class _ProjectsListState extends State<_ProjectsList> {
                                           style: TextStyle(
                                             fontSize: 14,
                                             color: colors.textColor
-                                                .withOpacity(0.8),
+                                                .withValues(alpha: 0.8),
                                           ),
                                         ),
                                       ),
@@ -400,8 +400,8 @@ class _ProjectsListState extends State<_ProjectsList> {
                                       Icon(
                                         Icons.business,
                                         size: 16,
-                                        color:
-                                            colors.textColor.withOpacity(0.6),
+                                        color: colors.textColor
+                                            .withValues(alpha: 0.6),
                                       ),
                                       const SizedBox(width: 8),
                                       Expanded(
@@ -410,7 +410,7 @@ class _ProjectsListState extends State<_ProjectsList> {
                                           style: TextStyle(
                                             fontSize: 14,
                                             color: colors.textColor
-                                                .withOpacity(0.8),
+                                                .withValues(alpha: 0.8),
                                           ),
                                         ),
                                       ),
@@ -424,8 +424,8 @@ class _ProjectsListState extends State<_ProjectsList> {
                                       Icon(
                                         Icons.person,
                                         size: 16,
-                                        color:
-                                            colors.textColor.withOpacity(0.6),
+                                        color: colors.textColor
+                                            .withValues(alpha: 0.6),
                                       ),
                                       const SizedBox(width: 8),
                                       Expanded(
@@ -463,7 +463,7 @@ class _ProjectsListState extends State<_ProjectsList> {
                                                 style: TextStyle(
                                                   fontSize: 14,
                                                   color: colors.textColor
-                                                      .withOpacity(0.8),
+                                                      .withValues(alpha: 0.8),
                                                 ),
                                               ),
                                             if (email.isNotEmpty)
@@ -472,7 +472,7 @@ class _ProjectsListState extends State<_ProjectsList> {
                                                 style: TextStyle(
                                                   fontSize: 14,
                                                   color: colors.textColor
-                                                      .withOpacity(0.8),
+                                                      .withValues(alpha: 0.8),
                                                 ),
                                               ),
                                           ],

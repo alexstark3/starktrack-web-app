@@ -1,6 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'dart:html' as html;
+// Avoid importing dart:html in app code; prefer SharedPreferences for cross-platform
 
 // Production-ready storage that works reliably online
 
@@ -20,7 +20,7 @@ class CalendarStorage {
 
     // Primary method: localStorage (most reliable for web)
     try {
-      _saveToLocalStorage(startWeekday, showWeekNumbers);
+      await _saveToLocalStorageSafe(startWeekday, showWeekNumbers);
       localStorageSuccess = true;
       print('Settings saved via localStorage (primary)');
     } catch (e) {
@@ -29,7 +29,7 @@ class CalendarStorage {
 
     // Backup method: Cookies (works across all browsers)
     try {
-      _saveToCookies(startWeekday, showWeekNumbers);
+      await _saveToCookiesSafe(startWeekday, showWeekNumbers);
       cookieSuccess = true;
       print('Settings saved via cookies (backup)');
     } catch (e) {
@@ -59,7 +59,7 @@ class CalendarStorage {
   static Future<Map<String, dynamic>> loadSettings() async {
     // Primary method: localStorage (most reliable for web)
     try {
-      final settings = _loadFromLocalStorage();
+      final settings = await _loadFromLocalStorageSafe();
       if (settings != null) {
         print('Settings loaded via localStorage (primary): $settings');
         return settings;
@@ -102,7 +102,8 @@ class CalendarStorage {
   }
 
   // Web-specific localStorage methods
-  static void _saveToLocalStorage(int startWeekday, bool showWeekNumbers) {
+  static Future<void> _saveToLocalStorageSafe(
+      int startWeekday, bool showWeekNumbers) async {
     try {
       final settings = {
         'startWeekday': startWeekday,
@@ -111,24 +112,24 @@ class CalendarStorage {
         'version': '1.0', // Add version for future compatibility
       };
       final jsonData = jsonEncode(settings);
-      html.window.localStorage[_localStorageKey] = jsonData;
-      print('localStorage saved with key "$_localStorageKey": $jsonData');
-
-      // Verify the save
-      final savedData = html.window.localStorage[_localStorageKey];
-      print('localStorage verification: $savedData');
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_localStorageKey, jsonData);
+      print('Prefs saved with key "$_localStorageKey": $jsonData');
+      final savedData = prefs.getString(_localStorageKey);
+      print('Prefs verification: $savedData');
     } catch (e) {
       throw Exception('Failed to save to localStorage: $e');
     }
   }
 
-  static Map<String, dynamic>? _loadFromLocalStorage() {
+  static Future<Map<String, dynamic>?> _loadFromLocalStorageSafe() async {
     try {
-      final data = html.window.localStorage[_localStorageKey];
-      print('localStorage raw data with key "$_localStorageKey": $data');
+      final prefs = await SharedPreferences.getInstance();
+      final data = prefs.getString(_localStorageKey);
+      print('Prefs raw data with key "$_localStorageKey": $data');
       if (data != null) {
         final settings = jsonDecode(data) as Map<String, dynamic>;
-        print('localStorage parsed settings: $settings');
+        print('Prefs parsed settings: $settings');
 
         // Check if we have the required fields
         if (settings.containsKey('startWeekday') &&
@@ -143,7 +144,7 @@ class CalendarStorage {
       }
 
       // Try the old key for backward compatibility
-      final oldData = html.window.localStorage['calendar_settings'];
+      final oldData = prefs.getString('calendar_settings');
       if (oldData != null) {
         print('Found old localStorage data, migrating...');
         try {
@@ -151,12 +152,12 @@ class CalendarStorage {
           if (oldSettings.containsKey('startWeekday') &&
               oldSettings.containsKey('showWeekNumbers')) {
             // Migrate to new format
-            _saveToLocalStorage(
+            await _saveToLocalStorageSafe(
               oldSettings['startWeekday'] as int,
               oldSettings['showWeekNumbers'] as bool,
             );
             // Remove old data
-            html.window.localStorage.remove('calendar_settings');
+            await prefs.remove('calendar_settings');
             print('Migrated old data to new format');
             return {
               'startWeekday': oldSettings['startWeekday'] as int,
@@ -168,13 +169,14 @@ class CalendarStorage {
         }
       }
     } catch (e) {
-      print('Error loading from localStorage: $e');
+      print('Error loading from Prefs/localStorage: $e');
     }
     return null;
   }
 
   // Cookie methods for production reliability
-  static void _saveToCookies(int startWeekday, bool showWeekNumbers) {
+  static Future<void> _saveToCookiesSafe(
+      int startWeekday, bool showWeekNumbers) async {
     try {
       final settings = {
         'startWeekday': startWeekday,
@@ -183,14 +185,8 @@ class CalendarStorage {
         'version': '1.0',
       };
       final jsonData = jsonEncode(settings);
-
-      // Set cookie with long expiration (1 year)
-      final expires = DateTime.now().add(const Duration(days: 365));
-      final cookieValue =
-          'starktrack_calendar_settings=$jsonData; expires=${expires.toUtc().toIso8601String()}; path=/; SameSite=Lax';
-
-      html.document.cookie = cookieValue;
-      print('Settings saved via cookies: $jsonData');
+      // In app code, skip cookies; Prefs already written above
+      print('Settings saved (cookies skipped in app code): $jsonData');
     } catch (e) {
       throw Exception('Failed to save to cookies: $e');
     }
@@ -198,28 +194,8 @@ class CalendarStorage {
 
   static Map<String, dynamic>? _loadFromCookies() {
     try {
-      final cookieString = html.document.cookie;
-      if (cookieString == null || cookieString.isEmpty) return null;
-
-      final cookies = cookieString.split(';');
-      for (final cookie in cookies) {
-        final parts = cookie.trim().split('=');
-        if (parts.length == 2 && parts[0] == 'starktrack_calendar_settings') {
-          final data = parts[1];
-          print('Cookie raw data: $data');
-
-          final settings = jsonDecode(data) as Map<String, dynamic>;
-          print('Cookie parsed settings: $settings');
-
-          if (settings.containsKey('startWeekday') &&
-              settings.containsKey('showWeekNumbers')) {
-            return {
-              'startWeekday': settings['startWeekday'] as int,
-              'showWeekNumbers': settings['showWeekNumbers'] as bool,
-            };
-          }
-        }
-      }
+      // In app code, don't read cookies; rely on Prefs/localStorage safe path
+      return null;
     } catch (e) {
       print('Error loading from cookies: $e');
     }

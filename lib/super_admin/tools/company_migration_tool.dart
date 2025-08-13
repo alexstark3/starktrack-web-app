@@ -171,7 +171,7 @@ class _CompanyMigrationToolState extends State<CompanyMigrationTool> {
                             'Migrate companies to secure IDs with random codes',
                             style: TextStyle(
                               fontSize: 16,
-                              color: colors.textColor.withOpacity(0.7),
+                              color: colors.textColor.withValues(alpha: 0.7),
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -243,7 +243,8 @@ class _CompanyMigrationToolState extends State<CompanyMigrationTool> {
                                 Text(
                                   'Old ID: $companyId',
                                   style: TextStyle(
-                                      color: colors.textColor.withOpacity(0.7)),
+                                      color: colors.textColor
+                                          .withValues(alpha: 0.7)),
                                 ),
                                 if (newCompanyId != null)
                                   Text(

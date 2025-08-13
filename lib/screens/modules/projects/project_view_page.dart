@@ -382,9 +382,10 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                                         color: _filterStart == null
                                             ? theme.colorScheme.primary
                                             : (isDark
-                                                ? Colors.white.withOpacity(0.87)
+                                                ? Colors.white
+                                                    .withValues(alpha: 0.87)
                                                 : Colors.black
-                                                    .withOpacity(0.87)),
+                                                    .withValues(alpha: 0.87)),
                                         fontWeight: FontWeight.w500,
                                         fontSize: kFilterFontSize,
                                       ),
@@ -428,9 +429,10 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                                         color: _filterEnd == null
                                             ? theme.colorScheme.primary
                                             : (isDark
-                                                ? Colors.white.withOpacity(0.87)
+                                                ? Colors.white
+                                                    .withValues(alpha: 0.87)
                                                 : Colors.black
-                                                    .withOpacity(0.87)),
+                                                    .withValues(alpha: 0.87)),
                                         fontWeight: FontWeight.w500,
                                         fontSize: kFilterFontSize,
                                       ),
@@ -445,9 +447,10 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                               height: kFilterHeight,
                               decoration: BoxDecoration(
                                 color: isDark
-                                    ? theme.colorScheme.primary.withOpacity(0.2)
+                                    ? theme.colorScheme.primary
+                                        .withValues(alpha: 0.2)
                                     : theme.colorScheme.primary
-                                        .withOpacity(0.1),
+                                        .withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(10),
                                 boxShadow: isDark
                                     ? null

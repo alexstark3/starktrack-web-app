@@ -9,8 +9,9 @@ class TimelineView extends StatelessWidget {
   final List<Map<String, dynamic>> teamMembers;
   final List<QueryDocumentSnapshot<Map<String, dynamic>>> timeOffRequests;
   final Map<String, Map<String, dynamic>> policies;
-  final Map<String, Map<String, dynamic>> holidayPolicies;
+  final Map<String, Map<String, dynamic>> holidayPolicies; // Keep as Map
   final AppColors colors;
+  final bool showYearView; // Add parameter to control year view
 
   const TimelineView({
     Key? key,
@@ -21,6 +22,7 @@ class TimelineView extends StatelessWidget {
     required this.policies,
     required this.holidayPolicies,
     required this.colors,
+    this.showYearView = false, // Default to false
   }) : super(key: key);
 
   @override
@@ -33,8 +35,8 @@ class TimelineView extends StatelessWidget {
       current = current.add(const Duration(days: 1));
     }
 
-    // Check if this is a year view (more than 31 days)
-    if (days.length > 31) {
+    // Only show year view when explicitly requested, not automatically
+    if (showYearView) {
       return _buildYearView();
     }
 
@@ -51,7 +53,7 @@ class TimelineView extends StatelessWidget {
         children: [
           // FIXED left sidebar - Team Member header and names (NEVER scrolls)
           Container(
-            width: 120,
+            width: 100,
             decoration: BoxDecoration(
               border: Border(
                 right: BorderSide(
@@ -64,7 +66,7 @@ class TimelineView extends StatelessWidget {
               children: [
                 // Team Member header
                 Container(
-                  width: 120,
+                  width: 100,
                   height:
                       100, // Height to cover all 3 header rows (30 + 30 + 40)
                   decoration: BoxDecoration(
@@ -75,6 +77,8 @@ class TimelineView extends StatelessWidget {
                       ),
                     ),
                   ),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 4, vertical: 4), // Add consistent padding
                   child: Center(
                     child: Text(
                       'Team Member',
@@ -89,7 +93,7 @@ class TimelineView extends StatelessWidget {
                 // Team member names
                 ...teamMembers.take(3).map((member) {
                   return Container(
-                    width: 120,
+                    width: 100,
                     height: 40,
                     decoration: BoxDecoration(
                       border: Border(
@@ -270,8 +274,10 @@ class TimelineView extends StatelessWidget {
                   child: Text(
                     monthName,
                     style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                      fontSize:
+                          16, // Reduced from 16 to match table month spans
+                      fontWeight: FontWeight
+                          .bold, // Changed to bold to match table month spans
                       color: colors.darkGray,
                     ),
                   ),
@@ -286,6 +292,8 @@ class TimelineView extends StatelessWidget {
                     policies: policies,
                     holidayPolicies: holidayPolicies,
                     colors: colors,
+                    showYearView:
+                        false, // Set to false to prevent infinite loop - show individual month view
                   ),
                 ),
               ],
@@ -339,8 +347,8 @@ class TimelineView extends StatelessWidget {
                 child: Text(
                   currentMonth,
                   style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 14, // Back to original size - was already correct
+                    fontWeight: FontWeight.bold, // Back to original weight
                     color: colors.darkGray,
                   ),
                 ),
@@ -469,15 +477,48 @@ class TimelineView extends StatelessWidget {
     DateTime day,
     Map<String, Map<String, dynamic>> holidayPolicies,
   ) {
-    // Check each policy's direct date field (each policy IS a holiday)
-    for (final policy in holidayPolicies.values) {
-      final policyDate = policy['date'] as Timestamp?;
-      if (policyDate != null) {
-        final parsedDate = policyDate.toDate();
-        if (parsedDate.year == day.year &&
-            parsedDate.month == day.month &&
-            parsedDate.day == day.day) {
-          return policy; // Return the entire policy as the holiday
+    // Check each holiday policy using its period (start/end) fields
+    for (final policyName in holidayPolicies.keys) {
+      final policy = holidayPolicies[policyName];
+      if (policy == null) continue;
+
+      // New structure: period.start / period.end
+      final period = policy['period'] as Map<String, dynamic>?;
+      final startTs = period != null ? period['start'] as Timestamp? : null;
+      final endTs = period != null ? period['end'] as Timestamp? : null;
+
+      // Backward-compat: some entries might still store a single 'date'
+      final singleDateTs = policy['date'] as Timestamp?;
+
+      DateTime? startDate = startTs?.toDate();
+      DateTime? endDate = endTs?.toDate() ?? startDate;
+
+      if (startDate == null && singleDateTs != null) {
+        startDate = singleDateTs.toDate();
+        endDate = startDate;
+      }
+
+      if (startDate == null) continue;
+
+      // Handle repeatAnnually by aligning to the displayed year's day/month
+      final repeatsAnnually = policy['repeatAnnually'] == true;
+      // Normalize comparisons to date-only (ignore time zones/time of day)
+      DateTime normalize(DateTime d) => DateTime(d.year, d.month, d.day);
+      final dayOnly = normalize(day);
+
+      if (repeatsAnnually) {
+        final alignedStart =
+            normalize(DateTime(day.year, startDate.month, startDate.day));
+        final alignedEnd =
+            normalize(DateTime(day.year, endDate!.month, endDate.day));
+        if (!dayOnly.isBefore(alignedStart) && !dayOnly.isAfter(alignedEnd)) {
+          return policy;
+        }
+      } else {
+        final startOnly = normalize(startDate);
+        final endOnly = normalize(endDate!);
+        if (!dayOnly.isBefore(startOnly) && !dayOnly.isAfter(endOnly)) {
+          return policy;
         }
       }
     }
@@ -510,32 +551,55 @@ class TimelineView extends StatelessWidget {
     Color barColor;
     String tooltipText = '';
 
+    // Helper to coerce to DateTime
+    DateTime? _toDate(dynamic value) {
+      if (value == null) return null;
+      if (value is DateTime) return value;
+      if (value is Timestamp) return value.toDate();
+      return null;
+    }
+
+    // Resolve dates from request map
+    final startDate = _toDate(timeOff['startDate']);
+    final endDate = _toDate(timeOff['endDate']);
+    final description = (timeOff['description'] ?? '').toString();
+
     if (policy != null) {
-      // Use the actual policy color from Firestore
-      final colorHex = policy['color'] as String?;
-      if (colorHex != null && colorHex.isNotEmpty) {
+      // Use the actual policy color from Firestore; support int or hex string
+      final colorValue = policy['color'];
+      if (colorValue is int) {
+        barColor = Color(colorValue);
+      } else if (colorValue is String && colorValue.isNotEmpty) {
         try {
-          barColor = Color(int.parse(colorHex.replaceFirst('#', '0xFF')));
-        } catch (e) {
-          barColor = colors.primaryBlue; // Fallback color
+          barColor = Color(int.parse(colorValue.replaceFirst('#', '0xFF')));
+        } catch (_) {
+          barColor = colors.primaryBlue;
         }
       } else {
-        barColor = colors.primaryBlue; // Fallback color
+        barColor = colors.primaryBlue;
       }
 
-      final policyName = policy['name'] as String? ?? '';
-      final description = timeOff['description'] ?? '';
-      tooltipText =
-          '$policyName\n${DateFormat('MMM dd').format(timeOff['startDate'])} - ${DateFormat('MMM dd').format(timeOff['endDate'])}';
+      final policyNameResolved = policy['name'] as String? ?? '';
+      final startStr =
+          startDate != null ? DateFormat('MMM dd').format(startDate) : '';
+      final endStr =
+          endDate != null ? DateFormat('MMM dd').format(endDate) : '';
+      tooltipText = '$policyNameResolved\n$startStr - $endStr';
       if (description.isNotEmpty) {
         tooltipText += '\n$description';
       }
     } else {
       // Fallback for unknown policies
       barColor = colors.primaryBlue;
-      tooltipText =
-          '${DateFormat('MMM dd').format(timeOff['startDate'])} - ${DateFormat('MMM dd').format(timeOff['endDate'])}\n${timeOff['description']}';
+      final startStr =
+          startDate != null ? DateFormat('MMM dd').format(startDate) : '';
+      final endStr =
+          endDate != null ? DateFormat('MMM dd').format(endDate) : '';
+      final desc = (timeOff['description'] ?? '').toString();
+      tooltipText = '$startStr - $endStr\n$desc';
     }
+
+    final isPending = (timeOff['status'] ?? 'approved') == 'pending';
 
     return Tooltip(
       message: tooltipText,
@@ -545,9 +609,17 @@ class TimelineView extends StatelessWidget {
           color: barColor,
           borderRadius: BorderRadius.circular(2),
         ),
-        child: const SizedBox(
-          width: 36,
-          height: 16,
+        child: Stack(
+          children: [
+            const SizedBox(width: 36, height: 16),
+            if (isPending)
+              const Positioned(
+                right: 2,
+                top: 1,
+                child:
+                    Icon(Icons.hourglass_empty, size: 12, color: Colors.white),
+              ),
+          ],
         ),
       ),
     );
@@ -572,11 +644,28 @@ class TimelineView extends StatelessWidget {
       barColor = colors.error; // Red for holidays
     }
 
-    // Convert Timestamp to DateTime for formatting
-    final holidayDate = (holiday['date'] as Timestamp?)?.toDate();
-    final formattedDate = holidayDate != null
-        ? DateFormat('dd/MM/yyyy').format(holidayDate)
-        : 'Unknown date';
+    // Resolve date(s) from period or legacy 'date'
+    final period = holiday['period'] as Map<String, dynamic>?;
+    final startTs = period != null ? period['start'] as Timestamp? : null;
+    final endTs = period != null ? period['end'] as Timestamp? : null;
+    final singleDateTs = holiday['date'] as Timestamp?;
+
+    DateTime? startDate = startTs?.toDate() ?? singleDateTs?.toDate();
+    DateTime? endDate = endTs?.toDate() ?? startDate;
+
+    String formattedDate;
+    final repeatsAnnually = holiday['repeatAnnually'] == true;
+    if (startDate == null) {
+      formattedDate = 'Unknown date';
+    } else if (endDate == null || startDate.isAtSameMomentAs(endDate)) {
+      formattedDate = repeatsAnnually
+          ? DateFormat('dd/MM').format(startDate)
+          : DateFormat('dd/MM/yyyy').format(startDate);
+    } else {
+      formattedDate = repeatsAnnually
+          ? '${DateFormat('dd/MM').format(startDate)} - ${DateFormat('dd/MM').format(endDate)}'
+          : '${DateFormat('dd/MM/yyyy').format(startDate)} - ${DateFormat('dd/MM/yyyy').format(endDate)}';
+    }
 
     return Tooltip(
       message: '${holiday['name']}\n$formattedDate',

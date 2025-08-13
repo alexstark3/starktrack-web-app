@@ -436,7 +436,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -463,7 +463,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                       subtitle,
                       style: TextStyle(
                         fontSize: 14,
-                        color: colors.textColor.withOpacity(0.7),
+                        color: colors.textColor.withValues(alpha: 0.7),
                       ),
                     ),
                   ],
@@ -471,7 +471,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
               ),
               Icon(
                 Icons.arrow_forward_ios,
-                color: colors.textColor.withOpacity(0.5),
+                color: colors.textColor.withValues(alpha: 0.5),
                 size: 16,
               ),
             ],

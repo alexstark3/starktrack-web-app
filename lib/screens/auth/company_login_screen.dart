@@ -7,6 +7,7 @@ import '../dashboard/company_dashboard_screen.dart';
 import '../../super_admin/security/login_rate_limiter.dart';
 import '../../l10n/app_localizations.dart';
 import '../../utils/browser_persistence.dart';
+import '../../utils/app_logger.dart';
 
 class CompanyLoginScreen extends StatefulWidget {
   const CompanyLoginScreen({Key? key}) : super(key: key);
@@ -30,7 +31,8 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
         await BrowserPersistence.saveUserEmail(email, true);
       }
     } catch (e) {
-      print('Error saving email for persistence: $e');
+      AppLogger.warn('Error saving email for persistence',
+          name: 'CompanyLogin', error: e);
     }
   }
 
@@ -69,7 +71,7 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
       );
       if (!mounted) return;
       final userId = authResult.user!.uid;
-      // print('LOGIN: Authenticated with UID=$userId');
+      // AppLogger.debug('Authenticated with UID=$userId', name: 'CompanyLogin');
 
       // 2. Find the company the user belongs to using userCompany collection
       final userCompanyDoc = await FirebaseFirestore.instance
@@ -144,9 +146,10 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
           ),
         ),
       );
-      // print('LOGIN: User found! Navigating to dashboard for company $companyId');
+      // AppLogger.info('Navigating to dashboard for company $companyId', name: 'CompanyLogin');
     } on FirebaseAuthException catch (e) {
-      print('LOGIN: FirebaseAuthException: ${e.message}');
+      AppLogger.warn('FirebaseAuthException',
+          name: 'CompanyLogin', error: e, stackTrace: e.stackTrace);
       if (!mounted) return;
 
       // Record failed login attempt for rate limiting
@@ -169,7 +172,8 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
         }
       });
     } catch (e) {
-      print('LOGIN: Unknown error: $e');
+      AppLogger.error('Unknown error during login',
+          name: 'CompanyLogin', error: e);
       if (!mounted) return;
 
       // Record failed login attempt for rate limiting

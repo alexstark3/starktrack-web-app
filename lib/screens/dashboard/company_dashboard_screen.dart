@@ -225,42 +225,31 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
     l.add(_ScreenCfg(l10n.history, Icons.history));
     l.add(_ScreenCfg('Time Off', Icons.calendar_month));
 
-    print('DEBUG: Available tabs for user:');
-    print('DEBUG: - Time Tracker: ${l10n.timeTracker}');
-    print('DEBUG: - History: ${l10n.history}');
-    print('DEBUG: - User roles: ${widget.roles}');
-    print('DEBUG: - User access: ${widget.access}');
+    // Debug prints removed to keep console clean
 
     // TEAM MODULE: Only for roles company_admin, admin, team_leader
     if (widget.roles.contains('company_admin') ||
         widget.roles.contains('admin') ||
         widget.roles.contains('team_leader')) {
       l.add(_ScreenCfg(l10n.team, Icons.group));
-      print('DEBUG: - Team: ${l10n.team} (added)');
     }
     // PROJECTS MODULE: Only for roles company_admin, admin, team_leader
     if (widget.roles.contains('company_admin') ||
         widget.roles.contains('admin') ||
         widget.roles.contains('team_leader')) {
       l.add(_ScreenCfg(l10n.projects, Icons.folder));
-      print('DEBUG: - Projects: ${l10n.projects} (added)');
     }
     // CLIENTS MODULE: Only for roles company_admin, admin, team_leader
     if (widget.roles.contains('company_admin') ||
         widget.roles.contains('admin') ||
         widget.roles.contains('team_leader')) {
       l.add(_ScreenCfg(l10n.clients, Icons.business));
-      print('DEBUG: - Clients: ${l10n.clients} (added)');
     }
     if (widget.roles.contains('admin') ||
         widget.roles.contains('company_admin')) {
       l.add(_ScreenCfg(l10n.admin, Icons.admin_panel_settings));
-      print('DEBUG: - Admin: ${l10n.admin} (added)');
     }
     l.add(_ScreenCfg(l10n.settings, Icons.settings));
-    print('DEBUG: - Settings: ${l10n.settings} (added)');
-
-    print('DEBUG: Total tabs: ${l.length}');
     return l;
   }
 }

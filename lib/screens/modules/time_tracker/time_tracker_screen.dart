@@ -47,23 +47,15 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
       // Check if user is authenticated
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) {
-        print('ERROR: No authenticated user found');
         throw Exception('User not authenticated');
       }
 
-      print('DEBUG: Fetching projects for company: ${widget.companyId}');
-      print('DEBUG: Current user ID: ${widget.userId}');
-      print('DEBUG: Authenticated user ID: ${currentUser.uid}');
-
       // Verify the authenticated user matches the widget user
       if (currentUser.uid != widget.userId) {
-        print(
-            'ERROR: User ID mismatch - authenticated: ${currentUser.uid}, widget: ${widget.userId}');
         throw Exception('User ID mismatch');
       }
 
       // Check if user exists in company users collection
-      print('DEBUG: Checking if user exists in company users collection...');
       final userDoc = await FirebaseFirestore.instance
           .collection('companies')
           .doc(widget.companyId)
@@ -72,100 +64,14 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
           .get();
 
       if (!userDoc.exists) {
-        print('ERROR: User does not exist in company users collection');
-        print('ERROR: Company ID: ${widget.companyId}');
-        print('ERROR: User ID: ${widget.userId}');
         throw Exception('User not found in company');
       }
-
-      print('DEBUG: User exists in company users collection');
-      final userData = userDoc.data() as Map<String, dynamic>;
-      print('DEBUG: User roles: ${userData['roles']}');
-      print('DEBUG: User modules: ${userData['modules']}');
-
-      // Check if user has userCompany document
-      print('DEBUG: Checking userCompany document...');
-      final userCompanyDoc = await FirebaseFirestore.instance
-          .collection('userCompany')
-          .doc(widget.userId)
-          .get();
-
-      if (!userCompanyDoc.exists) {
-        print('ERROR: User does not have userCompany document');
-      } else {
-        print('DEBUG: UserCompany document exists');
-        final userCompanyData = userCompanyDoc.data() as Map<String, dynamic>;
-        print('DEBUG: UserCompany companyId: ${userCompanyData['companyId']}');
-      }
-
-      // Test: Try to access the company document first
-      print('DEBUG: Testing company document access...');
-      try {
-        final companyDoc = await FirebaseFirestore.instance
-            .collection('companies')
-            .doc(widget.companyId)
-            .get();
-        print(
-            'DEBUG: Company document access: ${companyDoc.exists ? 'SUCCESS' : 'FAILED'}');
-      } catch (e) {
-        print('ERROR: Company document access failed: $e');
-      }
-
-      // Test: Try to access projects with different approach
-      print('DEBUG: Testing projects collection access...');
-
-      // Try different approaches to access projects
-      try {
-        // Approach 1: Direct collection reference
-        final snapshot1 = await FirebaseFirestore.instance
-            .collection('companies')
-            .doc(widget.companyId)
-            .collection('projects')
-            .limit(1)
-            .get();
-        print(
-            'DEBUG: Approach 1 (direct): SUCCESS - ${snapshot1.docs.length} projects');
-      } catch (e) {
-        print('ERROR: Approach 1 (direct) failed: $e');
-      }
-
-      try {
-        // Approach 2: Using a query
-        final snapshot2 = await FirebaseFirestore.instance
-            .collection('companies')
-            .doc(widget.companyId)
-            .collection('projects')
-            .where(FieldPath.documentId, isGreaterThan: '')
-            .limit(1)
-            .get();
-        print(
-            'DEBUG: Approach 2 (query): SUCCESS - ${snapshot2.docs.length} projects');
-      } catch (e) {
-        print('ERROR: Approach 2 (query) failed: $e');
-      }
-
-      try {
-        // Approach 3: Using a specific document ID
-        final snapshot3 = await FirebaseFirestore.instance
-            .collection('companies')
-            .doc(widget.companyId)
-            .collection('projects')
-            .doc('test')
-            .get();
-        print(
-            'DEBUG: Approach 3 (specific doc): ${snapshot3.exists ? 'EXISTS' : 'NOT EXISTS'}');
-      } catch (e) {
-        print('ERROR: Approach 3 (specific doc) failed: $e');
-      }
-
+      // Fetch all projects for this company
       final snapshot = await FirebaseFirestore.instance
           .collection('companies')
           .doc(widget.companyId)
           .collection('projects')
-          .limit(1) // Just get one document to test
           .get();
-
-      print('DEBUG: Successfully fetched ${snapshot.docs.length} projects');
 
       return snapshot.docs
           .map((d) => {
@@ -175,9 +81,6 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
           .where((proj) => (proj['name'] ?? '').toString().trim().isNotEmpty)
           .toList();
     } catch (e) {
-      print('ERROR: Failed to fetch projects: $e');
-      print('ERROR: Company ID: ${widget.companyId}');
-      print('ERROR: User ID: ${widget.userId}');
       rethrow;
     }
   }

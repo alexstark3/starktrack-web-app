@@ -1,3 +1,5 @@
+library team_members_view;
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
@@ -5,6 +7,12 @@ import '../../../../theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../services/overtime_calculation_service.dart';
 import 'add_new_session.dart';
+
+part 'status_icon.part.dart';
+part 'totals_header.part.dart';
+part 'helpers.part.dart';
+part 'edit_log_dialog.part.dart';
+part 'history_entry.part.dart';
 
 const double kFilterHeight = 38;
 const double kFilterRadius = 9;
@@ -238,8 +246,10 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                                       color: fromDate == null
                                           ? theme.colorScheme.primary
                                           : (isDark
-                                              ? Colors.white.withOpacity(0.87)
-                                              : Colors.black.withOpacity(0.87)),
+                                              ? Colors.white
+                                                  .withValues(alpha: 0.87)
+                                              : Colors.black
+                                                  .withValues(alpha: 0.87)),
                                       fontWeight: FontWeight.w500,
                                       fontSize: kFilterFontSize,
                                     ),
@@ -281,8 +291,10 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                                       color: toDate == null
                                           ? theme.colorScheme.primary
                                           : (isDark
-                                              ? Colors.white.withOpacity(0.87)
-                                              : Colors.black.withOpacity(0.87)),
+                                              ? Colors.white
+                                                  .withValues(alpha: 0.87)
+                                              : Colors.black
+                                                  .withValues(alpha: 0.87)),
                                       fontWeight: FontWeight.w500,
                                       fontSize: kFilterFontSize,
                                     ),
@@ -379,8 +391,10 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                             height: kFilterHeight,
                             decoration: BoxDecoration(
                               color: isDark
-                                  ? theme.colorScheme.primary.withOpacity(0.2)
-                                  : theme.colorScheme.primary.withOpacity(0.1),
+                                  ? theme.colorScheme.primary
+                                      .withValues(alpha: 0.2)
+                                  : theme.colorScheme.primary
+                                      .withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(10),
                               boxShadow: isDark
                                   ? null
@@ -536,125 +550,6 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
   }
 }
 
-class _StatusIcon extends StatelessWidget {
-  final String companyId;
-  final String userId;
-
-  const _StatusIcon({required this.companyId, required this.userId});
-
-  @override
-  Widget build(BuildContext context) {
-    final todayStr = DateFormat('dd/MM/yyyy').format(DateTime.now());
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('companies')
-          .doc(companyId)
-          .collection('users')
-          .doc(userId)
-          .collection('all_logs')
-          .where('sessionDate', isEqualTo: todayStr)
-          .snapshots(),
-      builder: (context, snapshot) {
-        bool isWorking = false;
-        if (snapshot.hasData) {
-          for (var doc in snapshot.data!.docs) {
-            final data = doc.data() as Map<String, dynamic>;
-            final hasBegin = data['begin'] != null;
-            final hasEnd = data['end'] != null;
-            if (hasBegin && !hasEnd) {
-              isWorking = true;
-              break;
-            }
-          }
-        }
-        return Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: isWorking ? Colors.green : Colors.red,
-            shape: BoxShape.circle,
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _TotalsHeader extends StatelessWidget {
-  final String companyId;
-  final String userId;
-
-  const _TotalsHeader({required this.companyId, required this.userId});
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<QuerySnapshot>(
-      future: FirebaseFirestore.instance
-          .collection('companies')
-          .doc(companyId)
-          .collection('users')
-          .doc(userId)
-          .collection('all_logs')
-          .get(),
-      builder: (context, snapshot) {
-        double totalWork = 0;
-        double totalExpenses = 0;
-        int approvedCount = 0;
-        int rejectedCount = 0;
-        int pendingCount = 0;
-
-        if (snapshot.hasData) {
-          for (var doc in snapshot.data!.docs) {
-            final data = doc.data() as Map<String, dynamic>;
-            final workMinutes = (data['duration_minutes'] as int?) ?? 0;
-            totalWork += workMinutes;
-
-            final expenses = (data['expenses'] ?? {}) as Map<String, dynamic>;
-            totalExpenses += expenses.values.fold<double>(
-                0, (sum, e) => sum + (e is num ? e.toDouble() : 0));
-
-            final approvedRaw = data['approved'];
-            final rejectedRaw = data['rejected'];
-            final approvedAfterEditRaw = data['approvedAfterEdit'];
-
-            final isApproved =
-                approvedRaw == true || approvedRaw == 1 || approvedRaw == '1';
-            final isRejected =
-                rejectedRaw == true || rejectedRaw == 1 || rejectedRaw == '1';
-            final isApprovedAfterEdit = approvedAfterEditRaw == true ||
-                approvedAfterEditRaw == 1 ||
-                approvedAfterEditRaw == '1';
-
-            if (isApprovedAfterEdit || isApproved) {
-              approvedCount++;
-            } else if (isRejected) {
-              rejectedCount++;
-            } else {
-              pendingCount++;
-            }
-          }
-        }
-
-        return Wrap(
-          spacing: 18,
-          runSpacing: 8,
-          children: [
-            Text(
-                '${AppLocalizations.of(context)!.totalTime}: ${_fmtH(totalWork)}',
-                style: const TextStyle(fontWeight: FontWeight.w600)),
-            Text(
-                '${AppLocalizations.of(context)!.totalExpenses}: ${totalExpenses.toStringAsFixed(2)} CHF',
-                style: const TextStyle(fontWeight: FontWeight.w600)),
-            Text(
-                '${AppLocalizations.of(context)!.approved}: $approvedCount | ${AppLocalizations.of(context)!.rejected}: $rejectedCount | ${AppLocalizations.of(context)!.pending}: $pendingCount',
-                style: const TextStyle(fontSize: 13, color: Colors.grey)),
-          ],
-        );
-      },
-    );
-  }
-}
-
 class _LogsTable extends StatefulWidget {
   final String companyId;
   final String userId;
@@ -729,7 +624,7 @@ class _LogsTableState extends State<_LogsTable> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              AppLocalizations.of(context)!.confirmDeleteMessage,
+              'Are you sure you want to delete this session?',
               style: TextStyle(color: colors.textColor),
             ),
             const SizedBox(height: 16),
@@ -757,7 +652,7 @@ class _LogsTableState extends State<_LogsTable> {
             ),
             const SizedBox(height: 16),
             Text(
-              AppLocalizations.of(context)!.confirmDeleteMessage,
+              'Are you sure you want to delete this session?',
               style: TextStyle(
                 color: colors.red,
                 fontWeight: FontWeight.w500,
@@ -784,6 +679,82 @@ class _LogsTableState extends State<_LogsTable> {
         ],
       ),
     );
+  }
+
+  Future<String?> _promptManagerNote(BuildContext context, String title) async {
+    final colors = Theme.of(context).extension<AppColors>()!;
+    final TextEditingController ctrl = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        bool showError = false;
+        return StatefulBuilder(
+          builder: (context, setState) => AlertDialog(
+            backgroundColor: colors.backgroundDark,
+            title: Text(title, style: TextStyle(color: colors.textColor)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: ctrl,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    labelText: 'Note',
+                    errorText: showError ? 'Note Required !' : null,
+                  ),
+                  onChanged: (_) {
+                    if (showError && ctrl.text.trim().isNotEmpty) {
+                      setState(() => showError = false);
+                    }
+                  },
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(null),
+                child: Text(AppLocalizations.of(context)!.cancel,
+                    style: TextStyle(color: colors.textColor)),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  final value = ctrl.text.trim();
+                  if (value.isEmpty) {
+                    setState(() => showError = true);
+                    return;
+                  }
+                  Navigator.of(context).pop(value);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colors.primaryBlue,
+                  foregroundColor: colors.whiteTextOnBlue,
+                ),
+                child: Text(AppLocalizations.of(context)!.save),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _sendManagerNoteToUser({
+    required DocumentReference logRef,
+    required String note,
+    required String type,
+  }) async {
+    try {
+      final userRef = logRef.parent.parent; // users/{userId}
+      final companyRef = userRef?.parent; // companies/{companyId}/users
+      if (userRef == null || companyRef == null || note.isEmpty) return;
+      await userRef.collection('manager_notes').add({
+        'note': note,
+        'type': type, // rejected | deleted
+        'logId': logRef.id,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    } catch (_) {}
   }
 
   // Helper for formatting Duration as HH:MMh
@@ -917,23 +888,7 @@ class _LogsTableState extends State<_LogsTable> {
       final weekStart = startOfYear.add(Duration(days: (weekNumber - 1) * 7));
       final weekEnd = weekStart.add(const Duration(days: 6));
 
-      print('DEBUG: Calculating overtime for week $weekNumber, year $year');
-      print('DEBUG: Week start: ${DateFormat('dd/MM/yyyy').format(weekStart)}');
-      print('DEBUG: Week end: ${DateFormat('dd/MM/yyyy').format(weekEnd)}');
-
-      // Additional debug for week calculation
-      if (weekNumber == 27) {
-        print('DEBUG: WEEK 27 - Week key: $weekKey');
-        print('DEBUG: WEEK 27 - Parsed year: $year, week number: $weekNumber');
-        print(
-            'DEBUG: WEEK 27 - Jan 4 date: ${DateFormat('dd/MM/yyyy').format(jan4)}');
-        print(
-            'DEBUG: WEEK 27 - Start of year: ${DateFormat('dd/MM/yyyy').format(startOfYear)}');
-        print(
-            'DEBUG: WEEK 27 - Week start calculation: ${DateFormat('dd/MM/yyyy').format(weekStart)}');
-        print(
-            'DEBUG: WEEK 27 - Week end calculation: ${DateFormat('dd/MM/yyyy').format(weekEnd)}');
-      }
+      // Removed debug prints
 
       // Calculate overtime for the entire week at once (not from user start date)
       final result = await OvertimeCalculationService.calculateOvertimeFromLogs(
@@ -947,70 +902,26 @@ class _LogsTableState extends State<_LogsTable> {
           result['calculationDetails'] as List<Map<String, dynamic>>? ?? [];
       int totalOvertimeMinutes = 0;
 
-      print(
-          'DEBUG: Found ${calculationDetails.length} days with data for week $weekNumber');
-
       for (final dayDetail in calculationDetails) {
         final dateStr = dayDetail['date'] as String?;
         if (dateStr != null) {
           // Parse the date for proper comparison
           final dayDate = DateTime.parse(dateStr);
-          // Convert to EU format for display
-          final euDateStr = DateFormat('dd/MM/yyyy').format(dayDate);
+          // EU format conversion removed (unused)
           // Only include days that are within the week range
           if (dayDate.isAfter(weekStart.subtract(const Duration(days: 1))) &&
               dayDate.isBefore(weekEnd)) {
             final dayOvertimeMinutes =
                 dayDetail['overtimeMinutes'] as int? ?? 0;
             totalOvertimeMinutes += dayOvertimeMinutes;
-            print(
-                'DEBUG: Day $euDateStr - overtime: ${dayOvertimeMinutes} minutes (INCLUDED in week $weekNumber)');
-          } else {
-            print(
-                'DEBUG: Day $euDateStr - EXCLUDED from week $weekNumber (outside date range)');
-          }
+          } else {}
         }
       }
 
       final totalOvertimeHours = (totalOvertimeMinutes / 60).toStringAsFixed(2);
       final reason = '';
 
-      print(
-          'DEBUG: Total overtime for week $weekNumber: $totalOvertimeMinutes minutes ($totalOvertimeHours hours)');
-
-      // Special debug for week 27
-      if (weekNumber == 27) {
-        print('DEBUG: WEEK 27 - Result: SUCCESS');
-        print(
-            'DEBUG: WEEK 27 - Calculation details length: ${calculationDetails.length}');
-        print('DEBUG: WEEK 27 - Total overtime minutes: $totalOvertimeMinutes');
-        print('DEBUG: WEEK 27 - Total overtime hours: $totalOvertimeHours');
-
-        // Additional debug for week 27
-        print('DEBUG: WEEK 27 - Raw result keys: ${result.keys.toList()}');
-        print('DEBUG: WEEK 27 - Current overtime: ${result['current']}');
-        print(
-            'DEBUG: WEEK 27 - Transferred overtime: ${result['transferred']}');
-        print('DEBUG: WEEK 27 - Used overtime: ${result['used']}');
-
-        // Check if the calculation details have the expected data
-        for (int i = 0; i < calculationDetails.length; i++) {
-          final detail = calculationDetails[i];
-          final dateStr = detail['date'] as String?;
-          final euDateStr = dateStr != null
-              ? DateFormat('dd/MM/yyyy').format(DateTime.parse(dateStr))
-              : 'unknown';
-          print(
-              'DEBUG: WEEK 27 - Day $i: date=$euDateStr, worked=${detail['minutesWorked']}, expected=${detail['expectedMinutes']}, overtime=${detail['overtimeMinutes']}');
-
-          // Additional debug for null worked minutes
-          if (detail['minutesWorked'] == null) {
-            print(
-                'DEBUG: WEEK 27 - WARNING: minutesWorked is null for date $euDateStr');
-            print('DEBUG: WEEK 27 - Full detail: $detail');
-          }
-        }
-      }
+      // Removed debug prints
 
       return {
         'overtimeMinutes': totalOvertimeMinutes,
@@ -1483,12 +1394,26 @@ class _LogsTableState extends State<_LogsTable> {
                                       color: Colors.red, size: 20),
                                   tooltip: AppLocalizations.of(context)!.reject,
                                   onPressed: () async {
+                                    final note = await _promptManagerNote(
+                                        context,
+                                        AppLocalizations.of(context)!.reject);
+                                    if (note == null) {
+                                      // User canceled: do not change status
+                                      return;
+                                    }
                                     await entry.doc.reference.update({
                                       'rejected': true,
                                       'rejectedBy': widget.userId,
                                       'rejectedAt':
                                           FieldValue.serverTimestamp(),
+                                      if (note.isNotEmpty) 'managerNote': note,
                                     });
+                                    if (note.isNotEmpty) {
+                                      await _sendManagerNoteToUser(
+                                          logRef: entry.doc.reference,
+                                          note: note,
+                                          type: 'rejected');
+                                    }
                                     widget.onAction();
                                   },
                                 ),
@@ -1523,8 +1448,19 @@ class _LogsTableState extends State<_LogsTable> {
                                     final confirmed =
                                         await _showDeleteConfirmation(
                                             context, data);
+                                    String? note;
+                                    if (confirmed == true) {
+                                      note = await _promptManagerNote(context,
+                                          AppLocalizations.of(context)!.delete);
+                                    }
                                     if (confirmed == true) {
                                       await entry.doc.reference.delete();
+                                      if (note != null && note.isNotEmpty) {
+                                        await _sendManagerNoteToUser(
+                                            logRef: entry.doc.reference,
+                                            note: note,
+                                            type: 'deleted');
+                                      }
                                       widget.onAction();
                                       if (context.mounted) {
                                         ScaffoldMessenger.of(context)
@@ -1600,8 +1536,6 @@ class _LogsTableState extends State<_LogsTable> {
                           // If date range filtering is active, calculate overtime for entire range
                           if (widget.fromDate != null ||
                               widget.toDate != null) {
-                            print(
-                                'DEBUG: Date range filtering active - fromDate: ${widget.fromDate}, toDate: ${widget.toDate}');
                             // Only show overtime for the first group when date range filtering is active
                             if (groupIdx == 0) {
                               return FutureBuilder<Map<String, dynamic>?>(
@@ -1618,17 +1552,11 @@ class _LogsTableState extends State<_LogsTable> {
                                     final overtimeData = overtimeSnapshot.data!;
                                     final overtimeMinutes =
                                         overtimeData['current'] as int? ?? 0;
-                                    final overtimeHours = (overtimeMinutes / 60)
-                                        .toStringAsFixed(2);
-
-                                    // Show overtime even when 0 for debugging
+                                    // Show overtime value
                                     final isOvertime = overtimeMinutes > 0;
                                     final color =
                                         isOvertime ? Colors.green : Colors.red;
-                                    final sign = isOvertime ? '+' : '-';
 
-                                    print(
-                                        'DEBUG: Adding overtime to totalWidgets (date range): $sign${overtimeHours}h for group $groupIdx');
                                     totalWidgets.add(
                                       Text(
                                         'Overtime: ${_formatOvertimeHours(overtimeMinutes / 60)}',
@@ -1640,8 +1568,6 @@ class _LogsTableState extends State<_LogsTable> {
                                     );
                                   }
 
-                                  print(
-                                      'DEBUG: totalWidgets count (date range): ${totalWidgets.length}');
                                   return Wrap(
                                     spacing: 16,
                                     runSpacing: 4,
@@ -1651,8 +1577,6 @@ class _LogsTableState extends State<_LogsTable> {
                               );
                             } else {
                               // For other groups when date range filtering is active, don't show overtime
-                              print(
-                                  'DEBUG: Date range filtering - not showing overtime for group $groupIdx');
                               return Wrap(
                                 spacing: 16,
                                 runSpacing: 4,
@@ -1661,8 +1585,6 @@ class _LogsTableState extends State<_LogsTable> {
                             }
                           } else {
                             // Calculate overtime based on grouping type (only when no date range filtering)
-                            print(
-                                'DEBUG: No date range filtering - using group type calculation for group $groupIdx');
                             Future<Map<String, dynamic>?> overtimeFuture;
 
                             switch (widget.groupType) {
@@ -1671,8 +1593,6 @@ class _LogsTableState extends State<_LogsTable> {
                                     widget.userId, groupKey);
                                 break;
                               case GroupType.week:
-                                print(
-                                    'DEBUG: Calling _calculateWeeklyOvertime for groupKey: $groupKey');
                                 overtimeFuture = _calculateWeeklyOvertime(
                                     widget.userId, groupKey);
                                 break;
@@ -1695,19 +1615,10 @@ class _LogsTableState extends State<_LogsTable> {
                                   final overtimeMinutes =
                                       overtimeData['overtimeMinutes'] as int? ??
                                           0;
-                                  final overtimeHours =
-                                      overtimeData['overtimeHours']
-                                              as String? ??
-                                          '0.00';
-
-                                  // Show overtime even when 0 for debugging
+                                  // Show overtime value
                                   final isOvertime = overtimeMinutes > 0;
                                   final color =
                                       isOvertime ? Colors.green : Colors.red;
-                                  final sign = isOvertime ? '+' : '-';
-
-                                  print(
-                                      'DEBUG: Adding overtime to totalWidgets (group type): $sign${overtimeHours}h for group $groupIdx');
 
                                   // Check if overtime is already added to prevent duplicates
                                   bool overtimeAlreadyAdded = false;
@@ -1732,39 +1643,15 @@ class _LogsTableState extends State<_LogsTable> {
                                         ),
                                       ),
                                     );
-                                  } else {
-                                    print(
-                                        'DEBUG: Overtime already added for group $groupIdx - skipping duplicate');
-                                  }
+                                  } else {}
 
                                   // For week 27, let's show the breakdown
                                   if (groupKey.contains('Week 27')) {
-                                    print('DEBUG: WEEK 27 BREAKDOWN:');
-                                    final calculationDetails = overtimeData[
-                                                'calculationDetails']
-                                            as List<Map<String, dynamic>>? ??
-                                        [];
-                                    for (final dayDetail
-                                        in calculationDetails) {
-                                      final dayOvertime =
-                                          dayDetail['overtimeMinutes']
-                                                  as int? ??
-                                              0;
-                                      final dateStr =
-                                          dayDetail['date'] as String? ??
-                                              'unknown';
-                                      final euDateStr = dateStr != 'unknown'
-                                          ? DateFormat('dd/MM/yyyy')
-                                              .format(DateTime.parse(dateStr))
-                                          : 'unknown';
-                                      print(
-                                          'DEBUG: WEEK 27 - $euDateStr: $dayOvertime minutes');
-                                    }
+                                    // calculationDetails not used; removed
+                                    // Breakdown loop removed
                                   }
                                 }
 
-                                print(
-                                    'DEBUG: totalWidgets count (group type): ${totalWidgets.length}');
                                 return Wrap(
                                   spacing: 16,
                                   runSpacing: 4,
@@ -1792,552 +1679,4 @@ class _LogsTableState extends State<_LogsTable> {
       },
     );
   }
-}
-
-class _EditLogDialog extends StatefulWidget {
-  final DocumentSnapshot logDoc;
-  final List<String> projects;
-  final VoidCallback onSaved;
-
-  const _EditLogDialog({
-    required this.logDoc,
-    required this.projects,
-    required this.onSaved,
-  });
-
-  @override
-  State<_EditLogDialog> createState() => _EditLogDialogState();
-}
-
-class _EditLogDialogState extends State<_EditLogDialog> {
-  late TextEditingController _noteCtrl;
-  late TextEditingController _startCtrl;
-  late TextEditingController _endCtrl;
-  late Map<String, dynamic> _expenses;
-  String _approvalNote = '';
-  String? _projectValue;
-  bool _projectError = false;
-
-  @override
-  void initState() {
-    final data = widget.logDoc.data() as Map<String, dynamic>;
-    _noteCtrl = TextEditingController(text: data['note'] ?? '');
-    _startCtrl = TextEditingController(
-      text: (data['begin'] as Timestamp?) != null
-          ? DateFormat('HH:mm').format((data['begin'] as Timestamp).toDate())
-          : '',
-    );
-    _endCtrl = TextEditingController(
-      text: (data['end'] as Timestamp?) != null
-          ? DateFormat('HH:mm').format((data['end'] as Timestamp).toDate())
-          : '',
-    );
-    _expenses = Map<String, dynamic>.from(data['expenses'] ?? {});
-    _approvalNote = data['approvalNote'] ?? '';
-    final projectValue = data['project']?.toString();
-    if (projectValue != null && widget.projects.contains(projectValue)) {
-      _projectValue = projectValue;
-    } else {
-      _projectValue = null;
-    }
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _noteCtrl.dispose();
-    _startCtrl.dispose();
-    _endCtrl.dispose();
-    super.dispose();
-  }
-
-  Future<void> _showExpensePopup() async {
-    final colors = Theme.of(context).extension<AppColors>()!;
-    final TextEditingController nameCtrl = TextEditingController();
-    final TextEditingController amountCtrl = TextEditingController();
-
-    Map<String, dynamic> tempExpenses = Map<String, dynamic>.from(_expenses);
-    bool tempPerDiem = tempExpenses.containsKey('Per diem');
-
-    // Check if per diem is used elsewhere on this day
-    final data = widget.logDoc.data() as Map<String, dynamic>;
-    final begin = (data['begin'] as Timestamp?)?.toDate();
-    final sessionDate =
-        begin != null ? DateFormat('dd/MM/yyyy').format(begin) : '';
-
-    bool perDiemUsedElsewhere = false;
-    if (sessionDate.isNotEmpty) {
-      try {
-        final logRef = widget.logDoc.reference;
-        final userRef = logRef.parent.parent;
-        final companyRef = userRef?.parent;
-
-        if (userRef == null || companyRef == null) return;
-
-        final companyId = companyRef.id;
-        final userId = userRef.id;
-
-        final snapshot = await FirebaseFirestore.instance
-            .collection('companies')
-            .doc(companyId) // company ID
-            .collection('users')
-            .doc(userId) // user ID
-            .collection('all_logs')
-            .where('sessionDate', isEqualTo: sessionDate)
-            .get();
-
-        for (var doc in snapshot.docs) {
-          if (doc.id != widget.logDoc.id) {
-            // Skip current session
-            final docData = doc.data();
-            final expenses =
-                Map<String, dynamic>.from(docData['expenses'] ?? {});
-            if (expenses.containsKey('Per diem')) {
-              perDiemUsedElsewhere = true;
-              break;
-            }
-          }
-        }
-      } catch (e) {
-        print('Error checking per diem: $e');
-      }
-    }
-
-    final bool perDiemAvailable = !perDiemUsedElsewhere;
-
-    final result = await showDialog<Map<String, dynamic>>(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogCtx) {
-        return StatefulBuilder(
-          builder: (context, setStateDialog) {
-            bool canAddExpense() {
-              final name = nameCtrl.text.trim();
-              final amountStr = amountCtrl.text.trim();
-              final amount = double.tryParse(amountStr.replaceAll(',', '.'));
-              return name.isNotEmpty &&
-                  amountStr.isNotEmpty &&
-                  amount != null &&
-                  amount > 0 &&
-                  !tempExpenses.containsKey(name) &&
-                  name != 'Per diem';
-            }
-
-            void addExpense() {
-              final name = nameCtrl.text.trim();
-              final amountStr = amountCtrl.text.trim();
-              if (!canAddExpense()) return;
-              setStateDialog(() {
-                tempExpenses[name] =
-                    double.parse(amountStr.replaceAll(',', '.'));
-                nameCtrl.clear();
-                amountCtrl.clear();
-              });
-            }
-
-            void handlePerDiemChange(bool? checked) {
-              setStateDialog(() {
-                tempPerDiem = checked ?? false;
-                if (tempPerDiem) {
-                  tempExpenses['Per diem'] = 16.00;
-                } else {
-                  tempExpenses.remove('Per diem');
-                }
-              });
-            }
-
-            void handleExpenseChange(String key, bool? checked) {
-              if (checked == false) {
-                setStateDialog(() => tempExpenses.remove(key));
-              }
-            }
-
-            final List<String> otherExpenseKeys =
-                tempExpenses.keys.where((k) => k != 'Per diem').toList();
-            final List<Widget> expenseWidgets = [
-              for (final key in otherExpenseKeys)
-                Row(
-                  children: [
-                    Checkbox(
-                      value: true,
-                      onChanged: (checked) => handleExpenseChange(key, checked),
-                      activeColor: Colors.blue,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4)),
-                    ),
-                    Text(
-                      key,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.normal, fontSize: 16),
-                    ),
-                    const Spacer(),
-                    Text(
-                      '${(tempExpenses[key] as num?)?.toStringAsFixed(2) ?? '0.00'} CHF',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.normal, fontSize: 16),
-                    ),
-                  ],
-                ),
-              Row(
-                children: [
-                  Checkbox(
-                    value: tempPerDiem,
-                    onChanged: perDiemAvailable ? handlePerDiemChange : null,
-                    activeColor: Colors.blue,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4)),
-                  ),
-                  Text(
-                    'Per Diem',
-                    style: TextStyle(
-                      fontWeight: FontWeight.normal,
-                      fontSize: 16,
-                      color: perDiemAvailable
-                          ? Colors.black
-                          : Colors.grey.shade400,
-                    ),
-                  ),
-                  if (perDiemUsedElsewhere)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 6),
-                      child: Tooltip(
-                        message: AppLocalizations.of(context)!
-                            .perDiemAlreadyUsedInAnotherSession,
-                        child: Icon(Icons.info_outline,
-                            color: Colors.grey, size: 18),
-                      ),
-                    ),
-                  const Spacer(),
-                  const Text('16.00 CHF',
-                      style: TextStyle(
-                          fontWeight: FontWeight.normal, fontSize: 16)),
-                ],
-              ),
-            ];
-
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18)),
-              title: Text(AppLocalizations.of(context)!.expensesTitle),
-              content: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ...expenseWidgets,
-                    const SizedBox(height: 14),
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: TextField(
-                            controller: nameCtrl,
-                            decoration: InputDecoration(
-                              hintText: AppLocalizations.of(context)!.nameLabel,
-                              border: UnderlineInputBorder(),
-                              isDense: true,
-                              contentPadding: EdgeInsets.symmetric(vertical: 4),
-                            ),
-                            onChanged: (_) => setStateDialog(() {}),
-                            onSubmitted: (_) =>
-                                canAddExpense() ? addExpense() : null,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          flex: 1,
-                          child: TextField(
-                            controller: amountCtrl,
-                            decoration: InputDecoration(
-                              hintText:
-                                  AppLocalizations.of(context)!.amountLabel,
-                              border: UnderlineInputBorder(),
-                              isDense: true,
-                              contentPadding: EdgeInsets.symmetric(vertical: 4),
-                            ),
-                            keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true),
-                            onChanged: (_) => setStateDialog(() {}),
-                            onSubmitted: (_) =>
-                                canAddExpense() ? addExpense() : null,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: canAddExpense() ? addExpense : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            foregroundColor: colors.whiteTextOnBlue,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8)),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                          ),
-                          child: Text(AppLocalizations.of(context)!.addLabel,
-                              style: const TextStyle(fontSize: 14)),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(AppLocalizations.of(context)!.cancelLabel,
-                      style: const TextStyle(color: Colors.blue, fontSize: 16)),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: colors.whiteTextOnBlue,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20)),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
-                    textStyle: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  onPressed: () => Navigator.pop(context, tempExpenses),
-                  child: Text(AppLocalizations.of(context)!.saveLabel),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-
-    if (result != null) {
-      setState(() {
-        _expenses = Map<String, dynamic>.from(result);
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(AppLocalizations.of(context)!.editTimeLog),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Start time
-            TextField(
-              controller: _startCtrl,
-              decoration: InputDecoration(
-                  labelText:
-                      '${AppLocalizations.of(context)!.start} ${AppLocalizations.of(context)!.time} (HH:mm)'),
-              keyboardType: TextInputType.datetime,
-            ),
-            // End time
-            TextField(
-              controller: _endCtrl,
-              decoration: InputDecoration(
-                  labelText:
-                      '${AppLocalizations.of(context)!.end} ${AppLocalizations.of(context)!.time} (HH:mm)'),
-              keyboardType: TextInputType.datetime,
-            ),
-            // Project (dropdown)
-            DropdownButtonFormField<String>(
-              value: _projectValue,
-              isExpanded: true,
-              items: widget.projects.map((name) {
-                return DropdownMenuItem<String>(
-                  value: name,
-                  child: Text(name),
-                );
-              }).toList(),
-              onChanged: (val) {
-                setState(() {
-                  _projectValue = val;
-                  _projectError = false;
-                });
-              },
-              decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!.projectLabel),
-            ),
-            if (_projectError)
-              Padding(
-                padding: const EdgeInsets.only(top: 4.0),
-                child: Text(
-                  '${AppLocalizations.of(context)!.selectProject}!',
-                  style: const TextStyle(
-                      color: Colors.red, fontWeight: FontWeight.bold),
-                ),
-              ),
-            // Note
-            TextField(
-              controller: _noteCtrl,
-              decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!.noteLabel),
-            ),
-            const SizedBox(height: 12),
-            // Expenses (using standard expense popup)
-            GestureDetector(
-              onTap: _showExpensePopup,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('${AppLocalizations.of(context)!.expenses}:',
-                          style: const TextStyle(fontWeight: FontWeight.w600)),
-                      const SizedBox(width: 8),
-                      if (_expenses.isEmpty)
-                        Text(AppLocalizations.of(context)!.tapToAdd,
-                            style: const TextStyle(color: Colors.grey))
-                      else
-                        Expanded(
-                          child: Wrap(
-                            spacing: 8,
-                            runSpacing: 4,
-                            children: [
-                              for (var entry in _expenses.entries)
-                                if (entry.key != 'Per diem')
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context).brightness ==
-                                              Brightness.dark
-                                          ? Colors.blue.withOpacity(0.2)
-                                          : Colors.blue.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(4),
-                                      border: Border.all(
-                                        color: Colors.blue.withOpacity(0.3),
-                                      ),
-                                    ),
-                                    child: Text(
-                                        '${entry.key} ${(entry.value as num?)?.toStringAsFixed(2) ?? '0.00'} CHF',
-                                        style: const TextStyle(fontSize: 13)),
-                                  ),
-                              if (_expenses.containsKey('Per diem'))
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Colors.blue.withOpacity(0.2)
-                                        : Colors.blue.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(4),
-                                    border: Border.all(
-                                      color: Colors.blue.withOpacity(0.3),
-                                    ),
-                                  ),
-                                  child: Text(
-                                      AppLocalizations.of(context)!
-                                          .perDiemLabel(
-                                              (_expenses['Per diem'] as num?)
-                                                      ?.toStringAsFixed(2) ??
-                                                  '0.00'),
-                                      style: const TextStyle(fontSize: 13)),
-                                ),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            // Approval note (optional)
-            TextField(
-              decoration: InputDecoration(
-                  labelText: '${AppLocalizations.of(context)!.approvalNote}'),
-              onChanged: (v) => _approvalNote = v.trim(),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          child: Text(AppLocalizations.of(context)!.cancel),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        ElevatedButton(
-          child: Text(
-              '${AppLocalizations.of(context)!.save} & ${AppLocalizations.of(context)!.approve}'),
-          onPressed: () async {
-            // Validate time and project
-            DateTime start, end;
-            try {
-              final baseDay = (widget.logDoc['begin'] as Timestamp).toDate();
-              final sParts = _startCtrl.text.split(':');
-              final eParts = _endCtrl.text.split(':');
-              start = DateTime(baseDay.year, baseDay.month, baseDay.day,
-                  int.parse(sParts[0]), int.parse(sParts[1]));
-              end = DateTime(baseDay.year, baseDay.month, baseDay.day,
-                  int.parse(eParts[0]), int.parse(eParts[1]));
-              if (!end.isAfter(start))
-                throw AppLocalizations.of(context)!.endBeforeStart;
-            } catch (_) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(AppLocalizations.of(context)!.endBeforeStart)));
-              return;
-            }
-            if (_projectValue == null || _projectValue!.trim().isEmpty) {
-              setState(() => _projectError = true);
-              return;
-            }
-            int durationMins = end.difference(start).inMinutes;
-
-            await widget.logDoc.reference.update({
-              'begin': Timestamp.fromDate(start),
-              'end': Timestamp.fromDate(end),
-              'duration_minutes': durationMins,
-              'note': _noteCtrl.text.trim(),
-              'expenses': _expenses,
-              'project': _projectValue,
-              'projectId': _projectValue, // Add projectId field
-              'approvalNote': _approvalNote,
-              'approved': false, // Set to false since this is approvedAfterEdit
-              'approvedAt': FieldValue.serverTimestamp(),
-              'edited': true,
-              'approvedAfterEdit':
-                  true, // This is the primary approval status for edited sessions
-            });
-            widget.onSaved();
-            Navigator.of(context).pop();
-          },
-        ),
-      ],
-    );
-  }
-}
-
-String _fmtH(num mins) {
-  final h = (mins ~/ 60).toString().padLeft(2, '0');
-  final m = (mins % 60).toString().padLeft(2, '0');
-  return '$h:$m';
-}
-
-// Helper class for history entry
-class _HistoryEntry {
-  final DocumentSnapshot doc;
-  final DateTime? begin;
-  final DateTime? end;
-  final Duration duration;
-  final String project;
-  final String note;
-  final String sessionDate;
-  final bool perDiem;
-  final double expense; // total
-  final Map<String, dynamic> expensesMap;
-
-  _HistoryEntry({
-    required this.doc,
-    required this.begin,
-    required this.end,
-    required this.duration,
-    required this.project,
-    required this.note,
-    required this.sessionDate,
-    required this.perDiem,
-    required this.expense,
-    required this.expensesMap,
-  });
 }

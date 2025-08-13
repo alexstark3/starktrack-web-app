@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../theme/app_colors.dart';
 import 'package:starktrack/screens/modules/time_off/timeline/timeoff_calendar.dart';
 import 'balance.dart';
+import 'requests.dart';
 
 class TimeOffModule extends StatefulWidget {
   final String companyId;
@@ -65,6 +66,20 @@ class _TimeOffModuleState extends State<TimeOffModule> {
                         });
                       },
                     ),
+                    const SizedBox(width: 8),
+                    // Requests tab
+                    _TimeOffTab(
+                      icon: Icons.inbox_outlined,
+                      title: 'Requests',
+                      isSelected: _selectedIndex == 2,
+                      colors: colors,
+                      showOnlyIcon: showOnlyIcons,
+                      onTap: () {
+                        setState(() {
+                          _selectedIndex = 2;
+                        });
+                      },
+                    ),
                   ],
                 );
               },
@@ -114,6 +129,11 @@ class _TimeOffModuleState extends State<TimeOffModule> {
       );
     } else if (_selectedIndex == 1) {
       return TimeOffBalance(
+        companyId: widget.companyId,
+        userId: widget.userId,
+      );
+    } else if (_selectedIndex == 2) {
+      return TimeOffRequests(
         companyId: widget.companyId,
         userId: widget.userId,
       );

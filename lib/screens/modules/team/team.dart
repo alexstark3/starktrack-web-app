@@ -5,6 +5,7 @@ import '../../../../l10n/app_localizations.dart';
 import 'members/members.dart';
 import 'groups/groups.dart';
 import 'balance/balance.dart';
+import 'approvals/approvals.dart';
 
 class TeamModuleTabScreen extends StatefulWidget {
   final String companyId;
@@ -98,6 +99,22 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                         });
                       },
                     ),
+                    const SizedBox(width: 8),
+                    // Approvals tab
+                    _TeamTab(
+                      icon: Icons.inbox_outlined,
+                      title: 'Approvals',
+                      isSelected: _selectedIndex == 3,
+                      colors: colors,
+                      selectedMemberDoc: null,
+                      showOnlyIcon: showOnlyIcons,
+                      onTap: () {
+                        setState(() {
+                          _selectedIndex = 3;
+                          widget.onSelectMember?.call(null);
+                        });
+                      },
+                    ),
                   ],
                 );
               },
@@ -158,6 +175,11 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
     } else if (_selectedIndex == 2) {
       // Balance tab content
       return BalanceTab(
+        companyId: widget.companyId,
+      );
+    } else if (_selectedIndex == 3) {
+      // Approvals tab content
+      return TeamApprovalsScreen(
         companyId: widget.companyId,
       );
     }

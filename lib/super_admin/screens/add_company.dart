@@ -61,12 +61,8 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
     if (widget.existingCompany != null) {
       final company = widget.existingCompany!;
 
-      print('🔍 DEBUG: Initializing existing company data: ${company['name']}');
-
       // Set company ID for existing company
       _tempCompanyId = company['id'] ?? company['secureId'];
-      print(
-          '🔍 DEBUG: Set _tempCompanyId for existing company: $_tempCompanyId');
 
       // Set company name
       _nameController.text = company['name'] ?? '';
@@ -76,7 +72,6 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
 
       // Set address data
       final address = company['address'] as Map<String, dynamic>? ?? {};
-      print('🔍 DEBUG: Company address data: $address');
 
       _addressData = {
         'country': address['country'] ?? 'Switzerland',
@@ -86,8 +81,6 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
         'street': address['street'] ?? '',
         'streetNumber': address['streetNumber']?.toString() ?? '',
       };
-
-      print('🔍 DEBUG: Initialized address data: $_addressData');
 
       // Set modules
       final modulesData = company['modules'];
@@ -105,7 +98,6 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
   }
 
   void _onAddressChanged(Map<String, dynamic> newAddressData) {
-    print('🔍 DEBUG: AddCompanyDialog - Address changed: $newAddressData');
     // Only update if the address data is actually different
     if (_addressData.toString() != newAddressData.toString()) {
       setState(() {
@@ -288,7 +280,7 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
                     // Debug output for address data
                     if (widget.existingCompany != null)
                       Text(
-                        'DEBUG: Address data being passed: $_addressData',
+                        '',
                         style: TextStyle(
                           color: Colors.red,
                           fontSize: 10,
@@ -354,15 +346,7 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    // Debug output for tempCompanyId
-                    if (widget.existingCompany == null)
-                      Text(
-                        'DEBUG: _tempCompanyId = $_tempCompanyId',
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 10,
-                        ),
-                      ),
+                    // Removed debug output for tempCompanyId
                     InkWell(
                       onTap: _tempCompanyId != null
                           ? () {
@@ -401,7 +385,8 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
                                       ? colors.textColor
                                       : (_tempCompanyId != null
                                           ? colors.primaryBlue
-                                          : colors.textColor.withOpacity(0.7)),
+                                          : colors.textColor
+                                              .withValues(alpha: 0.7)),
                                 ),
                               ),
                             ),
@@ -482,7 +467,7 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
             ),
             subtitle: Text(
               CompanyModuleService.getModuleDescription(module),
-              style: TextStyle(color: colors.textColor.withOpacity(0.7)),
+              style: TextStyle(color: colors.textColor.withValues(alpha: 0.7)),
             ),
             value: isSelected,
             onChanged: (bool? value) {
@@ -523,8 +508,6 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
         // Update existing company
         final companyId = widget.existingCompany!['id'];
 
-        print('🔍 DEBUG: Updating company with ID: $companyId');
-
         await FirebaseFirestore.instance
             .collection('companies')
             .doc(companyId)
@@ -535,8 +518,6 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
           'modules': _selectedModules,
           'updatedAt': FieldValue.serverTimestamp(),
         });
-
-        print('🔍 DEBUG: Company updated with ID: $companyId');
 
         setState(() => _isLoading = false);
 
@@ -554,9 +535,6 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
         final companyId =
             CompanyIdGenerator.generateSecureCompanyId(companyName);
 
-        print('🔍 DEBUG: Creating company with name: $companyName');
-        print('🔍 DEBUG: Generated company ID: $companyId');
-
         await FirebaseFirestore.instance
             .collection('companies')
             .doc(companyId)
@@ -572,12 +550,8 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
           'originalId': CompanyIdGenerator.extractCompanyName(companyId),
         });
 
-        print('🔍 DEBUG: Company created with ID: $companyId');
-
         // Store company ID for admin creation
         _tempCompanyId = companyId;
-        print(
-            '🔍 DEBUG: Company created, _tempCompanyId set to: $_tempCompanyId');
 
         setState(() {
           _isLoading = false;
@@ -589,9 +563,6 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
             setState(() {});
           }
         });
-
-        print(
-            '🔍 DEBUG: setState called, _tempCompanyId should be: $_tempCompanyId');
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

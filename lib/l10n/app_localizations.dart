@@ -1858,6 +1858,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error {operation} group: {error}'**
   String errorGroupOperation(String operation, String error);
+
+  /// No description provided for @teamMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Team Member'**
+  String get teamMember;
+
+  /// No description provided for @personal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get personal;
+
+  /// No description provided for @resetToThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to this week'**
+  String get resetToThisWeek;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -246,7 +246,7 @@ class _ClientsTable extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: colors.primaryBlue.withOpacity(0.1),
+                            color: colors.primaryBlue.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(
@@ -276,7 +276,8 @@ class _ClientsTable extends StatelessWidget {
                                       .join(', '),
                                   style: TextStyle(
                                     fontSize: 14,
-                                    color: colors.textColor.withOpacity(0.7),
+                                    color:
+                                        colors.textColor.withValues(alpha: 0.7),
                                   ),
                                 ),
                             ],
@@ -291,7 +292,7 @@ class _ClientsTable extends StatelessWidget {
                           Icon(
                             Icons.location_on,
                             size: 16,
-                            color: colors.textColor.withOpacity(0.6),
+                            color: colors.textColor.withValues(alpha: 0.6),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
@@ -299,7 +300,7 @@ class _ClientsTable extends StatelessWidget {
                               address,
                               style: TextStyle(
                                 fontSize: 14,
-                                color: colors.textColor.withOpacity(0.8),
+                                color: colors.textColor.withValues(alpha: 0.8),
                               ),
                             ),
                           ),
@@ -313,7 +314,7 @@ class _ClientsTable extends StatelessWidget {
                           Icon(
                             Icons.person,
                             size: 16,
-                            color: colors.textColor.withOpacity(0.6),
+                            color: colors.textColor.withValues(alpha: 0.6),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
@@ -321,7 +322,7 @@ class _ClientsTable extends StatelessWidget {
                               person,
                               style: TextStyle(
                                 fontSize: 14,
-                                color: colors.textColor.withOpacity(0.8),
+                                color: colors.textColor.withValues(alpha: 0.8),
                               ),
                             ),
                           ),
@@ -335,7 +336,7 @@ class _ClientsTable extends StatelessWidget {
                           Icon(
                             Icons.email,
                             size: 16,
-                            color: colors.textColor.withOpacity(0.6),
+                            color: colors.textColor.withValues(alpha: 0.6),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
@@ -343,7 +344,7 @@ class _ClientsTable extends StatelessWidget {
                               email,
                               style: TextStyle(
                                 fontSize: 14,
-                                color: colors.textColor.withOpacity(0.8),
+                                color: colors.textColor.withValues(alpha: 0.8),
                               ),
                             ),
                           ),

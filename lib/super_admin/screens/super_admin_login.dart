@@ -202,7 +202,7 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: colors.primaryBlue.withOpacity(0.1),
+                          color: colors.primaryBlue.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(50),
                         ),
                         child: Icon(
@@ -321,7 +321,7 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: colors.error.withOpacity(0.1),
+                            color: colors.error.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(color: colors.error),
                           ),
@@ -397,7 +397,7 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
                         Text(
                           'Version: $_version',
                           style: TextStyle(
-                            color: colors.textColor.withOpacity(0.6),
+                            color: colors.textColor.withValues(alpha: 0.6),
                             fontSize: 12,
                           ),
                         ),

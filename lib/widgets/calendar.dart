@@ -313,26 +313,18 @@ class _CustomCalendarState extends State<CustomCalendar> {
           });
           // Save settings to shared preferences immediately
           _saveSettings();
-          print(
-              'Settings changed and saved: startWeekday=$startWeekday, showWeekNumbers=$showWeekNumbers');
         },
       ),
     );
   }
 
   void _saveSettings() async {
-    print(
-        'Attempting to save settings: startWeekday=$_startWeekday, showWeekNumbers=$_showWeekNumbers');
     try {
       await CalendarStorage.saveSettings(_startWeekday, _showWeekNumbers);
-      print('Settings saved successfully via CalendarStorage');
-    } catch (e) {
-      print('Error saving calendar settings: $e');
-    }
+    } catch (e) {}
   }
 
   void _loadSettings() async {
-    print('Attempting to load calendar settings...');
     try {
       final settings = await CalendarStorage.loadSettings();
 
@@ -342,18 +334,13 @@ class _CustomCalendarState extends State<CustomCalendar> {
           _showWeekNumbers =
               settings['showWeekNumbers'] ?? widget.showWeekNumbers;
         });
-        print(
-            'Settings loaded: startWeekday=$_startWeekday, showWeekNumbers=$_showWeekNumbers');
       }
     } catch (e) {
-      print('Error loading calendar settings: $e');
       if (mounted) {
         setState(() {
           _startWeekday = widget.startWeekday;
           _showWeekNumbers = widget.showWeekNumbers;
         });
-        print(
-            'Using widget defaults due to error: startWeekday=$_startWeekday, showWeekNumbers=$_showWeekNumbers');
       }
     }
   }

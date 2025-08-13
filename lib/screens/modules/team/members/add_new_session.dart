@@ -28,7 +28,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
   final _noteController = TextEditingController();
   final _startTimeController = TextEditingController();
   final _endTimeController = TextEditingController();
-  
+
   DateTime _selectedDate = DateTime.now();
   Map<String, dynamic> _expenses = {};
   bool _isLoading = false;
@@ -58,7 +58,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
           .doc(widget.companyId)
           .collection('projects')
           .get();
-      
+
       setState(() {
         _availableProjects = snapshot.docs
             .map((doc) => doc.data()['name']?.toString() ?? '')
@@ -66,7 +66,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
             .toList();
       });
     } catch (e) {
-    //  print('Error loading projects: $e');
+      //  print('Error loading projects: $e');
     }
   }
 
@@ -106,7 +106,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
   Future<bool> _checkPerDiemExists(DateTime date) async {
     try {
       final dateStr = DateFormat('yyyy-MM-dd').format(date);
-      
+
       final snapshot = await FirebaseFirestore.instance
           .collection('companies')
           .doc(widget.companyId)
@@ -115,7 +115,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
           .collection('all_logs')
           .where('sessionDate', isEqualTo: dateStr)
           .get();
-      
+
       for (var doc in snapshot.docs) {
         final data = doc.data();
         final expenses = data['expenses'] as Map<String, dynamic>? ?? {};
@@ -133,17 +133,19 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
   void _addExpense() async {
     // Check if per diem already exists for this date
     final perDiemExists = await _checkPerDiemExists(_selectedDate);
-    
+
     showDialog(
       context: context,
       builder: (context) {
         final nameController = TextEditingController();
         final amountController = TextEditingController();
-        
-        Map<String, dynamic> tempExpenses = Map<String, dynamic>.from(_expenses);
-        bool tempPerDiem = tempExpenses.containsKey('Per Diem') || tempExpenses.containsKey('Per diem');
+
+        Map<String, dynamic> tempExpenses =
+            Map<String, dynamic>.from(_expenses);
+        bool tempPerDiem = tempExpenses.containsKey('Per Diem') ||
+            tempExpenses.containsKey('Per diem');
         final colors = Theme.of(context).extension<AppColors>()!;
-        
+
         return StatefulBuilder(
           builder: (context, setDialogState) {
             bool canAddExpense() {
@@ -164,7 +166,8 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
               final amountStr = amountController.text.trim();
               if (!canAddExpense()) return;
               setDialogState(() {
-                tempExpenses[name] = double.parse(amountStr.replaceAll(',', '.'));
+                tempExpenses[name] =
+                    double.parse(amountStr.replaceAll(',', '.'));
                 nameController.clear();
                 amountController.clear();
               });
@@ -189,8 +192,9 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
             }
 
             // Expenses for display (Per diem last)
-            final List<String> otherExpenseKeys =
-                tempExpenses.keys.where((k) => k != 'Per Diem' && k != 'Per diem').toList();
+            final List<String> otherExpenseKeys = tempExpenses.keys
+                .where((k) => k != 'Per Diem' && k != 'Per diem')
+                .toList();
             final List<Widget> expenseWidgets = [
               for (final key in otherExpenseKeys)
                 Row(
@@ -229,14 +233,15 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                     style: TextStyle(
                       fontWeight: FontWeight.normal,
                       fontSize: 16,
-                      color: !perDiemExists ? Colors.black : Colors.grey.shade400,
+                      color:
+                          !perDiemExists ? Colors.black : Colors.grey.shade400,
                     ),
                   ),
                   const Spacer(),
                   const Text(
                     '16.00 CHF',
-                    style: TextStyle(
-                        fontWeight: FontWeight.normal, fontSize: 16),
+                    style:
+                        TextStyle(fontWeight: FontWeight.normal, fontSize: 16),
                   ),
                   if (perDiemExists)
                     const Padding(
@@ -251,7 +256,8 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
             ];
 
             return AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18)),
               title: Text(AppLocalizations.of(context)!.expensesTitle),
               content: SingleChildScrollView(
                 child: Column(
@@ -272,7 +278,8 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                               contentPadding: EdgeInsets.symmetric(vertical: 4),
                             ),
                             onChanged: (_) => setDialogState(() {}),
-                            onSubmitted: (_) => canAddExpense() ? addExpense() : null,
+                            onSubmitted: (_) =>
+                                canAddExpense() ? addExpense() : null,
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -281,14 +288,17 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                           child: TextField(
                             controller: amountController,
                             decoration: InputDecoration(
-                              hintText: AppLocalizations.of(context)!.amountLabel,
+                              hintText:
+                                  AppLocalizations.of(context)!.amountLabel,
                               border: UnderlineInputBorder(),
                               isDense: true,
                               contentPadding: EdgeInsets.symmetric(vertical: 4),
                             ),
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
                             onChanged: (_) => setDialogState(() {}),
-                            onSubmitted: (_) => canAddExpense() ? addExpense() : null,
+                            onSubmitted: (_) =>
+                                canAddExpense() ? addExpense() : null,
                           ),
                         ),
                         const SizedBox(width: 6),
@@ -296,7 +306,8 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                           height: 32,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
                               backgroundColor: colors.primaryBlue,
                               foregroundColor: Colors.white,
                               elevation: 0,
@@ -313,19 +324,25 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                   ],
                 ),
               ),
-              actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              actionsPadding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(color: colors.primaryBlue, fontSize: 16)),
+                  child: Text(AppLocalizations.of(context)!.cancel,
+                      style:
+                          TextStyle(color: colors.primaryBlue, fontSize: 16)),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colors.primaryBlue,
                     foregroundColor: colors.whiteTextOnBlue,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
-                    textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
+                    textStyle: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   onPressed: () {
                     setState(() {
@@ -358,9 +375,11 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
 
     try {
       // Parse times
-      final startTime = TimeOfDay.fromDateTime(DateFormat.Hm().parse(_startTimeController.text));
-      final endTime = TimeOfDay.fromDateTime(DateFormat.Hm().parse(_endTimeController.text));
-      
+      final startTime = TimeOfDay.fromDateTime(
+          DateFormat.Hm().parse(_startTimeController.text));
+      final endTime = TimeOfDay.fromDateTime(
+          DateFormat.Hm().parse(_endTimeController.text));
+
       // Create DateTime objects
       final startDateTime = DateTime(
         _selectedDate.year,
@@ -369,7 +388,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
         startTime.hour,
         startTime.minute,
       );
-      
+
       final endDateTime = DateTime(
         _selectedDate.year,
         _selectedDate.month,
@@ -378,13 +397,39 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
         endTime.minute,
       );
 
+      // Validate time order
+      if (!endDateTime.isAfter(startDateTime)) {
+        throw Exception('End time must be after start time');
+      }
+
+      // Prevent overlaps with existing logs for this date (boundaries equal allowed)
+      final sessionId = DateFormat('yyyy-MM-dd').format(_selectedDate);
+      final existing = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(widget.companyId)
+          .collection('users')
+          .doc(widget.userId)
+          .collection('all_logs')
+          .where('sessionDate', isEqualTo: sessionId)
+          .get();
+      for (final d in existing.docs) {
+        final data = d.data();
+        final ob = (data['begin'] as Timestamp?)?.toDate();
+        final oe = (data['end'] as Timestamp?)?.toDate();
+        if (ob == null || oe == null) continue;
+        if (startDateTime.isBefore(oe) && endDateTime.isAfter(ob)) {
+          throw Exception('Time overlaps another entry on this day');
+        }
+      }
+
       // Calculate duration
       final duration = endDateTime.difference(startDateTime);
       final durationMinutes = duration.inMinutes;
 
       // Check if per diem is included and set the perDiem field
-      final hasPerDiem = _expenses.containsKey('Per Diem') || _expenses.containsKey('perDiem');
-      
+      final hasPerDiem =
+          _expenses.containsKey('Per Diem') || _expenses.containsKey('perDiem');
+
       // Generate custom log ID (same pattern as time tracker)
       String _generateLogId(DateTime dt) {
         final y = dt.year.toString().padLeft(4, '0');
@@ -395,9 +440,9 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
         final s = dt.second.toString().padLeft(2, '0');
         return '$y$m$d$h$min$s';
       }
-      
+
       final logId = _generateLogId(startDateTime);
-      
+
       // Get the actual Firestore document ID for the selected project
       String? actualProjectId;
       if (_projectController.text.trim().isNotEmpty) {
@@ -411,7 +456,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
           actualProjectId = projectQuery.docs.first.id;
         }
       }
-      
+
       // Create session data
       final sessionData = {
         'sessionDate': DateFormat('yyyy-MM-dd').format(_selectedDate),
@@ -440,7 +485,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
 
       widget.onSessionAdded();
       Navigator.pop(context);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Session added successfully for ${widget.userName}'),
@@ -464,7 +509,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
-    
+
     return Dialog(
       child: Container(
         width: 600,
@@ -484,7 +529,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                 ),
               ),
               const SizedBox(height: 20),
-              
+
               // Date selection
               Row(
                 children: [
@@ -505,7 +550,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               // Time selection
               Row(
                 children: [
@@ -513,7 +558,8 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                     child: TextFormField(
                       controller: _startTimeController,
                       decoration: InputDecoration(
-                        labelText: '${AppLocalizations.of(context)!.start} ${AppLocalizations.of(context)!.time}',
+                        labelText:
+                            '${AppLocalizations.of(context)!.start} ${AppLocalizations.of(context)!.time}',
                         border: OutlineInputBorder(),
                         suffixIcon: Icon(Icons.access_time),
                       ),
@@ -531,7 +577,8 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                     child: TextFormField(
                       controller: _endTimeController,
                       decoration: InputDecoration(
-                        labelText: '${AppLocalizations.of(context)!.end} ${AppLocalizations.of(context)!.time}',
+                        labelText:
+                            '${AppLocalizations.of(context)!.end} ${AppLocalizations.of(context)!.time}',
                         border: OutlineInputBorder(),
                         suffixIcon: Icon(Icons.access_time),
                       ),
@@ -547,10 +594,12 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               // Project selection
               DropdownButtonFormField<String>(
-                value: _projectController.text.isEmpty ? null : _projectController.text,
+                value: _projectController.text.isEmpty
+                    ? null
+                    : _projectController.text,
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context)!.project,
                   border: OutlineInputBorder(),
@@ -572,7 +621,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                 },
               ),
               const SizedBox(height: 16),
-              
+
               // Note field
               TextFormField(
                 controller: _noteController,
@@ -583,24 +632,26 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Expenses section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     AppLocalizations.of(context)!.expenses,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   ElevatedButton.icon(
                     onPressed: _addExpense,
                     icon: const Icon(Icons.add),
-                    label: Text('${AppLocalizations.of(context)!.add} ${AppLocalizations.of(context)!.expenses}'),
+                    label: Text(
+                        '${AppLocalizations.of(context)!.add} ${AppLocalizations.of(context)!.expenses}'),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              
+
               // Expenses list
               if (_expenses.isNotEmpty)
                 Container(
@@ -618,9 +669,9 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                     }).toList(),
                   ),
                 ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Action buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,

@@ -105,9 +105,7 @@ class ApiHoliday {
       return region;
     }).toList();
 
-    // Debug logging for API response
-    print(
-        'DEBUG: API Holiday - Name: ${json['name']}, Global: ${json['global']}, Counties: $regions');
+    // Debug logging removed
 
     return ApiHoliday(
       name: json['name'] ?? '',

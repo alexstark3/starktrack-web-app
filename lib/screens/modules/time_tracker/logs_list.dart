@@ -169,6 +169,8 @@ class _LogsListState extends State<LogsList> {
               (log['projectId'] ?? log['project'] ?? '') as String;
           final String projectName = _projectNameFromId(projectId);
           final List<String> projectLines = [projectName];
+          final String managerNote = (log['managerNote'] ?? '').toString();
+          final bool isEdited = (log['edited'] ?? false) == true;
 
           if (widget.showBreakCards && i > 0) {
             final prev = docs[i - 1].data() as Map<String, dynamic>;
@@ -246,6 +248,7 @@ class _LogsListState extends State<LogsList> {
                     expenseLines: expenseLines,
                     expensesMap: expensesMap,
                     note: noteText,
+                    managerNote: managerNote,
                     appColors: appColors,
                     borderColor: borderColor,
                     textColor: textColor,
@@ -256,6 +259,7 @@ class _LogsListState extends State<LogsList> {
                     isRejected: (log['rejected'] ?? false) == true,
                     isApprovedAfterEdit:
                         (log['approvedAfterEdit'] ?? false) == true,
+                    isEdited: isEdited,
                     onDelete: () => doc.reference.delete(),
                     onSave: (newStart, newEnd, newNote, newProjId,
                         newExpenses) async {
@@ -268,6 +272,30 @@ class _LogsListState extends State<LogsList> {
                         final nn = DateTime(
                             d.year, d.month, d.day, ne.hour, ne.minute);
                         if (!nn.isAfter(nb)) throw Exception('Invalid time');
+                        // Overlap check with other logs of the same day
+                        final sessionId =
+                            DateFormat('yyyy-MM-dd').format(widget.selectedDay);
+                        final others = await doc.reference.parent
+                            .where('sessionDate', isEqualTo: sessionId)
+                            .get();
+                        bool overlaps = false;
+                        for (final od in others.docs) {
+                          if (od.id == doc.id) continue;
+                          final odata = od.data() as Map<String, dynamic>;
+                          final ob = (odata['begin'] as Timestamp?)?.toDate();
+                          final oe = (odata['end'] as Timestamp?)?.toDate();
+                          if (ob == null || oe == null) continue;
+                          // Overlap if newStart < otherEnd AND newEnd > otherStart (boundaries equal are allowed)
+                          if (nb.isBefore(oe) && nn.isAfter(ob)) {
+                            overlaps = true;
+                            break;
+                          }
+                        }
+                        if (overlaps) {
+                          throw Exception(
+                              'Time overlaps another entry on this day');
+                        }
+
                         await doc.reference.update({
                           'begin': nb,
                           'end': nn,
@@ -276,10 +304,15 @@ class _LogsListState extends State<LogsList> {
                           'projectId': newProjId,
                           'project': _projectNameFromId(newProjId),
                           'expenses': newExpenses,
+                          // Reset status to pending (hourglass)
+                          'approved': false,
+                          'rejected': false,
+                          'approvedAfterEdit': false,
+                          'edited': true,
                         });
                       } catch (err) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(err.toString())));
+                        // Propagate error to outer handler so it can decide UI (and avoid double messages)
+                        rethrow;
                       }
                     },
                     projects: widget.projects,
@@ -342,6 +375,7 @@ class _LogEditRow extends StatefulWidget {
   final List<String> expenseLines;
   final Map<String, dynamic> expensesMap;
   final String note;
+  final String managerNote;
   final AppColors appColors;
   final Color borderColor;
   final Color textColor;
@@ -362,6 +396,7 @@ class _LogEditRow extends StatefulWidget {
   final bool isApproved;
   final bool isRejected;
   final bool isApprovedAfterEdit;
+  final bool isEdited;
 
   const _LogEditRow({
     Key? key,
@@ -374,6 +409,7 @@ class _LogEditRow extends StatefulWidget {
     required this.expenseLines,
     required this.expensesMap,
     required this.note,
+    required this.managerNote,
     required this.appColors,
     required this.borderColor,
     required this.textColor,
@@ -393,6 +429,7 @@ class _LogEditRow extends StatefulWidget {
     required this.isApproved,
     required this.isRejected,
     required this.isApprovedAfterEdit,
+    required this.isEdited,
   }) : super(key: key);
 
   @override
@@ -908,32 +945,57 @@ class _LogEditRowState extends State<_LogEditRow>
               ),
             ],
           ),
+          if (widget.managerNote.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Manager:',
+                      style: style.copyWith(fontWeight: FontWeight.w600)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      widget.managerNote,
+                      style: style.copyWith(color: Colors.red),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           Padding(
             padding: const EdgeInsets.only(top: 10),
             child: Row(
               children: [
-                widget.isApprovedAfterEdit
-                    ? _iconBtn(Icons.verified, Colors.orange, () {}, 'Edited')
+                widget.isRejected
+                    ? _iconBtn(Icons.cancel, Colors.red, () {}, 'Rejected')
                     : widget.isApproved
                         ? _iconBtn(
                             Icons.verified, Colors.green, () {}, 'Approved')
-                        : widget.isRejected
+                        : widget.isApprovedAfterEdit
                             ? _iconBtn(
-                                Icons.cancel, Colors.red, () {}, 'Rejected')
-                            : _iconBtn(
-                                Icons.edit,
-                                Colors.blue[400]!,
-                                () =>
-                                    widget.setEditingState(widget.logId, true)),
+                                Icons.verified, Colors.orange, () {}, 'Edited')
+                            : widget.isEdited
+                                ? _iconBtn(Icons.hourglass_empty, Colors.orange,
+                                    () {}, 'Pending')
+                                : _iconBtn(
+                                    Icons.edit,
+                                    Colors.blue[400]!,
+                                    () => widget.setEditingState(
+                                        widget.logId, true)),
                 const SizedBox(width: 8),
-                widget.isApprovedAfterEdit
-                    ? _iconBtn(Icons.verified, Colors.orange, () {}, 'Edited')
+                widget.isRejected
+                    ? _iconBtn(
+                        Icons.edit,
+                        Colors.blue[400]!,
+                        () => widget.setEditingState(widget.logId, true),
+                        'Edit')
                     : widget.isApproved
                         ? _iconBtn(
                             Icons.verified, Colors.green, () {}, 'Approved')
-                        : widget.isRejected
+                        : (widget.isApprovedAfterEdit || widget.isEdited)
                             ? _iconBtn(
-                                Icons.cancel, Colors.red, () {}, 'Rejected')
+                                Icons.verified, Colors.orange, () {}, 'Edited')
                             : _iconBtn(Icons.delete, Colors.red[300]!,
                                 () async {
                                 final l10n = AppLocalizations.of(context)!;
@@ -986,6 +1048,18 @@ class _LogEditRowState extends State<_LogEditRow>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Editable time fields for worker side
+        TextField(
+          controller: startCtrl,
+          keyboardType: TextInputType.datetime,
+          decoration: const InputDecoration(labelText: 'Start Time (HH:mm)'),
+        ),
+        TextField(
+          controller: endCtrl,
+          keyboardType: TextInputType.datetime,
+          decoration: const InputDecoration(labelText: 'End Time (HH:mm)'),
+        ),
+        const SizedBox(height: 6),
         _infoText(l10n.work,
             '${startCtrl.text.isNotEmpty ? startCtrl.text : '--'} - ${endCtrl.text.isNotEmpty ? endCtrl.text : '--'} = ${widget.duration.inMinutes == 0 ? '00:00h' : '${widget.duration.inHours.toString().padLeft(2, '0')}:${(widget.duration.inMinutes % 60).toString().padLeft(2, '0')}h'}'),
         if (widget.isApprovedAfterEdit ||
@@ -1151,10 +1225,11 @@ class _LogEditRowState extends State<_LogEditRow>
                     );
                   }
                 } catch (e) {
+                  // Do not close edit mode; show error and keep user in the form
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                          content: Text('Save failed: $e'),
+                          content: Text(e.toString()),
                           backgroundColor: Colors.red),
                     );
                   }
