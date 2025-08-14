@@ -122,13 +122,12 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
               ElevatedButton(
                 onPressed: () async {
                   await FirebaseAuth.instance.signOut();
-                  if (mounted) {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (context) => const SuperAdminLoginScreen(),
-                      ),
-                    );
-                  }
+                  if (!context.mounted) return;
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => const SuperAdminLoginScreen(),
+                    ),
+                  );
                 },
                 child: const Text('Sign Out'),
               ),
@@ -154,13 +153,12 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
             icon: Icon(Icons.logout, color: colors.textColor),
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
-              if (mounted) {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder: (context) => const SuperAdminLoginScreen(),
-                  ),
-                );
-              }
+              if (!context.mounted) return;
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => const SuperAdminLoginScreen(),
+                ),
+              );
             },
           ),
         ],

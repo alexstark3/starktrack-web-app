@@ -7,7 +7,7 @@ import '../../modules/admin/user_address.dart';
 
 class AddClientDialog extends StatefulWidget {
   final String companyId;
-  const AddClientDialog({Key? key, required this.companyId}) : super(key: key);
+  const AddClientDialog({super.key, required this.companyId});
 
   @override
   State<AddClientDialog> createState() => _AddClientDialogState();
@@ -315,19 +315,12 @@ class _AddClientDialogState extends State<AddClientDialog> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                        child: Text(AppLocalizations.of(context)!.cancel),
                         onPressed: _isSaving
                             ? null
-                            : () => Navigator.of(context).pop(false)),
+                            : () => Navigator.of(context).pop(false),
+                        child: Text(AppLocalizations.of(context)!.cancel)),
                     const SizedBox(width: 18),
                     ElevatedButton(
-                      child: _isSaving
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2))
-                          : Text(AppLocalizations.of(context)!.save,
-                              style: TextStyle(fontWeight: FontWeight.bold)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: colors.primaryBlue,
                         foregroundColor: colors.whiteTextOnBlue,
@@ -338,6 +331,13 @@ class _AddClientDialogState extends State<AddClientDialog> {
                         elevation: 0,
                       ),
                       onPressed: _isSaving ? null : _save,
+                      child: _isSaving
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2))
+                          : Text(AppLocalizations.of(context)!.save,
+                              style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
@@ -387,6 +387,7 @@ class _AddClientDialogState extends State<AddClientDialog> {
         if (!testSnap.exists) break;
         counter++;
       }
+      if (!mounted) return;
       setState(() {
         _isSaving = false;
         _suggestedName = clientId;
@@ -414,8 +415,10 @@ class _AddClientDialogState extends State<AddClientDialog> {
         'client': clientId, // Store the client ID for linking in projects
         'createdAt': FieldValue.serverTimestamp(),
       });
+      if (!mounted) return;
       Navigator.of(context).pop(true);
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error =
             'Fehler beim Speichern des ${AppLocalizations.of(context)!.client.toLowerCase()}. Bitte versuchen Sie es erneut.';
@@ -429,8 +432,7 @@ class EditClientDialog extends StatefulWidget {
   final String companyId;
   final Map<String, dynamic> client;
   const EditClientDialog(
-      {Key? key, required this.companyId, required this.client})
-      : super(key: key);
+      {super.key, required this.companyId, required this.client});
 
   @override
   State<EditClientDialog> createState() => _EditClientDialogState();
@@ -629,19 +631,12 @@ class _EditClientDialogState extends State<EditClientDialog> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                        child: Text(AppLocalizations.of(context)!.cancel),
                         onPressed: _isSaving
                             ? null
-                            : () => Navigator.of(context).pop(false)),
+                            : () => Navigator.of(context).pop(false),
+                        child: Text(AppLocalizations.of(context)!.cancel)),
                     const SizedBox(width: 18),
                     ElevatedButton(
-                      child: _isSaving
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2))
-                          : Text(AppLocalizations.of(context)!.save,
-                              style: TextStyle(fontWeight: FontWeight.bold)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: colors.primaryBlue,
                         foregroundColor: colors.whiteTextOnBlue,
@@ -652,6 +647,13 @@ class _EditClientDialogState extends State<EditClientDialog> {
                         elevation: 0,
                       ),
                       onPressed: _isSaving ? null : _save,
+                      child: _isSaving
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2))
+                          : Text(AppLocalizations.of(context)!.save,
+                              style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
@@ -748,8 +750,10 @@ class _EditClientDialogState extends State<EditClientDialog> {
         },
         'updatedAt': FieldValue.serverTimestamp(),
       });
+      if (!mounted) return;
       Navigator.of(context).pop(true);
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = 'Failed to update client. Please try again.';
         _isSaving = false;

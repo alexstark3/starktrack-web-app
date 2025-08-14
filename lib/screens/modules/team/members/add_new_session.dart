@@ -65,7 +65,9 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
             .where((name) => name.isNotEmpty)
             .toList();
       });
-    } catch (e) {}
+    } catch (e) {
+      debugPrint('Failed to load projects: $e');
+    }
   }
 
   Future<void> _selectDate() async {
@@ -131,6 +133,9 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
     // Check if per diem already exists for this date
     final perDiemExists = await _checkPerDiemExists(_selectedDate);
 
+    if (!mounted) {
+      return;
+    }
     showDialog(
       context: context,
       builder: (context) {
@@ -428,7 +433,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
           _expenses.containsKey('Per Diem') || _expenses.containsKey('perDiem');
 
       // Generate custom log ID (same pattern as time tracker)
-      String _generateLogId(DateTime dt) {
+      String generateLogId(DateTime dt) {
         final y = dt.year.toString().padLeft(4, '0');
         final m = dt.month.toString().padLeft(2, '0');
         final d = dt.day.toString().padLeft(2, '0');
@@ -438,7 +443,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
         return '$y$m$d$h$min$s';
       }
 
-      final logId = _generateLogId(startDateTime);
+      final logId = generateLogId(startDateTime);
 
       // Get the actual Firestore document ID for the selected project
       String? actualProjectId;
@@ -567,7 +572,8 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                       onTap: () => _selectTime(_startTimeController),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return '${AppLocalizations.of(context)!.startAndEndTimesCannotBeEmpty}';
+                          return AppLocalizations.of(context)!
+                              .startAndEndTimesCannotBeEmpty;
                         }
                         return null;
                       },
@@ -586,7 +592,8 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                       onTap: () => _selectTime(_endTimeController),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return '${AppLocalizations.of(context)!.startAndEndTimesCannotBeEmpty}';
+                          return AppLocalizations.of(context)!
+                              .startAndEndTimesCannotBeEmpty;
                         }
                         return null;
                       },
@@ -616,7 +623,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return '${AppLocalizations.of(context)!.selectProject}';
+                    return AppLocalizations.of(context)!.selectProject;
                   }
                   return null;
                 },

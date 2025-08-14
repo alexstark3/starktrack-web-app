@@ -229,6 +229,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
                   onDateRangeChanged: (dateRange) {
                     if (dateRange.startDate != null) {
                       setState(() {
+                        // Store as ISO for backend consistency, display as EU format in UI
                         _startDateController.text = DateFormat('yyyy-MM-dd')
                             .format(dateRange.startDate!);
                       });
@@ -468,10 +469,9 @@ class _AddUserDialogState extends State<AddUserDialog> {
         }
       }
 
-      if (mounted) {
-        widget.onUserAdded();
-        Navigator.of(context).pop();
-      }
+      if (!mounted) return;
+      widget.onUserAdded();
+      Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -618,8 +618,9 @@ class _AddUserDialogState extends State<AddUserDialog> {
                               keyboardType: TextInputType.emailAddress,
                               enabled: !isEdit,
                               validator: (value) {
-                                if (value?.isEmpty == true)
+                                if (value?.isEmpty == true) {
                                   return l10n.required;
+                                }
                                 if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
                                     .hasMatch(value!)) {
                                   return l10n.invalidEmail;
@@ -794,7 +795,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
                                 child: Text(
                                   _startDateController.text.isEmpty
                                       ? 'Select Start Date'
-                                      : 'Start Date: ${_startDateController.text}',
+                                      : 'Start Date: ${DateFormat('dd/MM/yyyy').format(DateTime.parse(_startDateController.text))}',
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodyLarge
@@ -889,9 +890,12 @@ class _AddUserDialogState extends State<AddUserDialog> {
                           label: l10n.password,
                           obscureText: true,
                           validator: (value) {
-                            if (value?.isEmpty == true) return l10n.required;
-                            if (value!.length < 6)
+                            if (value?.isEmpty == true) {
+                              return l10n.required;
+                            }
+                            if (value!.length < 6) {
                               return l10n.passwordMinLength;
+                            }
                             return null;
                           },
                         ),
@@ -1261,17 +1265,15 @@ class _AddUserDialogState extends State<AddUserDialog> {
                             password: passwordController.text,
                           );
 
-                          if (mounted) {
-                            Navigator.of(context).pop(true);
-                          }
+                          if (!context.mounted) return;
+                          Navigator.of(context).pop(true);
                         } catch (e) {
-                          if (mounted) {
-                            setState(() {
-                              errorMessage =
-                                  'Invalid password. Please try again.';
-                              isLoading = false;
-                            });
-                          }
+                          if (!context.mounted) return;
+                          setState(() {
+                            errorMessage =
+                                'Invalid password. Please try again.';
+                            isLoading = false;
+                          });
                         }
                       }
                     },
@@ -1304,17 +1306,15 @@ class _AddUserDialogState extends State<AddUserDialog> {
                             password: passwordController.text,
                           );
 
-                          if (mounted) {
-                            Navigator.of(context).pop(true);
-                          }
+                          if (!context.mounted) return;
+                          Navigator.of(context).pop(true);
                         } catch (e) {
-                          if (mounted) {
-                            setState(() {
-                              errorMessage =
-                                  'Invalid password. Please try again.';
-                              isLoading = false;
-                            });
-                          }
+                          if (!context.mounted) return;
+                          setState(() {
+                            errorMessage =
+                                'Invalid password. Please try again.';
+                            isLoading = false;
+                          });
                         }
                       }
                     },

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../theme/app_colors.dart';
+import 'app_search_field.dart';
 import '../l10n/app_localizations.dart';
 
 class UserGroupSelectionDialog extends StatefulWidget {
@@ -88,6 +89,8 @@ class _UserGroupSelectionDialogState extends State<UserGroupSelectionDialog> {
       _filteredUsers = List.from(_users);
       _filteredGroups = List.from(_groups);
     } catch (e) {
+      // Ignore load errors; UI will show empty state
+      debugPrint('UserGroupSelectionDialog: failed to load users/groups: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -167,23 +170,11 @@ class _UserGroupSelectionDialogState extends State<UserGroupSelectionDialog> {
             ),
             const SizedBox(height: 20),
 
-            // Search bar
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: appColors.lightGray),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: l10n.searchUsersAndGroups,
-                  prefixIcon: Icon(Icons.search, color: appColors.primaryBlue),
-                  border: InputBorder.none,
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                ),
-                onChanged: _filterItems,
-              ),
+            // Search bar (standardized)
+            AppSearchField(
+              controller: _searchController,
+              hintText: l10n.searchUsersAndGroups,
+              onChanged: _filterItems,
             ),
             const SizedBox(height: 20),
 
@@ -437,23 +428,11 @@ class _EmbeddedUserGroupSearchState extends State<EmbeddedUserGroupSearch> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Search bar
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: appColors.lightGray),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: l10n.searchUsersAndGroups,
-                prefixIcon: Icon(Icons.search, color: appColors.primaryBlue),
-                border: InputBorder.none,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              ),
-              onChanged: _filterItems,
-            ),
+          // Search bar (standardized)
+          AppSearchField(
+            controller: _searchController,
+            hintText: l10n.searchUsersAndGroups,
+            onChanged: _filterItems,
           ),
 
           // Results area

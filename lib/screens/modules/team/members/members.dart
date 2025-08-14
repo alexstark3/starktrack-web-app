@@ -117,12 +117,11 @@ class _MembersTable extends StatelessWidget {
   final void Function(DocumentSnapshot) onView;
 
   const _MembersTable({
-    Key? key,
     required this.companyId,
     required this.search,
     this.teamLeaderId,
     required this.onView,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

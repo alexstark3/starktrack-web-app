@@ -810,6 +810,7 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
   }
 
   Future<List<Map<String, dynamic>>> _getTeamMembers() {
+    final l10n = AppLocalizations.of(context)!;
     if (!_showTeam) {
       // Personal view - only show current user
       return FirebaseFirestore.instance
@@ -830,7 +831,7 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
               data['firstName'] ??
               data['fullName'] ??
               data['userName'] ??
-              AppLocalizations.of(context)!.unknownUser;
+              l10n.unknownUser;
           return [
             {
               'id': doc.id,
@@ -864,7 +865,7 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
             data['firstName'] ??
             data['fullName'] ??
             data['userName'] ??
-            AppLocalizations.of(context)!.unknownUser;
+            l10n.unknownUser;
         return {
           'id': doc.id,
           'name': name,

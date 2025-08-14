@@ -41,7 +41,9 @@ class OvertimeCalculationService {
       if (startDateString != null) {
         try {
           userStartDate = DateTime.parse(startDateString);
-        } catch (e) {}
+        } catch (e) {
+          // Invalid startDate format; ignore and fallback to default
+        }
       }
 
       // Use reasonable date range (last 4 weeks by default)
@@ -52,9 +54,8 @@ class OvertimeCalculationService {
       // Use the provided date range, but if no specific range is provided, use user's start date
       final effectiveFromDate = fromDate != null || toDate != null
           ? actualFromDate // Use provided date range
-          : (userStartDate != null
-              ? userStartDate
-              : actualFromDate); // Use user start date only for default calculation
+          : (userStartDate ??
+              actualFromDate); // Use user start date only for default calculation
 
       // Get holidays for the company
       final holidays =
@@ -117,21 +118,36 @@ class OvertimeCalculationService {
         }
       }
 
+      // Build full set of days to evaluate: all weekdays in range, plus any day
+      // that has logs or paid time (holiday/timeoff). This ensures regular
+      // workdays without logs contribute undertime.
+      final df = DateFormat('yyyy-MM-dd');
+      final Set<String> days = {};
+      for (var d = effectiveFromDate;
+          !d.isAfter(actualToDate);
+          d = d.add(const Duration(days: 1))) {
+        if (d.weekday >= DateTime.monday && d.weekday <= DateTime.friday) {
+          days.add(df.format(d));
+        }
+      }
+      days.addAll(dailyMinutes.keys);
+      days.addAll(allWorkedTime.keys);
+
       // Calculate overtime per day
       int totalOvertimeMinutes = 0;
       int totalWorkingDays = 0;
       List<Map<String, dynamic>> calculationDetails = [];
 
-      for (final entry in dailyMinutes.entries) {
-        final date = DateTime.parse(entry.key);
-        final minutesWorked = entry.value;
+      for (final day in days) {
+        final date = DateTime.parse(day);
+        final minutesWorked = dailyMinutes[day] ?? 0;
 
         // Get paid time for this day (holidays, paid holidays, paid timeoffs)
-        final paidMinutes = allWorkedTime[entry.key] ?? 0;
+        final paidMinutes = allWorkedTime[day] ?? 0;
         final totalMinutesForDay = minutesWorked + paidMinutes;
 
         // Check if it's a holiday
-        final isHoliday = holidays.contains(entry.key);
+        final isHoliday = holidays.contains(day);
 
         // Check if it has paid time off
         final hasPaidTime = paidMinutes > 0;
@@ -140,7 +156,7 @@ class OvertimeCalculationService {
         final isWeekend = date.weekday >= 6;
 
         Map<String, dynamic> dayDetail = {
-          'date': entry.key,
+          'date': day,
           'minutesWorked': minutesWorked,
           'hoursWorked': (minutesWorked / 60).toStringAsFixed(2),
           'paidMinutes': paidMinutes,

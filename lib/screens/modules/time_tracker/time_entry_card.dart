@@ -148,6 +148,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
     // For new session, only allow per diem if not present in any other session yet
     bool canEditPerDiem = (perDiemSessionId == null);
 
+    if (!mounted) return;
     await showDialog(
       context: context,
       useRootNavigator: false,
@@ -549,9 +550,8 @@ class _TimeEntryCardState extends State<TimeEntryCard>
           );
 
           if (picked != null) {
-            final formatted = picked.hour.toString().padLeft(2, '0') +
-                ':' +
-                picked.minute.toString().padLeft(2, '0');
+            final formatted =
+                '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
             setState(() => c.text = formatted);
           }
         },

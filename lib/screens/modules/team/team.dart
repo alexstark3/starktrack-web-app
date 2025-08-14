@@ -4,7 +4,7 @@ import '../../../../theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'members/members.dart';
 import 'groups/groups.dart';
-import 'balance/balance.dart';
+import 'balance/team_balance.dart';
 import 'approvals/approvals.dart';
 
 class TeamModuleTabScreen extends StatefulWidget {

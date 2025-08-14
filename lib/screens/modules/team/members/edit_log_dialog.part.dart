@@ -110,6 +110,7 @@ class _EditLogDialogState extends State<_EditLogDialog> {
 
     final bool perDiemAvailable = !perDiemUsedElsewhere;
 
+    if (!mounted) return;
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
       barrierDismissible: false,
@@ -453,6 +454,7 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                   }
                 }
               } catch (_) {
+                if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content:
                         Text('Invalid time: overlaps or end before start')));
@@ -478,6 +480,7 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                 'approvedAfterEdit': true,
               });
               widget.onSaved();
+              if (!context.mounted) return;
               Navigator.of(context).pop();
             }),
       ],

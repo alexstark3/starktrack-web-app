@@ -1055,10 +1055,14 @@ class _LogsTableState extends State<_LogsTable> {
           // Date range filter
           if (widget.fromDate != null &&
               begin != null &&
-              begin.isBefore(widget.fromDate!)) return false;
+              begin.isBefore(widget.fromDate!)) {
+            return false;
+          }
           if (widget.toDate != null &&
               begin != null &&
-              begin.isAfter(widget.toDate!)) return false;
+              begin.isAfter(widget.toDate!)) {
+            return false;
+          }
 
           // Project filter
           if (widget.searchProject.isNotEmpty &&
@@ -1147,9 +1151,9 @@ class _LogsTableState extends State<_LogsTable> {
 
         for (var entry in entries) {
           String key = '';
-          if (entry.begin == null)
+          if (entry.begin == null) {
             key = AppLocalizations.of(context)!.unknown;
-          else {
+          } else {
             switch (widget.groupType) {
               case GroupType.day:
                 key = DateFormat('dd/MM/yyyy').format(entry.begin!);

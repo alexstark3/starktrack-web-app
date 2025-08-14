@@ -7,6 +7,7 @@ import 'add_user.dart';
 import 'holiday_policy/holiday_policy.dart';
 import 'timeoff_policy/timeoff_policy.dart';
 import '../../../../utils/app_logger.dart';
+import '../../../widgets/app_search_field.dart';
 
 class AdminPanel extends StatefulWidget {
   final String companyId;
@@ -266,58 +267,18 @@ class _AdminPanelState extends State<AdminPanel> {
                         // Very small screens: stack search and button
                         return Column(
                           children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? Colors.white24
-                                      : Colors.black26,
-                                  width: 1,
-                                ),
-                                color: Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? appColors.lightGray
-                                    : Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: TextField(
-                                onChanged: (value) {
-                                  if (mounted) {
-                                    setState(() => _searchText = value);
-                                  }
-                                },
-                                decoration: InputDecoration(
-                                  hintText: l10n.searchUsers,
-                                  hintStyle: TextStyle(
-                                    color: Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? const Color(0xFFB3B3B3)
-                                        : appColors.textColor,
-                                  ),
-                                  prefixIcon: Icon(
-                                    Icons.search,
-                                    color: Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? const Color(0xFFB3B3B3)
-                                        : appColors.darkGray,
-                                  ),
-                                  isDense: true,
-                                  border: InputBorder.none,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 12),
-                                ),
-                                style: TextStyle(
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? const Color(0xFFCCCCCC)
-                                      : appColors.textColor,
-                                ),
-                              ),
+                            AppSearchField(
+                              hintText: l10n.searchUsers,
+                              onChanged: (value) {
+                                if (mounted) {
+                                  setState(() => _searchText = value);
+                                }
+                              },
                             ),
                             const SizedBox(height: 10),
                             SizedBox(
                               width: double.infinity,
+                              height: 38,
                               child: ElevatedButton.icon(
                                 onPressed: _showAddUserDialog,
                                 icon: Icon(Icons.add,
@@ -329,6 +290,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                 ),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: appColors.primaryBlue,
+                                  minimumSize: const Size(0, 38),
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 12, vertical: 12),
                                   shape: RoundedRectangleBorder(
@@ -344,72 +306,35 @@ class _AdminPanelState extends State<AdminPanel> {
                         return Row(
                           children: [
                             Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Colors.white24
-                                        : Colors.black26,
-                                    width: 1,
-                                  ),
-                                  color: Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? appColors.lightGray
-                                      : Colors.white,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: TextField(
-                                  onChanged: (value) {
-                                    if (mounted) {
-                                      setState(() => _searchText = value);
-                                    }
-                                  },
-                                  decoration: InputDecoration(
-                                    hintText: l10n.searchUsers,
-                                    hintStyle: TextStyle(
-                                      color: Theme.of(context).brightness ==
-                                              Brightness.dark
-                                          ? const Color(0xFFB3B3B3)
-                                          : appColors.textColor,
-                                    ),
-                                    prefixIcon: Icon(
-                                      Icons.search,
-                                      color: Theme.of(context).brightness ==
-                                              Brightness.dark
-                                          ? const Color(0xFFB3B3B3)
-                                          : appColors.darkGray,
-                                    ),
-                                    isDense: true,
-                                    border: InputBorder.none,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 12, vertical: 12),
-                                  ),
-                                  style: TextStyle(
-                                    color: Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? const Color(0xFFCCCCCC)
-                                        : appColors.textColor,
-                                  ),
-                                ),
+                              child: AppSearchField(
+                                hintText: l10n.searchUsers,
+                                onChanged: (value) {
+                                  if (mounted) {
+                                    setState(() => _searchText = value);
+                                  }
+                                },
                               ),
                             ),
                             const SizedBox(width: 16),
-                            ElevatedButton.icon(
-                              onPressed: _showAddUserDialog,
-                              icon: Icon(Icons.add,
-                                  color: appColors.whiteTextOnBlue),
-                              label: Text(
-                                l10n.addNewUser,
-                                style:
-                                    TextStyle(color: appColors.whiteTextOnBlue),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: appColors.primaryBlue,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 14, vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                            SizedBox(
+                              height: 38,
+                              child: ElevatedButton.icon(
+                                onPressed: _showAddUserDialog,
+                                icon: Icon(Icons.add,
+                                    color: appColors.whiteTextOnBlue),
+                                label: Text(
+                                  l10n.addNewUser,
+                                  style: TextStyle(
+                                      color: appColors.whiteTextOnBlue),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: appColors.primaryBlue,
+                                  minimumSize: const Size(0, 38),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
                                 ),
                               ),
                             ),
@@ -430,40 +355,48 @@ class _AdminPanelState extends State<AdminPanel> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            ElevatedButton.icon(
-                              onPressed: _showHolidayPolicyDialog,
-                              icon: Icon(Icons.calendar_today,
-                                  color: appColors.whiteTextOnBlue),
-                              label: Text(
-                                l10n.addHolidayPolicy,
-                                style:
-                                    TextStyle(color: appColors.whiteTextOnBlue),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: appColors.primaryBlue,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 14, vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                            SizedBox(
+                              height: 38,
+                              child: ElevatedButton.icon(
+                                onPressed: _showHolidayPolicyDialog,
+                                icon: Icon(Icons.calendar_today,
+                                    color: appColors.whiteTextOnBlue),
+                                label: Text(
+                                  l10n.addHolidayPolicy,
+                                  style: TextStyle(
+                                      color: appColors.whiteTextOnBlue),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: appColors.primaryBlue,
+                                  minimumSize: const Size(0, 38),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
                                 ),
                               ),
                             ),
                             const SizedBox(height: 12),
-                            ElevatedButton.icon(
-                              onPressed: _showTimeOffPolicyDialog,
-                              icon: Icon(Icons.schedule,
-                                  color: appColors.whiteTextOnBlue),
-                              label: Text(
-                                l10n.addTimeOffPolicy,
-                                style:
-                                    TextStyle(color: appColors.whiteTextOnBlue),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: appColors.primaryBlue,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 14, vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                            SizedBox(
+                              height: 38,
+                              child: ElevatedButton.icon(
+                                onPressed: _showTimeOffPolicyDialog,
+                                icon: Icon(Icons.schedule,
+                                    color: appColors.whiteTextOnBlue),
+                                label: Text(
+                                  l10n.addTimeOffPolicy,
+                                  style: TextStyle(
+                                      color: appColors.whiteTextOnBlue),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: appColors.primaryBlue,
+                                  minimumSize: const Size(0, 38),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
                                 ),
                               ),
                             ),
@@ -475,39 +408,47 @@ class _AdminPanelState extends State<AdminPanel> {
                           spacing: 12,
                           runSpacing: 8,
                           children: [
-                            ElevatedButton.icon(
-                              onPressed: _showHolidayPolicyDialog,
-                              icon: Icon(Icons.calendar_today,
-                                  color: appColors.whiteTextOnBlue),
-                              label: Text(
-                                l10n.addHolidayPolicy,
-                                style:
-                                    TextStyle(color: appColors.whiteTextOnBlue),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: appColors.primaryBlue,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 14, vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                            SizedBox(
+                              height: 38,
+                              child: ElevatedButton.icon(
+                                onPressed: _showHolidayPolicyDialog,
+                                icon: Icon(Icons.calendar_today,
+                                    color: appColors.whiteTextOnBlue),
+                                label: Text(
+                                  l10n.addHolidayPolicy,
+                                  style: TextStyle(
+                                      color: appColors.whiteTextOnBlue),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: appColors.primaryBlue,
+                                  minimumSize: const Size(0, 38),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
                                 ),
                               ),
                             ),
-                            ElevatedButton.icon(
-                              onPressed: _showTimeOffPolicyDialog,
-                              icon: Icon(Icons.schedule,
-                                  color: appColors.whiteTextOnBlue),
-                              label: Text(
-                                l10n.addTimeOffPolicy,
-                                style:
-                                    TextStyle(color: appColors.whiteTextOnBlue),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: appColors.primaryBlue,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 14, vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                            SizedBox(
+                              height: 38,
+                              child: ElevatedButton.icon(
+                                onPressed: _showTimeOffPolicyDialog,
+                                icon: Icon(Icons.schedule,
+                                    color: appColors.whiteTextOnBlue),
+                                label: Text(
+                                  l10n.addTimeOffPolicy,
+                                  style: TextStyle(
+                                      color: appColors.whiteTextOnBlue),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: appColors.primaryBlue,
+                                  minimumSize: const Size(0, 38),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
                                 ),
                               ),
                             ),

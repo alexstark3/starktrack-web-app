@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../../theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../widgets/app_search_field.dart';
 import 'view_clients.dart';
 import 'add_client_dialog.dart';
 
@@ -62,88 +63,97 @@ class _ClientsTabState extends State<ClientsTab> {
                       ),
                     ],
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? colors.lightGray
-                          : Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Theme.of(context).brightness == Brightness.dark
-                          ? null
-                          : Border.all(color: Colors.black26, width: 1),
-                      boxShadow: Theme.of(context).brightness == Brightness.dark
-                          ? null
-                          : [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.08),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                    ),
-                    child: TextField(
-                      decoration: InputDecoration(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isCompact = constraints.maxWidth < 600;
+                if (isCompact) {
+                  return Wrap(
+                    spacing: 16,
+                    runSpacing: 10,
+                    children: [
+                      SizedBox(
+                        width: 120,
+                        child: AppSearchField(
+                          hintText: l10n.searchByClientNamePersonEmail,
+                          onChanged: (val) => setState(
+                              () => _search = val.trim().toLowerCase()),
+                        ),
+                      ),
+                      SizedBox(
+                          width: 120,
+                          height: 38,
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.add, size: 20),
+                            label: Text(l10n.addNew),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: colors.primaryBlue,
+                              foregroundColor: colors.whiteTextOnBlue,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10),
+                              minimumSize: const Size(120, 38),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8)),
+                            ),
+                            onPressed: () async {
+                              final result = await showDialog<bool>(
+                                context: context,
+                                builder: (ctx) => AddClientDialog(
+                                    companyId: widget.companyId),
+                              );
+                              if (result == true) {
+                                if (!mounted) return;
+                                setState(() {});
+                              }
+                            },
+                          )),
+                    ],
+                  );
+                }
+                return Row(
+                  children: [
+                    Expanded(
+                      child: AppSearchField(
                         hintText: l10n.searchByClientNamePersonEmail,
-                        hintStyle: TextStyle(
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? const Color(0xFFB3B3B3)
-                              : colors.textColor,
-                        ),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? const Color(0xFFB3B3B3)
-                              : colors.darkGray,
-                        ),
-                        isDense: true,
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 12),
+                        onChanged: (val) =>
+                            setState(() => _search = val.trim().toLowerCase()),
                       ),
-                      style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? const Color(0xFFCCCCCC)
-                            : colors.textColor,
-                      ),
-                      onChanged: (val) =>
-                          setState(() => _search = val.trim().toLowerCase()),
                     ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.add, size: 20),
-                  label: Text(l10n.addNew),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.primaryBlue,
-                    foregroundColor: colors.whiteTextOnBlue,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 18, vertical: 14),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
-                  ),
-                  onPressed: () async {
-                    final result = await showDialog<bool>(
-                      context: context,
-                      builder: (ctx) =>
-                          AddClientDialog(companyId: widget.companyId),
-                    );
-                    if (result == true) {
-                      // Refresh the clients list
-                      setState(() {});
-                    }
-                  },
-                ),
-              ],
+                    const SizedBox(width: 16),
+                    SizedBox(
+                        width: 120,
+                        height: 38,
+                        child: ElevatedButton.icon(
+                          icon: const Icon(Icons.add, size: 20),
+                          label: Text(l10n.addNew),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: colors.primaryBlue,
+                            foregroundColor: colors.whiteTextOnBlue,
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            minimumSize: const Size(120, 38),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                          ),
+                          onPressed: () async {
+                            final result = await showDialog<bool>(
+                              context: context,
+                              builder: (ctx) =>
+                                  AddClientDialog(companyId: widget.companyId),
+                            );
+                            if (result == true) {
+                              if (!mounted) return;
+                              setState(() {});
+                            }
+                          },
+                        )),
+                  ],
+                );
+              },
             ),
           ),
           const SizedBox(height: 20),
           Expanded(
             child: _ClientsTable(
+              key: ValueKey('clients_table_$_search'),
               companyId: widget.companyId,
               search: _search,
               onSelectClient: (clientData) =>
@@ -162,11 +172,11 @@ class _ClientsTable extends StatelessWidget {
   final void Function(Map<String, dynamic> clientData) onSelectClient;
 
   const _ClientsTable({
-    Key? key,
+    super.key,
     required this.companyId,
     required this.search,
     required this.onSelectClient,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -358,7 +368,7 @@ class _ClientsTable extends StatelessWidget {
                           Icon(
                             Icons.phone,
                             size: 16,
-                            color: colors.textColor.withOpacity(0.6),
+                            color: colors.textColor.withValues(alpha: 0.6),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
@@ -366,7 +376,7 @@ class _ClientsTable extends StatelessWidget {
                               phone,
                               style: TextStyle(
                                 fontSize: 14,
-                                color: colors.textColor.withOpacity(0.8),
+                                color: colors.textColor.withValues(alpha: 0.8),
                               ),
                             ),
                           ),

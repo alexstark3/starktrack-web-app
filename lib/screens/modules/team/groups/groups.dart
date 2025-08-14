@@ -3,14 +3,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'add_group.dart';
+import '../../../../widgets/app_search_field.dart';
 
 class GroupsTab extends StatefulWidget {
   final String companyId;
 
   const GroupsTab({
-    Key? key,
+    super.key,
     required this.companyId,
-  }) : super(key: key);
+  });
 
   @override
   State<GroupsTab> createState() => _GroupsTabState();
@@ -58,56 +59,9 @@ class _GroupsTabState extends State<GroupsTab> {
             child: Row(
               children: [
                 Expanded(
-                  child: TextField(
+                  child: AppSearchField(
                     controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: l10n.searchGroups,
-                      hintStyle: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withValues(alpha: 0.7)
-                            : colors.textColor,
-                      ),
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withValues(alpha: 0.7)
-                            : colors.darkGray,
-                      ),
-                      filled: true,
-                      fillColor: Theme.of(context).brightness == Brightness.dark
-                          ? colors.lightGray
-                          : Theme.of(context).colorScheme.surface,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
-                          color: Colors.black.withValues(alpha: 0.26),
-                          width: 1,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
-                          color: Colors.black.withValues(alpha: 0.26),
-                          width: 1,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide:
-                            BorderSide(color: colors.primaryBlue, width: 2),
-                      ),
-                    ),
-                    style: TextStyle(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Theme.of(context).colorScheme.onSurface
-                          : colors.textColor,
-                    ),
+                    hintText: l10n.searchGroups,
                     onChanged: (value) {
                       setState(() {
                         _searchQuery = value.trim().toLowerCase();

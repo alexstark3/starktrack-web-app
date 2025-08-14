@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../../theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../widgets/app_search_field.dart';
 import 'add_project_dialog.dart';
 import 'project_view_page.dart';
 
@@ -11,11 +12,11 @@ class ProjectsTab extends StatelessWidget {
   final Function(Map<String, dynamic>? project) onSelectProject;
 
   const ProjectsTab({
-    Key? key,
+    super.key,
     required this.companyId,
     required this.selectedProject,
     required this.onSelectProject,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -38,10 +39,9 @@ class _ProjectsList extends StatefulWidget {
   final Function(Map<String, dynamic> project) onSelectProject;
 
   const _ProjectsList({
-    Key? key,
     required this.companyId,
     required this.onSelectProject,
-  }) : super(key: key);
+  });
 
   @override
   State<_ProjectsList> createState() => _ProjectsListState();
@@ -100,128 +100,104 @@ class _ProjectsListState extends State<_ProjectsList> {
                       ),
                     ],
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? colors.lightGray
-                          : Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Theme.of(context).brightness == Brightness.dark
-                          ? null
-                          : Border.all(color: Colors.black26, width: 1),
-                      boxShadow: Theme.of(context).brightness == Brightness.dark
-                          ? null
-                          : [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.08),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                    ),
-                    child: TextField(
-                      decoration: InputDecoration(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isCompact = constraints.maxWidth < 600;
+                if (isCompact) {
+                  return Wrap(
+                    spacing: 16,
+                    runSpacing: 10,
+                    children: [
+                      SizedBox(
+                        width: 120,
+                        child: AppSearchField(
+                          hintText:
+                              AppLocalizations.of(context)!.searchByProject,
+                          onChanged: (val) => setState(
+                              () => _searchProject = val.trim().toLowerCase()),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 120,
+                        child: AppSearchField(
+                          hintText:
+                              AppLocalizations.of(context)!.searchByClient,
+                          prefixIcon: Icons.grid_on,
+                          onChanged: (val) => setState(
+                              () => _searchClient = val.trim().toLowerCase()),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 120,
+                        height: 38,
+                        child: ElevatedButton.icon(
+                          icon: const Icon(Icons.add, size: 20),
+                          label: Text(AppLocalizations.of(context)!.addNew),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: colors.primaryBlue,
+                            foregroundColor: colors.whiteTextOnBlue,
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            minimumSize: const Size(120, 38),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                          ),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (ctx) =>
+                                  AddProjectDialog(companyId: widget.companyId),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                }
+                return Row(
+                  children: [
+                    Expanded(
+                      child: AppSearchField(
                         hintText: AppLocalizations.of(context)!.searchByProject,
-                        hintStyle: TextStyle(
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? const Color(0xFFB3B3B3)
-                              : colors.textColor,
-                        ),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? const Color(0xFFB3B3B3)
-                              : colors.darkGray,
-                        ),
-                        isDense: true,
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 12),
+                        onChanged: (val) => setState(
+                            () => _searchProject = val.trim().toLowerCase()),
                       ),
-                      style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? const Color(0xFFCCCCCC)
-                            : colors.textColor,
-                      ),
-                      onChanged: (val) => setState(
-                          () => _searchProject = val.trim().toLowerCase()),
                     ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? colors.lightGray
-                          : Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Theme.of(context).brightness == Brightness.dark
-                          ? null
-                          : Border.all(color: Colors.black26, width: 1),
-                      boxShadow: Theme.of(context).brightness == Brightness.dark
-                          ? null
-                          : [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.08),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                    ),
-                    child: TextField(
-                      decoration: InputDecoration(
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: AppSearchField(
                         hintText: AppLocalizations.of(context)!.searchByClient,
-                        hintStyle: TextStyle(
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? const Color(0xFFB3B3B3)
-                              : colors.textColor,
-                        ),
-                        prefixIcon: Icon(
-                          Icons.grid_on,
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? const Color(0xFFB3B3B3)
-                              : colors.darkGray,
-                        ),
-                        isDense: true,
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 12),
+                        prefixIcon: Icons.grid_on,
+                        onChanged: (val) => setState(
+                            () => _searchClient = val.trim().toLowerCase()),
                       ),
-                      style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? const Color(0xFFCCCCCC)
-                            : colors.textColor,
-                      ),
-                      onChanged: (val) => setState(
-                          () => _searchClient = val.trim().toLowerCase()),
                     ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.add, size: 20),
-                  label: Text(AppLocalizations.of(context)!.addNewProject),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.primaryBlue,
-                    foregroundColor: colors.whiteTextOnBlue,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 18, vertical: 14),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
-                  ),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (ctx) =>
-                          AddProjectDialog(companyId: widget.companyId),
-                    );
-                  },
-                ),
-              ],
+                    const SizedBox(width: 16),
+                    SizedBox(
+                      width: 120,
+                      height: 38,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.add, size: 20),
+                        label: Text(AppLocalizations.of(context)!.addNew),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: colors.primaryBlue,
+                          foregroundColor: colors.whiteTextOnBlue,
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          minimumSize: const Size(120, 38),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8)),
+                        ),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (ctx) =>
+                                AddProjectDialog(companyId: widget.companyId),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
           const SizedBox(height: 20),
@@ -434,7 +410,7 @@ class _ProjectsListState extends State<_ProjectsList> {
                                           style: TextStyle(
                                             fontSize: 14,
                                             color: colors.textColor
-                                                .withOpacity(0.8),
+                                                .withValues(alpha: 0.8),
                                           ),
                                         ),
                                       ),
@@ -448,8 +424,8 @@ class _ProjectsListState extends State<_ProjectsList> {
                                       Icon(
                                         Icons.contact_phone,
                                         size: 16,
-                                        color:
-                                            colors.textColor.withOpacity(0.6),
+                                        color: colors.textColor
+                                            .withValues(alpha: 0.6),
                                       ),
                                       const SizedBox(width: 8),
                                       Expanded(

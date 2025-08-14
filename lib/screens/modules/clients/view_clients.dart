@@ -10,11 +10,11 @@ class ViewClients extends StatefulWidget {
   final VoidCallback onEdit;
 
   const ViewClients({
-    Key? key,
+    super.key,
     required this.companyId,
     required this.client,
     required this.onEdit,
-  }) : super(key: key);
+  });
 
   @override
   State<ViewClients> createState() => _ViewClientsState();
@@ -191,10 +191,9 @@ class _ProjectCard extends StatelessWidget {
   final String companyId;
   final Map<String, dynamic> project;
   const _ProjectCard({
-    Key? key,
     required this.companyId,
     required this.project,
-  }) : super(key: key);
+  });
 
   Future<Map<String, dynamic>> _totals() async {
     double totalHours = 0;
@@ -245,7 +244,7 @@ class _ProjectCard extends StatelessWidget {
         double expenses = snap.data?['expenses'] ?? 0;
         final hoursText = hours > 0 ? hours.toStringAsFixed(2) : '-';
         final expensesText =
-            expenses > 0 ? expenses.toStringAsFixed(2) + ' CHF' : '-';
+            expenses > 0 ? '${expenses.toStringAsFixed(2)} CHF' : '-';
 
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
@@ -346,10 +345,9 @@ class _ClientTotalsCard extends StatelessWidget {
   final List<Map<String, dynamic>> projects;
 
   const _ClientTotalsCard({
-    Key? key,
     required this.companyId,
     required this.projects,
-  }) : super(key: key);
+  });
 
   Future<Map<String, dynamic>> _calculateTotals() async {
     double totalHours = 0;
@@ -459,14 +457,14 @@ class _ClientTotalsCard extends StatelessWidget {
                     Icon(
                       Icons.access_time,
                       size: 16,
-                      color: colors.textColor.withOpacity(0.6),
+                      color: colors.textColor.withValues(alpha: 0.6),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       '${AppLocalizations.of(context)!.totalTime}: ${hours.toStringAsFixed(2)}',
                       style: TextStyle(
                         fontSize: 14,
-                        color: colors.textColor.withOpacity(0.8),
+                        color: colors.textColor.withValues(alpha: 0.8),
                       ),
                     ),
                   ],
@@ -477,14 +475,14 @@ class _ClientTotalsCard extends StatelessWidget {
                     Icon(
                       Icons.attach_money,
                       size: 16,
-                      color: colors.textColor.withOpacity(0.6),
+                      color: colors.textColor.withValues(alpha: 0.6),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       '${AppLocalizations.of(context)!.totalExpenses}: ${expenses.toStringAsFixed(2)} CHF',
                       style: TextStyle(
                         fontSize: 14,
-                        color: colors.textColor.withOpacity(0.8),
+                        color: colors.textColor.withValues(alpha: 0.8),
                       ),
                     ),
                   ],

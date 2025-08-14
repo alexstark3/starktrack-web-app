@@ -360,7 +360,7 @@ class _LogsListState extends State<LogsList> {
     final endStr = DateFormat.Hm().format(to);
     final h = d.inHours.toString().padLeft(2, '0');
     final m = (d.inMinutes % 60).toString().padLeft(2, '0');
-    return '${AppLocalizations.of(context)?.breaks ?? 'Breaks'}: $startStr - $endStr = $h:$m' +
+    return '${AppLocalizations.of(context)?.breaks ?? 'Breaks'}: $startStr - $endStr = $h:$m'
         'h';
   }
 
@@ -963,7 +963,7 @@ class _LogEditRowState extends State<_LogEditRow>
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(AppLocalizations.of(context)!.manager + ':',
+                  Text('${AppLocalizations.of(context)!.manager}:',
                       style: style.copyWith(fontWeight: FontWeight.w600)),
                   const SizedBox(width: 8),
                   Expanded(
@@ -1023,7 +1023,6 @@ class _LogEditRowState extends State<_LogEditRow>
                                             Navigator.of(ctx).pop(false),
                                       ),
                                       ElevatedButton(
-                                        child: Text(l10n.delete),
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors.red,
                                           foregroundColor:
@@ -1031,6 +1030,7 @@ class _LogEditRowState extends State<_LogEditRow>
                                         ),
                                         onPressed: () =>
                                             Navigator.of(ctx).pop(true),
+                                        child: Text(l10n.delete),
                                       ),
                                     ],
                                   ),
@@ -1231,23 +1231,21 @@ class _LogEditRowState extends State<_LogEditRow>
                   // Clear pending data after successful save so database values are used
                   widget.clearPendingExpenses(widget.logId);
                   widget.clearPendingNote(widget.logId);
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content:
-                              Text(AppLocalizations.of(context)!.changesSaved),
-                          backgroundColor: Colors.green),
-                    );
-                  }
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content:
+                            Text(AppLocalizations.of(context)!.changesSaved),
+                        backgroundColor: Colors.green),
+                  );
                 } catch (e) {
                   // Do not close edit mode; show error and keep user in the form
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content: Text(e.toString()),
-                          backgroundColor: Colors.red),
-                    );
-                  }
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text(e.toString()),
+                        backgroundColor: Colors.red),
+                  );
                 } finally {
                   if (mounted) {
                     setState(() => _saving = false);
@@ -1271,12 +1269,12 @@ class _LogEditRowState extends State<_LogEditRow>
                         onPressed: () => Navigator.of(ctx).pop(false),
                       ),
                       ElevatedButton(
-                        child: Text(l10n.delete),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
                           foregroundColor: widget.appColors.whiteTextOnBlue,
                         ),
                         onPressed: () => Navigator.of(ctx).pop(true),
+                        child: Text(l10n.delete),
                       ),
                     ],
                   ),

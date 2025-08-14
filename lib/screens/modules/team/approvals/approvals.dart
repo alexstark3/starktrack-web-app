@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:starktrack/l10n/app_localizations.dart';
 import 'package:starktrack/theme/app_colors.dart';
 import 'package:starktrack/widgets/calendar.dart';
+import 'package:starktrack/widgets/app_search_field.dart';
 
 class TeamApprovalsScreen extends StatefulWidget {
   final String companyId;
@@ -15,7 +16,7 @@ class TeamApprovalsScreen extends StatefulWidget {
 
 class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
   String _search = '';
-  String _statusFilter = 'pending'; // default to pending
+  String _statusFilter = 'all'; // default to all
 
   @override
   Widget build(BuildContext context) {
@@ -27,32 +28,12 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
           padding: const EdgeInsets.all(10),
           child: Row(
             children: [
-              // Search
+              // Search (standardized single field without extra wrapper borders)
               Expanded(
-                child: Container(
-                  height: 38,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                        color: colors.darkGray.withValues(alpha: 0.3)),
-                    borderRadius: BorderRadius.circular(9),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Row(
-                    children: [
-                      Icon(Icons.search, color: colors.darkGray),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText:
-                                  AppLocalizations.of(context)!.searchRequests),
-                          onChanged: (v) =>
-                              setState(() => _search = v.trim().toLowerCase()),
-                        ),
-                      ),
-                    ],
-                  ),
+                child: AppSearchField(
+                  hintText: AppLocalizations.of(context)!.searchRequests,
+                  onChanged: (v) =>
+                      setState(() => _search = v.trim().toLowerCase()),
                 ),
               ),
               const SizedBox(width: 10),
@@ -86,7 +67,7 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
                             child: Text(AppLocalizations.of(context)!.all)),
                       ],
                       onChanged: (v) =>
-                          setState(() => _statusFilter = v ?? 'pending'),
+                          setState(() => _statusFilter = v ?? 'all'),
                     ),
                   ),
                 ),
@@ -111,9 +92,12 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
               final docs = snapshot.data!.docs.where((d) {
                 final data = d.data();
                 final status = (data['status'] ?? 'pending').toString();
-                if (_statusFilter != 'all' && status != _statusFilter)
+                if (_statusFilter != 'all' && status != _statusFilter) {
                   return false;
-                if (_search.isEmpty) return true;
+                }
+                if (_search.isEmpty) {
+                  return true;
+                }
                 final hay = [
                   (data['policyName'] ?? '').toString(),
                   status,
@@ -125,14 +109,16 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
                 ..sort((a, b) {
                   final ta = a.data()['createdAt'];
                   final tb = b.data()['createdAt'];
-                  if (ta is Timestamp && tb is Timestamp)
+                  if (ta is Timestamp && tb is Timestamp) {
                     return tb.compareTo(ta);
+                  }
                   return 0;
                 });
 
-              if (docs.isEmpty)
+              if (docs.isEmpty) {
                 return Center(
                     child: Text(AppLocalizations.of(context)!.noRequests));
+              }
 
               return ListView.separated(
                 itemCount: docs.length,

@@ -298,29 +298,29 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
 
                   int totalMinutes = filteredLogs.fold<int>(
                     0,
-                    (sum, log) {
+                    (accumulatedMinutes, log) {
                       final raw = log['duration_minutes'];
                       final intVal = raw is int
                           ? raw
                           : (raw is double
                               ? raw.toInt()
                               : int.tryParse(raw?.toString() ?? '0') ?? 0);
-                      return sum + intVal;
+                      return accumulatedMinutes + intVal;
                     },
                   );
-                  double totalExpenses =
-                      filteredLogs.fold<double>(0.0, (sum, log) {
+                  double totalExpenses = filteredLogs.fold<double>(0.0,
+                      (accumulatedExpenses, log) {
                     final expenses = log['expenses'];
                     if (expenses is Map) {
                       for (var value in expenses.values) {
                         if (value is num) {
-                          sum += value.toDouble();
+                          accumulatedExpenses += value.toDouble();
                         } else if (value is String) {
-                          sum += double.tryParse(value) ?? 0.0;
+                          accumulatedExpenses += double.tryParse(value) ?? 0.0;
                         }
                       }
                     }
-                    return sum;
+                    return accumulatedExpenses;
                   });
 
                   return Column(
@@ -944,6 +944,7 @@ class _EditProjectDialogState extends State<EditProjectDialog> {
                                   .doc(docId.toString())
                                   .update(update);
 
+                              if (!context.mounted) return;
                               Navigator.pop(context, {
                                 ...widget.project,
                                 ...update,

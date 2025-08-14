@@ -31,7 +31,9 @@ class _TotalsHeader extends StatelessWidget {
 
             final expenses = (data['expenses'] ?? {}) as Map<String, dynamic>;
             totalExpenses += expenses.values.fold<double>(
-                0, (sum, e) => sum + (e is num ? e.toDouble() : 0));
+                0,
+                (accumulated, e) =>
+                    accumulated + (e is num ? e.toDouble() : 0));
 
             final approvedRaw = data['approved'];
             final rejectedRaw = data['rejected'];

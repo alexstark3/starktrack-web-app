@@ -378,19 +378,17 @@ class _HolidayPolicyListDialogState extends State<HolidayPolicyListDialog> {
                     .doc(policyId)
                     .delete();
 
-                if (mounted) {
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.holidayPolicyDeleted)),
-                  );
-                }
+                if (!context.mounted) return;
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.holidayPolicyDeleted)),
+                );
               } catch (e) {
-                if (mounted) {
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('${l10n.error}: $e')),
-                  );
-                }
+                if (!context.mounted) return;
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('${l10n.error}: $e')),
+                );
               }
             },
             style: ElevatedButton.styleFrom(
@@ -751,16 +749,14 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
             .add(policyData);
       }
 
-      if (mounted) {
-        widget.onPolicyAdded();
-        Navigator.of(context).pop();
-      }
+      if (!mounted) return;
+      widget.onPolicyAdded();
+      Navigator.of(context).pop();
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${l10n.error}: $e')),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${l10n.error}: $e')),
+      );
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);

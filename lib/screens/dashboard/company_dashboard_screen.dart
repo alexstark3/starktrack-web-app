@@ -209,7 +209,8 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
               onSettings: () => setState(() => _selected = l10n.settings),
               onLogout: () async {
                 await FirebaseAuth.instance.signOut();
-                if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
+                if (!context.mounted) return;
+                Navigator.of(context).popUntil((r) => r.isFirst);
               },
             ),
           ),

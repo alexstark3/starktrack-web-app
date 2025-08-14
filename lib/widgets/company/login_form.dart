@@ -45,7 +45,10 @@ class _LoginFormState extends State<LoginForm> {
       if (mounted && savedEmail != null && savedEmail.isNotEmpty) {
         widget.emailController.text = savedEmail;
       }
-    } catch (e) {}
+    } catch (e) {
+      // Ignore persistence errors; user can still log in manually
+      debugPrint('LoginForm: failed to load saved email: $e');
+    }
   }
 
   void _submit() {

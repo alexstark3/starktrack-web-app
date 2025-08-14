@@ -238,7 +238,6 @@ class _HistoryLogsState extends State<HistoryLogs> {
 
     final noteBox = Container(
       height: kFilterHeight,
-      width: 150,
       alignment: Alignment.centerLeft,
       decoration: pillDecoration,
       padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -352,7 +351,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                         const SizedBox(width: kFilterSpacing),
                         projectBox,
                         const SizedBox(width: kFilterSpacing),
-                        noteBox,
+                        Expanded(child: noteBox),
                       ],
                     );
                   }
@@ -395,10 +394,14 @@ class _HistoryLogsState extends State<HistoryLogs> {
 
                     if (fromDate != null &&
                         begin != null &&
-                        begin.isBefore(fromDate!)) return false;
+                        begin.isBefore(fromDate!)) {
+                      return false;
+                    }
                     if (toDate != null &&
                         begin != null &&
-                        begin.isAfter(toDate!)) return false;
+                        begin.isAfter(toDate!)) {
+                      return false;
+                    }
 
                     if (searchProject.isNotEmpty &&
                         !project
@@ -506,8 +509,12 @@ class _HistoryLogsState extends State<HistoryLogs> {
 
                   // Sort by begin date descending
                   entries.sort((a, b) {
-                    if (a.begin == null) return 1;
-                    if (b.begin == null) return -1;
+                    if (a.begin == null) {
+                      return 1;
+                    }
+                    if (b.begin == null) {
+                      return -1;
+                    }
                     return b.begin!.compareTo(a.begin!);
                   });
 
@@ -853,10 +860,14 @@ class _HistoryEntry {
 
 // Helper for formatting Duration as HH:MMh
 String _formatDuration(Duration d) {
-  if (d == Duration.zero) return '';
+  if (d == Duration.zero) {
+    return '';
+  }
   final h = d.inHours;
   final m = d.inMinutes % 60;
-  if (h > 0) return '${h}h ${m.toString().padLeft(2, '0')}m';
+  if (h > 0) {
+    return '${h}h ${m.toString().padLeft(2, '0')}m';
+  }
   return '${m}m';
 }
 

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:starktrack/theme/app_colors.dart';
+import 'package:starktrack/widgets/app_search_field.dart';
 import 'package:starktrack/widgets/calendar.dart';
 import 'package:starktrack/l10n/app_localizations.dart';
 
@@ -31,30 +32,10 @@ class _TimeOffRequestsState extends State<TimeOffRequests> {
           child: Row(
             children: [
               Expanded(
-                child: Container(
-                  height: 38,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                        color: colors.darkGray.withValues(alpha: 0.3)),
-                    borderRadius: BorderRadius.circular(9),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Row(
-                    children: [
-                      Icon(Icons.search, color: colors.darkGray),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText:
-                                  AppLocalizations.of(context)!.searchRequests),
-                          onChanged: (v) =>
-                              setState(() => _search = v.trim().toLowerCase()),
-                        ),
-                      ),
-                    ],
-                  ),
+                child: AppSearchField(
+                  hintText: AppLocalizations.of(context)!.searchRequests,
+                  onChanged: (v) =>
+                      setState(() => _search = v.trim().toLowerCase()),
                 ),
               ),
               const SizedBox(width: 10),

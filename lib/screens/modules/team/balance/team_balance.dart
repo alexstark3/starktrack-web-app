@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../services/overtime_calculation_service.dart';
+import '../../../../widgets/app_search_field.dart';
 
 class BalanceTab extends StatefulWidget {
   final String companyId;
@@ -35,6 +36,49 @@ class _BalanceTabState extends State<BalanceTab> {
     super.dispose();
   }
 
+  Widget _buildTypeButton(String value, String label, AppColors colors) {
+    final bool selected = _selectedType == value;
+    return SizedBox(
+      width: 120,
+      height: 38,
+      child: TextButton(
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          backgroundColor: selected
+              ? colors.primaryBlue
+              : Theme.of(context).colorScheme.surface,
+          foregroundColor: selected ? colors.whiteTextOnBlue : colors.textColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+            side: BorderSide(
+              color: selected
+                  ? colors.primaryBlue
+                  : Colors.black.withValues(alpha: 0.26),
+              width: 1,
+            ),
+          ),
+        ),
+        onPressed: () {
+          setState(() {
+            _selectedType = value;
+            // Reset edit states
+            _editingBonus.clear();
+            for (final controller in _bonusControllers.values) {
+              controller.dispose();
+            }
+            _bonusControllers.clear();
+          });
+        },
+        child: Center(
+          child: Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.w500),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
@@ -53,60 +97,16 @@ class _BalanceTabState extends State<BalanceTab> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
                     Expanded(
-                      child: TextField(
+                      child: AppSearchField(
                         controller: _searchController,
-                        decoration: InputDecoration(
-                          hintText: l10n.searchMembers,
-                          hintStyle: TextStyle(
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? Theme.of(context).colorScheme.onSurface
-                                    : colors.textColor,
-                          ),
-                          prefixIcon: Icon(
-                            Icons.search,
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? Theme.of(context).colorScheme.onSurface
-                                    : colors.darkGray,
-                          ),
-                          filled: true,
-                          fillColor:
-                              Theme.of(context).brightness == Brightness.dark
-                                  ? colors.lightGray
-                                  : Theme.of(context).colorScheme.surface,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(
-                              color: Colors.black.withValues(alpha: 0.26),
-                              width: 1,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(
-                              color: Colors.black.withValues(alpha: 0.26),
-                              width: 1,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide:
-                                BorderSide(color: colors.primaryBlue, width: 2),
-                          ),
-                        ),
-                        style: TextStyle(
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? Theme.of(context).colorScheme.onSurface
-                              : colors.textColor,
-                        ),
+                        hintText: l10n.searchMembers,
                         onChanged: (value) {
                           setState(() {
                             _searchQuery = value.trim().toLowerCase();
@@ -124,67 +124,13 @@ class _BalanceTabState extends State<BalanceTab> {
                 ),
                 const SizedBox(height: 8),
                 Wrap(
-                  spacing: 8,
-                  runSpacing: 4,
+                  spacing: 10,
+                  runSpacing: 10,
                   crossAxisAlignment: WrapCrossAlignment.start,
                   alignment: WrapAlignment.start,
                   children: [
-                    SizedBox(
-                      width: 120,
-                      child: RadioListTile<String>(
-                        title: Text(
-                          'Vacations',
-                          style: TextStyle(
-                            color: colors.textColor,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        value: 'vacations',
-                        groupValue: _selectedType,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedType = value!;
-                            // Reset all edit states when switching types
-                            _editingBonus.clear();
-                            // Clear all controllers to force re-initialization
-                            for (final controller in _bonusControllers.values) {
-                              controller.dispose();
-                            }
-                            _bonusControllers.clear();
-                          });
-                        },
-                        activeColor: colors.primaryBlue,
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    ),
-                    SizedBox(
-                      width: 120,
-                      child: RadioListTile<String>(
-                        title: Text(
-                          'Overtime',
-                          style: TextStyle(
-                            color: colors.textColor,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        value: 'overtime',
-                        groupValue: _selectedType,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedType = value!;
-                            // Reset all edit states when switching types
-                            _editingBonus.clear();
-                            // Clear all controllers to force re-initialization
-                            for (final controller in _bonusControllers.values) {
-                              controller.dispose();
-                            }
-                            _bonusControllers.clear();
-                          });
-                        },
-                        activeColor: colors.primaryBlue,
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    ),
+                    _buildTypeButton('overtime', 'Overtime', colors),
+                    _buildTypeButton('vacations', 'Vacations', colors),
                   ],
                 ),
               ],
@@ -253,7 +199,7 @@ class _BalanceTabState extends State<BalanceTab> {
               }
 
               return ListView.builder(
-                key: ValueKey('balance_list_${_selectedType}_${_searchQuery}'),
+                key: ValueKey('balance_list_${_selectedType}_$_searchQuery'),
                 itemCount: filteredUsers.length,
                 itemBuilder: (context, index) {
                   final doc = filteredUsers[index];
@@ -361,9 +307,9 @@ class _BalanceTabState extends State<BalanceTab> {
     if (_selectedType == 'vacations') {
       // Handle decimal values for vacations (e.g., 5.5 days)
       if (value is double) {
-        displayValue = value.toStringAsFixed(1) + ' Days';
+        displayValue = '${value.toStringAsFixed(1)} Days';
       } else {
-        displayValue = value.toString() + ' Days';
+        displayValue = '$value Days';
       }
     } else {
       // Convert minutes to HH:mm format for overtime
@@ -412,9 +358,9 @@ class _BalanceTabState extends State<BalanceTab> {
     if (_selectedType == 'vacations') {
       // Handle decimal values for vacations
       if (value is double) {
-        displayValue = value.toStringAsFixed(1) + ' Days';
+        displayValue = '${value.toStringAsFixed(1)} Days';
       } else {
-        displayValue = value.toString() + ' Days';
+        displayValue = '$value Days';
       }
     } else {
       // Convert minutes to HH:mm format for overtime
@@ -554,9 +500,6 @@ class _BalanceTabState extends State<BalanceTab> {
   }
 
   void _saveBonusValue(String userId, dynamic newValue) {
-    // TODO: Save the bonus value to Firestore
-    // This will update the bonus field in the user's document
-
     // Update Firestore
     final field = _selectedType == 'vacations' ? 'annualLeaveDays' : 'overtime';
     final subField = 'bonus';

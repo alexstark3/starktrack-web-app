@@ -19,12 +19,18 @@ class DateRange {
 
   @override
   String toString() {
-    if (startDate == null && endDate == null) return 'No dates selected';
-    if (startDate == null)
+    if (startDate == null && endDate == null) {
+      return 'No dates selected';
+    }
+    if (startDate == null) {
       return 'End: ${DateFormat('MMM dd, yyyy').format(endDate!)}';
-    if (endDate == null)
+    }
+    if (endDate == null) {
       return 'Start: ${DateFormat('MMM dd, yyyy').format(startDate!)}';
-    if (isSingleDate) return DateFormat('MMM dd, yyyy').format(startDate!);
+    }
+    if (isSingleDate) {
+      return DateFormat('MMM dd, yyyy').format(startDate!);
+    }
     return '${DateFormat('MMM dd, yyyy').format(startDate!)} - ${DateFormat('MMM dd, yyyy').format(endDate!)}';
   }
 }
@@ -336,7 +342,10 @@ class _CustomCalendarState extends State<CustomCalendar> {
   void _saveSettings() async {
     try {
       await CalendarStorage.saveSettings(_startWeekday, _showWeekNumbers);
-    } catch (e) {}
+    } catch (e) {
+      // Saving settings failed; ignore to avoid blocking UI
+      debugPrint('Calendar: failed to save settings: $e');
+    }
   }
 
   void _loadSettings() async {
