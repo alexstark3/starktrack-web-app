@@ -292,7 +292,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                   backgroundColor: appColors.primaryBlue,
                                   minimumSize: const Size(0, 38),
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 12),
+                                      horizontal: 12, vertical: 8),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
