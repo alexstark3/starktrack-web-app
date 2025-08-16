@@ -63,7 +63,7 @@ class _ViewClientsState extends State<ViewClients> {
 
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -152,7 +152,7 @@ class _ViewClientsState extends State<ViewClients> {
                       companyId: widget.companyId,
                       projects: projects,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 10),
                     // Individual project cards
                     ...projects.map((project) => _ProjectCard(
                           companyId: widget.companyId,
@@ -247,13 +247,13 @@ class _ProjectCard extends StatelessWidget {
             expenses > 0 ? '${expenses.toStringAsFixed(2)} CHF' : '-';
 
         return Card(
-          margin: const EdgeInsets.only(bottom: 12),
+          margin: const EdgeInsets.only(bottom: 10),
           elevation: 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -396,13 +396,13 @@ class _ClientTotalsCard extends StatelessWidget {
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
           return Card(
-            margin: const EdgeInsets.only(bottom: 12),
+            margin: const EdgeInsets.only(bottom: 10),
             elevation: 2,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Padding(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.all(10),
               child: Center(child: CircularProgressIndicator()),
             ),
           );
@@ -415,13 +415,13 @@ class _ClientTotalsCard extends StatelessWidget {
         final projectCount = totals['projectCount'] as int;
 
         return Card(
-          margin: const EdgeInsets.only(bottom: 12),
+          margin: const EdgeInsets.only(bottom: 10),
           elevation: 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -433,7 +433,7 @@ class _ClientTotalsCard extends StatelessWidget {
                     color: colors.primaryBlue,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 Row(
                   children: [
                     Icon(

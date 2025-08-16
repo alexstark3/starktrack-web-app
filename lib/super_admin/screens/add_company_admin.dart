@@ -7,10 +7,10 @@ class AddCompanyAdminDialog extends StatefulWidget {
   final Function() onAdminAdded;
 
   const AddCompanyAdminDialog({
-    Key? key,
+    super.key,
     required this.companyId,
     required this.onAdminAdded,
-  }) : super(key: key);
+  });
 
   @override
   State<AddCompanyAdminDialog> createState() => _AddCompanyAdminDialogState();

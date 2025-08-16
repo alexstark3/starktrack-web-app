@@ -86,7 +86,7 @@ class _CalendarSettingsDialogState extends State<CalendarSettingsDialog> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<int>(
-              value: _startWeekday,
+              initialValue: _startWeekday,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -144,7 +144,7 @@ class _CalendarSettingsDialogState extends State<CalendarSettingsDialog> {
                       _showWeekNumbers = value;
                     });
                   },
-                  activeColor: appColors.primaryBlue,
+                  activeThumbColor: appColors.primaryBlue,
                 ),
               ],
             ),

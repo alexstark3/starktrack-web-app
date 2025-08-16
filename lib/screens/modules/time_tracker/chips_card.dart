@@ -18,7 +18,7 @@ class ChipsCard extends StatelessWidget {
     if (d.inMinutes == 0) return '00:00h';
     final h = d.inHours.toString().padLeft(2, '0');
     final m = (d.inMinutes % 60).toString().padLeft(2, '0');
-    return '$h:$m' + 'h';
+    return '$h:$m' 'h';
   }
 
   @override

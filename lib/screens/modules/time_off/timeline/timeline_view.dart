@@ -121,7 +121,7 @@ class TimelineView extends StatelessWidget {
                       ),
                     ),
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),
@@ -129,7 +129,7 @@ class TimelineView extends StatelessWidget {
           Flexible(
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              child: Container(
+              child: SizedBox(
                 width: days.length * 40.0,
                 child: Column(
                   children: [
@@ -260,7 +260,7 @@ class TimelineView extends StatelessWidget {
                           );
                         }).toList(),
                       );
-                    }).toList(),
+                    }),
                   ],
                 ),
               ),

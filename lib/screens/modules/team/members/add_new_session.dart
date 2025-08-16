@@ -204,7 +204,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                     Checkbox(
                       value: true,
                       onChanged: (checked) => handleExpenseChange(key, checked),
-                      activeColor: colors.primaryBlue,
+                      checkColor: colors.primaryBlue,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4)),
                     ),
@@ -226,7 +226,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
                   Checkbox(
                     value: tempPerDiem,
                     onChanged: !perDiemExists ? handlePerDiemChange : null,
-                    activeColor: colors.primaryBlue,
+                    checkColor: colors.primaryBlue,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4)),
                   ),
@@ -605,7 +605,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
 
               // Project selection
               DropdownButtonFormField<String>(
-                value: _projectController.text.isEmpty
+                initialValue: _projectController.text.isEmpty
                     ? null
                     : _projectController.text,
                 decoration: InputDecoration(
@@ -662,7 +662,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
 
               // Expenses list
               if (_expenses.isNotEmpty)
-                Container(
+                SizedBox(
                   height: 100,
                   child: ListView(
                     children: _expenses.entries.map((entry) {

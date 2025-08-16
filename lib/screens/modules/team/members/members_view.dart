@@ -1517,7 +1517,7 @@ class _LogsTableState extends State<_LogsTable> {
                         ],
                       ),
                     );
-                  }).toList(),
+                  }),
                   // Group totals footer
                   Container(
                     width: double.infinity,

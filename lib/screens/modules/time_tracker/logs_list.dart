@@ -646,7 +646,7 @@ class _LogEditRowState extends State<_LogEditRow>
                     Checkbox(
                       value: true,
                       onChanged: (checked) => handleExpenseChange(key, checked),
-                      activeColor: primaryColor,
+                      checkColor: primaryColor,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4)),
                     ),
@@ -669,7 +669,7 @@ class _LogEditRowState extends State<_LogEditRow>
                     value: tempPerDiem,
                     onChanged:
                         perDiemAvailableHere ? handlePerDiemChange : null,
-                    activeColor: primaryColor,
+                    checkColor: primaryColor,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4)),
                   ),

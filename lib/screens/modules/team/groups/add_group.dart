@@ -115,7 +115,7 @@ class _AddGroupDialogState extends State<AddGroupDialog> {
                 }).toList();
 
                 return DropdownButtonFormField<String>(
-                  value: _selectedTeamLeader,
+                  initialValue: _selectedTeamLeader,
                   decoration: InputDecoration(
                     labelText: l10n.teamLeaderOptional,
                     filled: true,

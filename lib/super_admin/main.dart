@@ -19,8 +19,8 @@ void main() async {
 
   try {
     AppLogger.info('Initializing Firebase for Super Admin...');
-    AppLogger.debug('Platform: ${defaultTargetPlatform}');
-    AppLogger.debug('Is Web: ${kIsWeb}');
+    AppLogger.debug('Platform: $defaultTargetPlatform');
+    AppLogger.debug('Is Web: $kIsWeb');
 
     // Initialize Firebase for admin app
     await Firebase.initializeApp(

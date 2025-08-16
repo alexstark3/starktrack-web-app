@@ -29,31 +29,65 @@ class _TimeOffRequestsState extends State<TimeOffRequests> {
         // Search + New Request button row
         Padding(
           padding: const EdgeInsets.all(10),
-          child: Row(
-            children: [
-              Expanded(
-                child: AppSearchField(
-                  hintText: AppLocalizations.of(context)!.searchRequests,
-                  onChanged: (v) =>
-                      setState(() => _search = v.trim().toLowerCase()),
-                ),
-              ),
-              const SizedBox(width: 10),
-              SizedBox(
-                height: 38,
-                child: ElevatedButton.icon(
-                  onPressed: () => _openNewRequestDialog(colors),
-                  icon: const Icon(Icons.add),
-                  label: Text(AppLocalizations.of(context)!.requestButton),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.primaryBlue,
-                    foregroundColor: colors.whiteTextOnBlue,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(9)),
-                  ),
-                ),
-              ),
-            ],
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // Use Row for normal screens, Column for compact screens
+              if (constraints.maxWidth > 600) {
+                return Row(
+                  children: [
+                    Expanded(
+                      child: AppSearchField(
+                        hintText: AppLocalizations.of(context)!.searchRequests,
+                        onChanged: (v) =>
+                            setState(() => _search = v.trim().toLowerCase()),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    SizedBox(
+                      height: 38,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _openNewRequestDialog(colors),
+                        icon: const Icon(Icons.add),
+                        label: Text(AppLocalizations.of(context)!.requestButton),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: colors.primaryBlue,
+                          foregroundColor: colors.whiteTextOnBlue,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(9)),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              } else {
+                // Compact mode - stack vertically
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AppSearchField(
+                      hintText: AppLocalizations.of(context)!.searchRequests,
+                      onChanged: (v) =>
+                          setState(() => _search = v.trim().toLowerCase()),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 38,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _openNewRequestDialog(colors),
+                        icon: const Icon(Icons.add),
+                        label: Text(AppLocalizations.of(context)!.requestButton),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: colors.primaryBlue,
+                          foregroundColor: colors.whiteTextOnBlue,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(9)),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
+            },
           ),
         ),
 
@@ -231,7 +265,7 @@ class _NewRequestDialogState extends State<_NewRequestDialog> {
                     (a['name'] as String).compareTo(b['name'] as String));
 
                 return DropdownButtonFormField<String>(
-                  value: _selectedPolicyName,
+                  initialValue: _selectedPolicyName,
                   items: items
                       .map((p) => DropdownMenuItem<String>(
                             value: p['name'] as String,

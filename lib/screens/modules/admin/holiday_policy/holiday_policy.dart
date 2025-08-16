@@ -927,7 +927,7 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
                             _isPaid = value;
                           });
                         },
-                        activeColor: appColors.primaryBlue,
+                        activeThumbColor: appColors.primaryBlue,
                       ),
                     ],
                   ),
@@ -1008,7 +1008,7 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
                             _repeatsAnnually = value;
                           });
                         },
-                        activeColor: appColors.primaryBlue,
+                        activeThumbColor: appColors.primaryBlue,
                       ),
                     ],
                   ),
@@ -1033,7 +1033,7 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
                             _assignToEveryone = value;
                           });
                         },
-                        activeColor: appColors.primaryBlue,
+                        activeThumbColor: appColors.primaryBlue,
                       ),
                     ],
                   ),
@@ -1275,7 +1275,7 @@ class _DirectSearchInterfaceState extends State<_DirectSearchInterface> {
     final appColors = Theme.of(context).extension<AppColors>()!;
     final l10n = AppLocalizations.of(context)!;
 
-    return Container(
+    return SizedBox(
       height: 300,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1335,7 +1335,7 @@ class _DirectSearchInterfaceState extends State<_DirectSearchInterface> {
                                     onChanged: (value) {
                                       _toggleUserSelection(user['id']);
                                     },
-                                    activeColor: appColors.primaryBlue,
+                                    checkColor: appColors.primaryBlue,
                                     dense: true,
                                   )),
                             ],
@@ -1356,7 +1356,7 @@ class _DirectSearchInterfaceState extends State<_DirectSearchInterface> {
                                         onChanged: (value) {
                                           _toggleGroupSelection(group['id']);
                                         },
-                                        activeColor: appColors.primaryBlue,
+                                        checkColor: appColors.primaryBlue,
                                         dense: true,
                                       )),
                             ],

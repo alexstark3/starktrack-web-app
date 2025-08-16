@@ -59,6 +59,15 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
     });
   }
 
+  // Helper function to format date range with smart wrapping
+  String _formatDateRange(DateTime startDate, DateTime endDate, bool isCompact) {
+    if (isCompact) {
+      return '${DateFormat('dd/MM/yyyy').format(startDate)}\n${DateFormat('dd/MM/yyyy').format(endDate)}';
+    } else {
+      return '${DateFormat('dd/MM/yyyy').format(startDate)} - ${DateFormat('dd/MM/yyyy').format(endDate)}';
+    }
+  }
+
   Future<void> _selectDate(BuildContext context) async {
     final DateRange? result = await showDialog<DateRange>(
       context: context,
@@ -134,47 +143,44 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
                             width: availableWidth, // Take full available width
                             child: InkWell(
                               onTap: () => _selectDate(context),
-                              child: IntrinsicHeight(
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, // Reduced from 18 to 10px
-                                      vertical: 0), // Back to 0 for 38px height
-                                  constraints: const BoxConstraints(
-                                    minHeight: 38, // Minimum 38px height
-                                    maxHeight: double
-                                        .infinity, // Allow expansion when needed
-                                  ),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: colors.darkGray
-                                            .withValues(alpha: 0.3)),
-                                    borderRadius: BorderRadius.circular(
-                                        9), // Match history page radius
-                                  ),
-                                  child: Row(
-                                    // Change back to Row for proper layout
-                                    children: [
-                                      Icon(Icons.calendar_today,
-                                          size: 20, color: colors.darkGray),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Align(
-                                          // Left align the text instead of center
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            '${DateFormat('dd/MM/yyyy').format(_startDate)} - ${DateFormat('dd/MM/yyyy').format(_endDate)}',
-                                            style: TextStyle(
-                                                color: colors.textColor,
-                                                fontSize:
-                                                    16), // Match history page font size
-                                            overflow: TextOverflow.visible,
-                                            softWrap: true,
-                                          ),
-                                        ),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, // Reduced from 18 to 10px
+                                    vertical: 9), // Center content vertically in 38px height
+                                constraints: BoxConstraints(
+                                  minHeight: 38, // Minimum height
+                                  maxHeight: 60, // Allow expansion for wrapped text in compact mode
+                                ),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: colors.darkGray
+                                          .withValues(alpha: 0.3)),
+                                  borderRadius: BorderRadius.circular(
+                                      9), // Match history page radius
+                                ),
+                                child: Row(
+                                  // Change back to Row for proper layout
+                                  children: [
+                                    Icon(Icons.calendar_today,
+                                        size: 20, color: Theme.of(context).colorScheme.primary),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Align(
+                                        // Left align the text instead of center
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          _formatDateRange(_startDate, _endDate, true),
+                                          style: TextStyle(
+                                              color: colors.textColor,
+                                              fontSize:
+                                                  16), // Match history page font size
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 2, // Allow up to 2 lines
+                                            ),
                                       ),
-                                      // Removed the dropdown arrow icon
-                                    ],
-                                  ),
+                                    ),
+                                    // Removed the dropdown arrow icon
+                                  ],
                                 ),
                               ),
                             ),
@@ -269,47 +275,41 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
                             flex: 2, // Reduced from 3 to make it less wide
                             child: InkWell(
                               onTap: () => _selectDate(context),
-                              child: IntrinsicHeight(
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, // Reduced from 18 to 10px
-                                      vertical: 0), // Back to 0 for 38px height
-                                  constraints: const BoxConstraints(
-                                    minHeight: 38, // Minimum 38px height
-                                    maxHeight: double
-                                        .infinity, // Allow expansion when needed
-                                  ),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: colors.darkGray
-                                            .withValues(alpha: 0.3)),
-                                    borderRadius: BorderRadius.circular(
-                                        9), // Match history page radius
-                                  ),
-                                  child: Row(
-                                    // Change back to Row for proper layout
-                                    children: [
-                                      Icon(Icons.calendar_today,
-                                          size: 20, color: colors.darkGray),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Align(
-                                          // Left align the text instead of center
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            '${DateFormat('dd/MM/yyyy').format(_startDate)} - ${DateFormat('dd/MM/yyyy').format(_endDate)}',
-                                            style: TextStyle(
-                                                color: colors.textColor,
-                                                fontSize:
-                                                    16), // Match history page font size
-                                            overflow: TextOverflow.visible,
-                                            softWrap: true,
-                                          ),
-                                        ),
+                                                            child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, // Reduced from 18 to 10px
+                                    vertical: 9), // Center content vertically in 38px height
+                                height: 38, // Fixed height for full mode (no wrapping needed)
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: colors.darkGray
+                                          .withValues(alpha: 0.3)),
+                                  borderRadius: BorderRadius.circular(
+                                      9), // Match history page radius
+                                ),
+                                child: Row(
+                                  // Change back to Row for proper layout
+                                  children: [
+                                    Icon(Icons.calendar_today,
+                                        size: 20, color: Theme.of(context).colorScheme.primary),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Align(
+                                        // Left align the text instead of center
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          '${DateFormat('dd/MM/yyyy').format(_startDate)} - ${DateFormat('dd/MM/yyyy').format(_endDate)}',
+                                          style: TextStyle(
+                                              color: colors.textColor,
+                                              fontSize:
+                                                  16), // Match history page font size
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 2, // Allow up to 2 lines
+                                            ),
                                       ),
-                                      // Removed the dropdown arrow icon
-                                    ],
-                                  ),
+                                    ),
+                                    // Removed the dropdown arrow icon
+                                  ],
                                 ),
                               ),
                             ),

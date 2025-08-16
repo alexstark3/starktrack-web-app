@@ -484,8 +484,7 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
                 }
               });
             },
-            activeColor: colors.primaryBlue,
-            checkColor: colors.whiteTextOnBlue,
+            checkColor: colors.primaryBlue,
           );
         }).toList(),
       ),

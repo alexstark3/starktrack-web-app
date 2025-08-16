@@ -48,12 +48,12 @@ class AppSearchField extends StatelessWidget {
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide(
-                color: Colors.black.withValues(alpha: 0.26), width: 1),
+                color: Colors.black.withValues(alpha: 0.3), width: 1),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide(
-                color: Colors.black.withValues(alpha: 0.26), width: 1),
+                color: Colors.black.withValues(alpha: 0.3), width: 1),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),

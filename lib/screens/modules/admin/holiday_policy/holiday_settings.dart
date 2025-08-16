@@ -330,7 +330,7 @@ class _HolidaySettingsScreenState extends State<HolidaySettingsScreen> {
                         SizedBox(
                           width: 120,
                           child: DropdownButtonFormField<int>(
-                            value: _selectedYear,
+                            initialValue: _selectedYear,
                             decoration: InputDecoration(
                               filled: true,
                               fillColor: Theme.of(context).brightness ==

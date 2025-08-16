@@ -102,7 +102,7 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
                     const SizedBox(width: 8),
                     // Approvals tab
                     _TeamTab(
-                      icon: Icons.inbox_outlined,
+                      icon: Icons.assignment_turned_in,
                       title: 'Approvals',
                       isSelected: _selectedIndex == 3,
                       colors: colors,

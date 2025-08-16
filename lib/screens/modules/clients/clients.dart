@@ -40,14 +40,14 @@ class _ClientsTabState extends State<ClientsTab> {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Search bar + Add button in a card
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: Theme.of(context).brightness == Brightness.dark
                   ? colors.cardColorDark
@@ -65,20 +65,18 @@ class _ClientsTabState extends State<ClientsTab> {
             ),
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final isCompact = constraints.maxWidth < 600;
-                if (isCompact) {
-                  return Wrap(
-                    spacing: 16,
-                    runSpacing: 10,
+                // 600px+: Search field and button in one row
+                if (constraints.maxWidth > 600) {
+                  return Row(
                     children: [
-                      SizedBox(
-                        width: 120,
+                      Expanded(
                         child: AppSearchField(
                           hintText: l10n.searchByClientNamePersonEmail,
-                          onChanged: (val) => setState(
-                              () => _search = val.trim().toLowerCase()),
+                          onChanged: (val) =>
+                              setState(() => _search = val.trim().toLowerCase()),
                         ),
                       ),
+                      const SizedBox(width: 10),
                       SizedBox(
                           width: 120,
                           height: 38,
@@ -88,8 +86,47 @@ class _ClientsTabState extends State<ClientsTab> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: colors.primaryBlue,
                               foregroundColor: colors.whiteTextOnBlue,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 10),
+                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              minimumSize: const Size(120, 38),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8)),
+                            ),
+                            onPressed: () async {
+                              final result = await showDialog<bool>(
+                                context: context,
+                                builder: (ctx) =>
+                                    AddClientDialog(companyId: widget.companyId),
+                              );
+                              if (result == true) {
+                                if (!mounted) return;
+                                setState(() {});
+                              }
+                            },
+                          )),
+                    ],
+                  );
+                }
+                // <600px: Button wraps to second line
+                else {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AppSearchField(
+                        hintText: l10n.searchByClientNamePersonEmail,
+                        onChanged: (val) => setState(
+                            () => _search = val.trim().toLowerCase()),
+                      ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                          width: 120,
+                          height: 38,
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.add, size: 20),
+                            label: Text(l10n.addNew),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: colors.primaryBlue,
+                              foregroundColor: colors.whiteTextOnBlue,
+                              padding: const EdgeInsets.symmetric(horizontal: 10),
                               minimumSize: const Size(120, 38),
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8)),
@@ -109,48 +146,10 @@ class _ClientsTabState extends State<ClientsTab> {
                     ],
                   );
                 }
-                return Row(
-                  children: [
-                    Expanded(
-                      child: AppSearchField(
-                        hintText: l10n.searchByClientNamePersonEmail,
-                        onChanged: (val) =>
-                            setState(() => _search = val.trim().toLowerCase()),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    SizedBox(
-                        width: 120,
-                        height: 38,
-                        child: ElevatedButton.icon(
-                          icon: const Icon(Icons.add, size: 20),
-                          label: Text(l10n.addNew),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: colors.primaryBlue,
-                            foregroundColor: colors.whiteTextOnBlue,
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            minimumSize: const Size(120, 38),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8)),
-                          ),
-                          onPressed: () async {
-                            final result = await showDialog<bool>(
-                              context: context,
-                              builder: (ctx) =>
-                                  AddClientDialog(companyId: widget.companyId),
-                            );
-                            if (result == true) {
-                              if (!mounted) return;
-                              setState(() {});
-                            }
-                          },
-                        )),
-                  ],
-                );
               },
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           Expanded(
             child: _ClientsTable(
               key: ValueKey('clients_table_$_search'),
@@ -241,13 +240,13 @@ class _ClientsTable extends StatelessWidget {
 
             return Card(
               key: ValueKey('client_item_${doc.id}'),
-              margin: const EdgeInsets.only(bottom: 12),
+              margin: const EdgeInsets.only(bottom: 10),
               elevation: 2,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -265,7 +264,7 @@ class _ClientsTable extends StatelessWidget {
                             size: 24,
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -295,7 +294,7 @@ class _ClientsTable extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 10),
                     if (address.isNotEmpty) ...[
                       Row(
                         children: [
@@ -383,7 +382,7 @@ class _ClientsTable extends StatelessWidget {
                         ],
                       ),
                     ],
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
@@ -399,7 +398,7 @@ class _ClientsTable extends StatelessWidget {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
+                                horizontal: 10, vertical: 8),
                           ),
                         ),
                       ],

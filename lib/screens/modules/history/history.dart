@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../utils/app_logger.dart';
+import '../../../widgets/calendar.dart';
 
 const double kFilterHeight = 38;
 const double kFilterRadius = 9;
@@ -27,8 +28,7 @@ class HistoryLogs extends StatefulWidget {
 }
 
 class _HistoryLogsState extends State<HistoryLogs> {
-  DateTime? fromDate;
-  DateTime? toDate;
+  DateRange? dateRange;
   String searchNote = '';
   String searchProject = '';
   GroupType groupType = GroupType.day;
@@ -36,9 +36,9 @@ class _HistoryLogsState extends State<HistoryLogs> {
   late final TextEditingController projectController;
   late final TextEditingController noteController;
 
-  final dateFormat = DateFormat('yyyy-MM-dd');
-  final timeFormat = DateFormat('HH:mm');
-  final expenseFormat = NumberFormat.currency(symbol: "CHF ", decimalDigits: 2);
+     final dateFormat = DateFormat('dd/MM/yyyy');
+   final timeFormat = DateFormat('HH:mm');
+   final expenseFormat = NumberFormat.currency(symbol: "CHF ", decimalDigits: 2);
 
   @override
   void initState() {
@@ -94,78 +94,71 @@ class _HistoryLogsState extends State<HistoryLogs> {
           : Colors.black.withValues(alpha: 0.87),
     );
 
-    // Individual date field widgets
-    final fromDateField = InkWell(
+    // Date range picker widget
+    final dateRangeField = InkWell(
       borderRadius: BorderRadius.circular(kFilterRadius),
       onTap: () async {
-        DateTime? picked = await showDatePicker(
+        await showDialog(
           context: context,
-          initialDate: fromDate ?? DateTime.now(),
-          firstDate: DateTime(2023),
-          lastDate: DateTime(2100),
-        );
-        if (picked != null) {
-          setState(() => fromDate = picked);
-        }
-      },
-      child: Container(
-        height: kFilterHeight,
-        padding: const EdgeInsets.symmetric(horizontal: 18),
-        decoration: pillDecoration,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
-            const SizedBox(width: 6),
-            Text(
-              fromDate == null ? l10n.from : dateFormat.format(fromDate!),
-              style: TextStyle(
-                color: fromDate == null
-                    ? theme.colorScheme.primary
-                    : (isDark
-                        ? Colors.white.withValues(alpha: 0.87)
-                        : Colors.black.withValues(alpha: 0.87)),
-                fontWeight: FontWeight.w500,
-                fontSize: kFilterFontSize,
+          builder: (context) => Dialog(
+            backgroundColor: appColors.backgroundLight,
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 400, maxHeight: 500),
+              padding: const EdgeInsets.all(10),
+              child: CustomCalendar(
+                initialDateRange: dateRange,
+                                 onDateRangeChanged: (newDateRange) {
+                   setState(() {
+                     // If only one date is selected, treat it as both start and end
+                     if (newDateRange.startDate != null && newDateRange.endDate == null) {
+                       dateRange = DateRange(
+                         startDate: newDateRange.startDate,
+                         endDate: newDateRange.startDate,
+                       );
+                     } else {
+                       dateRange = newDateRange;
+                     }
+                   });
+                 },
+                minDate: DateTime(2023),
+                maxDate: DateTime(2100),
+                title: l10n.pickDates,
               ),
             ),
-          ],
-        ),
-      ),
-    );
-
-    final toDateField = InkWell(
-      borderRadius: BorderRadius.circular(kFilterRadius),
-      onTap: () async {
-        DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: toDate ?? DateTime.now(),
-          firstDate: DateTime(2023),
-          lastDate: DateTime(2100),
+          ),
         );
-        if (picked != null) {
-          setState(() => toDate = picked);
-        }
       },
       child: Container(
-        height: kFilterHeight,
-        padding: const EdgeInsets.symmetric(horizontal: 18),
+        constraints: BoxConstraints(
+          minHeight: kFilterHeight,
+          maxHeight: 60, // Always allow expansion for wrapped text
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: pillDecoration,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.date_range, color: theme.colorScheme.primary, size: 20),
+            Icon(Icons.calendar_today, color: theme.colorScheme.primary, size: 20),
             const SizedBox(width: 6),
-            Text(
-              toDate == null ? l10n.to : dateFormat.format(toDate!),
-              style: TextStyle(
-                color: toDate == null
-                    ? theme.colorScheme.primary
-                    : (isDark
-                        ? Colors.white.withValues(alpha: 0.87)
-                        : Colors.black.withValues(alpha: 0.87)),
-                fontWeight: FontWeight.w500,
-                fontSize: kFilterFontSize,
+            Flexible(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final isCompact = constraints.maxWidth < 200;
+                  return Text(
+                    dateRange == null ? l10n.pickDates : _formatDateRange(dateRange!, isCompact),
+                    style: TextStyle(
+                      color: dateRange == null
+                          ? theme.colorScheme.primary
+                          : (isDark
+                              ? Colors.white.withValues(alpha: 0.87)
+                              : Colors.black.withValues(alpha: 0.87)),
+                      fontWeight: FontWeight.w500,
+                      fontSize: kFilterFontSize,
+                    ),
+                    overflow: TextOverflow.visible,
+                    maxLines: 2, // Allow up to 2 lines
+                  );
+                },
               ),
             ),
           ],
@@ -211,12 +204,12 @@ class _HistoryLogsState extends State<HistoryLogs> {
     );
 
     // Project and Note filters
-    final projectBox = Container(
-      height: kFilterHeight,
-      width: 150,
-      alignment: Alignment.centerLeft,
-      decoration: pillDecoration,
-      padding: const EdgeInsets.symmetric(horizontal: 18),
+         final projectBox = Container(
+       height: kFilterHeight,
+       width: 150,
+       alignment: Alignment.centerLeft,
+       decoration: pillDecoration,
+       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: TextField(
         controller: projectController,
         decoration: InputDecoration(
@@ -240,7 +233,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
       height: kFilterHeight,
       alignment: Alignment.centerLeft,
       decoration: pillDecoration,
-      padding: const EdgeInsets.symmetric(horizontal: 18),
+             padding: const EdgeInsets.symmetric(horizontal: 10),
       child: TextField(
         controller: noteController,
         decoration: InputDecoration(
@@ -264,9 +257,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
     final refreshBtn = Container(
       height: kFilterHeight,
       decoration: BoxDecoration(
-        color: isDark
-            ? theme.colorScheme.primary.withValues(alpha: 0.2)
-            : theme.colorScheme.primary.withValues(alpha: 0.1),
+        color: theme.colorScheme.primary,
         borderRadius: BorderRadius.circular(10),
         boxShadow: isDark
             ? null
@@ -279,12 +270,11 @@ class _HistoryLogsState extends State<HistoryLogs> {
               ],
       ),
       child: IconButton(
-        icon: Icon(Icons.refresh, color: theme.colorScheme.primary, size: 24),
+        icon: Icon(Icons.refresh, color: Colors.white, size: 24),
         tooltip: l10n.clearFilters,
         onPressed: () {
           setState(() {
-            fromDate = null;
-            toDate = null;
+            dateRange = null;
             searchProject = '';
             searchNote = '';
             groupType = GroupType.day;
@@ -298,7 +288,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
     return Scaffold(
       backgroundColor: appColors.backgroundDark,
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         child: Column(
           children: [
             // Search filters
@@ -319,7 +309,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                         ),
                       ],
               ),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(10),
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final needsWrap = constraints.maxWidth < 800;
@@ -330,8 +320,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                       runSpacing: 8,
                       children: [
                         // Individual elements that will wrap in order
-                        fromDateField,
-                        toDateField,
+                        dateRangeField,
                         groupDropdown,
                         refreshBtn,
                         projectBox,
@@ -341,9 +330,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                   } else {
                     return Row(
                       children: [
-                        fromDateField,
-                        const SizedBox(width: kFilterSpacing),
-                        toDateField,
+                        dateRangeField,
                         const SizedBox(width: kFilterSpacing),
                         groupDropdown,
                         const SizedBox(width: kFilterSpacing),
@@ -358,7 +345,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                 },
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
 
             // Results
             Expanded(
@@ -385,23 +372,64 @@ class _HistoryLogsState extends State<HistoryLogs> {
                   var logs = snapshot.data!.docs;
 
                   List<QueryDocumentSnapshot> filteredLogs = logs.where((doc) {
-                    final data = doc.data() as Map<String, dynamic>;
-                    final begin = (data['begin'] is Timestamp)
-                        ? (data['begin'] as Timestamp).toDate()
-                        : null;
-                    final project = (data['project'] ?? '').toString();
-                    final note = (data['note'] ?? '').toString();
+                                         final data = doc.data() as Map<String, dynamic>;
+                     final begin = (data['begin'] is Timestamp)
+                         ? (data['begin'] as Timestamp).toDate()
+                         : null;
+                     final end = (data['end'] is Timestamp)
+                         ? (data['end'] as Timestamp).toDate()
+                         : null;
+                     final project = (data['project'] ?? '').toString();
+                     final note = (data['note'] ?? '').toString();
 
-                    if (fromDate != null &&
-                        begin != null &&
-                        begin.isBefore(fromDate!)) {
-                      return false;
-                    }
-                    if (toDate != null &&
-                        begin != null &&
-                        begin.isAfter(toDate!)) {
-                      return false;
-                    }
+                                         if (dateRange?.startDate != null && dateRange?.endDate != null && begin != null) {
+                       final rangeStart = dateRange!.startDate!;
+                       final rangeEnd = dateRange!.endDate!;
+                       
+                       // Check if the session overlaps with the selected date range
+                       // A session overlaps if:
+                       // 1. Session starts within the range, OR
+                       // 2. Session ends within the range, OR  
+                       // 3. Session completely contains the range
+                       
+                       bool sessionOverlaps = false;
+                       
+                       if (end != null) {
+                         // Session has both start and end times
+                         // Check if session overlaps with the date range
+                         final sessionStart = begin;
+                         final sessionEnd = end;
+                         
+                         // Convert to date-only comparison (ignore time)
+                         final sessionStartDate = DateTime(sessionStart.year, sessionStart.month, sessionStart.day);
+                         final sessionEndDate = DateTime(sessionEnd.year, sessionEnd.month, sessionEnd.day);
+                         final rangeStartDate = DateTime(rangeStart.year, rangeStart.month, rangeStart.day);
+                         final rangeEndDate = DateTime(rangeEnd.year, rangeEnd.month, rangeEnd.day);
+                         
+                         // Check for overlap
+                         sessionOverlaps = !(sessionEndDate.isBefore(rangeStartDate) || sessionStartDate.isAfter(rangeEndDate));
+                       } else {
+                         // Session only has start time, check if start date is within range
+                         final sessionDate = DateTime(begin.year, begin.month, begin.day);
+                         final rangeStartDate = DateTime(rangeStart.year, rangeStart.month, rangeStart.day);
+                         final rangeEndDate = DateTime(rangeEnd.year, rangeEnd.month, rangeEnd.day);
+                         
+                         sessionOverlaps = !(sessionDate.isBefore(rangeStartDate) || sessionDate.isAfter(rangeEndDate));
+                       }
+                       
+                       if (!sessionOverlaps) {
+                         return false;
+                       }
+                     } else if (dateRange?.startDate != null && dateRange?.endDate == null && begin != null) {
+                       // Single date selected - check if session is on that date
+                       final selectedDate = dateRange!.startDate!;
+                       final sessionDate = DateTime(begin.year, begin.month, begin.day);
+                       final selectedDateOnly = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+                       
+                       if (!sessionDate.isAtSameMomentAs(selectedDateOnly)) {
+                         return false;
+                       }
+                     }
 
                     if (searchProject.isNotEmpty &&
                         !project
@@ -603,7 +631,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
 
                       return Container(
                         key: ValueKey('history_group_$groupKey'),
-                        margin: const EdgeInsets.only(bottom: 8),
+                        margin: const EdgeInsets.only(bottom: 10),
                         decoration: BoxDecoration(
                           color: isDark
                               ? appColors.cardColorDark
@@ -624,8 +652,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                             // Group header
                             Container(
                               width: double.infinity,
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 12, horizontal: 16),
+                              padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
                                 color: isDark
                                     ? theme.colorScheme.primary
@@ -647,145 +674,147 @@ class _HistoryLogsState extends State<HistoryLogs> {
                             ),
                             // Group entries
                             ...groupList
-                                .map((entry) => ListTile(
-                                      title: Text(
-                                        (entry.begin != null &&
-                                                entry.end != null)
-                                            ? '${dateFormat.format(entry.begin!)}  ${timeFormat.format(entry.begin!)} - ${timeFormat.format(entry.end!)}'
-                                            : entry.sessionDate,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: isDark
-                                              ? const Color(0xFFCCCCCC)
-                                              : const Color(0xFF212121),
+                                .map((entry) => Padding(
+                                      padding: const EdgeInsets.all(10),
+                                      child: ListTile(
+                                        contentPadding: EdgeInsets.zero,
+                                        title: Text(
+                                          (entry.begin != null &&
+                                                  entry.end != null)
+                                              ? '${dateFormat.format(entry.begin!)}  ${timeFormat.format(entry.begin!)} - ${timeFormat.format(entry.end!)}'
+                                              : entry.sessionDate,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: isDark
+                                                ? const Color(0xFFCCCCCC)
+                                                : const Color(0xFF212121),
+                                          ),
                                         ),
-                                      ),
-                                      subtitle: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          if (entry.project.isNotEmpty)
-                                            Text(
-                                              '${l10n.project}: ${entry.project}',
-                                              style: TextStyle(
-                                                color: isDark
-                                                    ? const Color(0xFF969696)
-                                                    : const Color(0xFF6A6A6A),
-                                              ),
-                                            ),
-                                          if (entry.duration != Duration.zero)
-                                            Text(
-                                              '${l10n.duration}: ${_formatDuration(entry.duration)}',
-                                              style: TextStyle(
-                                                color: isDark
-                                                    ? const Color(0xFF969696)
-                                                    : const Color(0xFF6A6A6A),
-                                              ),
-                                            ),
-                                          if (entry.note.isNotEmpty)
-                                            Text(
-                                              '${l10n.note}: ${entry.note}',
-                                              style: TextStyle(
-                                                color: isDark
-                                                    ? const Color(0xFF969696)
-                                                    : const Color(0xFF6A6A6A),
-                                              ),
-                                            ),
-                                          if (entry.perDiem)
-                                            Text(
-                                              '${l10n.perDiem}: ${l10n.yes}',
-                                              style: TextStyle(
-                                                color:
-                                                    theme.colorScheme.primary,
-                                              ),
-                                            ),
-                                          if (entry.expensesMap.isNotEmpty)
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  top: 2.0),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  ...entry.expensesMap.entries
-                                                      .map((e) {
-                                                    if (e.value is bool) {
-                                                      return Text(
-                                                        '${_translateExpenseKey(e.key, l10n)}: ${e.value ? l10n.yes : l10n.no}',
-                                                        style: TextStyle(
-                                                            color: theme
-                                                                .colorScheme
-                                                                .primary,
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                            fontSize: 15),
-                                                      );
-                                                    } else {
-                                                      double expenseValue = 0.0;
-                                                      if (e.value is num) {
-                                                        expenseValue =
-                                                            (e.value as num)
-                                                                .toDouble();
-                                                      } else if (e.value
-                                                          is String) {
-                                                        expenseValue =
-                                                            double.tryParse(e
-                                                                        .value
-                                                                    as String) ??
-                                                                0.0;
-                                                      }
-                                                      return Text(
-                                                        '${_translateExpenseKey(e.key, l10n)}: ${expenseFormat.format(expenseValue)}',
-                                                        style: TextStyle(
-                                                            color: theme
-                                                                .colorScheme
-                                                                .error,
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                            fontSize: 15),
-                                                      );
-                                                    }
-                                                  }).toList(),
-                                                  if (entry.expense > 0)
-                                                    Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              top: 4.0),
-                                                      child: Text(
-                                                        '${l10n.totalExpenses}: ${expenseFormat.format(entry.expense)}',
-                                                        style: const TextStyle(
-                                                          color: Colors.red,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                          fontSize: 15,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                ],
-                                              ),
-                                            )
-                                          else if (entry.expense > 0)
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  top: 2.0),
-                                              child: Text(
-                                                '${l10n.totalExpenses}: ${expenseFormat.format(entry.expense)}',
-                                                style: const TextStyle(
-                                                  color: Colors.red,
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 15,
+                                        subtitle: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            if (entry.project.isNotEmpty)
+                                              Text(
+                                                '${l10n.project}: ${entry.project}',
+                                                style: TextStyle(
+                                                  color: isDark
+                                                      ? const Color(0xFF969696)
+                                                      : const Color(0xFF6A6A6A),
                                                 ),
                                               ),
-                                            ),
-                                        ],
+                                            if (entry.duration != Duration.zero)
+                                              Text(
+                                                '${l10n.duration}: ${_formatDuration(entry.duration)}',
+                                                style: TextStyle(
+                                                  color: isDark
+                                                      ? const Color(0xFF969696)
+                                                      : const Color(0xFF6A6A6A),
+                                                ),
+                                              ),
+                                            if (entry.note.isNotEmpty)
+                                              Text(
+                                                '${l10n.note}: ${entry.note}',
+                                                style: TextStyle(
+                                                  color: isDark
+                                                      ? const Color(0xFF969696)
+                                                      : const Color(0xFF6A6A6A),
+                                                ),
+                                              ),
+                                            if (entry.perDiem)
+                                              Text(
+                                                '${l10n.perDiem}: ${l10n.yes}',
+                                                style: TextStyle(
+                                                  color:
+                                                      theme.colorScheme.primary,
+                                                ),
+                                              ),
+                                            if (entry.expensesMap.isNotEmpty)
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    top: 2.0),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    ...entry.expensesMap.entries
+                                                        .map((e) {
+                                                      if (e.value is bool) {
+                                                        return Text(
+                                                          '${_translateExpenseKey(e.key, l10n)}: ${e.value ? l10n.yes : l10n.no}',
+                                                          style: TextStyle(
+                                                              color: theme
+                                                                  .colorScheme
+                                                                  .primary,
+                                                              fontWeight:
+                                                                  FontWeight.w600,
+                                                              fontSize: 15),
+                                                        );
+                                                      } else {
+                                                        double expenseValue = 0.0;
+                                                        if (e.value is num) {
+                                                          expenseValue =
+                                                              (e.value as num)
+                                                                  .toDouble();
+                                                        } else if (e.value
+                                                            is String) {
+                                                          expenseValue =
+                                                              double.tryParse(e
+                                                                          .value
+                                                                      as String) ??
+                                                                  0.0;
+                                                        }
+                                                        return Text(
+                                                          '${_translateExpenseKey(e.key, l10n)}: ${expenseFormat.format(expenseValue)}',
+                                                          style: TextStyle(
+                                                              color: theme
+                                                                  .colorScheme
+                                                                  .error,
+                                                              fontWeight:
+                                                                  FontWeight.w600,
+                                                              fontSize: 15),
+                                                        );
+                                                      }
+                                                    }),
+                                                    if (entry.expense > 0)
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets.only(
+                                                                top: 4.0),
+                                                        child: Text(
+                                                          '${l10n.totalExpenses}: ${expenseFormat.format(entry.expense)}',
+                                                          style: const TextStyle(
+                                                            color: Colors.red,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            fontSize: 15,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                  ],
+                                                ),
+                                              )
+                                            else if (entry.expense > 0)
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    top: 2.0),
+                                                child: Text(
+                                                  '${l10n.totalExpenses}: ${expenseFormat.format(entry.expense)}',
+                                                  style: const TextStyle(
+                                                    color: Colors.red,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 15,
+                                                  ),
+                                                ),
+                                              ),
+                                          ],
+                                        ),
                                       ),
-                                    ))
-                                .toList(),
+                                    )),
                             // Group totals footer
                             Container(
                               width: double.infinity,
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 10, horizontal: 16),
+                              padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
                                 color: isDark
                                     ? theme.colorScheme.primary
@@ -882,13 +911,36 @@ int _weekNumber(DateTime date) {
   return weekNumber;
 }
 
-// Helper function to translate expense keys
-String _translateExpenseKey(String key, AppLocalizations l10n) {
-  switch (key.toLowerCase()) {
-    case 'per diem':
-    case 'perdiem':
-      return l10n.perDiem;
-    default:
-      return key;
-  }
-}
+ // Helper function to translate expense keys
+ String _translateExpenseKey(String key, AppLocalizations l10n) {
+   switch (key.toLowerCase()) {
+     case 'per diem':
+     case 'perdiem':
+       return l10n.perDiem;
+     default:
+       return key;
+   }
+ }
+
+ // Helper function to format date range with dd.mm.yyyy format
+ String _formatDateRange(DateRange dateRange, bool isCompact) {
+   if (dateRange.startDate == null && dateRange.endDate == null) {
+     return 'No dates selected';
+   }
+   if (dateRange.startDate == null) {
+     return 'End: ${DateFormat('dd.MM.yyyy').format(dateRange.endDate!)}';
+   }
+   if (dateRange.endDate == null) {
+     return 'Start: ${DateFormat('dd.MM.yyyy').format(dateRange.startDate!)}';
+   }
+   if (dateRange.isSingleDate) {
+     return DateFormat('dd.MM.yyyy').format(dateRange.startDate!);
+   }
+   
+   // Only wrap on compact screens
+   if (isCompact) {
+     return '${DateFormat('dd/MM/yyyy').format(dateRange.startDate!)}\n${DateFormat('dd/MM/yyyy').format(dateRange.endDate!)}';
+   } else {
+     return '${DateFormat('dd/MM/yyyy').format(dateRange.startDate!)} - ${DateFormat('dd/MM/yyyy').format(dateRange.endDate!)}';
+   }
+ }

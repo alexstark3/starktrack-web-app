@@ -233,7 +233,7 @@ class _AdminPanelState extends State<AdminPanel> {
         children: [
           // Main card with search and action buttons
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(10),
             child: Container(
               decoration: BoxDecoration(
                 color: Theme.of(context).brightness == Brightness.dark
@@ -253,7 +253,7 @@ class _AdminPanelState extends State<AdminPanel> {
                         ),
                       ],
               ),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -315,7 +315,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                 },
                               ),
                             ),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: 10),
                             SizedBox(
                               height: 38,
                               child: ElevatedButton.icon(
@@ -331,7 +331,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                   backgroundColor: appColors.primaryBlue,
                                   minimumSize: const Size(0, 38),
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 14, vertical: 12),
+                                      horizontal: 10, vertical: 12),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
@@ -370,14 +370,14 @@ class _AdminPanelState extends State<AdminPanel> {
                                   backgroundColor: appColors.primaryBlue,
                                   minimumSize: const Size(0, 38),
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 14, vertical: 8),
+                                      horizontal: 10, vertical: 8),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 10),
                             SizedBox(
                               height: 38,
                               child: ElevatedButton.icon(
@@ -393,7 +393,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                   backgroundColor: appColors.primaryBlue,
                                   minimumSize: const Size(0, 38),
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 14, vertical: 8),
+                                      horizontal: 10, vertical: 8),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
@@ -405,7 +405,7 @@ class _AdminPanelState extends State<AdminPanel> {
                       } else {
                         // Normal screens: policy buttons in a wrap
                         return Wrap(
-                          spacing: 12,
+                          spacing: 10,
                           runSpacing: 8,
                           children: [
                             SizedBox(
@@ -423,7 +423,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                   backgroundColor: appColors.primaryBlue,
                                   minimumSize: const Size(0, 38),
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 14, vertical: 8),
+                                      horizontal: 10, vertical: 8),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
@@ -445,7 +445,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                   backgroundColor: appColors.primaryBlue,
                                   minimumSize: const Size(0, 38),
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 14, vertical: 8),
+                                      horizontal: 10, vertical: 8),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
@@ -462,9 +462,7 @@ class _AdminPanelState extends State<AdminPanel> {
             ),
           ),
 
-          const SizedBox(height: 20),
-
-          const SizedBox(height: 20),
+          const SizedBox(height: 5),
 
           // Users list
           Expanded(
@@ -523,7 +521,7 @@ class _AdminPanelState extends State<AdminPanel> {
 
                 return ListView.builder(
                   key: ValueKey('admin_users_list_$_searchText'),
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                   itemCount: filteredUsers.length,
                   itemBuilder: (context, index) {
                     final doc = filteredUsers[index];
@@ -534,9 +532,9 @@ class _AdminPanelState extends State<AdminPanel> {
                     return Card(
                       key: ValueKey('admin_user_item_${doc.id}'),
                       color: appColors.backgroundLight,
-                      margin: const EdgeInsets.only(bottom: 12),
+                      margin: const EdgeInsets.only(bottom: 10),
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(10),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -595,7 +593,7 @@ class _AdminPanelState extends State<AdminPanel> {
                             ),
                             // Action buttons at bottom left
                             if (!isProtectedUser) ...[
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 10),
                               Row(
                                 children: [
                                   // Active status indicator

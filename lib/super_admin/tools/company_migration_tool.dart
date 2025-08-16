@@ -4,7 +4,7 @@ import '../security/company_migration_service.dart';
 import '../../theme/app_colors.dart';
 
 class CompanyMigrationTool extends StatefulWidget {
-  const CompanyMigrationTool({Key? key}) : super(key: key);
+  const CompanyMigrationTool({super.key});
 
   @override
   State<CompanyMigrationTool> createState() => _CompanyMigrationToolState();

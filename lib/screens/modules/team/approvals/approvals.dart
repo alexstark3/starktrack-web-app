@@ -20,12 +20,10 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
-
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.symmetric(horizontal: 0),
           child: Row(
             children: [
               // Search (standardized single field without extra wrapper borders)
@@ -42,10 +40,10 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
                 height: 38,
                 child: DropdownButtonHideUnderline(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
                     decoration: BoxDecoration(
                       border: Border.all(
-                          color: colors.darkGray.withValues(alpha: 0.3)),
+                          color: Colors.black.withValues(alpha: 0.3)),
                       borderRadius: BorderRadius.circular(9),
                     ),
                     child: DropdownButton<String>(
@@ -136,6 +134,7 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
                           : '${DateFormat('dd/MM/yyyy').format(start)} - ${DateFormat('dd/MM/yyyy').format(end)}';
 
                   return ListTile(
+                    contentPadding: const EdgeInsets.all(10),
                     title: Text(data['policyName'] ??
                         AppLocalizations.of(context)!.unknownPolicy),
                     subtitle: Text(dateText),

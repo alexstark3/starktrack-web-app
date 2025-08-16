@@ -261,6 +261,9 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                 if (result != null && result.files.isNotEmpty) {
                   final file = result.files.first;
                   final json = utf8.decode(file.bytes ?? []);
+                  
+                  if (!context.mounted) return;
+                  
                   final confirmed = await showDialog<bool>(
                     context: context,
                     builder: (ctx) => AlertDialog(
@@ -331,7 +334,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                   onChanged: _isForceLogoutLoading
                       ? null
                       : (val) => _setForceLogout(val),
-                  activeColor: Colors.red,
+                  activeThumbColor: Colors.red,
                 ),
                 const SizedBox(width: 8),
                 Text(

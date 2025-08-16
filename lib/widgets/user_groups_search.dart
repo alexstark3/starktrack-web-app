@@ -207,7 +207,7 @@ class _UserGroupSelectionDialogState extends State<UserGroupSelectionDialog> {
                                     value: _selectedUsers.contains(user['id']),
                                     onChanged: (_) =>
                                         _toggleUserSelection(user['id']),
-                                    activeColor: appColors.primaryBlue,
+                                    checkColor: appColors.primaryBlue,
                                   )),
                               const SizedBox(height: 16),
                             ],
@@ -228,7 +228,7 @@ class _UserGroupSelectionDialogState extends State<UserGroupSelectionDialog> {
                                             .contains(group['id']),
                                         onChanged: (_) =>
                                             _toggleGroupSelection(group['id']),
-                                        activeColor: appColors.primaryBlue,
+                                        checkColor: appColors.primaryBlue,
                                       )),
                             ],
                           ],
@@ -423,7 +423,7 @@ class _EmbeddedUserGroupSearchState extends State<EmbeddedUserGroupSearch> {
     final appColors = Theme.of(context).extension<AppColors>()!;
     final l10n = AppLocalizations.of(context)!;
 
-    return Container(
+    return SizedBox(
       height: 300,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -471,7 +471,7 @@ class _EmbeddedUserGroupSearchState extends State<EmbeddedUserGroupSearch> {
                                     onChanged: (value) {
                                       _toggleUserSelection(user['id']);
                                     },
-                                    activeColor: appColors.primaryBlue,
+                                    checkColor: appColors.primaryBlue,
                                     dense: true,
                                   )),
                             ],
@@ -492,7 +492,7 @@ class _EmbeddedUserGroupSearchState extends State<EmbeddedUserGroupSearch> {
                                         onChanged: (value) {
                                           _toggleGroupSelection(group['id']);
                                         },
-                                        activeColor: appColors.primaryBlue,
+                                        checkColor: appColors.primaryBlue,
                                         dense: true,
                                       )),
                             ],

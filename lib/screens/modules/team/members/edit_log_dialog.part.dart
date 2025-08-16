@@ -166,7 +166,7 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                   Checkbox(
                       value: true,
                       onChanged: (checked) => handleExpenseChange(key, checked),
-                      activeColor: Colors.blue,
+                      checkColor: Colors.blue,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4))),
                   Text(key,
@@ -182,7 +182,7 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                 Checkbox(
                     value: tempPerDiem,
                     onChanged: perDiemAvailable ? handlePerDiemChange : null,
-                    activeColor: Colors.blue,
+                    checkColor: Colors.blue,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4))),
                 Text('Per Diem',
@@ -313,7 +313,7 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                       '${AppLocalizations.of(context)!.end} ${AppLocalizations.of(context)!.time} (HH:mm)'),
               keyboardType: TextInputType.datetime),
           DropdownButtonFormField<String>(
-              value: _projectValue,
+              initialValue: _projectValue,
               isExpanded: true,
               items: widget.projects
                   .map((name) =>

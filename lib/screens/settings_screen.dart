@@ -19,12 +19,12 @@ class SettingsScreen extends StatelessWidget {
 
     const green = Color(0xFF3ECB68);
     const double labelWidth = 110;
-    const double minGap = 16;
+    const double minGap = 10;
 
     return Scaffold(
       backgroundColor: appColors.backgroundDark,
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -43,7 +43,7 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -73,7 +73,7 @@ class SettingsScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
                   // Language Picker Row
                   Row(
                     children: [

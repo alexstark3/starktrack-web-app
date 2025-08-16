@@ -817,7 +817,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
 
                       // Team Leader assignment
                       DropdownButtonFormField<String>(
-                        value: _selectedTeamLeaderId.isEmpty
+                        initialValue: _selectedTeamLeaderId.isEmpty
                             ? null
                             : _selectedTeamLeaderId,
                         decoration: InputDecoration(
@@ -1202,7 +1202,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
         Switch(
           value: value,
           onChanged: onChanged,
-          activeColor: appColors.primaryBlue,
+          activeThumbColor: appColors.primaryBlue,
         ),
       ],
     );

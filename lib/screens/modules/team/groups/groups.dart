@@ -33,59 +33,84 @@ class _GroupsTabState extends State<GroupsTab> {
     final l10n = AppLocalizations.of(context)!;
 
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Search bar and Add button in a card
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? colors.cardColorDark
-                  : colors.backgroundLight,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: Theme.of(context).brightness == Brightness.dark
-                  ? null
-                  : [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
+          // Search bar and Add button
+          LayoutBuilder(
+            builder: (context, constraints) {
+              // Use Row for normal screens, Column for compact screens
+              if (constraints.maxWidth > 600) {
+                return Row(
+                  children: [
+                    Expanded(
+                      child: AppSearchField(
+                        controller: _searchController,
+                        hintText: l10n.searchGroups,
+                        onChanged: (value) {
+                          setState(() {
+                            _searchQuery = value.trim().toLowerCase();
+                          });
+                        },
                       ),
-                    ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: AppSearchField(
-                    controller: _searchController,
-                    hintText: l10n.searchGroups,
-                    onChanged: (value) {
-                      setState(() {
-                        _searchQuery = value.trim().toLowerCase();
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                ElevatedButton.icon(
-                  onPressed: () => _showAddGroupDialog(context),
-                  icon: const Icon(Icons.add),
-                  label: Text(l10n.addGroup),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.primaryBlue,
-                    foregroundColor: colors.whiteTextOnBlue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
                     ),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 12),
-                  ),
-                ),
-              ],
-            ),
+                    const SizedBox(width: 16),
+                    SizedBox(
+                      height: 38,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _showAddGroupDialog(context),
+                        icon: const Icon(Icons.add),
+                        label: Text(l10n.addGroup),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: colors.primaryBlue,
+                          foregroundColor: colors.whiteTextOnBlue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 0),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              } else {
+                // Compact mode - stack vertically
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AppSearchField(
+                      controller: _searchController,
+                      hintText: l10n.searchGroups,
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery = value.trim().toLowerCase();
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 38,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _showAddGroupDialog(context),
+                        icon: const Icon(Icons.add),
+                        label: Text(l10n.addGroup),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: colors.primaryBlue,
+                          foregroundColor: colors.whiteTextOnBlue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 0),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
+            },
           ),
           const SizedBox(height: 20),
           // Groups list
@@ -171,19 +196,13 @@ class _GroupsTabState extends State<GroupsTab> {
                             ? colors.cardColorDark
                             : colors.backgroundLight,
                         borderRadius: BorderRadius.circular(12),
-                        boxShadow: Theme.of(context).brightness ==
-                                Brightness.dark
-                            ? null
-                            : [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.08),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
+                        border: Border.all(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
                       ),
                       child: ListTile(
-                        contentPadding: const EdgeInsets.all(16),
+                        contentPadding: const EdgeInsets.all(10),
                         leading: CircleAvatar(
                           backgroundColor: colors.primaryBlue,
                           child: Icon(

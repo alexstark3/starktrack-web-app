@@ -205,7 +205,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                   Checkbox(
                     value: true,
                     onChanged: (checked) => handleExpenseChange(key, checked),
-                    activeColor: primaryColor,
+                    checkColor: primaryColor,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4)),
                   ),
@@ -227,7 +227,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                 Checkbox(
                   value: tempPerDiem,
                   onChanged: canEditPerDiem ? handlePerDiemChange : null,
-                  activeColor: primaryColor,
+                  checkColor: primaryColor,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4)),
                 ),

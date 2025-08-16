@@ -699,7 +699,7 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
                       value: isActive,
                       onChanged: (value) =>
                           _toggleCompanyStatus(company['id'], value),
-                      activeColor: Colors.green,
+                      activeThumbColor: Colors.green,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                   ],

@@ -137,7 +137,7 @@ class CompanyMigrationService {
       // 6. Create migration record
       await _firestore
           .collection('migrations')
-          .doc('company_${oldCompanyId}')
+          .doc('company_$oldCompanyId')
           .set({
         'oldCompanyId': oldCompanyId,
         'newCompanyId': newCompanyId,

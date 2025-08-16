@@ -29,7 +29,7 @@ class AdminVersionService {
       final buildNumber = packageInfo.buildNumber;
 
       // Format: 1.1.1.152 (main version + build number as fourth segment)
-      return '${mainVersion}.${buildNumber}';
+      return '$mainVersion.$buildNumber';
     } catch (e) {
       AppLogger.error('Error getting package info: $e');
       return '1.1.1.0'; // Fallback version

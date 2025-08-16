@@ -156,14 +156,14 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
     final email = _clientInfo?['email'] ?? '';
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // --- Top section: Project details
           Padding(
             padding:
-                const EdgeInsets.only(left: 0, right: 0, top: 38, bottom: 10),
+                const EdgeInsets.only(left: 0, right: 0, top: 10, bottom: 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -548,7 +548,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                         child: ListView.builder(
                           key: ValueKey(
                               'project_logs_list_${widget.project['id']}'),
-                          padding: const EdgeInsets.only(bottom: 24, top: 8),
+                          padding: EdgeInsets.zero,
                           itemCount: filteredLogs.length,
                           itemBuilder: (context, idx) {
                             final log = filteredLogs[idx];
@@ -593,8 +593,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
 
                             return Container(
                               key: ValueKey('project_log_${log['id'] ?? idx}'),
-                              margin: const EdgeInsets.symmetric(
-                                  vertical: 10, horizontal: 4),
+                              margin: const EdgeInsets.only(top: 10, bottom: 10),
                               decoration: BoxDecoration(
                                 color: Theme.of(context).brightness ==
                                         Brightness.dark
@@ -620,8 +619,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                                     : null,
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 12.0, horizontal: 18.0),
+                                padding: const EdgeInsets.all(10),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -819,7 +817,7 @@ class _EditProjectDialogState extends State<EditProjectDialog> {
             : BorderSide.none,
       ),
       child: Container(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(10),
         width: 460,
         child: SingleChildScrollView(
           child: Column(
@@ -849,7 +847,7 @@ class _EditProjectDialogState extends State<EditProjectDialog> {
                           decoration: InputDecoration(
                               labelText:
                                   AppLocalizations.of(context)!.street))),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 10),
                   Expanded(
                       child: TextField(
                           controller: _numberCtrl,
@@ -866,7 +864,7 @@ class _EditProjectDialogState extends State<EditProjectDialog> {
                           decoration: InputDecoration(
                               labelText:
                                   AppLocalizations.of(context)!.postCode))),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 10),
                   Expanded(
                       child: TextField(
                           controller: _cityCtrl,
@@ -874,10 +872,10 @@ class _EditProjectDialogState extends State<EditProjectDialog> {
                               labelText: AppLocalizations.of(context)!.city))),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               // --- Client picker ---
               DropdownButtonFormField<String>(
-                value: _selectedClientId?.isNotEmpty == true
+                initialValue: _selectedClientId?.isNotEmpty == true
                     ? _selectedClientId
                     : null,
                 items: _clients.entries.map((e) {
@@ -892,10 +890,10 @@ class _EditProjectDialogState extends State<EditProjectDialog> {
                 onChanged: (val) => setState(() => _selectedClientId = val),
               ),
               if (_error.isNotEmpty) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 Text(_error, style: TextStyle(color: Colors.red)),
               ],
-              const SizedBox(height: 18),
+              const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [

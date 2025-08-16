@@ -951,7 +951,7 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
                             _isPaid = value;
                           });
                         },
-                        activeColor: appColors.primaryBlue,
+                        activeThumbColor: appColors.primaryBlue,
                       ),
                     ],
                   ),
@@ -976,7 +976,7 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
                             _isRepeating = value;
                           });
                         },
-                        activeColor: appColors.primaryBlue,
+                        activeThumbColor: appColors.primaryBlue,
                       ),
                     ],
                   ),
@@ -986,29 +986,79 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
                   if (_isRepeating) ...[
                     Row(
                       children: [
-                        Radio<String>(
-                          value: 'Yearly',
-                          groupValue: _repeats,
-                          onChanged: (value) {
+                        GestureDetector(
+                          onTap: () {
                             setState(() {
-                              _repeats = value!;
+                              _repeats = 'Yearly';
                             });
                           },
-                          activeColor: appColors.primaryBlue,
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 20,
+                                height: 20,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: _repeats == 'Yearly' 
+                                        ? appColors.primaryBlue 
+                                        : Colors.grey,
+                                    width: 2,
+                                  ),
+                                  color: _repeats == 'Yearly' 
+                                      ? appColors.primaryBlue 
+                                      : Colors.transparent,
+                                ),
+                                child: _repeats == 'Yearly'
+                                    ? Icon(
+                                        Icons.check,
+                                        size: 14,
+                                        color: Colors.white,
+                                      )
+                                    : null,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(l10n.yearly),
+                            ],
+                          ),
                         ),
-                        Text(l10n.yearly),
                         const SizedBox(width: 20),
-                        Radio<String>(
-                          value: 'Monthly',
-                          groupValue: _repeats,
-                          onChanged: (value) {
+                        GestureDetector(
+                          onTap: () {
                             setState(() {
-                              _repeats = value!;
+                              _repeats = 'Monthly';
                             });
                           },
-                          activeColor: appColors.primaryBlue,
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 20,
+                                height: 20,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: _repeats == 'Monthly' 
+                                        ? appColors.primaryBlue 
+                                        : Colors.grey,
+                                    width: 2,
+                                  ),
+                                  color: _repeats == 'Monthly' 
+                                      ? appColors.primaryBlue 
+                                      : Colors.transparent,
+                                ),
+                                child: _repeats == 'Monthly'
+                                    ? Icon(
+                                        Icons.check,
+                                        size: 14,
+                                        color: Colors.white,
+                                      )
+                                    : null,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(l10n.monthly),
+                            ],
+                          ),
                         ),
-                        Text(l10n.monthly),
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -1090,7 +1140,7 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
                             _isAccruing = value;
                           });
                         },
-                        activeColor: appColors.primaryBlue,
+                        activeThumbColor: appColors.primaryBlue,
                       ),
                     ],
                   ),
@@ -1132,7 +1182,7 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
                         SizedBox(
                           width: 100,
                           child: DropdownButtonFormField<String>(
-                            value: _accruingPeriod,
+                            initialValue: _accruingPeriod,
                             decoration: InputDecoration(
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
@@ -1172,29 +1222,79 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Radio<String>(
-                        value: 'Days',
-                        groupValue: _timeUnit,
-                        onChanged: (value) {
+                      GestureDetector(
+                        onTap: () {
                           setState(() {
-                            _timeUnit = value!;
+                            _timeUnit = 'Days';
                           });
                         },
-                        activeColor: appColors.primaryBlue,
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: _timeUnit == 'Days' 
+                                      ? appColors.primaryBlue 
+                                      : Colors.grey,
+                                  width: 2,
+                                ),
+                                color: _timeUnit == 'Days' 
+                                    ? appColors.primaryBlue 
+                                    : Colors.transparent,
+                              ),
+                              child: _timeUnit == 'Days'
+                                  ? Icon(
+                                      Icons.check,
+                                      size: 14,
+                                      color: Colors.white,
+                                    )
+                                  : null,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(l10n.days),
+                          ],
+                        ),
                       ),
-                      Text(l10n.days),
                       const SizedBox(width: 20),
-                      Radio<String>(
-                        value: 'Hours',
-                        groupValue: _timeUnit,
-                        onChanged: (value) {
+                      GestureDetector(
+                        onTap: () {
                           setState(() {
-                            _timeUnit = value!;
+                            _timeUnit = 'Hours';
                           });
                         },
-                        activeColor: appColors.primaryBlue,
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: _timeUnit == 'Hours' 
+                                      ? appColors.primaryBlue 
+                                      : Colors.grey,
+                                  width: 2,
+                                ),
+                                color: _timeUnit == 'Hours' 
+                                    ? appColors.primaryBlue 
+                                    : Colors.transparent,
+                              ),
+                              child: _timeUnit == 'Hours'
+                                  ? Icon(
+                                      Icons.check,
+                                      size: 14,
+                                      color: Colors.white,
+                                    )
+                                  : null,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(l10n.hours),
+                          ],
+                        ),
                       ),
-                      Text(l10n.hours),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -1218,7 +1318,7 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
                             _doesNotCount = value;
                           });
                         },
-                        activeColor: appColors.primaryBlue,
+                        activeThumbColor: appColors.primaryBlue,
                       ),
                     ],
                   ),
@@ -1251,7 +1351,7 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
                                 _notCountHolidays = value!;
                               });
                             },
-                            activeColor: appColors.primaryBlue,
+                            checkColor: appColors.primaryBlue,
                             contentPadding: EdgeInsets.zero,
                             dense: true,
                           ),
@@ -1300,7 +1400,7 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
                                           }
                                         });
                                       },
-                                      activeColor: appColors.primaryBlue,
+                                      checkColor: appColors.primaryBlue,
                                       contentPadding: EdgeInsets.zero,
                                       dense: true,
                                     )),
@@ -1329,7 +1429,7 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
                             _includeOvertime = value;
                           });
                         },
-                        activeColor: appColors.primaryBlue,
+                        activeThumbColor: appColors.primaryBlue,
                       ),
                     ],
                   ),
@@ -1354,7 +1454,7 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
                             _allowNegativeBalance = value;
                           });
                         },
-                        activeColor: appColors.primaryBlue,
+                        activeThumbColor: appColors.primaryBlue,
                       ),
                     ],
                   ),
@@ -1408,7 +1508,7 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
                             _assignToEveryone = value;
                           });
                         },
-                        activeColor: appColors.primaryBlue,
+                        activeThumbColor: appColors.primaryBlue,
                       ),
                     ],
                   ),
