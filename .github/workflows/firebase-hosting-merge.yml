@@ -37,6 +37,6 @@ jobs:
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }} # Provided by GitHub for repository access
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SA }} # Your Firebase service account secret
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SA }} # ignore: context_access
           channelId: live                                                    # Deploys to your live hosting channel
           projectId: starktracklog                                           # Your Firebase project ID

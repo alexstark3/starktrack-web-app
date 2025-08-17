@@ -41,35 +41,39 @@ class _BalanceTabState extends State<BalanceTab> {
     return SizedBox(
       width: 120,
       height: 38,
-      child: TextButton(
-        style: TextButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          backgroundColor: selected
-              ? colors.primaryBlue
-              : Theme.of(context).colorScheme.surface,
-          foregroundColor: selected ? colors.whiteTextOnBlue : colors.textColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-            side: BorderSide(
-              color: selected
-                  ? colors.primaryBlue
-                  : Colors.black.withValues(alpha: 0.26),
-              width: 1,
+      child: Material(
+        color: Colors.transparent,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: selected
+                ? colors.primaryBlue
+                : Theme.of(context).colorScheme.surface,
+            foregroundColor: selected ? colors.whiteTextOnBlue : colors.textColor,
+            elevation: selected ? 2 : 0, // Add elevation for selected state
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: BorderSide(
+                color: selected
+                    ? colors.primaryBlue
+                    : Theme.of(context).brightness == Brightness.dark
+                        ? colors.borderColorDark
+                        : colors.borderColorLight,
+                width: 1,
+              ),
             ),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
           ),
-        ),
-        onPressed: () {
-          setState(() {
-            _selectedType = value;
-            // Reset edit states
-            _editingBonus.clear();
-            for (final controller in _bonusControllers.values) {
-              controller.dispose();
-            }
-            _bonusControllers.clear();
-          });
-        },
-        child: Center(
+          onPressed: () {
+            setState(() {
+              _selectedType = value;
+              // Reset edit states
+              _editingBonus.clear();
+              for (final controller in _bonusControllers.values) {
+                controller.dispose();
+              }
+              _bonusControllers.clear();
+            });
+          },
           child: Text(
             label,
             style: const TextStyle(fontWeight: FontWeight.w500),
@@ -87,56 +91,39 @@ class _BalanceTabState extends State<BalanceTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Search bar and radio buttons in a card
-        Card(
-          elevation: Theme.of(context).brightness == Brightness.dark ? 0 : 2,
-          color: Theme.of(context).brightness == Brightness.dark
-              ? colors.cardColorDark
-              : colors.backgroundLight,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: AppSearchField(
-                        controller: _searchController,
-                        hintText: l10n.searchMembers,
-                        onChanged: (value) {
-                          setState(() {
-                            _searchQuery = value.trim().toLowerCase();
-                          });
-                        },
-                      ),
+        // Search bar and radio buttons
+        Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: AppSearchField(
+                      controller: _searchController,
+                      hintText: l10n.searchMembers,
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery = value.trim().toLowerCase();
+                        });
+                      },
                     ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      onPressed: _recalculateOvertime,
-                      icon: Icon(Icons.refresh, color: colors.primaryBlue),
-                      tooltip: 'Recalculate overtime',
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  crossAxisAlignment: WrapCrossAlignment.start,
-                  alignment: WrapAlignment.start,
-                  children: [
-                    _buildTypeButton('overtime', 'Overtime', colors),
-                    _buildTypeButton('vacations', 'Vacations', colors),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+
+                ],
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                crossAxisAlignment: WrapCrossAlignment.start,
+                alignment: WrapAlignment.start,
+                children: [
+                  _buildTypeButton('overtime', 'Overtime', colors),
+                  _buildTypeButton('vacations', 'Vacations', colors),
+                ],
+              ),
+            ],
           ),
-        ),
         const SizedBox(height: 8),
         // Workers list with time off balance
         Expanded(
@@ -211,13 +198,18 @@ class _BalanceTabState extends State<BalanceTab> {
                   return Card(
                     key: ValueKey('balance_item_${doc.id}'),
                     margin: const EdgeInsets.only(bottom: 12),
-                    elevation:
-                        Theme.of(context).brightness == Brightness.dark ? 0 : 2,
+                    elevation: 0,
                     color: Theme.of(context).brightness == Brightness.dark
                         ? colors.cardColorDark
                         : colors.backgroundLight,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? colors.borderColorDark
+                            : colors.borderColorLight,
+                        width: 1,
+                      ),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
@@ -678,70 +670,5 @@ class _BalanceTabState extends State<BalanceTab> {
         );
       },
     );
-  }
-
-  // Recalculate overtime for all users
-  Future<void> _recalculateOvertime() async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const AlertDialog(
-        content: Row(
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(width: 16),
-            Text('Recalculating overtime...'),
-          ],
-        ),
-      ),
-    );
-
-    try {
-      // Get all users
-      final usersSnapshot = await FirebaseFirestore.instance
-          .collection('companies')
-          .doc(widget.companyId)
-          .collection('users')
-          .get();
-
-      final users = usersSnapshot.docs;
-
-      // Calculate overtime for each user
-      for (final userDoc in users) {
-        final userId = userDoc.id;
-        try {
-          await OvertimeCalculationService.calculateAndUpdateOvertime(
-            widget.companyId,
-            userId,
-            fromDate: DateTime.now().subtract(const Duration(days: 28)),
-            toDate: DateTime.now(),
-          );
-        } catch (e) {
-          // Silently handle individual user recalculation errors
-        }
-      }
-
-      if (mounted) {
-        Navigator.of(context).pop(); // Close loading dialog
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Overtime recalculated for ${users.length} users'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        // This will trigger a rebuild and recalculate overtime
-        setState(() {});
-      }
-    } catch (e) {
-      if (mounted) {
-        Navigator.of(context).pop(); // Close loading dialog
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error recalculating overtime: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
   }
 }

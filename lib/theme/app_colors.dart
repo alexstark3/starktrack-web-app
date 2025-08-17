@@ -18,6 +18,8 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color sideMenuDark;
   final Color cardColorDark;
   final Color backgroundLight;
+  final Color borderColorLight;
+  final Color borderColorDark;
 
   const AppColors({
     required this.primaryBlue,
@@ -37,6 +39,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.sideMenuDark,
     required this.cardColorDark,
     required this.backgroundLight,
+    required this.borderColorLight,
+    required this.borderColorDark,
   });
 
   @override
@@ -58,6 +62,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? sideMenuDark,
     Color? cardColorDark,
     Color? backgroundLight,
+    Color? borderColorLight,
+    Color? borderColorDark,
   }) {
     return AppColors(
       primaryBlue: primaryBlue ?? this.primaryBlue,
@@ -77,6 +83,8 @@ class AppColors extends ThemeExtension<AppColors> {
       sideMenuDark: sideMenuDark ?? this.sideMenuDark,
       cardColorDark: cardColorDark ?? this.cardColorDark,
       backgroundLight: backgroundLight ?? this.backgroundLight,
+      borderColorLight: borderColorLight ?? this.borderColorLight,
+      borderColorDark: borderColorDark ?? this.borderColorDark,
     );
   }
 
@@ -102,6 +110,8 @@ class AppColors extends ThemeExtension<AppColors> {
       sideMenuDark: Color.lerp(sideMenuDark, other.sideMenuDark, t)!,
       cardColorDark: Color.lerp(cardColorDark, other.cardColorDark, t)!,
       backgroundLight: Color.lerp(backgroundLight, other.backgroundLight, t)!,
+      borderColorLight: Color.lerp(borderColorLight, other.borderColorLight, t)!,
+      borderColorDark: Color.lerp(borderColorDark, other.borderColorDark, t)!,
     );
   }
 
@@ -124,6 +134,8 @@ class AppColors extends ThemeExtension<AppColors> {
     sideMenuDark: Color(0xFFF3F3F7), // Not used in light theme but required
     cardColorDark: Color(0xFFFFFFFF), // Light theme uses white cards
     backgroundLight: Color(0xFFFFFFFF), // Light theme background
+    borderColorLight: Color(0xFFB3B3B3), // Light theme border color
+    borderColorDark: Color(0xFF404040), // Dark theme border color (same for consistency)
   );
 
   static const AppColors dark = AppColors(
@@ -138,12 +150,13 @@ class AppColors extends ThemeExtension<AppColors> {
     backgroundDark: Color(0xFF252526), // VS Code sidebar
     success: Color(0xFF67C187),
     error: Color(0xFFD76C6C),
-    whiteTextOnBlue:
-        Colors.white, // Pure white for better contrast on blue buttons
+    whiteTextOnBlue: Colors.white, // Pure white for better contrast on blue buttons
     orange: Color(0xFFFF9800),
     sideMenuLight: Color(0xFF252526), // Not used in dark theme but required
     sideMenuDark: Color(0xFF1E1E1E), // VS Code side menu color
     cardColorDark: Color(0xFF191919), // Dark card color matching logs
     backgroundLight: Color(0xFF2D2D30), // Dark theme light background
+    borderColorLight: Color(0xFFB3B3B3), // Light theme border color (same for consistency)
+    borderColorDark: Color(0xFF404040), // Dark theme border color
   );
 }

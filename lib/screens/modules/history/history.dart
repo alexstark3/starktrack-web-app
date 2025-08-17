@@ -71,19 +71,12 @@ class _HistoryLogsState extends State<HistoryLogs> {
     final appColors = Theme.of(context).extension<AppColors>()!;
 
     BoxDecoration pillDecoration = BoxDecoration(
-      border:
-          Border.all(color: isDark ? Colors.white24 : Colors.black26, width: 1),
+      border: Border.all(
+        color: isDark ? appColors.borderColorDark : appColors.borderColorLight,
+        width: 1,
+      ),
       color: isDark ? appColors.cardColorDark : appColors.backgroundLight,
       borderRadius: BorderRadius.circular(10),
-      boxShadow: isDark
-          ? null
-          : [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
     );
 
     TextStyle pillTextStyle = TextStyle(
@@ -254,24 +247,10 @@ class _HistoryLogsState extends State<HistoryLogs> {
     );
 
     // Refresh button
-    final refreshBtn = Container(
+    final refreshBtn = SizedBox(
       height: kFilterHeight,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.primary,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: isDark
-            ? null
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-      ),
-      child: IconButton(
-        icon: Icon(Icons.refresh, color: Colors.white, size: 24),
-        tooltip: l10n.clearFilters,
+      width: kFilterHeight, // Make it square
+      child: ElevatedButton(
         onPressed: () {
           setState(() {
             dateRange = null;
@@ -282,33 +261,37 @@ class _HistoryLogsState extends State<HistoryLogs> {
           projectController.clear();
           noteController.clear();
         },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: theme.colorScheme.primary,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          padding: EdgeInsets.zero, // Remove padding to make it square
+        ),
+        child: const Icon(Icons.refresh, size: 24),
       ),
     );
 
     return Scaffold(
-      backgroundColor: appColors.backgroundDark,
+      backgroundColor: appColors.dashboardBackground,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         child: Column(
           children: [
             // Search filters
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: isDark
-                    ? appColors.cardColorDark
-                    : appColors.backgroundLight,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: isDark
-                    ? null
-                    : [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.08),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-              ),
+                    Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: isDark
+                ? appColors.cardColorDark
+                : appColors.backgroundLight,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isDark ? appColors.borderColorDark : appColors.borderColorLight,
+              width: 1,
+            ),
+          ),
               padding: const EdgeInsets.all(10),
               child: LayoutBuilder(
                 builder: (context, constraints) {
@@ -629,24 +612,19 @@ class _HistoryLogsState extends State<HistoryLogs> {
                         }
                       }
 
-                      return Container(
-                        key: ValueKey('history_group_$groupKey'),
-                        margin: const EdgeInsets.only(bottom: 10),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? appColors.cardColorDark
-                              : appColors.backgroundLight,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: isDark
-                              ? null
-                              : [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.08),
-                                    blurRadius: 6,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                        ),
+                              return Container(
+          key: ValueKey('history_group_$groupKey'),
+          margin: const EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+            color: isDark
+                ? appColors.cardColorDark
+                : appColors.backgroundLight,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isDark ? appColors.borderColorDark : appColors.borderColorLight,
+              width: 1,
+            ),
+          ),
                         child: Column(
                           children: [
                             // Group header

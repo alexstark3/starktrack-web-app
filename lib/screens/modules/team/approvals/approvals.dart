@@ -73,6 +73,7 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
             ],
           ),
         ),
+        const SizedBox(height: 10),
         Expanded(
           child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
             stream: FirebaseFirestore.instance
@@ -133,37 +134,46 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
                           ? DateFormat('dd/MM/yyyy').format(start)
                           : '${DateFormat('dd/MM/yyyy').format(start)} - ${DateFormat('dd/MM/yyyy').format(end)}';
 
-                  return ListTile(
-                    contentPadding: const EdgeInsets.all(10),
-                    title: Text(data['policyName'] ??
-                        AppLocalizations.of(context)!.unknownPolicy),
-                    subtitle: Text(dateText),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (status == 'pending') ...[
-                          IconButton(
-                            icon: const Icon(Icons.check_circle,
-                                color: Colors.green),
-                            tooltip: AppLocalizations.of(context)!.approve,
-                            onPressed: () => _updateStatus(ref, 'approved'),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.edit,
-                                color: Colors.blueAccent),
-                            tooltip: AppLocalizations.of(context)!.edit,
-                            onPressed: () => _editDates(ref, start, end),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.cancel, color: Colors.red),
-                            tooltip: AppLocalizations.of(context)!.deny,
-                            onPressed: () => _denyWithNote(ref),
-                          ),
-                        ] else ...[
-                          _statusChip(status,
-                              Theme.of(context).extension<AppColors>()!),
-                        ]
-                      ],
+                  return Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.black.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(10),
+                      title: Text(data['policyName'] ??
+                          AppLocalizations.of(context)!.unknownPolicy),
+                      subtitle: Text(dateText),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (status == 'pending') ...[
+                            IconButton(
+                              icon: const Icon(Icons.check_circle,
+                                  color: Colors.green),
+                              tooltip: AppLocalizations.of(context)!.approve,
+                              onPressed: () => _updateStatus(ref, 'approved'),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.edit,
+                                  color: Colors.blueAccent),
+                              tooltip: AppLocalizations.of(context)!.edit,
+                              onPressed: () => _editDates(ref, start, end),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.cancel, color: Colors.red),
+                              tooltip: AppLocalizations.of(context)!.deny,
+                              onPressed: () => _denyWithNote(ref),
+                            ),
+                          ] else ...[
+                            _statusChip(status,
+                                Theme.of(context).extension<AppColors>()!),
+                          ]
+                        ],
+                      ),
                     ),
                   );
                 },

@@ -71,6 +71,9 @@ class _LoginFormState extends State<LoginForm> {
             constraints: const BoxConstraints(maxWidth: 400),
             child: Card(
               color: isDark ? colors?.cardColorDark : Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(32.0),
                 child: Form(
@@ -149,14 +152,20 @@ class _LoginFormState extends State<LoginForm> {
             filled: true,
             fillColor: isDark
                 ? colors?.lightGray ?? Colors.grey[800]
-                : Colors.grey[100],
+                : Colors.white,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
+              borderSide: BorderSide(
+                color: isDark ? colors?.borderColorDark ?? Colors.grey[700]! : colors?.borderColorLight ?? Colors.grey[300]!,
+                width: 1,
+              ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
+              borderSide: BorderSide(
+                color: isDark ? colors?.borderColorDark ?? Colors.grey[700]! : colors?.borderColorLight ?? Colors.grey[300]!,
+                width: 1,
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -189,14 +198,20 @@ class _LoginFormState extends State<LoginForm> {
             filled: true,
             fillColor: isDark
                 ? colors?.lightGray ?? Colors.grey[800]
-                : Colors.grey[100],
+                : Colors.white,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
+              borderSide: BorderSide(
+                color: isDark ? colors?.borderColorDark ?? Colors.grey[700]! : colors?.borderColorLight ?? Colors.grey[300]!,
+                width: 1,
+              ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
+              borderSide: BorderSide(
+                color: isDark ? colors?.borderColorDark ?? Colors.grey[700]! : colors?.borderColorLight ?? Colors.grey[300]!,
+                width: 1,
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),

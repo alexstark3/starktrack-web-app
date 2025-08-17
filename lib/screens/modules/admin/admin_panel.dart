@@ -228,7 +228,7 @@ class _AdminPanelState extends State<AdminPanel> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: appColors.backgroundDark,
+      backgroundColor: appColors.dashboardBackground,
       body: Column(
         children: [
           // Main card with search and action buttons
@@ -240,18 +240,12 @@ class _AdminPanelState extends State<AdminPanel> {
                     ? appColors.backgroundLight
                     : Colors.white,
                 borderRadius: BorderRadius.circular(12),
-                border: Theme.of(context).brightness == Brightness.dark
-                    ? null
-                    : Border.all(color: Colors.black26, width: 1),
-                boxShadow: Theme.of(context).brightness == Brightness.dark
-                    ? null
-                    : [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.08),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+                border: Border.all(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? appColors.borderColorDark
+                      : appColors.borderColorLight,
+                  width: 1,
+                ),
               ),
               padding: const EdgeInsets.all(10),
               child: Column(
@@ -533,6 +527,16 @@ class _AdminPanelState extends State<AdminPanel> {
                       key: ValueKey('admin_user_item_${doc.id}'),
                       color: appColors.backgroundLight,
                       margin: const EdgeInsets.only(bottom: 10),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? appColors.borderColorDark
+                              : appColors.borderColorLight,
+                          width: 1,
+                        ),
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.all(10),
                         child: Column(

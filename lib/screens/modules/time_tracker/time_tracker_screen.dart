@@ -100,7 +100,7 @@ class _TimeTrackerScreenState extends State<TimeTrackerScreen> {
         .orderBy('begin');
 
     return Scaffold(
-      backgroundColor: Theme.of(context).extension<AppColors>()!.backgroundDark,
+      backgroundColor: Theme.of(context).extension<AppColors>()!.dashboardBackground,
       resizeToAvoidBottomInset: false,
       body: _projectsFuture == null
           ? const Center(child: CircularProgressIndicator())

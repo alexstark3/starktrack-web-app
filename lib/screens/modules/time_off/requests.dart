@@ -27,9 +27,7 @@ class _TimeOffRequestsState extends State<TimeOffRequests> {
     return Column(
       children: [
         // Search + New Request button row
-        Padding(
-          padding: const EdgeInsets.all(10),
-          child: LayoutBuilder(
+        LayoutBuilder(
             builder: (context, constraints) {
               // Use Row for normal screens, Column for compact screens
               if (constraints.maxWidth > 600) {
@@ -89,8 +87,8 @@ class _TimeOffRequestsState extends State<TimeOffRequests> {
               }
             },
           ),
-        ),
-
+        // Standard 10px spacing between search and list
+        const SizedBox(height: 10),
         // Requests list
         Expanded(
           child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -153,11 +151,21 @@ class _TimeOffRequestsState extends State<TimeOffRequests> {
                           ? DateFormat('dd/MM/yyyy').format(start)
                           : '${DateFormat('dd/MM/yyyy').format(start)} - ${DateFormat('dd/MM/yyyy').format(end)}';
 
-                  return ListTile(
-                    title: Text(data['policyName'] ??
-                        AppLocalizations.of(context)!.unknownPolicy),
-                    subtitle: Text(dateText),
-                    trailing: _statusChip(status, colors),
+                  return Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.black.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(10),
+                      title: Text(data['policyName'] ??
+                          AppLocalizations.of(context)!.unknownPolicy),
+                      subtitle: Text(dateText),
+                      trailing: _statusChip(status, colors),
+                    ),
                   );
                 },
               );

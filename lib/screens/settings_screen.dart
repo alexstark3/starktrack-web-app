@@ -22,7 +22,7 @@ class SettingsScreen extends StatelessWidget {
     const double minGap = 10;
 
     return Scaffold(
-      backgroundColor: appColors.backgroundDark,
+      backgroundColor: appColors.dashboardBackground,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         child: Column(
@@ -35,13 +35,10 @@ class SettingsScreen extends StatelessWidget {
                     ? const Color(0xFF1E1E1E)
                     : appColors.backgroundLight,
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                border: Border.all(
+                  color: isDark ? appColors.borderColorDark : appColors.borderColorLight,
+                  width: 1,
+                ),
               ),
               padding: const EdgeInsets.all(10),
               child: Column(

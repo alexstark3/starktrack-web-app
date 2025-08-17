@@ -248,9 +248,15 @@ class _ProjectCard extends StatelessWidget {
 
         return Card(
           margin: const EdgeInsets.only(bottom: 10),
-          elevation: 2,
+          elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? colors.borderColorDark
+                  : colors.borderColorLight,
+              width: 1,
+            ),
           ),
           child: Padding(
             padding: const EdgeInsets.all(10),
@@ -397,9 +403,15 @@ class _ClientTotalsCard extends StatelessWidget {
         if (snap.connectionState == ConnectionState.waiting) {
           return Card(
             margin: const EdgeInsets.only(bottom: 10),
-            elevation: 2,
+            elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
+              side: BorderSide(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? colors.borderColorDark
+                    : colors.borderColorLight,
+                width: 1,
+              ),
             ),
             child: const Padding(
               padding: EdgeInsets.all(10),
@@ -416,9 +428,15 @@ class _ClientTotalsCard extends StatelessWidget {
 
         return Card(
           margin: const EdgeInsets.only(bottom: 10),
-          elevation: 2,
+          elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? colors.borderColorDark
+                  : colors.borderColorLight,
+              width: 1,
+            ),
           ),
           child: Padding(
             padding: const EdgeInsets.all(10),

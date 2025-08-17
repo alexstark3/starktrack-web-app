@@ -9,6 +9,7 @@ import '../modules/team/team.dart'; // Team Module
 import 'package:starktrack/screens/modules/projects/projects.dart'; // Projects Module
 import 'package:starktrack/screens/modules/clients/clients.dart'; // Clients Module
 import '../modules/admin/admin_panel.dart';
+import '../modules/reports/reports.dart';
 import '../settings_screen.dart';
 import 'package:starktrack/widgets/company/company_side_menu.dart';
 import '../../widgets/company/company_top_bar.dart';
@@ -138,6 +139,10 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
                 });
               },
             ),
+          if (tabLabels.contains('Reports'))
+            const ReportsScreen(
+              key: PageStorageKey('reports'),
+            ),
           if (tabLabels.contains(l10n.admin))
             AdminPanel(
               key: const PageStorageKey('admin'),
@@ -245,6 +250,12 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
         widget.roles.contains('admin') ||
         widget.roles.contains('team_leader')) {
       l.add(_ScreenCfg(l10n.clients, Icons.business));
+    }
+    // REPORTS MODULE: Only for roles company_admin, admin, team_leader
+    if (widget.roles.contains('company_admin') ||
+        widget.roles.contains('admin') ||
+        widget.roles.contains('team_leader')) {
+      l.add(_ScreenCfg('Reports', Icons.assessment));
     }
     if (widget.roles.contains('admin') ||
         widget.roles.contains('company_admin')) {

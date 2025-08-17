@@ -1231,10 +1231,14 @@ class _LogsTableState extends State<_LogsTable> {
             return Card(
               key: ValueKey('member_history_group_$groupKey'),
               margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-              elevation: isDark ? 0 : 4,
+              elevation: 0,
               color: isDark ? appColors.cardColorDark : Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: isDark ? appColors.borderColorDark : appColors.borderColorLight,
+                  width: 1,
+                ),
               ),
               child: Column(
                 children: [

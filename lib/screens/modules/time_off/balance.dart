@@ -42,39 +42,27 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Search bar in a card (same style as Team Balance)
-        Card(
-          elevation: Theme.of(context).brightness == Brightness.dark ? 0 : 2,
-          color: Theme.of(context).brightness == Brightness.dark
-              ? colors.cardColorDark
-              : colors.backgroundLight,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        // Search bar
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: AppSearchField(
-                        controller: _searchController,
-                        hintText: l10n.search,
-                        onChanged: (value) {
-                          setState(() {
-                            _searchQuery = value.trim().toLowerCase();
-                          });
-                        },
-                      ),
-                    ),
-                  ],
+                Expanded(
+                  child: AppSearchField(
+                    controller: _searchController,
+                    hintText: l10n.search,
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value.trim().toLowerCase();
+                      });
+                    },
+                  ),
                 ),
-                const SizedBox(height: 8),
               ],
             ),
-          ),
+            const SizedBox(height: 8),
+          ],
         ),
         const SizedBox(height: 8),
 
@@ -122,13 +110,18 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
                   Card(
                     key: ValueKey('timeoff_vacations_${widget.userId}'),
                     margin: const EdgeInsets.only(bottom: 12),
-                    elevation:
-                        Theme.of(context).brightness == Brightness.dark ? 0 : 2,
+                    elevation: 0,
                     color: Theme.of(context).brightness == Brightness.dark
                         ? colors.cardColorDark
                         : colors.backgroundLight,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? colors.borderColorDark
+                            : colors.borderColorLight,
+                        width: 1,
+                      ),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
@@ -182,13 +175,18 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
                   Card(
                     key: ValueKey('timeoff_overtime_${widget.userId}'),
                     margin: const EdgeInsets.only(bottom: 12),
-                    elevation:
-                        Theme.of(context).brightness == Brightness.dark ? 0 : 2,
+                    elevation: 0,
                     color: Theme.of(context).brightness == Brightness.dark
                         ? colors.cardColorDark
                         : colors.backgroundLight,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? colors.borderColorDark
+                            : colors.borderColorLight,
+                        width: 1,
+                      ),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(16),

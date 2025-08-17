@@ -8,6 +8,7 @@ import '../../super_admin/security/login_rate_limiter.dart';
 import '../../l10n/app_localizations.dart';
 import '../../utils/browser_persistence.dart';
 import '../../utils/app_logger.dart';
+import '../../theme/app_colors.dart';
 
 class CompanyLoginScreen extends StatefulWidget {
   const CompanyLoginScreen({super.key});
@@ -194,7 +195,9 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>();
     return Scaffold(
+      backgroundColor: colors?.dashboardBackground,
       body: LoginForm(
         emailController: _emailController,
         passwordController: _passwordController,

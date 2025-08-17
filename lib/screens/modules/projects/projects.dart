@@ -90,15 +90,12 @@ class _ProjectsListState extends State<_ProjectsList> {
                   ? colors.cardColorDark
                   : colors.backgroundLight,
               borderRadius: BorderRadius.circular(12),
-              boxShadow: Theme.of(context).brightness == Brightness.dark
-                  ? null
-                  : [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+              border: Border.all(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? colors.borderColorDark
+                    : colors.borderColorLight,
+                width: 1,
+              ),
             ),
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -292,9 +289,15 @@ class _ProjectsListState extends State<_ProjectsList> {
                         return Card(
                           key: ValueKey('project_item_${doc.id}'),
                           margin: const EdgeInsets.only(bottom: 10),
-                          elevation: 2,
+                          elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? colors.borderColorDark
+                                  : colors.borderColorLight,
+                              width: 1,
+                            ),
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(10),

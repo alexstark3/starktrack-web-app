@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../widgets/app_search_field.dart';
 import 'members_view.dart';
 
 class MembersTab extends StatefulWidget {
@@ -43,59 +44,20 @@ class _MembersTabState extends State<MembersTab> {
       );
     }
 
-    final colors = Theme.of(context).extension<AppColors>()!;
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Search field
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white24
-                    : Colors.black26,
-                width: 1,
-              ),
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? colors.lightGray
-                  : Colors.white,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText:
-                    AppLocalizations.of(context)?.searchByNameSurnameEmail ??
-                        'Search by name, surname or email',
-                hintStyle: TextStyle(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? const Color(0xFFB3B3B3)
-                      : colors.textColor,
-                ),
-                prefixIcon: Icon(
-                  Icons.search,
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? const Color(0xFFB3B3B3)
-                      : colors.darkGray,
-                ),
-                isDense: true,
-                border: InputBorder.none,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              ),
-              style: TextStyle(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? const Color(0xFFCCCCCC)
-                    : colors.textColor,
-              ),
-              onChanged: (val) =>
-                  setState(() => _search = val.trim().toLowerCase()),
-            ),
+                    // Search field
+          AppSearchField(
+            controller: _searchController,
+            hintText: AppLocalizations.of(context)?.searchByNameSurnameEmail ??
+                'Search by name, surname or email',
+            onChanged: (val) =>
+                setState(() => _search = val.trim().toLowerCase()),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           Expanded(
             child: _MembersTable(
               companyId: widget.companyId,
