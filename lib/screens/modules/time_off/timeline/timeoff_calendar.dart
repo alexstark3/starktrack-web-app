@@ -70,9 +70,9 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
 
   // Helper function to determine if dates should wrap based on available width
   bool _shouldWrapDates(double availableWidth) {
-    // Only wrap when space is very tight (below 400px for the date field)
+    // Only wrap when space is very tight (below 360px for the date field)
     // This ensures dates stay on one line unless absolutely necessary
-    return availableWidth < 400;
+    return availableWidth < 300;
   }
 
   Future<void> _selectDate(BuildContext context) async {

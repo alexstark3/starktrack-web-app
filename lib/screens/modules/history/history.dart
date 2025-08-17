@@ -200,49 +200,49 @@ class _HistoryLogsState extends State<HistoryLogs> {
          final projectBox = Container(
        height: kFilterHeight,
        width: 150,
-       alignment: Alignment.centerLeft,
        decoration: pillDecoration,
        padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: TextField(
-        controller: projectController,
-        decoration: InputDecoration(
-          hintText: AppLocalizations.of(context)!.project,
-          hintStyle: TextStyle(
-            color: isDark
-                ? const Color(0xFFB3B3B3)
-                : Colors.black.withValues(alpha: 0.87),
+      child: Center(
+        child: TextField(
+          controller: projectController,
+          decoration: InputDecoration(
+            hintText: AppLocalizations.of(context)!.project,
+            hintStyle: TextStyle(
+              color: isDark
+                  ? const Color(0xFFB3B3B3)
+                  : Colors.black.withValues(alpha: 0.87),
+            ),
+            border: InputBorder.none,
+            isDense: true,
+            contentPadding: EdgeInsets.zero,
           ),
-          border: InputBorder.none,
-          isDense: true,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
+          style: pillTextStyle,
+          onChanged: (v) => setState(() => searchProject = v.trim()),
         ),
-        style: pillTextStyle,
-        onChanged: (v) => setState(() => searchProject = v.trim()),
       ),
     );
 
     final noteBox = Container(
       height: kFilterHeight,
-      alignment: Alignment.centerLeft,
       decoration: pillDecoration,
-             padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: TextField(
-        controller: noteController,
-        decoration: InputDecoration(
-          hintText: AppLocalizations.of(context)!.note,
-          hintStyle: TextStyle(
-            color: isDark
-                ? const Color(0xFFB3B3B3)
-                : Colors.black.withValues(alpha: 0.87),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: Center(
+        child: TextField(
+          controller: noteController,
+          decoration: InputDecoration(
+            hintText: AppLocalizations.of(context)!.note,
+            hintStyle: TextStyle(
+              color: isDark
+                  ? const Color(0xFFB3B3B3)
+                  : Colors.black.withValues(alpha: 0.87),
+            ),
+            border: InputBorder.none,
+            isDense: true,
+            contentPadding: EdgeInsets.zero,
           ),
-          border: InputBorder.none,
-          isDense: true,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
+          style: pillTextStyle,
+          onChanged: (v) => setState(() => searchNote = v.trim()),
         ),
-        style: pillTextStyle,
-        onChanged: (v) => setState(() => searchNote = v.trim()),
       ),
     );
 
