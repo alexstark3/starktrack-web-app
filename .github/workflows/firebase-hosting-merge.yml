@@ -20,7 +20,7 @@ jobs:
       # Step 2: Set up the Flutter SDK environment
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.32.5' # IMPORTANT: Ensure this matches your local Flutter version
+          flutter-version: '3.35.1' # IMPORTANT: Ensure this matches your local Flutter version
           channel: 'stable'       # Assumes you are using the stable channel
           cache: true             # Caches Flutter dependencies for faster builds
 

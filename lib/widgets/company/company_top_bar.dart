@@ -80,6 +80,7 @@ class CompanyTopBar extends StatelessWidget {
                   ),
                   PopupMenuItem(
                     value: 'settings',
+                    onTap: onSettings,
                     child: Row(
                       children: [
                         const Icon(
@@ -91,10 +92,10 @@ class CompanyTopBar extends StatelessWidget {
                         Text(AppLocalizations.of(context)!.settings),
                       ],
                     ),
-                    onTap: onSettings,
                   ),
                   PopupMenuItem(
                     value: 'logout',
+                    onTap: onLogout,
                     child: Row(
                       children: [
                         const Icon(
@@ -106,7 +107,6 @@ class CompanyTopBar extends StatelessWidget {
                         Text(AppLocalizations.of(context)!.logout),
                       ],
                     ),
-                    onTap: onLogout,
                   ),
                 ],
                 child: Container(
