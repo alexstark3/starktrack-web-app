@@ -229,38 +229,51 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
     // Time Tracker should be available to all users
     l.add(_ScreenCfg(l10n.timeTracker, Icons.access_time));
     l.add(_ScreenCfg(l10n.history, Icons.history));
-    l.add(_ScreenCfg(l10n.timeOff, Icons.calendar_month));
+    
+    // TIME OFF MODULE: Only show if user has time_off module enabled
+    if (widget.access['time_off'] == true) {
+      l.add(_ScreenCfg(l10n.timeOff, Icons.calendar_month));
+    }
 
-    // Debug prints removed to keep console clean
-
-    // TEAM MODULE: Only for roles company_admin, admin, team_leader
-    if (widget.roles.contains('company_admin') ||
-        widget.roles.contains('admin') ||
-        widget.roles.contains('team_leader')) {
+    // TEAM MODULE: Only show if company has team module AND user has required role
+    if (widget.access['team'] == true &&
+        (widget.roles.contains('company_admin') ||
+         widget.roles.contains('admin') ||
+         widget.roles.contains('team_leader'))) {
       l.add(_ScreenCfg(l10n.team, Icons.group));
     }
-    // PROJECTS MODULE: Only for roles company_admin, admin, team_leader
-    if (widget.roles.contains('company_admin') ||
-        widget.roles.contains('admin') ||
-        widget.roles.contains('team_leader')) {
+    
+    // PROJECTS MODULE: Only show if company has projects module AND user has required role
+    if (widget.access['projects'] == true &&
+        (widget.roles.contains('company_admin') ||
+         widget.roles.contains('admin') ||
+         widget.roles.contains('team_leader'))) {
       l.add(_ScreenCfg(l10n.projects, Icons.folder));
     }
-    // CLIENTS MODULE: Only for roles company_admin, admin, team_leader
-    if (widget.roles.contains('company_admin') ||
-        widget.roles.contains('admin') ||
-        widget.roles.contains('team_leader')) {
+    
+    // CLIENTS MODULE: Only show if company has clients module AND user has required role
+    if (widget.access['clients'] == true &&
+        (widget.roles.contains('company_admin') ||
+         widget.roles.contains('admin') ||
+         widget.roles.contains('team_leader'))) {
       l.add(_ScreenCfg(l10n.clients, Icons.business));
     }
-    // REPORTS MODULE: Only for roles company_admin, admin, team_leader
-    if (widget.roles.contains('company_admin') ||
-        widget.roles.contains('admin') ||
-        widget.roles.contains('team_leader')) {
+    
+    // REPORTS MODULE: Only show if company has reports module AND user has required role
+    if (widget.access['reports'] == true &&
+        (widget.roles.contains('company_admin') ||
+         widget.roles.contains('admin') ||
+         widget.roles.contains('team_leader'))) {
       l.add(_ScreenCfg('Reports', Icons.assessment));
     }
-    if (widget.roles.contains('admin') ||
-        widget.roles.contains('company_admin')) {
+    
+    // ADMIN MODULE: Only show if company has admin module AND user has required role
+    if (widget.access['admin'] == true &&
+        (widget.roles.contains('admin') ||
+         widget.roles.contains('company_admin'))) {
       l.add(_ScreenCfg(l10n.admin, Icons.admin_panel_settings));
     }
+    
     l.add(_ScreenCfg(l10n.settings, Icons.settings));
     return l;
   }

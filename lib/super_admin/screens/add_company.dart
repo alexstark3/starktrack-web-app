@@ -27,7 +27,7 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
       TextEditingController(text: '10');
 
   Map<String, dynamic> _addressData = {};
-  List<String> _selectedModules = [];
+  List<String> _selectedModules = CompanyModuleService.getCoreModules(); // Core modules are always enabled
   String? _tempCompanyId;
   String? _selectedAdminName;
 
@@ -90,6 +90,13 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
           _selectedModules = List<String>.from(modulesData);
         } else if (modulesData is Map) {
           _selectedModules = modulesData.keys.cast<String>().toList();
+        }
+      }
+      
+      // Ensure all core modules are always enabled
+      for (final coreModule in CompanyModuleService.getCoreModules()) {
+        if (!_selectedModules.contains(coreModule)) {
+          _selectedModules.add(coreModule);
         }
       }
 
@@ -465,17 +472,29 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: availableModules.map((module) {
           final isSelected = _selectedModules.contains(module);
+          final isCoreModule = CompanyModuleService.getCoreModules().contains(module);
+          
           return CheckboxListTile(
             title: Text(
               CompanyModuleService.getModuleDisplayName(module),
-              style: TextStyle(color: colors.textColor),
+              style: TextStyle(
+                color: isCoreModule 
+                  ? colors.textColor.withValues(alpha: 0.6) 
+                  : colors.textColor
+              ),
             ),
             subtitle: Text(
-              CompanyModuleService.getModuleDescription(module),
-              style: TextStyle(color: colors.textColor.withValues(alpha: 0.7)),
+              isCoreModule 
+                ? 'Core module - always enabled and locked'
+                : CompanyModuleService.getModuleDescription(module),
+              style: TextStyle(
+                color: isCoreModule 
+                  ? colors.textColor.withValues(alpha: 0.5)
+                  : colors.textColor.withValues(alpha: 0.7)
+              ),
             ),
             value: isSelected,
-            onChanged: (bool? value) {
+            onChanged: isCoreModule ? null : (bool? value) {
               setState(() {
                 if (value == true) {
                   _selectedModules.add(module);
@@ -511,6 +530,14 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
       if (widget.existingCompany != null) {
         // Update existing company
         final companyId = widget.existingCompany!['id'];
+        
+        // Ensure all core modules are always included
+        final modulesToSave = List<String>.from(_selectedModules);
+        for (final coreModule in CompanyModuleService.getCoreModules()) {
+          if (!modulesToSave.contains(coreModule)) {
+            modulesToSave.add(coreModule);
+          }
+        }
 
         await FirebaseFirestore.instance
             .collection('companies')
@@ -519,7 +546,7 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
           'name': companyName,
           'address': _addressData,
           'userLimit': userLimit,
-          'modules': _selectedModules,
+          'modules': modulesToSave,
           'updatedAt': FieldValue.serverTimestamp(),
         });
 
@@ -538,6 +565,14 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
         // Create new company
         final companyId =
             CompanyIdGenerator.generateSecureCompanyId(companyName);
+            
+        // Ensure all core modules are always included
+        final modulesToSave = List<String>.from(_selectedModules);
+        for (final coreModule in CompanyModuleService.getCoreModules()) {
+          if (!modulesToSave.contains(coreModule)) {
+            modulesToSave.add(coreModule);
+          }
+        }
 
         await FirebaseFirestore.instance
             .collection('companies')
@@ -547,7 +582,7 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
           'address': _addressData,
           'userLimit': userLimit,
           'userCount': 0,
-          'modules': _selectedModules,
+          'modules': modulesToSave,
           'active': true,
           'createdAt': FieldValue.serverTimestamp(),
           'secureId': companyId,

@@ -21,8 +21,8 @@ service cloud.firestore {
       allow write: if request.resource != null &&
                    request.resource.data.companyId != null &&
                    hasRoleInCompany(request.auth.uid,
-                                    request.resource.data.companyId,
-                                    ['admin','company_admin','super_admin']);
+                                   request.resource.data.companyId,
+                                   ['admin','company_admin','super_admin']);
 
       /* DELETE */
       allow delete: if hasRoleInCompanySimple(request.auth.uid,
@@ -71,15 +71,34 @@ service cloud.firestore {
                       !resource.data.roles.hasAny(['super_admin']);
       }
 
-      /* ----- Projects collection - only for users with time_tracker module ----- */
+      /* ----- Projects collection - accessible to users with projects module OR time_tracker module ----- */
       match /projects/{docId} {
         allow read: if request.auth != null &&
-                     hasModuleAccess(request.auth.uid, companyId, 'time_tracker');
+                     (hasModuleAccess(request.auth.uid, companyId, 'projects') ||
+                      hasModuleAccess(request.auth.uid, companyId, 'time_tracker'));
+      }
+
+      /* ----- Clients collection - only for users with clients module ----- */
+      match /clients/{docId} {
+        allow read: if request.auth != null &&
+                     hasModuleAccess(request.auth.uid, companyId, 'clients');
+      }
+
+      /* ----- Team collection - only for users with team module ----- */
+      match /team/{docId} {
+        allow read: if request.auth != null &&
+                     hasModuleAccess(request.auth.uid, companyId, 'team');
+      }
+
+      /* ----- Reports collection - only for users with reports module ----- */
+      match /reports/{docId} {
+        allow read: if request.auth != null &&
+                     hasModuleAccess(request.auth.uid, companyId, 'reports');
       }
 
       /* ----- Other company sub-collections ----- */
       match /{subCol}/{docId} {
-        allow read, write: if ['clients','groups',
+        allow read, write: if ['groups',
                                'holiday_policies','timeoff_policies','timeoff_requests']
                                .hasAny([subCol]) &&
                            (
@@ -178,8 +197,16 @@ service cloud.firestore {
 
     /* Check if user has specific module access */
     function hasModuleAccess(userId, companyId, moduleName) {
-      return exists(/databases/$(database)/documents/companies/$(companyId)/users/$(userId)) &&
-             get(/databases/$(database)/documents/companies/$(companyId)/users/$(userId)).data.modules.hasAny([moduleName]);
+      // Core modules (time_tracker, history) are always accessible if company has them
+      return (['time_tracker', 'history'].hasAny([moduleName]) &&
+              exists(/databases/$(database)/documents/companies/$(companyId)) &&
+              get(/databases/$(database)/documents/companies/$(companyId)).data.modules.hasAny([moduleName])) ||
+             
+             // Other modules require both company and user to have them enabled
+             (exists(/databases/$(database)/documents/companies/$(companyId)/users/$(userId)) &&
+              get(/databases/$(database)/documents/companies/$(companyId)/users/$(userId)).data.modules.hasAny([moduleName]) &&
+              exists(/databases/$(database)/documents/companies/$(companyId)) &&
+              get(/databases/$(database)/documents/companies/$(companyId)).data.modules.hasAny([moduleName]));
     }
 
     /* Prevent privilege escalation */

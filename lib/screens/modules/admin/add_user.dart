@@ -5,9 +5,9 @@ import 'package:intl/intl.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../super_admin/services/company_module_service.dart';
+import '../../../../utils/app_logger.dart';
 import '../../../../widgets/calendar.dart';
 import 'user_address.dart';
-import '../../../../utils/app_logger.dart';
 
 class AddUserDialog extends StatefulWidget {
   final String companyId;
@@ -52,19 +52,23 @@ class _AddUserDialogState extends State<AddUserDialog> {
 
   // Form state
   List<String> _selectedRoles = [];
-  List<String> _selectedModules = ['time_tracker'];
+  List<String> _selectedModules = CompanyModuleService.getCoreModules();
   String _selectedTeamLeaderId = '';
   bool _isActive = true;
   bool _showBreaks = true;
   bool _workplaceSame = true;
   bool _isSubmitting = false;
   String _errorText = '';
+  
+  // Company modules
+  List<String> _companyModules = CompanyModuleService.getCoreModules();
 
   @override
   void initState() {
     super.initState();
     _initializeData();
     _initializeControllers();
+    _loadCompanyModules();
   }
 
   void _initializeData() {
@@ -95,7 +99,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
         'email': '',
         'phone': '',
         'roles': [],
-        'modules': ['time_tracker'],
+        'modules': CompanyModuleService.getCoreModules(),
         'active': true,
         'workPercent': 100,
         'weeklyHours': 40,
@@ -153,6 +157,97 @@ class _AddUserDialogState extends State<AddUserDialog> {
     // Initialize start date controller
     final startDate = _userData['startDate'] ?? '';
     _startDateController = TextEditingController(text: startDate);
+  }
+
+  /// Load company modules to determine which modules can be assigned to users
+  Future<void> _loadCompanyModules() async {
+    try {
+      final companyModules = await CompanyModuleService.getCompanyModules(widget.companyId);
+      setState(() {
+        _companyModules = companyModules;
+      });
+    } catch (e) {
+      AppLogger.error('Error loading company modules: $e');
+      // Fallback to core modules if loading fails
+      setState(() {
+        _companyModules = CompanyModuleService.getCoreModules();
+      });
+    }
+  }
+
+  /// Ensure company has all modules that are being assigned to users
+  Future<void> _ensureCompanyModules(List<String> userModules) async {
+    if (!widget.currentUserRoles.contains('super_admin')) return;
+    
+    try {
+      final currentCompanyModules = await CompanyModuleService.getCompanyModules(widget.companyId);
+      final modulesToAdd = userModules.where((module) => 
+        !currentCompanyModules.contains(module) && 
+        !CompanyModuleService.getCoreModules().contains(module)
+      );
+      
+      for (final module in modulesToAdd) {
+        await CompanyModuleService.addModuleToCompany(widget.companyId, module);
+      }
+      // Reload company modules after adding new ones
+      await _loadCompanyModules();
+    } catch (e) {
+      AppLogger.error('Error ensuring company modules: $e');
+    }
+  }
+
+  /// Get modules that are currently assigned to the user being edited
+  List<String> _getUserCurrentModules() {
+    if (widget.editUser != null) {
+      final userData = widget.editUser!.data() as Map<String, dynamic>;
+      final modules = userData['modules'];
+      if (modules is List) {
+        return List<String>.from(modules);
+      }
+    }
+    return [];
+  }
+
+  /// Check if any new modules were added during editing
+  bool _hasNewModules(List<String> newModules) {
+    final currentModules = _getUserCurrentModules();
+    return newModules.any((module) => !currentModules.contains(module));
+  }
+
+  /// Get display name for a module
+  String _getModuleDisplayName(String module) {
+    return CompanyModuleService.getModuleDisplayName(module);
+  }
+
+  /// Build module options for the UI
+  List<Map<String, dynamic>> _buildModuleOptions() {
+    final options = <Map<String, dynamic>>[];
+    
+    // Core modules are always available and locked
+    for (final module in CompanyModuleService.getCoreModules()) {
+      options.add({
+        'label': _getModuleDisplayName(module),
+        'value': module,
+        'locked': true
+      });
+    }
+    
+    // For super admins, show all available modules; for others, show only company modules
+    final optionalModules = widget.currentUserRoles.contains('super_admin') 
+        ? CompanyModuleService.getAvailableModules()
+        : _companyModules;
+    
+    for (final module in optionalModules) {
+      if (!CompanyModuleService.getCoreModules().contains(module)) {
+        options.add({
+          'label': _getModuleDisplayName(module),
+          'value': module,
+          'locked': false
+        });
+      }
+    }
+    
+    return options;
   }
 
   Map<String, dynamic> _buildAnnualLeaveDays() {
@@ -469,6 +564,28 @@ class _AddUserDialogState extends State<AddUserDialog> {
         }
       }
 
+      // Ensure company has all modules that are being assigned to users
+      await _ensureCompanyModules(_selectedModules);
+      
+      // Show feedback about newly enabled modules for super admins
+      if (widget.currentUserRoles.contains('super_admin') && _hasNewModules(_selectedModules)) {
+        final currentCompanyModules = await CompanyModuleService.getCompanyModules(widget.companyId);
+        final newlyEnabledModules = _selectedModules.where((module) => 
+          !currentCompanyModules.contains(module) && 
+          !CompanyModuleService.getCoreModules().contains(module)
+        );
+        
+        if (newlyEnabledModules.isNotEmpty && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('New modules enabled for company: ${newlyEnabledModules.join(', ')}'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+
       if (!mounted) return;
       widget.onUserAdded();
       Navigator.of(context).pop();
@@ -699,23 +816,57 @@ class _AddUserDialogState extends State<AddUserDialog> {
                       // Modules with locked time tracker
                       _buildModuleButtons(
                         label: l10n.modules,
-                        options: [
-                          {
-                            'label': l10n.timeTracker,
-                            'value': 'time_tracker',
-                            'locked': true
-                          },
-                          {
-                            'label': l10n.admin,
-                            'value': 'admin',
-                            'locked': false
-                          },
-                        ],
+                        options: _buildModuleOptions(),
                         values: _selectedModules,
                         onChanged: (values) =>
                             setState(() => _selectedModules = values),
                       ),
+
                       const SizedBox(height: 16),
+
+                      // Module status info for super admins
+                      if (widget.currentUserRoles.contains('super_admin'))
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          margin: const EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.blue),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.info, color: Colors.blue, size: 16),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      'As Super Admin, you can assign any module to users. Modules not yet enabled for the company will be automatically enabled.',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.blue,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              if (widget.editUser != null) ...[
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Currently assigned: ${_getUserCurrentModules().join(', ')}',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.blue.withValues(alpha: 0.8),
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
 
                       // Work Settings
 

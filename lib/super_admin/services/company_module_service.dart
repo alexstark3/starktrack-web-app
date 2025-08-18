@@ -8,12 +8,24 @@ class CompanyModuleService {
   static List<String> getAvailableModules() {
     return [
       'time_tracker',
+      'time_off',
       'admin',
       'team',
       'projects',
       'clients',
+      'reports',
       'history',
     ];
+  }
+
+  /// Get core modules that are always enabled and locked
+  static List<String> getCoreModules() {
+    return ['time_tracker', 'history'];
+  }
+
+  /// Get optional modules that can be enabled/disabled
+  static List<String> getOptionalModules() {
+    return ['time_off', 'admin', 'team', 'projects', 'clients', 'reports'];
   }
 
   /// Get module display name
@@ -21,6 +33,8 @@ class CompanyModuleService {
     switch (module) {
       case 'time_tracker':
         return 'Time Tracker';
+      case 'time_off':
+        return 'Time Off';
       case 'admin':
         return 'Admin Panel';
       case 'team':
@@ -29,6 +43,8 @@ class CompanyModuleService {
         return 'Projects';
       case 'clients':
         return 'Clients';
+      case 'reports':
+        return 'Reports';
       case 'history':
         return 'History';
       default:
@@ -41,6 +57,8 @@ class CompanyModuleService {
     switch (module) {
       case 'time_tracker':
         return 'Track time and manage work sessions';
+      case 'time_off':
+        return 'Manage time off requests, balances and calendar';
       case 'admin':
         return 'User management and company settings';
       case 'team':
@@ -49,6 +67,8 @@ class CompanyModuleService {
         return 'Create and manage projects';
       case 'clients':
         return 'Manage client relationships';
+      case 'reports':
+        return 'Generate and view reports';
       case 'history':
         return 'View time tracking history and reports';
       default:

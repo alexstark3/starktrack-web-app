@@ -118,7 +118,13 @@ class _CompanyLoginScreenState extends State<CompanyLoginScreen> {
           : <String>[];
       final access = <String, dynamic>{
         'time_tracker': modules.contains('time_tracker'),
+        'time_off': modules.contains('time_off'),
+        'team': modules.contains('team'),
+        'projects': modules.contains('projects'),
+        'clients': modules.contains('clients'),
+        'reports': modules.contains('reports'),
         'admin': modules.contains('admin'),
+        'history': modules.contains('history'),
       };
 
       final String email = (data['email'] ?? '') as String;

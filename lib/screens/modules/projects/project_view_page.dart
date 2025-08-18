@@ -3,9 +3,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../../../theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../widgets/calendar.dart';
 
 // Filter styling constants
-const double kFilterHeight = 40.0;
+const double kFilterHeight = 38.0;
 const double kFilterRadius = 10.0;
 const double kFilterSpacing = 12.0;
 const double kFilterFontSize = 14.0;
@@ -161,109 +162,150 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // --- Top section: Project details
-          Padding(
-            padding:
-                const EdgeInsets.only(left: 0, right: 0, top: 10, bottom: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  projectName.isNotEmpty
-                      ? projectName
-                      : AppLocalizations.of(context)!.noProjectsFound,
-                  style: TextStyle(
-                    fontSize: 18, // Reduced from 22 to 18
-                    fontWeight: FontWeight.bold,
-                    color: colors.primaryBlue,
+          Container(
+            margin: const EdgeInsets.only(top: 10, bottom: 5),
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness ==
+                      Brightness.dark
+                  ? colors.cardColorDark
+                  : Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: Theme.of(context).brightness ==
+                        Brightness.dark
+                    ? const Color(0xFF404040)
+                    : colors.borderColorLight,
+                width: 1,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    projectName.isNotEmpty
+                        ? projectName
+                        : AppLocalizations.of(context)!.noProjectsFound,
+                    style: TextStyle(
+                      fontSize: 18, // Reduced from 22 to 18
+                      fontWeight: FontWeight.bold,
+                      color: colors.primaryBlue,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.primaryBlue,
-                    foregroundColor: colors.whiteTextOnBlue,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
-                  ),
-                  onPressed: _showEditDialog,
-                  child: Text(AppLocalizations.of(context)!.edit),
-                ),
-                const SizedBox(height: 10),
-                if (projectRef.isNotEmpty)
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('${AppLocalizations.of(context)!.projectRef}: ',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Expanded(
-                          child:
-                              Text(projectRef, maxLines: null, softWrap: true)),
-                    ],
-                  ),
-                if (addressString.isNotEmpty)
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('${AppLocalizations.of(context)!.address}: ',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Expanded(
-                          child: Text(addressString,
-                              maxLines: null, softWrap: true)),
-                    ],
-                  ),
-                if (clientName.toString().isNotEmpty) ...[
                   const SizedBox(height: 10),
-                  Text(AppLocalizations.of(context)!.clientDetails,
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: colors.primaryBlue)),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('${AppLocalizations.of(context)!.clientName}: ',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Expanded(
-                          child: Text(clientName.toString(),
-                              maxLines: null, softWrap: true)),
-                    ],
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colors.primaryBlue,
+                      foregroundColor: colors.whiteTextOnBlue,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: _showEditDialog,
+                    child: Text(AppLocalizations.of(context)!.edit),
                   ),
-                  if (contactPerson.isNotEmpty)
+                  const SizedBox(height: 10),
+                  if (projectRef.isNotEmpty)
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('${AppLocalizations.of(context)!.contactPerson}: ',
+                        Text('${AppLocalizations.of(context)!.projectRef}: ',
                             style: TextStyle(fontWeight: FontWeight.bold)),
                         Expanded(
-                            child: Text(contactPerson,
-                                maxLines: null, softWrap: true)),
+                            child:
+                                Text(projectRef, maxLines: null, softWrap: true)),
                       ],
                     ),
-                  if (phone.toString().isNotEmpty)
+                  if (addressString.isNotEmpty)
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('${AppLocalizations.of(context)!.phone}: ',
+                        Text('${AppLocalizations.of(context)!.address}: ',
                             style: TextStyle(fontWeight: FontWeight.bold)),
                         Expanded(
-                            child: Text(phone.toString(),
+                            child: Text(addressString,
                                 maxLines: null, softWrap: true)),
                       ],
                     ),
-                  if (email.toString().isNotEmpty)
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('${AppLocalizations.of(context)!.email}: ',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        Expanded(
-                            child: Text(email.toString(),
-                                maxLines: null, softWrap: true)),
-                      ],
-                    ),
-                ]
-              ],
+                ],
+              ),
             ),
           ),
+          // --- Client details section
+          if (clientName.toString().isNotEmpty)
+            Container(
+              margin: const EdgeInsets.only(top: 5, bottom: 5),
+              decoration: BoxDecoration(
+                color: Theme.of(context).brightness ==
+                        Brightness.dark
+                    ? colors.cardColorDark
+                    : Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: Theme.of(context).brightness ==
+                          Brightness.dark
+                      ? const Color(0xFF404040)
+                      : colors.borderColorLight,
+                  width: 1,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(AppLocalizations.of(context)!.clientDetails,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: colors.primaryBlue)),
+                    const SizedBox(height: 10),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('${AppLocalizations.of(context)!.clientName}: ',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Expanded(
+                            child: Text(clientName.toString(),
+                                maxLines: null, softWrap: true)),
+                      ],
+                    ),
+                    if (contactPerson.isNotEmpty)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('${AppLocalizations.of(context)!.contactPerson}: ',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                          Expanded(
+                              child: Text(contactPerson,
+                                  maxLines: null, softWrap: true)),
+                        ],
+                      ),
+                    if (phone.toString().isNotEmpty)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('${AppLocalizations.of(context)!.phone}: ',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                          Expanded(
+                              child: Text(phone.toString(),
+                                  maxLines: null, softWrap: true)),
+                        ],
+                      ),
+                    if (email.toString().isNotEmpty)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('${AppLocalizations.of(context)!.email}: ',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                          Expanded(
+                              child: Text(email.toString(),
+                                  maxLines: null, softWrap: true)),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
+            ),
           // --- Sessions and totals
           Expanded(
             child: Padding(
@@ -327,13 +369,34 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // --- DATE FILTER UI (NEW) ---
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0, top: 0),
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
+                      Container(
+                        margin: const EdgeInsets.only(top: 5, bottom: 10),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).brightness ==
+                                  Brightness.dark
+                              ? colors.cardColorDark
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: Theme.of(context).brightness ==
+                                    Brightness.dark
+                                ? const Color(0xFF404040)
+                                : colors.borderColorLight,
+                            width: 1,
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Date filters
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0, top: 0),
+                                child: Builder(
+                                  builder: (context) {
                             final theme = Theme.of(context);
                             final isDark = theme.brightness == Brightness.dark;
-                            final dateFormat = DateFormat('yyyy-MM-dd');
 
                             // Pill decoration
                             final pillDecoration = BoxDecoration(
@@ -348,25 +411,45 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                               ),
                             );
 
-                            // Start date picker
-                            final startDatePicker = InkWell(
+                            // Date range picker
+                            final dateRangePicker = InkWell(
                               borderRadius:
                                   BorderRadius.circular(kFilterRadius),
                               onTap: () async {
-                                DateTime? picked = await showDatePicker(
+                                final result = await showDialog<DateRange>(
                                   context: context,
-                                  initialDate: _filterStart ?? DateTime.now(),
-                                  firstDate: DateTime(2023),
-                                  lastDate: DateTime(2100),
+                                  builder: (context) => Dialog(
+                                    child: Container(
+                                      constraints: const BoxConstraints(maxWidth: 400, maxHeight: 500),
+                                      child: CustomCalendar(
+                                        initialDateRange: DateRange(
+                                          startDate: _filterStart,
+                                          endDate: _filterEnd,
+                                        ),
+                                        onDateRangeChanged: (dateRange) {
+                                          setState(() {
+                                            _filterStart = dateRange.startDate;
+                                            _filterEnd = dateRange.endDate;
+                                          });
+                                        },
+                                        minDate: DateTime(2023),
+                                        maxDate: DateTime(2100),
+                                      ),
+                                    ),
+                                  ),
                                 );
-                                if (picked != null) {
-                                  setState(() => _filterStart = picked);
+                                
+                                if (result != null) {
+                                  setState(() {
+                                    _filterStart = result.startDate;
+                                    _filterEnd = result.endDate;
+                                  });
                                 }
                               },
                               child: Container(
                                 height: kFilterHeight,
                                 padding:
-                                    const EdgeInsets.symmetric(horizontal: 18),
+                                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                 decoration: pillDecoration,
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -375,20 +458,28 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                                         color: theme.colorScheme.primary,
                                         size: 20),
                                     const SizedBox(width: 6),
-                                    Text(
-                                      _filterStart == null
-                                          ? AppLocalizations.of(context)!.start
-                                          : dateFormat.format(_filterStart!),
-                                      style: TextStyle(
-                                        color: _filterStart == null
-                                            ? theme.colorScheme.primary
-                                            : (isDark
-                                                ? Colors.white
-                                                    .withValues(alpha: 0.87)
-                                                : Colors.black
-                                                    .withValues(alpha: 0.87)),
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: kFilterFontSize,
+                                    Flexible(
+                                      child: Text(
+                                        _filterStart == null && _filterEnd == null
+                                            ? 'Select Date Range'
+                                            : _filterStart != null && _filterEnd != null
+                                                ? '${DateFormat('dd/MM/yyyy').format(_filterStart!)} - ${DateFormat('dd/MM/yyyy').format(_filterEnd!)}'
+                                                : _filterStart != null
+                                                    ? 'From: ${DateFormat('dd/MM/yyyy').format(_filterStart!)}'
+                                                    : 'To: ${DateFormat('dd/MM/yyyy').format(_filterEnd!)}',
+                                        style: TextStyle(
+                                          color: _filterStart == null && _filterEnd == null
+                                              ? theme.colorScheme.primary
+                                              : (isDark
+                                                  ? Colors.white
+                                                      .withValues(alpha: 0.87)
+                                                  : Colors.black
+                                                      .withValues(alpha: 0.87)),
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: kFilterFontSize,
+                                        ),
+                                        maxLines: 2,
+                                        softWrap: true,
                                       ),
                                     ),
                                   ],
@@ -396,119 +487,54 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                               ),
                             );
 
-                            // End date picker
-                            final endDatePicker = InkWell(
-                              borderRadius:
-                                  BorderRadius.circular(kFilterRadius),
-                              onTap: () async {
-                                DateTime? picked = await showDatePicker(
-                                  context: context,
-                                  initialDate: _filterEnd ?? DateTime.now(),
-                                  firstDate: DateTime(2023),
-                                  lastDate: DateTime(2100),
-                                );
-                                if (picked != null) {
-                                  setState(() => _filterEnd = picked);
-                                }
-                              },
-                              child: Container(
-                                height: kFilterHeight,
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 18),
-                                decoration: pillDecoration,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.date_range,
-                                        color: theme.colorScheme.primary,
-                                        size: 20),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      _filterEnd == null
-                                          ? AppLocalizations.of(context)!.end
-                                          : dateFormat.format(_filterEnd!),
-                                      style: TextStyle(
-                                        color: _filterEnd == null
-                                            ? theme.colorScheme.primary
-                                            : (isDark
-                                                ? Colors.white
-                                                    .withValues(alpha: 0.87)
-                                                : Colors.black
-                                                    .withValues(alpha: 0.87)),
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: kFilterFontSize,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
+
 
                             // Clear filter button
-                            final clearButton = Container(
-                              height: kFilterHeight,
-                              decoration: BoxDecoration(
-                                color: isDark
-                                    ? theme.colorScheme.primary
-                                        .withValues(alpha: 0.2)
-                                    : theme.colorScheme.primary
-                                        .withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: isDark
-                                    ? null
-                                    : [
-                                        BoxShadow(
-                                          color: Colors.black
-                                              .withValues(alpha: 0.08),
-                                          blurRadius: 4,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ],
+                            final clearButton = ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: colors.primaryBlue,
+                                foregroundColor: Colors.white,
+                                elevation: 2,
+                                padding: const EdgeInsets.all(10),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(kFilterRadius),
+                                ),
+                                minimumSize: Size(kFilterHeight, kFilterHeight),
                               ),
-                              child: IconButton(
-                                icon: Icon(Icons.refresh,
-                                    color: theme.colorScheme.primary, size: 24),
-                                tooltip:
-                                    AppLocalizations.of(context)!.clearFilters,
-                                onPressed: () {
-                                  setState(() {
-                                    _filterStart = null;
-                                    _filterEnd = null;
-                                  });
-                                },
+                              onPressed: () {
+                                setState(() {
+                                  _filterStart = null;
+                                  _filterEnd = null;
+                                });
+                              },
+                              child: Icon(
+                                Icons.refresh,
+                                color: Colors.white,
+                                size: 20,
                               ),
                             );
 
-                            // Check if we need to wrap (when screen is too narrow)
-                            final needsWrap = constraints.maxWidth < 600;
-
-                            if (needsWrap) {
-                              // Wrap layout for small screens
-                              return Wrap(
-                                spacing: kFilterSpacing,
-                                runSpacing: 8,
-                                children: [
-                                  startDatePicker,
-                                  endDatePicker,
-                                  if (_filterStart != null ||
-                                      _filterEnd != null)
-                                    clearButton,
-                                ],
-                              );
-                            } else {
-                              // Single row layout for larger screens
-                              return Row(
-                                children: [
-                                  startDatePicker,
-                                  const SizedBox(width: kFilterSpacing),
-                                  endDatePicker,
-                                  const SizedBox(width: kFilterSpacing),
-                                  if (_filterStart != null ||
-                                      _filterEnd != null)
-                                    clearButton,
-                                ],
-                              );
-                            }
+                            // Simple responsive layout without LayoutBuilder
+                            return MediaQuery.of(context).size.width < 600
+                                ? Wrap(
+                                    spacing: kFilterSpacing,
+                                    runSpacing: 8,
+                                    children: [
+                                      dateRangePicker,
+                                      if (_filterStart != null ||
+                                          _filterEnd != null)
+                                        clearButton,
+                                    ],
+                                  )
+                                : Row(
+                                    children: [
+                                      dateRangePicker,
+                                      const SizedBox(width: kFilterSpacing),
+                                      if (_filterStart != null ||
+                                          _filterEnd != null)
+                                        clearButton,
+                                    ],
+                                  );
                           },
                         ),
                       ),
@@ -541,6 +567,10 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                               ],
                             ),
                           ],
+                        ),
+                      ),
+                            ],
+                          ),
                         ),
                       ),
                       // Data list (not table): every log in a Card
@@ -593,30 +623,20 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
 
                             return Container(
                               key: ValueKey('project_log_${log['id'] ?? idx}'),
-                              margin: const EdgeInsets.only(top: 10, bottom: 10),
+                              margin: const EdgeInsets.only(top: 5, bottom: 5),
                               decoration: BoxDecoration(
                                 color: Theme.of(context).brightness ==
                                         Brightness.dark
                                     ? colors.cardColorDark
                                     : Colors.white,
                                 borderRadius: BorderRadius.circular(10),
-                                border: Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? Border.all(
-                                        color: const Color(0xFF404040),
-                                        width: 1)
-                                    : null,
-                                boxShadow: Theme.of(context).brightness ==
-                                        Brightness.light
-                                    ? [
-                                        BoxShadow(
-                                          color: Colors.black12,
-                                          blurRadius: 6,
-                                          spreadRadius: 0,
-                                          offset: Offset(0, 3),
-                                        ),
-                                      ]
-                                    : null,
+                                border: Border.all(
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? const Color(0xFF404040)
+                                      : colors.borderColorLight,
+                                  width: 1,
+                                ),
                               ),
                               child: Padding(
                                 padding: const EdgeInsets.all(10),

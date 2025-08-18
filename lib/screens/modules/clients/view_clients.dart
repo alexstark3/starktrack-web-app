@@ -22,11 +22,13 @@ class ViewClients extends StatefulWidget {
 
 class _ViewClientsState extends State<ViewClients> {
   late Future<List<Map<String, dynamic>>> _projectsFuture;
+  late Future<Map<String, dynamic>> _totalsFuture;
 
   @override
   void initState() {
     super.initState();
     _projectsFuture = _fetchClientProjects();
+    _totalsFuture = _fetchClientTotals();
   }
 
   Future<List<Map<String, dynamic>>> _fetchClientProjects() async {
@@ -41,6 +43,80 @@ class _ViewClientsState extends State<ViewClients> {
       data['id'] = d.id;
       return data;
     }).toList();
+  }
+
+  Future<Map<String, dynamic>> _fetchClientTotals() async {
+    final projects = await _projectsFuture;
+    double totalHours = 0;
+    double totalExpenses = 0;
+
+    final usersSnap = await FirebaseFirestore.instance
+        .collection('companies')
+        .doc(widget.companyId)
+        .collection('users')
+        .get();
+
+    for (final userDoc in usersSnap.docs) {
+      for (final project in projects) {
+        final logsSnap = await FirebaseFirestore.instance
+            .collection('companies')
+            .doc(widget.companyId)
+            .collection('users')
+            .doc(userDoc.id)
+            .collection('all_logs')
+            .where('projectId', isEqualTo: project['id'])
+            .get();
+        for (final log in logsSnap.docs) {
+          final data = log.data();
+          totalHours += (data['duration_minutes'] ?? 0) / 60.0;
+          final expenses = (data['expenses'] ?? {}) as Map<String, dynamic>;
+          for (var v in expenses.values) {
+            if (v is num) totalExpenses += v.toDouble();
+          }
+        }
+      }
+    }
+
+    return {
+      'hours': totalHours,
+      'expenses': totalExpenses,
+      'projectCount': projects.length,
+    };
+  }
+
+  Future<Map<String, dynamic>> _getProjectTotals(String projectId) async {
+    double totalHours = 0;
+    double totalExpenses = 0;
+    
+    final usersSnap = await FirebaseFirestore.instance
+        .collection('companies')
+        .doc(widget.companyId)
+        .collection('users')
+        .get();
+        
+    for (final userDoc in usersSnap.docs) {
+      final logsSnap = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(widget.companyId)
+          .collection('users')
+          .doc(userDoc.id)
+          .collection('all_logs')
+          .where('projectId', isEqualTo: projectId)
+          .get();
+      for (final log in logsSnap.docs) {
+        final data = log.data();
+        totalHours += (data['duration_minutes'] ?? 0) / 60.0;
+        final expenses = (data['expenses'] ?? {}) as Map<String, dynamic>;
+        for (var v in expenses.values) {
+          if (v is num) totalExpenses += v.toDouble();
+        }
+      }
+    }
+    
+    return {
+      'hours': totalHours,
+      'expenses': totalExpenses,
+    };
   }
 
   @override
@@ -67,97 +143,148 @@ class _ViewClientsState extends State<ViewClients> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Client name
-            Text(
-              client['name'] ?? '',
-              style: TextStyle(
-                fontSize: 18, // Reduced from 22 to 18
-                fontWeight: FontWeight.bold,
-                color: colors.primaryBlue,
+            // Client details card
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? colors.cardColorDark
+                    : Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFF404040)
+                      : colors.borderColorLight,
+                  width: 1,
+                ),
               ),
-            ),
-            const SizedBox(height: 10),
-            // Edit button - left aligned under name
-            ElevatedButton.icon(
-              onPressed: () async {
-                final result = await showDialog<bool>(
-                  context: context,
-                  builder: (ctx) => EditClientDialog(
-                    companyId: widget.companyId,
-                    client: widget.client,
-                  ),
-                );
-                if (result == true) {
-                  widget.onEdit(); // Call the callback to refresh the parent
-                }
-              },
-              icon: const Icon(Icons.edit, size: 20),
-              label: Text(AppLocalizations.of(context)!.edit),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colors.primaryBlue,
-                foregroundColor: colors.whiteTextOnBlue,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Client name and edit button
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            client['name'] ?? '',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: colors.primaryBlue,
+                            ),
+                          ),
+                        ),
+                        ElevatedButton.icon(
+                          onPressed: () async {
+                            final result = await showDialog<bool>(
+                              context: context,
+                              builder: (ctx) => EditClientDialog(
+                                companyId: widget.companyId,
+                                client: widget.client,
+                              ),
+                            );
+                            if (result == true) {
+                              widget.onEdit(); // Call the callback to refresh the parent
+                            }
+                          },
+                          icon: const Icon(Icons.edit, size: 20),
+                          label: Text(AppLocalizations.of(context)!.edit),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: colors.primaryBlue,
+                            foregroundColor: colors.whiteTextOnBlue,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    // Info fields
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (address.isNotEmpty)
+                          _infoRow(AppLocalizations.of(context)!.address, address),
+                        if (person.isNotEmpty)
+                          _infoRow(AppLocalizations.of(context)!.contactPerson, person),
+                        if (email.isNotEmpty)
+                          _infoRow(AppLocalizations.of(context)!.email, email),
+                        if (phone.isNotEmpty)
+                          _infoRow(AppLocalizations.of(context)!.phone, phone),
+                        if ((client['city'] ?? '').isNotEmpty)
+                          _infoRow(
+                              AppLocalizations.of(context)!.city, client['city'] ?? ''),
+                        if (country.isNotEmpty)
+                          _infoRow(AppLocalizations.of(context)!.country, country),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 14),
-            // Info fields - left aligned in column
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (address.isNotEmpty)
-                  _infoRow(AppLocalizations.of(context)!.address, address),
-                if (person.isNotEmpty)
-                  _infoRow(AppLocalizations.of(context)!.contactPerson, person),
-                if (email.isNotEmpty)
-                  _infoRow(AppLocalizations.of(context)!.email, email),
-                if (phone.isNotEmpty)
-                  _infoRow(AppLocalizations.of(context)!.phone, phone),
-                if ((client['city'] ?? '').isNotEmpty)
-                  _infoRow(
-                      AppLocalizations.of(context)!.city, client['city'] ?? ''),
-                if (country.isNotEmpty)
-                  _infoRow(AppLocalizations.of(context)!.country, country),
-              ],
-            ),
-            const SizedBox(height: 24),
-            // Projects list for this client
-            Text(AppLocalizations.of(context)!.projectsForThisClient,
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 19,
-                    color: colors.primaryBlue)),
-            const SizedBox(height: 10),
+                         ),
+             const SizedBox(height: 20),
+             // Projects section
             FutureBuilder<List<Map<String, dynamic>>>(
               future: _projectsFuture,
               builder: (context, snap) {
                 if (snap.connectionState == ConnectionState.waiting) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 20.0),
-                    child: Center(child: CircularProgressIndicator()),
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? colors.cardColorDark
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? const Color(0xFF404040)
+                            : colors.borderColorLight,
+                        width: 1,
+                      ),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.all(20.0),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
                   );
                 }
                 final projects = snap.data ?? [];
                 if (projects.isEmpty) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    child: Text(AppLocalizations.of(context)!
-                        .noProjectsFoundForThisClient),
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? colors.cardColorDark
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? const Color(0xFF404040)
+                            : colors.borderColorLight,
+                        width: 1,
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Text(AppLocalizations.of(context)!
+                          .noProjectsFoundForThisClient),
+                    ),
                   );
                 }
                 return Column(
                   children: [
                     // Client totals summary
                     _ClientTotalsCard(
-                      companyId: widget.companyId,
-                      projects: projects,
+                      totals: _totalsFuture,
                     ),
                     const SizedBox(height: 10),
                     // Individual project cards
-                    ...projects.map((project) => _ProjectCard(
-                          companyId: widget.companyId,
-                          project: project,
-                        )),
+                    ...projects.map((project) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: _ProjectCard(
+                        project: project,
+                        totals: _getProjectTotals(project['id']),
+                      ),
+                    )),
                   ],
                 );
               },
@@ -188,44 +315,12 @@ class _ViewClientsState extends State<ViewClients> {
 }
 
 class _ProjectCard extends StatelessWidget {
-  final String companyId;
   final Map<String, dynamic> project;
+  final Future<Map<String, dynamic>> totals;
   const _ProjectCard({
-    required this.companyId,
     required this.project,
+    required this.totals,
   });
-
-  Future<Map<String, dynamic>> _totals() async {
-    double totalHours = 0;
-    double totalExpenses = 0;
-    final usersSnap = await FirebaseFirestore.instance
-        .collection('companies')
-        .doc(companyId)
-        .collection('users')
-        .get();
-    for (final userDoc in usersSnap.docs) {
-      final logsSnap = await FirebaseFirestore.instance
-          .collection('companies')
-          .doc(companyId)
-          .collection('users')
-          .doc(userDoc.id)
-          .collection('all_logs')
-          .where('projectId', isEqualTo: project['id'])
-          .get();
-      for (final log in logsSnap.docs) {
-        final data = log.data();
-        totalHours += (data['duration_minutes'] ?? 0) / 60.0;
-        final expenses = (data['expenses'] ?? {}) as Map<String, dynamic>;
-        for (var v in expenses.values) {
-          if (v is num) totalExpenses += v.toDouble();
-        }
-      }
-    }
-    return {
-      'hours': totalHours,
-      'expenses': totalExpenses,
-    };
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -238,7 +333,7 @@ class _ProjectCard extends StatelessWidget {
     ].where((e) => (e as String).isNotEmpty).join(' ');
 
     return FutureBuilder<Map<String, dynamic>>(
-      future: _totals(),
+      future: totals,
       builder: (context, snap) {
         double hours = snap.data?['hours'] ?? 0;
         double expenses = snap.data?['expenses'] ?? 0;
@@ -246,14 +341,16 @@ class _ProjectCard extends StatelessWidget {
         final expensesText =
             expenses > 0 ? '${expenses.toStringAsFixed(2)} CHF' : '-';
 
-        return Card(
+        return Container(
           margin: const EdgeInsets.only(bottom: 10),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(
+          decoration: BoxDecoration(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? colors.cardColorDark
+                : Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
               color: Theme.of(context).brightness == Brightness.dark
-                  ? colors.borderColorDark
+                  ? const Color(0xFF404040)
                   : colors.borderColorLight,
               width: 1,
             ),
@@ -347,68 +444,29 @@ class _ProjectCard extends StatelessWidget {
 }
 
 class _ClientTotalsCard extends StatelessWidget {
-  final String companyId;
-  final List<Map<String, dynamic>> projects;
+  final Future<Map<String, dynamic>> totals;
 
   const _ClientTotalsCard({
-    required this.companyId,
-    required this.projects,
+    required this.totals,
   });
-
-  Future<Map<String, dynamic>> _calculateTotals() async {
-    double totalHours = 0;
-    double totalExpenses = 0;
-
-    final usersSnap = await FirebaseFirestore.instance
-        .collection('companies')
-        .doc(companyId)
-        .collection('users')
-        .get();
-
-    for (final userDoc in usersSnap.docs) {
-      for (final project in projects) {
-        final logsSnap = await FirebaseFirestore.instance
-            .collection('companies')
-            .doc(companyId)
-            .collection('users')
-            .doc(userDoc.id)
-            .collection('all_logs')
-            .where('projectId', isEqualTo: project['id'])
-            .get();
-        for (final log in logsSnap.docs) {
-          final data = log.data();
-          totalHours += (data['duration_minutes'] ?? 0) / 60.0;
-          final expenses = (data['expenses'] ?? {}) as Map<String, dynamic>;
-          for (var v in expenses.values) {
-            if (v is num) totalExpenses += v.toDouble();
-          }
-        }
-      }
-    }
-
-    return {
-      'hours': totalHours,
-      'expenses': totalExpenses,
-      'projectCount': projects.length,
-    };
-  }
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
 
     return FutureBuilder<Map<String, dynamic>>(
-      future: _calculateTotals(),
+      future: totals,
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
-          return Card(
-            margin: const EdgeInsets.only(bottom: 10),
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(
+          return Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? colors.cardColorDark
+                  : Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
                 color: Theme.of(context).brightness == Brightness.dark
-                    ? colors.borderColorDark
+                    ? const Color(0xFF404040)
                     : colors.borderColorLight,
                 width: 1,
               ),
@@ -426,14 +484,15 @@ class _ClientTotalsCard extends StatelessWidget {
         final expenses = totals['expenses'] as double;
         final projectCount = totals['projectCount'] as int;
 
-        return Card(
-          margin: const EdgeInsets.only(bottom: 10),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? colors.cardColorDark
+                : Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
               color: Theme.of(context).brightness == Brightness.dark
-                  ? colors.borderColorDark
+                  ? const Color(0xFF404040)
                   : colors.borderColorLight,
               width: 1,
             ),
