@@ -409,45 +409,66 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
                         ),
                       ),
                     ),
-                    // Team button - 120px width
-                    SizedBox(
-                      width: 120,
-                      height: 38,
-                      child: Material(
-                        color: Colors.transparent,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              _showTeam = true;
-                            });
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _showTeam
-                                ? colors.primaryBlue
-                                : Colors.white,
-                            foregroundColor: _showTeam ? Colors.white : colors.darkGray,
-                            elevation: _showTeam ? 2 : 0, // Add elevation for active state
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(9), // Match history page radius
+                    // Team button - only show if user has team visibility permission
+                    FutureBuilder<DocumentSnapshot>(
+                      future: FirebaseFirestore.instance
+                          .collection('companies')
+                          .doc(widget.companyId)
+                          .collection('users')
+                          .doc(widget.userId)
+                          .get(),
+                      builder: (context, userSnapshot) {
+                        final canViewTeam = userSnapshot.hasData && 
+                            userSnapshot.data!.exists && 
+                            (userSnapshot.data!.data() as Map<String, dynamic>?)?['canViewTeamTimeOff'] == true;
+                        
+
+                        
+                        // Only show team button if user has permission
+                        if (!canViewTeam) {
+                          return const SizedBox.shrink(); // Hide the button completely
+                        }
+                        
+                        return SizedBox(
+                          width: 120,
+                          height: 38,
+                          child: Material(
+                            color: Colors.transparent,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  _showTeam = true;
+                                });
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _showTeam
+                                    ? colors.primaryBlue
+                                    : Colors.white,
+                                foregroundColor: _showTeam ? Colors.white : colors.darkGray,
+                                elevation: _showTeam ? 2 : 0, // Add elevation for active state
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(9), // Match history page radius
+                                ),
+                                side: BorderSide(
+                                  color: _showTeam
+                                      ? colors.primaryBlue
+                                      : Theme.of(context).brightness == Brightness.dark
+                                          ? colors.borderColorDark
+                                          : colors.borderColorLight,
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 18),
+                              ),
+                              child: Text(
+                                AppLocalizations.of(context)!.team,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 16, // Match history page font size
+                                ),
+                              ),
                             ),
-                            side: BorderSide(
-                              color: _showTeam
-                                  ? colors.primaryBlue
-                                  : Theme.of(context).brightness == Brightness.dark
-                                      ? colors.borderColorDark
-                                      : colors.borderColorLight,
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 18),
                           ),
-                          child: Text(
-                            AppLocalizations.of(context)!.team,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16, // Match history page font size
-                            ),
-                          ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   ],
                 );
@@ -485,6 +506,53 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
           }
 
           final teamMembers = teamSnapshot.data!;
+
+          // Check if this is because user doesn't have team visibility permission
+          if (teamMembers.isEmpty && _showTeam) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.lock_outline,
+                    size: 48,
+                    color: colors.darkGray,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Team View Not Available',
+                    style: TextStyle(
+                      color: colors.textColor,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'You don\'t have permission to view team time off information.\nContact your administrator to enable team visibility.',
+                    style: TextStyle(
+                      color: colors.darkGray,
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _showTeam = false;
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colors.primaryBlue,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('Switch to Personal View'),
+                  ),
+                ],
+              ),
+            );
+          }
 
           return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
             stream: FirebaseFirestore.instance
@@ -726,9 +794,58 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
                     final teamMembers = teamSnapshot.data!;
 
                     if (teamMembers.isEmpty) {
-                      return Center(
+                      // Check if this is because user doesn't have team visibility permission
+                      if (_showTeam) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.lock_outline,
+                                size: 48,
+                                color: colors.darkGray,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Team View Not Available',
+                                style: TextStyle(
+                                  color: colors.textColor,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'You don\'t have permission to view team time off information.\nContact your administrator to enable team visibility.',
+                                style: TextStyle(
+                                  color: colors.darkGray,
+                                  fontSize: 14,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _showTeam = false;
+                                  });
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: colors.primaryBlue,
+                                  foregroundColor: Colors.white,
+                                ),
+                                child: const Text('Switch to Personal View'),
+                              ),
+                            ],
+                          ),
+                        );
+                      } else {
+                        return Center(
                           child: Text(
-                              AppLocalizations.of(context)!.noMembersFound));
+                            AppLocalizations.of(context)!.noMembersFound,
+                          ),
+                        );
+                      }
                     }
 
                     // Use TimelineView for both Week and Month views
@@ -753,71 +870,138 @@ class _TimeOffCalendarState extends State<TimeOffCalendar> {
     );
   }
 
-  Future<List<Map<String, dynamic>>> _getTeamMembers() {
+  Future<List<Map<String, dynamic>>> _getTeamMembers() async {
     final l10n = AppLocalizations.of(context)!;
-    if (!_showTeam) {
-      // Personal view - only show current user
-      return FirebaseFirestore.instance
+    
+    // First check if current user has team visibility enabled
+    try {
+      final userDoc = await FirebaseFirestore.instance
           .collection('companies')
           .doc(widget.companyId)
           .collection('users')
           .doc(widget.userId)
-          .withConverter<Map<String, dynamic>>(
-            fromFirestore: (doc, _) => doc.data() ?? {},
-            toFirestore: (data, _) => data,
-          )
-          .get()
-          .then((doc) {
-        if (doc.exists) {
-          final data = doc.data()!;
-          final name = data['name'] ??
-              data['displayName'] ??
-              data['firstName'] ??
-              data['fullName'] ??
-              data['userName'] ??
+          .get();
+      
+      if (userDoc.exists) {
+        final userData = userDoc.data()!;
+        final canViewTeam = userData['canViewTeamTimeOff'] ?? false;
+        
+
+        
+        // Personal view - only show current user
+        if (!_showTeam) {
+          final name = userData['name'] ??
+              userData['displayName'] ??
+              userData['firstName'] ??
+              userData['fullName'] ??
+              userData['userName'] ??
               l10n.unknownUser;
           return [
             {
-              'id': doc.id,
+              'id': userDoc.id,
               'name': name,
-              'lastName': data['surname'] ?? '',
-              'email': data['email'] ?? '',
+              'lastName': userData['surname'] ?? '',
+              'email': userData['email'] ?? '',
             }
           ];
         }
-        return <Map<String, dynamic>>[];
-      }).catchError((error) {
-        return <Map<String, dynamic>>[];
-      });
+        
+        // Team view - only if user has permission
+        if (canViewTeam && _showTeam) {
+          try {
+            final snapshot = await FirebaseFirestore.instance
+                .collection('companies')
+                .doc(widget.companyId)
+                .collection('users')
+                .withConverter<Map<String, dynamic>>(
+                  fromFirestore: (doc, _) => doc.data() ?? {},
+                  toFirestore: (data, _) => data,
+                )
+                .get();
+            
+            if (snapshot.docs.isEmpty) {
+              return [];
+            }
+            
+            final membersIterable = snapshot.docs.map((doc) {
+              try {
+                final data = doc.data();
+                
+                final name = data['name'] ??
+                    data['displayName'] ??
+                    data['firstName'] ??
+                    data['fullName'] ??
+                    data['userName'] ??
+                    l10n.unknownUser;
+                
+                final member = {
+                  'id': doc.id,
+                  'name': name,
+                  'lastName': data['surname'] ?? '',
+                  'email': data['email'] ?? '',
+                };
+                return member;
+              } catch (e) {
+                // Return a fallback member for this user
+                return {
+                  'id': doc.id,
+                  'name': 'Error Loading User',
+                  'lastName': '',
+                  'email': 'error@example.com',
+                };
+              }
+            });
+            
+            return membersIterable.toList();
+            
+          } catch (e) {
+            // Return empty list on error
+            return [];
+          }
+        }
+        
+        // If user can't view team but team view is requested, show error message
+        if (!canViewTeam && _showTeam) {
+          // Return empty list but don't change _showTeam state
+          // This will show the error message in the UI
+          return [];
+        }
+      }
+    } catch (error) {
+      // On error, return empty list but don't change state
+      return [];
     }
-
-    // Team view - fetch all team members with names
+    
+    // Default fallback - personal view only
     return FirebaseFirestore.instance
         .collection('companies')
         .doc(widget.companyId)
         .collection('users')
+        .doc(widget.userId)
         .withConverter<Map<String, dynamic>>(
           fromFirestore: (doc, _) => doc.data() ?? {},
           toFirestore: (data, _) => data,
         )
         .get()
-        .then((snapshot) {
-      final membersIterable = snapshot.docs.map((doc) {
-        final data = doc.data();
+        .then((doc) {
+      if (doc.exists) {
+        final data = doc.data()!;
         final name = data['name'] ??
             data['displayName'] ??
             data['firstName'] ??
             data['fullName'] ??
             data['userName'] ??
             l10n.unknownUser;
-        return {
-          'id': doc.id,
-          'name': name,
-          'lastName': data['surname'] ?? '',
-          'email': data['email'] ?? '',
-        };
-      });
-      return membersIterable.toList();
+        return [
+          {
+            'id': doc.id,
+            'name': name,
+            'lastName': data['surname'] ?? '',
+            'email': data['email'] ?? '',
+          }
+        ];
+      }
+      return <Map<String, dynamic>>[];
     }).catchError((error) {
       return <Map<String, dynamic>>[];
     });

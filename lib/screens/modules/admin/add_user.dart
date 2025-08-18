@@ -57,6 +57,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
   bool _isActive = true;
   bool _showBreaks = true;
   bool _workplaceSame = true;
+  bool _canViewTeamTimeOff = false; // New: control team time off visibility
   bool _isSubmitting = false;
   String _errorText = '';
   
@@ -91,6 +92,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
       _isActive = _userData['active'] ?? true;
       _showBreaks = _userData['showBreaks'] ?? true;
       _workplaceSame = _userData['workplaceSame'] ?? true;
+      _canViewTeamTimeOff = _userData['canViewTeamTimeOff'] ?? false;
     } else {
       // Default values for new user
       _userData = {
@@ -113,6 +115,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
         'teamLeaderId': '',
         'showBreaks': true,
         'workplaceSame': true,
+        'canViewTeamTimeOff': false,
         'privateAdress': {},
         'workAddress': {},
       };
@@ -430,10 +433,13 @@ class _AddUserDialogState extends State<AddUserDialog> {
             _selectedTeamLeaderId.isEmpty ? null : _selectedTeamLeaderId,
         'showBreaks': _showBreaks,
         'workplaceSame': _workplaceSame,
+        'canViewTeamTimeOff': _canViewTeamTimeOff,
         'privateAdress': _privateAddress,
         'workAddress': _workAddress,
         'updatedAt': FieldValue.serverTimestamp(),
       };
+      
+      
 
       if (!isEdit) {
         userData['createdAt'] = FieldValue.serverTimestamp();
@@ -821,7 +827,13 @@ class _AddUserDialogState extends State<AddUserDialog> {
                         onChanged: (values) =>
                             setState(() => _selectedModules = values),
                       ),
-
+                      
+                      // Team Time Off Visibility (only show if time_off module is enabled)
+                      if (_selectedModules.contains('time_off')) ...[
+                        const SizedBox(height: 16),
+                        _buildTeamVisibilityRadio(),
+                      ],
+                      
                       const SizedBox(height: 16),
 
                       // Module status info for super admins
@@ -1033,6 +1045,9 @@ class _AddUserDialogState extends State<AddUserDialog> {
                       const SizedBox(height: 8),
                       _buildSwitchRow(l10n.showBreaks, _showBreaks,
                           (value) => setState(() => _showBreaks = value)),
+                      const SizedBox(height: 8),
+                      
+
                       // Password field (only for new users)
                       if (!isEdit) ...[
                         const SizedBox(height: 16),
@@ -1354,6 +1369,62 @@ class _AddUserDialogState extends State<AddUserDialog> {
           value: value,
           onChanged: onChanged,
           activeThumbColor: appColors.primaryBlue,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTeamVisibilityRadio() {
+    final appColors = Theme.of(context).extension<AppColors>()!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Team Time Off Visibility',
+          style: TextStyle(
+            color: appColors.textColor,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        SegmentedButton<bool>(
+          segments: [
+            ButtonSegment<bool>(
+              value: false,
+              label: Text('Personal Only'),
+            ),
+            ButtonSegment<bool>(
+              value: true,
+              label: Text('Personal + Team'),
+            ),
+          ],
+          selected: {_canViewTeamTimeOff},
+          onSelectionChanged: (Set<bool> selection) {
+            setState(() => _canViewTeamTimeOff = selection.first);
+          },
+          style: ButtonStyle(
+            foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+              if (states.contains(WidgetState.selected)) {
+                return Colors.white;
+              }
+              return appColors.textColor;
+            }),
+            backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+              if (states.contains(WidgetState.selected)) {
+                return appColors.primaryBlue;
+              }
+              return Colors.transparent;
+            }),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Choose whether this user can see only their own time off or also team members\' time off information',
+          style: TextStyle(
+            color: appColors.darkGray,
+            fontSize: 12,
+          ),
         ),
       ],
     );

@@ -98,8 +98,7 @@ service cloud.firestore {
 
       /* ----- Other company sub-collections ----- */
       match /{subCol}/{docId} {
-        allow read, write: if ['groups',
-                               'holiday_policies','timeoff_policies','timeoff_requests']
+        allow read, write: if ['groups']
                                .hasAny([subCol]) &&
                            (
                              /* READ - All collections for authenticated users in company */
@@ -110,6 +109,59 @@ service cloud.firestore {
                              /* WRITE — uses the new helper that tries *Simple* first */
                              (request.method != 'get' && companyCanWriteSimple())
                            );
+      }
+
+      /* ----- Users collection - special handling for team visibility ----- */
+      match /users/{docId} {
+        allow read: if request.auth != null &&
+                     (
+                       // User can always read their own document
+                       request.auth.uid == docId ||
+                       // Or if they have team visibility enabled
+                       (exists(/databases/$(database)/documents/companies/$(companyId)/users/$(request.auth.uid)) &&
+                        get(/databases/$(database)/documents/companies/$(companyId)/users/$(request.auth.uid)).data.canViewTeamTimeOff == true) ||
+                       // Or if they have admin privileges
+                       hasRoleInCompany(request.auth.uid, companyId,
+                                        ['admin','company_admin','super_admin'])
+                     );
+        allow write: if request.auth != null &&
+                     (request.auth.uid == docId ||
+                      hasRoleInCompany(request.auth.uid, companyId,
+                                       ['admin','company_admin','super_admin']));
+      }
+
+      /* ----- Time Off collections - require time_off module access ----- */
+      match /holiday_policies/{docId} {
+        allow read: if request.auth != null &&
+                     hasModuleAccess(request.auth.uid, companyId, 'time_off');
+        allow write: if hasRoleInCompany(request.auth.uid, companyId,
+                                         ['admin','company_admin','super_admin']);
+      }
+
+      match /timeoff_policies/{docId} {
+        allow read: if request.auth != null &&
+                     hasModuleAccess(request.auth.uid, companyId, 'time_off');
+        allow write: if hasRoleInCompany(request.auth.uid, companyId,
+                                         ['admin','company_admin','super_admin']);
+      }
+
+      match /timeoff_requests/{docId} {
+        allow read: if request.auth != null &&
+                     hasModuleAccess(request.auth.uid, companyId, 'time_off') &&
+                     (
+                       // User can always read their own requests
+                       request.auth.uid == resource.data.userId ||
+                       // Or if they have team visibility enabled
+                       (exists(/databases/$(database)/documents/companies/$(companyId)/users/$(request.auth.uid)) &&
+                        get(/databases/$(database)/documents/companies/$(companyId)/users/$(request.auth.uid)).data.canViewTeamTimeOff == true) ||
+                       // Or if they have admin privileges
+                       hasRoleInCompany(request.auth.uid, companyId,
+                                        ['admin','company_admin','super_admin'])
+                     );
+        allow write: if request.auth != null &&
+                     (request.auth.uid == resource.data.userId ||
+                      hasRoleInCompany(request.auth.uid, companyId,
+                                       ['admin','company_admin','super_admin']));
       }
 
       /* ----- Time-tracking logs ----- */

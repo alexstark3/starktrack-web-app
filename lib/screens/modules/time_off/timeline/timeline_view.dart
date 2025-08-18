@@ -93,7 +93,7 @@ class TimelineView extends StatelessWidget {
                   ),
                 ),
                 // Team member names
-                ...teamMembers.take(3).map((member) {
+                ...teamMembers.map((member) {
                   return Container(
                     width: 100,
                     height: 40,
@@ -225,7 +225,7 @@ class TimelineView extends StatelessWidget {
                       }).toList(),
                     ),
                     // Team member data rows
-                    ...teamMembers.take(3).map((member) {
+                    ...teamMembers.map((member) {
                       return Row(
                         children: days.map((day) {
                           final isWeekend = day.weekday > 5;

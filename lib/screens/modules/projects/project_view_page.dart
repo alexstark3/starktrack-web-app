@@ -490,17 +490,19 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
 
 
                             // Clear filter button
-                            final clearButton = ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: colors.primaryBlue,
-                                foregroundColor: Colors.white,
-                                elevation: 2,
-                                padding: const EdgeInsets.all(10),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(kFilterRadius),
+                            final clearButton = SizedBox(
+                              width: kFilterHeight,
+                              height: kFilterHeight,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: colors.primaryBlue,
+                                  foregroundColor: Colors.white,
+                                  elevation: 2,
+                                  padding: EdgeInsets.zero,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(kFilterRadius),
+                                  ),
                                 ),
-                                minimumSize: Size(kFilterHeight, kFilterHeight),
-                              ),
                               onPressed: () {
                                 setState(() {
                                   _filterStart = null;
@@ -511,6 +513,7 @@ class _ProjectViewPageState extends State<ProjectViewPage> {
                                 Icons.refresh,
                                 color: Colors.white,
                                 size: 20,
+                              ),
                               ),
                             );
 
