@@ -81,7 +81,7 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
             }
           }
         } catch (e) {
-          debugPrint('❌ Error fetching admin for company ${doc.id}: $e');
+          // Handle error silently
         }
 
         // Count actual users in the company and update the company document
@@ -106,7 +106,7 @@ class _CompanyManagementScreenState extends State<CompanyManagementScreen> {
             });
           }
         } catch (e) {
-          debugPrint('❌ Error counting users for company ${doc.id}: $e');
+          // Handle error silently
         }
 
         companies.add({

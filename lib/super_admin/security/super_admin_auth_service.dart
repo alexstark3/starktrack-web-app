@@ -14,16 +14,12 @@ class SuperAdminAuthService {
     }
 
     try {
-      AppLogger.debug('Checking admin status for user: ${user.uid}');
-      AppLogger.debug('Looking in collection: $_adminCollection');
-
       final adminDoc = await FirebaseFirestore.instance
           .collection(_adminCollection)
           .doc(user.uid)
           .get();
 
       final exists = adminDoc.exists;
-      AppLogger.debug('Admin document exists: $exists');
 
       if (exists) {
         AppLogger.info('User is an admin');

@@ -256,25 +256,29 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
   Widget _statusChip(String status, AppColors colors) {
     Color bg;
     Color fg;
+    String statusText;
     switch (status) {
       case 'approved':
         bg = colors.green;
         fg = Colors.white;
+        statusText = AppLocalizations.of(context)!.approved;
         break;
       case 'rejected':
         bg = colors.red;
         fg = Colors.white;
+        statusText = AppLocalizations.of(context)!.rejected;
         break;
       default:
         bg = colors.orange;
         fg = Colors.white;
+        statusText = AppLocalizations.of(context)!.pending;
         break;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration:
           BoxDecoration(color: bg, borderRadius: BorderRadius.circular(16)),
-      child: Text(status.toUpperCase(),
+      child: Text(statusText.toUpperCase(),
           style:
               TextStyle(color: fg, fontWeight: FontWeight.w600, fontSize: 12)),
     );

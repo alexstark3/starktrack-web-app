@@ -77,97 +77,47 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
     }
   }
 
-  Future<void> _login() async {
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _signIn() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = '';
+      });
 
-    setState(() {
-      _isLoading = true;
-      _errorMessage = '';
-    });
+      try {
+        final email = _emailController.text.trim();
+        final password = _passwordController.text;
 
-    try {
-      AppLogger.debug('Starting super admin login');
-      AppLogger.debug('Email: ${_emailController.text.trim()}');
-      AppLogger.debug('Domain: ${Uri.base.host}');
-      AppLogger.debug('FirebaseAuth instance: ${FirebaseAuth.instance}');
-
-      // Sign in with Firebase Auth
-      AppLogger.debug('Attempting Firebase Auth sign in');
-      AppLogger.debug('Email: ${_emailController.text.trim()}');
-      AppLogger.debug('Password length: ${_passwordController.text.length}');
-
-      // Try to sign in without reCAPTCHA
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-      );
-
-      AppLogger.info(
-          'Firebase Auth successful, uid: ${FirebaseAuth.instance.currentUser?.uid}');
-
-      // Check if user is an admin
-      AppLogger.debug('Checking admin status');
-      final isAdmin = await SuperAdminAuthService.isAdmin();
-      AppLogger.debug('Admin check result: $isAdmin');
-
-      if (!isAdmin) {
-        AppLogger.warn('User is not an admin, signing out');
-        // Sign out if not admin
-        await FirebaseAuth.instance.signOut();
-        if (mounted) {
-          setState(() {
-            _errorMessage = 'Access denied. Super admin privileges required.';
-            _isLoading = false;
-          });
-        }
-        return;
-      }
-
-      // Save email for browser persistence (if remember me is enabled)
-      await _saveLoginData();
-      if (!mounted) return;
-
-      // Navigate to admin dashboard
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const SuperAdminDashboardScreen(),
-          ),
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email,
+          password: password,
         );
-      }
-    } on FirebaseAuthException catch (e) {
-      String errorMsg;
-      switch (e.code) {
-        case 'user-not-found':
-          errorMsg = 'No super admin account found with this email.';
-          break;
-        case 'wrong-password':
-          errorMsg = 'Incorrect password.';
-          break;
-        case 'invalid-email':
-          errorMsg = 'Invalid email address.';
-          break;
-        case 'user-disabled':
-          errorMsg = 'This account has been disabled.';
-          break;
-        case 'too-many-requests':
-          errorMsg = 'Too many failed attempts. Please try again later.';
-          break;
-        default:
-          errorMsg = 'Login failed. Please try again.';
-      }
 
-      if (mounted) {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          final isAdmin = await SuperAdminAuthService.isAdmin();
+          
+          if (isAdmin) {
+            // Save login data before navigation
+            await _saveLoginData();
+            
+            if (!mounted) return;
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const SuperAdminDashboardScreen(),
+              ),
+            );
+          } else {
+            setState(() {
+              _errorMessage = 'Access denied. You do not have super admin privileges.';
+              _isLoading = false;
+            });
+            await FirebaseAuth.instance.signOut();
+          }
+        }
+      } catch (e) {
         setState(() {
-          _errorMessage = errorMsg;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      AppLogger.error('Unexpected super admin login error: $e');
-      if (mounted) {
-        setState(() {
-          _errorMessage = 'An unexpected error occurred.';
+          _errorMessage = 'Sign in failed: ${e.toString()}';
           _isLoading = false;
         });
       }
@@ -314,7 +264,7 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
                           }
                           return null;
                         },
-                        onFieldSubmitted: (_) => !_isLoading ? _login() : null,
+                        onFieldSubmitted: (_) => !_isLoading ? _signIn() : null,
                       ),
                       const SizedBox(height: 8),
 
@@ -350,7 +300,7 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
                         width: double.infinity,
                         height: 48,
                         child: ElevatedButton(
-                          onPressed: _isLoading ? null : _login,
+                          onPressed: _isLoading ? null : _signIn,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: colors.primaryBlue,
                             foregroundColor: colors.whiteTextOnBlue,
@@ -408,7 +358,7 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
                   // Replace deprecated onWillPop by handling back pop intent
                   onPopInvokedWithResult: (didPop, result) async {
                     if (!didPop && !_isLoading) {
-                      await _login();
+                      await _signIn();
                     }
                   },
                 ),

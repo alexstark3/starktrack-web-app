@@ -1,5 +1,4 @@
 import 'dart:developer' as dev;
-import 'package:flutter/foundation.dart';
 
 enum LogLevel { debug, info, warning, error }
 
@@ -12,10 +11,7 @@ class AppLogger {
     Object? error,
     StackTrace? stackTrace,
   }) {
-    if (kDebugMode) {
-      final suffix = error != null ? ' | $error' : '';
-      debugPrint('[$name][DEBUG] $message$suffix');
-    }
+    // Debug messages are only logged to dev tools, not to console
     dev.log(
       message,
       name: name,
@@ -29,9 +25,6 @@ class AppLogger {
     String message, {
     String name = 'StarkTrack',
   }) {
-    if (kDebugMode) {
-      debugPrint('[$name][INFO] $message');
-    }
     dev.log(
       message,
       name: name,
@@ -45,10 +38,6 @@ class AppLogger {
     Object? error,
     StackTrace? stackTrace,
   }) {
-    if (kDebugMode) {
-      final suffix = error != null ? ' | $error' : '';
-      debugPrint('[$name][WARN] $message$suffix');
-    }
     dev.log(
       message,
       name: name,

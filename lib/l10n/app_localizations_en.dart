@@ -291,6 +291,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get overtime => 'Overtime';
 
   @override
+  String get vacations => 'Vacations';
+
+  @override
+  String get type => 'Type';
+
+  @override
+  String get bonus => 'Bonus';
+
+  @override
+  String get updatedSuccessfully => 'updated successfully';
+
+  @override
+  String get transferred => 'Transferred';
+
+  @override
+  String get current => 'Current';
+
+  @override
+  String get used => 'Used';
+
+  @override
+  String get available => 'Available';
+
+  @override
+  String get calculatingOvertime => 'Calculating overtime from logs...';
+
+  @override
+  String get noOvertimeData => 'No overtime data available';
+
+  @override
+  String get failedToUpdateBonus => 'Failed to update bonus value';
+
+  @override
   String get totalExpenses => 'Total Expenses';
 
   @override
@@ -480,6 +513,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get weeks => 'Weeks';
+
+  @override
+  String get weekAbbreviation => 'W';
 
   @override
   String get months => 'Months';

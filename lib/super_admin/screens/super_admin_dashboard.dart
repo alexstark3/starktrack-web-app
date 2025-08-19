@@ -163,250 +163,255 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Admin Info Card
-            Card(
-              color: colors.cardColorDark,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Welcome, ${_adminData!['firstName']} ${_adminData!['surname']}',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: colors.textColor,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Admin Info Card
+              Card(
+                color: colors.cardColorDark,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Welcome, ${_adminData!['firstName']} ${_adminData!['surname']}',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: colors.textColor,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _adminData!['email'],
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: colors.textColor,
+                      const SizedBox(height: 8),
+                      Text(
+                        _adminData!['email'],
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: colors.textColor,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Roles: ${roles.join(', ')}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: colors.primaryBlue,
-                        fontWeight: FontWeight.w500,
+                      const SizedBox(height: 8),
+                      Text(
+                        'Roles: ${roles.join(', ')}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: colors.primaryBlue,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-            // Super Admin Actions
-            Text(
-              'Super Admin Actions',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: colors.textColor,
+              // Super Admin Actions
+              Text(
+                'Super Admin Actions',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: colors.textColor,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            // Backup Database Button
-            ElevatedButton.icon(
-              icon: Icon(Icons.download, color: colors.whiteTextOnBlue),
-              label: Text('Backup Database',
-                  style: TextStyle(color: colors.whiteTextOnBlue)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colors.primaryBlue,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-              ),
-              onPressed: () async {
-                final json =
-                    await FirestoreBackupService.backupAllCompaniesAsJson();
-                final bytes = utf8.encode(json);
-                await FileSaver.instance.saveFile(
-                  name: 'firestore_backup',
-                  ext: 'json',
-                  bytes: Uint8List.fromList(bytes),
-                  mimeType: MimeType.json,
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Restore from Backup Button
-            ElevatedButton.icon(
-              icon: Icon(Icons.upload_file, color: colors.whiteTextOnBlue),
-              label: Text('Restore from Backup',
-                  style: TextStyle(color: colors.whiteTextOnBlue)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-              ),
-              onPressed: () async {
-                final result = await FilePicker.platform.pickFiles(
-                  type: FileType.custom,
-                  allowedExtensions: ['json'],
-                  withData: true,
-                );
-                if (result != null && result.files.isNotEmpty) {
-                  final file = result.files.first;
-                  final json = utf8.decode(file.bytes ?? []);
-                  
-                  if (!context.mounted) return;
-                  
-                  final confirmed = await showDialog<bool>(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      title: const Text('Confirm Restore'),
-                      content: const Text(
-                          'Restoring from backup will overwrite existing data for the same IDs. Are you sure you want to continue?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(ctx).pop(false),
-                          child: const Text('Cancel'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () => Navigator.of(ctx).pop(true),
-                          child: const Text('Restore'),
-                        ),
-                      ],
-                    ),
-                  );
-                  if (confirmed == true) {
-                    try {
-                      await FirestoreBackupService.restoreFromJson(json);
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Restore completed successfully!'),
-                              backgroundColor: Colors.green),
-                        );
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text('Restore failed: $e'),
-                              backgroundColor: Colors.red),
-                        );
-                      }
-                    }
-                  }
-                }
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Migration Tool (Super Admin only)
-            if (isSuperAdmin) ...[
+              // Company Management
               _buildActionCard(
                 context,
-                title: 'Company Migration Tool',
-                subtitle: 'Migrate companies to secure IDs',
-                icon: Icons.security,
-                color: Colors.orange,
+                title: 'Company Management',
+                subtitle: 'View and manage all companies',
+                icon: Icons.business,
+                color: colors.primaryBlue,
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => const CompanyMigrationTool(),
+                      builder: (context) => const CompanyManagementScreen(),
                     ),
                   );
                 },
               ),
               const SizedBox(height: 12),
-            ],
 
-            // Force Logout Toggle
-            Row(
-              children: [
-                Switch(
-                  value: _forceLogout,
-                  onChanged: _isForceLogoutLoading
-                      ? null
-                      : (val) => _setForceLogout(val),
-                  activeThumbColor: Colors.red,
+              // User Management
+              _buildActionCard(
+                context,
+                title: 'User Management',
+                subtitle: 'Manage admin users',
+                icon: Icons.people,
+                color: Colors.green,
+                onTap: () {
+                  // TODO: Navigate to admin user management
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text('Admin User Management - Coming Soon')),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+
+              // System Statistics
+              _buildActionCard(
+                context,
+                title: 'System Statistics',
+                subtitle: 'View system usage and metrics',
+                icon: Icons.analytics,
+                color: Colors.purple,
+                onTap: () {
+                  // TODO: Navigate to system statistics
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('System Statistics - Coming Soon')),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Backup Database Button
+              ElevatedButton.icon(
+                icon: Icon(Icons.download, color: colors.whiteTextOnBlue),
+                label: Text('Backup Database',
+                    style: TextStyle(color: colors.whiteTextOnBlue)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colors.primaryBlue,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  _forceLogout
-                      ? 'Force Logout ON (Maintenance Mode)'
-                      : 'Force Logout OFF',
-                  style: TextStyle(
-                    color: _forceLogout ? Colors.red : colors.textColor,
-                    fontWeight: FontWeight.bold,
-                  ),
+                onPressed: () async {
+                  final json =
+                      await FirestoreBackupService.backupAllCompaniesAsJson();
+                  final bytes = utf8.encode(json);
+                  await FileSaver.instance.saveFile(
+                    name: 'firestore_backup',
+                    ext: 'json',
+                    bytes: Uint8List.fromList(bytes),
+                    mimeType: MimeType.json,
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Restore from Backup Button
+              ElevatedButton.icon(
+                icon: Icon(Icons.upload_file, color: colors.whiteTextOnBlue),
+                label: Text('Restore from Backup',
+                    style: TextStyle(color: colors.whiteTextOnBlue)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
-                if (_isForceLogoutLoading)
-                  const Padding(
-                    padding: EdgeInsets.only(left: 8.0),
-                    child: SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2)),
-                  ),
+                onPressed: () async {
+                  final result = await FilePicker.platform.pickFiles(
+                    type: FileType.custom,
+                    allowedExtensions: ['json'],
+                    withData: true,
+                  );
+                  if (result != null && result.files.isNotEmpty) {
+                    final file = result.files.first;
+                    final json = utf8.decode(file.bytes ?? []);
+                    
+                    if (!context.mounted) return;
+                    
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Confirm Restore'),
+                        content: const Text(
+                            'Restoring from backup will overwrite existing data for the same IDs. Are you sure you want to continue?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(false),
+                            child: const Text('Cancel'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => Navigator.of(ctx).pop(true),
+                            child: const Text('Restore'),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirmed == true) {
+                      try {
+                        await FirestoreBackupService.restoreFromJson(json);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Restore completed successfully!'),
+                                backgroundColor: Colors.green),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text('Restore failed: $e'),
+                                backgroundColor: Colors.red),
+                          );
+                        }
+                      }
+                    }
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Migration Tool (Super Admin only)
+              if (isSuperAdmin) ...[
+                _buildActionCard(
+                  context,
+                  title: 'Company Migration Tool',
+                  subtitle: 'Migrate companies to secure IDs',
+                  icon: Icons.security,
+                  color: Colors.orange,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const CompanyMigrationTool(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
               ],
-            ),
-            const SizedBox(height: 16),
 
-            // Company Management
-            _buildActionCard(
-              context,
-              title: 'Company Management',
-              subtitle: 'View and manage all companies',
-              icon: Icons.business,
-              color: colors.primaryBlue,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const CompanyManagementScreen(),
+              // Force Logout Toggle
+              Row(
+                children: [
+                  Switch(
+                    value: _forceLogout,
+                    onChanged: _isForceLogoutLoading
+                        ? null
+                        : (val) => _setForceLogout(val),
+                    activeThumbColor: Colors.red,
                   ),
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-
-            // User Management
-            _buildActionCard(
-              context,
-              title: 'User Management',
-              subtitle: 'Manage admin users',
-              icon: Icons.people,
-              color: Colors.green,
-              onTap: () {
-                // TODO: Navigate to admin user management
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content: Text('Admin User Management - Coming Soon')),
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-
-            // System Statistics
-            _buildActionCard(
-              context,
-              title: 'System Statistics',
-              subtitle: 'View system usage and metrics',
-              icon: Icons.analytics,
-              color: Colors.purple,
-              onTap: () {
-                // TODO: Navigate to system statistics
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('System Statistics - Coming Soon')),
-                );
-              },
-            ),
-          ],
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _forceLogout
+                          ? 'Force Logout ON (Maintenance Mode)'
+                          : 'Force Logout OFF',
+                      style: TextStyle(
+                        color: _forceLogout ? Colors.red : colors.textColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  if (_isForceLogoutLoading)
+                    const Padding(
+                      padding: EdgeInsets.only(left: 8.0),
+                      child: SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2)),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
         ),
       ),
     );
@@ -479,3 +484,4 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
     );
   }
 }
+

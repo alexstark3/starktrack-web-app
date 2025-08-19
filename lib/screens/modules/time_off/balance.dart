@@ -129,7 +129,7 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Vacations',
+                            l10n.vacations,
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -154,15 +154,15 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
                             return Column(
                               children: [
                                 _buildBalanceRow(
-                                    'Transferred', transferred, colors),
-                                _buildBalanceRow('Current', current, colors),
-                                _buildBonusRow(bonus, widget.userId, colors),
-                                _buildBalanceRow('Total', total, colors,
+                                    l10n.transferred, transferred, colors, l10n),
+                                _buildBalanceRow(l10n.current, current, colors, l10n),
+                                _buildBonusRow(bonus, widget.userId, colors, l10n),
+                                _buildBalanceRow(l10n.total, total, colors, l10n,
                                     isTotal: true),
                                 const SizedBox(height: 8),
-                                _buildBalanceRow('Used', used, colors,
+                                _buildBalanceRow(l10n.used, used, colors, l10n,
                                     isUsed: true),
-                                _buildBalanceRow('Available', available, colors,
+                                _buildBalanceRow(l10n.available, available, colors, l10n,
                                     isAvailable: true),
                               ],
                             );
@@ -194,7 +194,7 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Overtime',
+                            l10n.overtime,
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -202,7 +202,7 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          _buildOvertimeBalance(widget.userId, colors),
+                          _buildOvertimeBalance(widget.userId, colors, l10n),
                         ],
                       ),
                     ),
@@ -219,7 +219,8 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
   Widget _buildBalanceRow(
     String label,
     dynamic value,
-    AppColors colors, {
+    AppColors colors,
+    AppLocalizations l10n, {
     bool isTotal = false,
     bool isUsed = false,
     bool isAvailable = false,
@@ -238,9 +239,9 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
 
     String displayValue;
     if (value is double) {
-      displayValue = '${value.toStringAsFixed(1)} Days';
+      displayValue = '${value.toStringAsFixed(1)} ${l10n.days}';
     } else {
-      displayValue = '$value Days';
+      displayValue = '$value ${l10n.days}';
     }
 
     return Padding(
@@ -262,6 +263,7 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
     double value,
     String userId,
     AppColors colors,
+    AppLocalizations l10n,
   ) {
     final isEditing = _editingBonus[userId] ?? false;
     final controller = _bonusControllers[userId] ??
@@ -273,14 +275,14 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text('Bonus:'),
+          Text('${l10n.bonus}:'),
           Row(
             children: [
               IconButton(
                 onPressed: () {
                   if (isEditing) {
                     final newValue = double.tryParse(controller.text) ?? value;
-                    _saveBonusValue(userId, newValue);
+                    _saveBonusValue(userId, newValue, l10n);
                   }
                   setState(() => _editingBonus[userId] = !isEditing);
                 },
@@ -322,7 +324,7 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
                 )
               else
                 Text(
-                  '${value.toStringAsFixed(1)} Days',
+                  '${value.toStringAsFixed(1)} ${l10n.days}',
                   style: TextStyle(
                     color: colors.primaryBlue,
                     fontSize: 14,
@@ -336,7 +338,7 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
     );
   }
 
-  Widget _buildOvertimeBalance(String userId, AppColors colors) {
+  Widget _buildOvertimeBalance(String userId, AppColors colors, AppLocalizations l10n) {
     return FutureBuilder<Map<String, dynamic>>(
       future: OvertimeCalculationService.calculateOvertimeFromLogs(
         widget.companyId,
@@ -346,13 +348,13 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Column(
             children: [
-              _buildOvertimeRow('Transferred', 0, colors),
-              _buildOvertimeRow('Current', 0, colors),
-              _buildOvertimeBonusRow(0, userId, colors),
-              _buildOvertimeRow('Total', 0, colors, isTotal: true),
+              _buildOvertimeRow(l10n.transferred, 0, colors, l10n),
+              _buildOvertimeRow(l10n.current, 0, colors, l10n),
+              _buildOvertimeBonusRow(0, userId, colors, l10n),
+              _buildOvertimeRow(l10n.total, 0, colors, l10n, isTotal: true),
               const SizedBox(height: 8),
-              _buildOvertimeRow('Used', 0, colors, isUsed: true),
-              _buildOvertimeRow('Available', 0, colors, isAvailable: true),
+              _buildOvertimeRow(l10n.used, 0, colors, l10n, isUsed: true),
+              _buildOvertimeRow(l10n.available, 0, colors, l10n, isAvailable: true),
             ],
           );
         }
@@ -360,13 +362,13 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
         if (!snapshot.hasData) {
           return Column(
             children: [
-              _buildOvertimeRow('Transferred', 0, colors),
-              _buildOvertimeRow('Current', 0, colors),
-              _buildOvertimeBonusRow(0, userId, colors),
-              _buildOvertimeRow('Total', 0, colors, isTotal: true),
+              _buildOvertimeRow(l10n.transferred, 0, colors, l10n),
+              _buildOvertimeRow(l10n.current, 0, colors, l10n),
+              _buildOvertimeBonusRow(0, userId, colors, l10n),
+              _buildOvertimeRow(l10n.total, 0, colors, l10n, isTotal: true),
               const SizedBox(height: 8),
-              _buildOvertimeRow('Used', 0, colors, isUsed: true),
-              _buildOvertimeRow('Available', 0, colors, isAvailable: true),
+              _buildOvertimeRow(l10n.used, 0, colors, l10n, isUsed: true),
+              _buildOvertimeRow(l10n.available, 0, colors, l10n, isAvailable: true),
             ],
           );
         }
@@ -382,13 +384,13 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
 
         return Column(
           children: [
-            _buildOvertimeRow('Transferred', transferred, colors),
-            _buildOvertimeRow('Current', current, colors),
-            _buildOvertimeBonusRow(bonus, userId, colors),
-            _buildOvertimeRow('Total', total, colors, isTotal: true),
+            _buildOvertimeRow(l10n.transferred, transferred, colors, l10n),
+            _buildOvertimeRow(l10n.current, current, colors, l10n),
+            _buildOvertimeBonusRow(bonus, userId, colors, l10n),
+            _buildOvertimeRow(l10n.total, total, colors, l10n, isTotal: true),
             const SizedBox(height: 8),
-            _buildOvertimeRow('Used', used, colors, isUsed: true),
-            _buildOvertimeRow('Available', available, colors,
+            _buildOvertimeRow(l10n.used, used, colors, l10n, isUsed: true),
+            _buildOvertimeRow(l10n.available, available, colors, l10n,
                 isAvailable: true),
           ],
         );
@@ -399,7 +401,8 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
   Widget _buildOvertimeRow(
     String label,
     int value,
-    AppColors colors, {
+    AppColors colors,
+    AppLocalizations l10n, {
     bool isTotal = false,
     bool isUsed = false,
     bool isAvailable = false,
@@ -428,7 +431,7 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
     );
   }
 
-  Widget _buildOvertimeBonusRow(int value, String userId, AppColors colors) {
+  Widget _buildOvertimeBonusRow(int value, String userId, AppColors colors, AppLocalizations l10n) {
     final isEditing = _editingBonus[userId] ?? false;
     final controller = _bonusControllers[userId] ??
         TextEditingController(text: _formatMinutes(value));
@@ -438,14 +441,14 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text('Bonus:'),
+          Text('${l10n.bonus}:'),
           Row(
             children: [
               IconButton(
                 onPressed: () {
                   if (isEditing) {
                     final minutes = _parseTimeToMinutes(controller.text);
-                    _saveOvertimeBonusValue(userId, minutes);
+                    _saveOvertimeBonusValue(userId, minutes, l10n);
                   }
                   setState(() => _editingBonus[userId] = !isEditing);
                 },
@@ -512,7 +515,7 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
     return int.tryParse(timeText) ?? 0;
   }
 
-  void _saveOvertimeBonusValue(String userId, int minutes) {
+  void _saveOvertimeBonusValue(String userId, int minutes, AppLocalizations l10n) {
     FirebaseFirestore.instance
         .collection('companies')
         .doc(widget.companyId)
@@ -522,7 +525,7 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Bonus hours updated successfully'),
+          content: Text('${l10n.bonus} ${l10n.hours} ${l10n.updatedSuccessfully}'),
           backgroundColor: Theme.of(context).extension<AppColors>()!.success,
         ),
       );
@@ -530,7 +533,7 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Failed to update bonus value'),
+          content: Text(l10n.failedToUpdateBonus),
           backgroundColor: Theme.of(context).extension<AppColors>()!.error,
         ),
       );
@@ -544,7 +547,7 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
     return 0.0;
   }
 
-  void _saveBonusValue(String userId, double newValue) {
+  void _saveBonusValue(String userId, double newValue, AppLocalizations l10n) {
     FirebaseFirestore.instance
         .collection('companies')
         .doc(widget.companyId)
@@ -556,7 +559,7 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Bonus days updated successfully'),
+          content: Text('${l10n.bonus} ${l10n.days} ${l10n.updatedSuccessfully}'),
           backgroundColor: Theme.of(context).extension<AppColors>()!.success,
         ),
       );
@@ -564,7 +567,7 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Failed to update bonus value'),
+          content: Text(l10n.failedToUpdateBonus),
           backgroundColor: Theme.of(context).extension<AppColors>()!.error,
         ),
       );

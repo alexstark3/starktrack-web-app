@@ -534,6 +534,8 @@ abstract class AppLocalizations {
   /// **'Week'**
   String get week;
 
+  String get weekAbbreviation;
+
   /// No description provided for @month.
   ///
   /// In en, this message translates to:
@@ -551,6 +553,28 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Overtime'**
   String get overtime;
+
+  String get vacations;
+
+  String get type;
+
+  String get bonus;
+
+  String get updatedSuccessfully;
+
+  String get transferred;
+
+  String get current;
+
+  String get used;
+
+  String get available;
+
+  String get calculatingOvertime;
+
+  String get noOvertimeData;
+
+  String get failedToUpdateBonus;
 
   /// No description provided for @totalExpenses.
   ///

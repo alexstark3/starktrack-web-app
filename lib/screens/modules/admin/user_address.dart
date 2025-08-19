@@ -322,8 +322,8 @@ class _UserAddressState extends State<UserAddress> {
         // Country field (always show, Switzerland preselected for Swiss addresses)
         Autocomplete<String>(
           optionsBuilder: (TextEditingValue textEditingValue) {
-            if (textEditingValue.text == '') {
-              return const Iterable<String>.empty();
+            if (textEditingValue.text.isEmpty) {
+              return _countries.map((c) => c['name'] as String);
             }
             return _countries
                 .map((c) => c['name'] as String)
@@ -339,13 +339,18 @@ class _UserAddressState extends State<UserAddress> {
               _countryController.text = selection;
             });
             _updateAddressData();
+            // Move focus to next field after selection
+            FocusScope.of(context).nextFocus();
           },
-          fieldViewBuilder:
-              (context, controller, focusNode, onEditingComplete) {
+          fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
             return TextFormField(
               controller: controller,
               focusNode: focusNode,
-              onEditingComplete: onEditingComplete,
+              textInputAction: TextInputAction.next,
+              onFieldSubmitted: (_) {
+                // Move focus to the next field when Enter is pressed
+                FocusScope.of(context).nextFocus();
+              },
               decoration: InputDecoration(
                 labelText: l10n.country,
                 filled: true,
@@ -391,9 +396,9 @@ class _UserAddressState extends State<UserAddress> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextFormField(
-                controller: _areaController,
-                decoration: InputDecoration(
+                                  TextFormField(
+            controller: _areaController,
+            decoration: InputDecoration(
                   labelText: l10n.area,
                   hintText:
                       'Enter areas separated by commas (e.g., LU, ZH, BE)',

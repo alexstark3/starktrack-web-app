@@ -139,7 +139,7 @@ class TimelineView extends StatelessWidget {
                     ),
                     // Week spans row
                     Row(
-                      children: _buildWeekSpans(days, colors),
+                      children: _buildWeekSpans(context, days, colors),
                     ),
                     // Day headers row
                     Row(
@@ -406,7 +406,7 @@ class TimelineView extends StatelessWidget {
     return monthSpans;
   }
 
-  List<Widget> _buildWeekSpans(List<DateTime> days, AppColors colors) {
+  List<Widget> _buildWeekSpans(BuildContext context, List<DateTime> days, AppColors colors) {
     final weekSpans = <Widget>[];
     int currentIndex = 0;
 
@@ -452,7 +452,7 @@ class TimelineView extends StatelessWidget {
             children: [
               Center(
                 child: Text(
-                  'W$weekNumber',
+                  '${AppLocalizations.of(context)!.weekAbbreviation}$weekNumber',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,

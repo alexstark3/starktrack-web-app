@@ -1160,7 +1160,7 @@ class _LogsTableState extends State<_LogsTable> {
                 break;
               case GroupType.week:
                 final week = _weekNumber(entry.begin!);
-                key = 'Week $week, ${entry.begin!.year}';
+                key = '${AppLocalizations.of(context)!.week} $week, ${entry.begin!.year}';
                 break;
               case GroupType.month:
                 key = DateFormat('MMMM yyyy').format(entry.begin!);

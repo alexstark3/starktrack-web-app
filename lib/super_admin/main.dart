@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'security/super_admin_auth_service.dart';
 import 'screens/super_admin_dashboard.dart';
 import 'screens/super_admin_login.dart';
@@ -18,20 +17,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    AppLogger.info('Initializing Firebase for Super Admin...');
-    AppLogger.debug('Platform: $defaultTargetPlatform');
-    AppLogger.debug('Is Web: $kIsWeb');
-
-    // Initialize Firebase for admin app
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-
-    AppLogger.info('Firebase initialized successfully');
-    AppLogger.debug('Firebase Auth instance: ${FirebaseAuth.instance}');
   } catch (e) {
-    AppLogger.error('Firebase initialization error: $e');
-    // Continue anyway - Firebase might already be initialized
+    AppLogger.error('Failed to initialize Firebase: $e');
+    return;
   }
 
   runApp(const SuperAdminWebApp());

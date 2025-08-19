@@ -76,6 +76,10 @@ service cloud.firestore {
         allow read: if request.auth != null &&
                      (hasModuleAccess(request.auth.uid, companyId, 'projects') ||
                       hasModuleAccess(request.auth.uid, companyId, 'time_tracker'));
+        
+        /* Users with projects module can create, update, and delete projects */
+        allow create, update, delete: if request.auth != null &&
+                                      hasModuleAccess(request.auth.uid, companyId, 'projects');
       }
 
       /* ----- Clients collection - only for users with clients module ----- */

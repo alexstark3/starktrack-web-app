@@ -29,7 +29,6 @@ class CompanyMigrationService {
       } else {
         newCompanyId = CompanyIdGenerator.generateSecureCompanyId(oldCompanyId);
       }
-      AppLogger.debug('Using company ID: $newCompanyId');
 
       // 3. Create new company document with secure ID
       await _firestore.collection('companies').doc(newCompanyId).set({
@@ -177,7 +176,6 @@ class CompanyMigrationService {
         // Skip if already migrated (has secureId field)
         final companyData = companyDoc.data();
         if (companyData.containsKey('secureId')) {
-          AppLogger.debug('Company $companyId already migrated, skipping...');
           continue;
         }
 
@@ -231,8 +229,7 @@ class CompanyMigrationService {
           });
         }
 
-        AppLogger.debug(
-            'Migrated $collectionName collection: ${collectionSnapshot.docs.length} documents');
+        AppLogger.info('Migrated $collectionName collection: ${collectionSnapshot.docs.length} documents');
       } catch (e) {
         AppLogger.error('Failed to migrate $collectionName collection: $e');
       }

@@ -237,6 +237,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get week => 'Woche';
 
   @override
+  String get weekAbbreviation => 'W';
+
+  @override
   String get month => 'Monat';
 
   @override
@@ -244,6 +247,39 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get overtime => 'Überstunden';
+
+  @override
+  String get vacations => 'Urlaub';
+
+  @override
+  String get type => 'Typ';
+
+  @override
+  String get bonus => 'Bonus';
+
+  @override
+  String get updatedSuccessfully => 'erfolgreich aktualisiert';
+
+  @override
+  String get transferred => 'Übertragen';
+
+  @override
+  String get current => 'Aktuell';
+
+  @override
+  String get used => 'Verwendet';
+
+  @override
+  String get available => 'Verfügbar';
+
+  @override
+  String get calculatingOvertime => 'Überstunden werden aus Protokollen berechnet...';
+
+  @override
+  String get noOvertimeData => 'Keine Überstundendaten verfügbar';
+
+  @override
+  String get failedToUpdateBonus => 'Fehler beim Aktualisieren des Bonuswerts';
 
   @override
   String get totalExpenses => 'Gesamtausgaben';

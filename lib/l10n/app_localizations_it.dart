@@ -83,6 +83,9 @@ class AppLocalizationsIt extends AppLocalizationsEn {
   String get teamMember => 'Membro del team';
 
   @override
+  String get weekAbbreviation => 'S';
+
+  @override
   String get resetToThisWeek => 'Ripristina a questa settimana';
 
   @override
@@ -332,4 +335,40 @@ class AppLocalizationsIt extends AppLocalizationsEn {
 
   @override
   String get perDiem => 'Diaria';
+
+  @override
+  String get overtime => 'Straordinari';
+
+  @override
+  String get vacations => 'Vacanze';
+
+  @override
+  String get type => 'Tipo';
+
+  @override
+  String get bonus => 'Bonus';
+
+  @override
+  String get updatedSuccessfully => 'aggiornato con successo';
+
+  @override
+  String get transferred => 'Trasferito';
+
+  @override
+  String get current => 'Attuale';
+
+  @override
+  String get used => 'Utilizzato';
+
+  @override
+  String get available => 'Disponibile';
+
+  @override
+  String get calculatingOvertime => 'Calcolo straordinari dai log...';
+
+  @override
+  String get noOvertimeData => 'Nessun dato straordinario disponibile';
+
+  @override
+  String get failedToUpdateBonus => 'Impossibile aggiornare il valore del bonus';
 }

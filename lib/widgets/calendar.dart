@@ -517,7 +517,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
                         SizedBox(
                           width: 40,
                           child: Text(
-                            'Wk',
+                            AppLocalizations.of(context)!.weekAbbreviation,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: appColors.midGray,
                               fontWeight: FontWeight.w500,

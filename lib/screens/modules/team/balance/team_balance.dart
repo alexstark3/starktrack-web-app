@@ -118,8 +118,8 @@ class _BalanceTabState extends State<BalanceTab> {
                 crossAxisAlignment: WrapCrossAlignment.start,
                 alignment: WrapAlignment.start,
                 children: [
-                  _buildTypeButton('overtime', 'Overtime', colors),
-                  _buildTypeButton('vacations', 'Vacations', colors),
+                  _buildTypeButton('overtime', l10n.overtime, colors),
+                  _buildTypeButton('vacations', l10n.vacations, colors),
                 ],
               ),
             ],
@@ -245,7 +245,7 @@ class _BalanceTabState extends State<BalanceTab> {
                                       ),
                                     ),
                                     Text(
-                                      'Type: ${_selectedType == 'vacations' ? 'Vacations' : 'Overtime'}',
+                                      '${l10n.type}: ${_selectedType == 'vacations' ? l10n.vacations : l10n.overtime}',
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: colors.darkGray,
@@ -509,7 +509,7 @@ class _BalanceTabState extends State<BalanceTab> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-                'Bonus ${_selectedType == 'vacations' ? 'days' : 'hours'} updated successfully'),
+                '${AppLocalizations.of(context)!.bonus} ${_selectedType == 'vacations' ? AppLocalizations.of(context)!.days : AppLocalizations.of(context)!.hours} ${AppLocalizations.of(context)!.updatedSuccessfully}'),
             backgroundColor: Theme.of(context).extension<AppColors>()!.success,
           ),
         );
@@ -519,7 +519,7 @@ class _BalanceTabState extends State<BalanceTab> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to update bonus value'),
+            content: Text(AppLocalizations.of(context)!.failedToUpdateBonus),
             backgroundColor: Theme.of(context).extension<AppColors>()!.error,
           ),
         );
@@ -539,13 +539,13 @@ class _BalanceTabState extends State<BalanceTab> {
         if (!userSnapshot.hasData) {
           return Column(
             children: [
-              _buildBalanceRow('Transferred', 0.0, colors),
-              _buildBalanceRow('Current', 0.0, colors),
-              _buildBalanceRowWithButton('Bonus', 0.0, colors, userId),
-              _buildBalanceRow('Total', 0.0, colors, isTotal: true),
+              _buildBalanceRow(AppLocalizations.of(context)!.transferred, 0.0, colors),
+              _buildBalanceRow(AppLocalizations.of(context)!.current, 0.0, colors),
+              _buildBalanceRowWithButton(AppLocalizations.of(context)!.bonus, 0.0, colors, userId),
+              _buildBalanceRow(AppLocalizations.of(context)!.total, 0.0, colors, isTotal: true),
               const SizedBox(height: 8),
-              _buildBalanceRow('Used', 0.0, colors, isUsed: true),
-              _buildBalanceRow('Available', 0.0, colors, isAvailable: true),
+              _buildBalanceRow(AppLocalizations.of(context)!.used, 0.0, colors, isUsed: true),
+              _buildBalanceRow(AppLocalizations.of(context)!.available, 0.0, colors, isAvailable: true),
             ],
           );
         }
@@ -565,13 +565,13 @@ class _BalanceTabState extends State<BalanceTab> {
 
         return Column(
           children: [
-            _buildBalanceRow('Transferred', transferred, colors),
-            _buildBalanceRow('Current', current, colors),
-            _buildBalanceRowWithButton('Bonus', bonus, colors, userId),
-            _buildBalanceRow('Total', total, colors, isTotal: true),
+            _buildBalanceRow(AppLocalizations.of(context)!.transferred, transferred, colors),
+            _buildBalanceRow(AppLocalizations.of(context)!.current, current, colors),
+            _buildBalanceRowWithButton(AppLocalizations.of(context)!.bonus, bonus, colors, userId),
+            _buildBalanceRow(AppLocalizations.of(context)!.total, total, colors, isTotal: true),
             const SizedBox(height: 8),
-            _buildBalanceRow('Used', used, colors, isUsed: true),
-            _buildBalanceRow('Available', available, colors, isAvailable: true),
+            _buildBalanceRow(AppLocalizations.of(context)!.used, used, colors, isUsed: true),
+            _buildBalanceRow(AppLocalizations.of(context)!.available, available, colors, isAvailable: true),
           ],
         );
       },
@@ -600,17 +600,17 @@ class _BalanceTabState extends State<BalanceTab> {
         if (overtimeSnapshot.connectionState == ConnectionState.waiting) {
           return Column(
             children: [
-              _buildBalanceRow('Transferred', 0, colors),
-              _buildBalanceRow('Current', 0, colors),
-              _buildBalanceRowWithButton('Bonus', 0, colors, userId),
-              _buildBalanceRow('Total', 0, colors, isTotal: true),
+              _buildBalanceRow(AppLocalizations.of(context)!.transferred, 0, colors),
+              _buildBalanceRow(AppLocalizations.of(context)!.current, 0, colors),
+              _buildBalanceRowWithButton(AppLocalizations.of(context)!.bonus, 0, colors, userId),
+              _buildBalanceRow(AppLocalizations.of(context)!.total, 0, colors, isTotal: true),
               const SizedBox(height: 8),
-              _buildBalanceRow('Used', 0, colors, isUsed: true),
-              _buildBalanceRow('Available', 0, colors, isAvailable: true),
+              _buildBalanceRow(AppLocalizations.of(context)!.used, 0, colors, isUsed: true),
+              _buildBalanceRow(AppLocalizations.of(context)!.available, 0, colors, isAvailable: true),
               const SizedBox(height: 8),
               Center(
                 child: Text(
-                  'Calculating overtime from logs...',
+                  AppLocalizations.of(context)!.calculatingOvertime,
                   style: TextStyle(
                     color: colors.midGray,
                     fontSize: 12,
@@ -625,17 +625,17 @@ class _BalanceTabState extends State<BalanceTab> {
         if (!overtimeSnapshot.hasData) {
           return Column(
             children: [
-              _buildBalanceRow('Transferred', 0, colors),
-              _buildBalanceRow('Current', 0, colors),
-              _buildBalanceRowWithButton('Bonus', 0, colors, userId),
-              _buildBalanceRow('Total', 0, colors, isTotal: true),
+              _buildBalanceRow(AppLocalizations.of(context)!.transferred, 0, colors),
+              _buildBalanceRow(AppLocalizations.of(context)!.current, 0, colors),
+              _buildBalanceRowWithButton(AppLocalizations.of(context)!.bonus, 0, colors, userId),
+              _buildBalanceRow(AppLocalizations.of(context)!.total, 0, colors, isTotal: true),
               const SizedBox(height: 8),
-              _buildBalanceRow('Used', 0, colors, isUsed: true),
-              _buildBalanceRow('Available', 0, colors, isAvailable: true),
+              _buildBalanceRow(AppLocalizations.of(context)!.used, 0, colors, isUsed: true),
+              _buildBalanceRow(AppLocalizations.of(context)!.available, 0, colors, isAvailable: true),
               const SizedBox(height: 8),
               Center(
                 child: Text(
-                  'No overtime data available',
+                  AppLocalizations.of(context)!.noOvertimeData,
                   style: TextStyle(
                     color: colors.midGray,
                     fontSize: 12,
@@ -659,13 +659,13 @@ class _BalanceTabState extends State<BalanceTab> {
 
         return Column(
           children: [
-            _buildBalanceRow('Transferred', transferred, colors),
-            _buildBalanceRow('Current', current, colors),
-            _buildBalanceRowWithButton('Bonus', bonus, colors, userId),
-            _buildBalanceRow('Total', total, colors, isTotal: true),
+            _buildBalanceRow(AppLocalizations.of(context)!.transferred, transferred, colors),
+            _buildBalanceRow(AppLocalizations.of(context)!.current, current, colors),
+            _buildBalanceRowWithButton(AppLocalizations.of(context)!.bonus, bonus, colors, userId),
+            _buildBalanceRow(AppLocalizations.of(context)!.total, total, colors, isTotal: true),
             const SizedBox(height: 8),
-            _buildBalanceRow('Used', used, colors, isUsed: true),
-            _buildBalanceRow('Available', available, colors, isAvailable: true),
+            _buildBalanceRow(AppLocalizations.of(context)!.used, used, colors, isUsed: true),
+            _buildBalanceRow(AppLocalizations.of(context)!.available, available, colors, isAvailable: true),
           ],
         );
       },
