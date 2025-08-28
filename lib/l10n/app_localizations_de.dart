@@ -66,6 +66,29 @@ class AppLocalizationsDe extends AppLocalizations {
   String get pickDates => 'Daten auswählen';
 
   @override
+  String get selectedRange => 'Datumsbereich';
+
+  // Reports
+  @override
+  String get reports => 'Berichte';
+  @override
+  String get createReport => 'Bericht erstellen';
+  @override
+  String get reportName => 'Berichtsname';
+  @override
+  String get reportOrientation => 'Berichtsausrichtung';
+  @override
+  String get selectFields => 'Felder auswählen';
+  @override
+  String get filters => 'Filter';
+  @override
+  String get exportCsv => 'CSV exportieren';
+  @override
+  String get runReport => 'Bericht ausführen';
+  @override
+  String get deleteSuccessful => 'Erfolgreich gelöscht';
+
+  @override
   String get projects => 'Projekte';
 
   @override
@@ -289,6 +312,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get weeklyHours => 'Wochenstunden';
+
+  @override
+  String get workingDays => 'Arbeitstage pro Woche';
+
+  @override
+  String get overtimeDays => 'Überstunden-Tage';
 
   @override
   String get workload => 'Arbeitslast';

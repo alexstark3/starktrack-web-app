@@ -229,7 +229,8 @@ class TimelineView extends StatelessWidget {
                       return Row(
                         children: days.map((day) {
                           final isWeekend = day.weekday > 5;
-                          final timeOffs = _getTimeOffForDay(
+                          // Only show time off on working days (Monday-Friday)
+                          final timeOffs = isWeekend ? <Map<String, dynamic>>[] : _getTimeOffForDay(
                               day, member['id'], timeOffRequests);
                           final holiday =
                               _getHolidayForDay(day, holidayPolicies);

@@ -1,26 +1,33 @@
 part of 'members_view.dart';
 
-class _EditLogDialog extends StatefulWidget {
+class EditLogDialog extends StatefulWidget {
   final DocumentSnapshot logDoc;
   final List<String> projects;
   final VoidCallback onSaved;
+  final bool isWorkerMode; // New parameter to distinguish worker vs manager mode
+  final String? workerName; // Worker name for initials display
 
-  const _EditLogDialog({
+  const EditLogDialog({
+    super.key,
     required this.logDoc,
     required this.projects,
     required this.onSaved,
+    this.isWorkerMode = false, // Default to manager mode for backward compatibility
+    this.workerName,
   });
 
   @override
-  State<_EditLogDialog> createState() => _EditLogDialogState();
+  State<EditLogDialog> createState() => _EditLogDialogState();
 }
 
-class _EditLogDialogState extends State<_EditLogDialog> {
+class _EditLogDialogState extends State<EditLogDialog> {
   late TextEditingController _noteCtrl;
   late TextEditingController _startCtrl;
   late TextEditingController _endCtrl;
+  late TextEditingController _workerNoteCtrl;
   late Map<String, dynamic> _expenses;
   String _approvalNote = '';
+  String _workerNote = '';
   String? _projectValue;
   bool _projectError = false;
 
@@ -39,7 +46,9 @@ class _EditLogDialogState extends State<_EditLogDialog> {
           : '',
     );
     _expenses = Map<String, dynamic>.from(data['expenses'] ?? {});
-    _approvalNote = data['approvalNote'] ?? '';
+    _approvalNote = data['managerNote'] ?? '';
+    _workerNote = data['workerNote'] ?? '';
+    _workerNoteCtrl = TextEditingController(text: _workerNote);
     final projectValue = data['project']?.toString();
     if (projectValue != null && widget.projects.contains(projectValue)) {
       _projectValue = projectValue;
@@ -54,6 +63,7 @@ class _EditLogDialogState extends State<_EditLogDialog> {
     _noteCtrl.dispose();
     _startCtrl.dispose();
     _endCtrl.dispose();
+    _workerNoteCtrl.dispose();
     super.dispose();
   }
 
@@ -289,6 +299,8 @@ class _EditLogDialogState extends State<_EditLogDialog> {
     }
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
@@ -401,10 +413,36 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                         ]),
                   ])),
           const SizedBox(height: 12),
-          TextField(
+          // Show different fields based on mode
+          if (widget.isWorkerMode) ...[
+            // Show message history
+            _buildMessageHistory(),
+            // Show worker's note field
+            const SizedBox(height: 8),
+            TextField(
+              controller: _workerNoteCtrl,
               decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!.approvalNote),
-              onChanged: (v) => _approvalNote = v.trim()),
+                labelText: 'Your Note (Optional)',
+                hintText: 'Explain why you made these changes...',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+              onChanged: (v) => _workerNote = v.trim(),
+            ),
+          ] else ...[
+            // Manager mode: show message history and approval note field
+            _buildMessageHistory(),
+            const SizedBox(height: 8),
+            TextField(
+              controller: TextEditingController(text: _approvalNote),
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.approvalNote,
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+              onChanged: (v) => _approvalNote = v.trim(),
+            ),
+          ],
         ]),
       ),
       actions: [
@@ -414,12 +452,14 @@ class _EditLogDialogState extends State<_EditLogDialog> {
             onPressed: () => Navigator.of(context).pop()),
         ElevatedButton(
             style: ElevatedButton.styleFrom(
-                backgroundColor: colors.primaryBlue,
+                backgroundColor: widget.isWorkerMode ? Colors.orange : colors.primaryBlue,
                 foregroundColor: colors.whiteTextOnBlue,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18))),
             child: Text(
-                '${AppLocalizations.of(context)!.save} & ${AppLocalizations.of(context)!.approve}'),
+                widget.isWorkerMode 
+                    ? AppLocalizations.of(context)!.submitRequest 
+                    : '${AppLocalizations.of(context)!.save} & ${AppLocalizations.of(context)!.approve}'),
             onPressed: () async {
               DateTime start, end;
               try {
@@ -465,24 +505,153 @@ class _EditLogDialogState extends State<_EditLogDialog> {
                 return;
               }
               int durationMins = end.difference(start).inMinutes;
-              await widget.logDoc.reference.update({
-                'begin': Timestamp.fromDate(start),
-                'end': Timestamp.fromDate(end),
-                'duration_minutes': durationMins,
-                'note': _noteCtrl.text.trim(),
-                'expenses': _expenses,
-                'project': _projectValue,
-                'projectId': _projectValue,
-                'approvalNote': _approvalNote,
-                'approved': false,
-                'approvedAt': FieldValue.serverTimestamp(),
-                'edited': true,
-                'approvedAfterEdit': true,
-              });
+              
+              if (widget.isWorkerMode) {
+                // Worker mode: submit for approval (don't approve immediately)
+                try {
+                  await widget.logDoc.reference.update({
+                    'begin': Timestamp.fromDate(start),
+                    'end': Timestamp.fromDate(end),
+                    'duration_minutes': durationMins,
+                    'note': _noteCtrl.text.trim(),
+                    'expenses': _expenses,
+                    'project': _projectValue,
+                    'projectId': _projectValue,
+                    'workerNote': _workerNoteCtrl.text.trim(),
+                    'edited': true,
+                    'approved': false,
+                    'approvedAfterEdit': false,
+                    'rejected': false,
+                    if (_workerNoteCtrl.text.trim().isNotEmpty) 'messages': FieldValue.arrayUnion([{
+                      'from': 'worker',
+                      'message': _workerNoteCtrl.text.trim(),
+                      'timestamp': Timestamp.fromDate(DateTime.now().toUtc()),
+                      'action': 'edited'
+                    }]),
+                  });
+
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('Session submitted for approval'),
+                    backgroundColor: Colors.green,
+                  ));
+                } catch (e) {
+
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('Error saving: $e'),
+                    backgroundColor: Colors.red,
+                  ));
+                  return;
+                }
+              } else {
+                // Manager mode: save and approve immediately
+                await widget.logDoc.reference.update({
+                  'begin': Timestamp.fromDate(start),
+                  'end': Timestamp.fromDate(end),
+                  'duration_minutes': durationMins,
+                  'note': _noteCtrl.text.trim(),
+                  'expenses': _expenses,
+                  'project': _projectValue,
+                  'projectId': _projectValue,
+                  'managerNote': _approvalNote,
+                  'approved': false,
+                  'approvedAt': FieldValue.serverTimestamp(),
+                  'edited': true,
+                  'approvedAfterEdit': true,
+                  if (_approvalNote.trim().isNotEmpty) 'messages': FieldValue.arrayUnion([{
+                    'from': 'manager',
+                    'message': _approvalNote.trim(),
+                    'timestamp': Timestamp.fromDate(DateTime.now().toUtc()),
+                    'action': 'edited_approved'
+                  }]),
+                });
+              }
               widget.onSaved();
               if (!context.mounted) return;
               Navigator.of(context).pop();
             }),
+      ],
+    );
+  }
+
+  // Build message history widget
+  Widget _buildMessageHistory() {
+    final data = widget.logDoc.data() as Map<String, dynamic>;
+    final messages = data['messages'] as List<dynamic>? ?? [];
+    
+    if (messages.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        Text(
+          'Conversation History:',
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade300),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            children: messages.map<Widget>((message) {
+              final from = message['from'] as String;
+              final text = message['message'] as String;
+              final action = message['action'] as String;
+              
+              final isManager = from == 'manager';
+              
+              return Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: isManager ? Colors.red.shade50 : Colors.blue.shade50,
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey.shade200, width: 0.5),
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      isManager ? Icons.person : Icons.person_outline,
+                      size: 16,
+                      color: isManager ? Colors.red : Colors.blue,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${isManager ? 'Manager' : 'Worker'} ($action):',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              color: isManager ? Colors.red : Colors.blue,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            text,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ),
       ],
     );
   }

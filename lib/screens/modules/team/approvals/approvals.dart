@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:starktrack/l10n/app_localizations.dart';
 import 'package:starktrack/theme/app_colors.dart';
 import 'package:starktrack/widgets/calendar.dart';
 import 'package:starktrack/widgets/app_search_field.dart';
+import 'package:starktrack/utils/app_logger.dart';
 
 class TeamApprovalsScreen extends StatefulWidget {
   final String companyId;
@@ -70,6 +72,7 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
                   ),
                 ),
               ),
+
             ],
           ),
         ),
@@ -121,18 +124,31 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
 
               return ListView.separated(
                 itemCount: docs.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
+                separatorBuilder: (_, __) => const SizedBox(height: 10),
                 itemBuilder: (context, i) {
                   final ref = docs[i].reference;
                   final data = docs[i].data();
                   final start = (data['startDate'] as Timestamp?)?.toDate();
                   final end = (data['endDate'] as Timestamp?)?.toDate();
                   final status = (data['status'] ?? 'pending') as String;
+                  
+                  // Format date with time for half-day selections
+                  String formatDateTime(DateTime date, String? timeStr) {
+                    final dateStr = DateFormat('dd/MM/yyyy').format(date);
+                    if (timeStr != null && timeStr.isNotEmpty) {
+                      return '$dateStr $timeStr';
+                    }
+                    return dateStr;
+                  }
+
+                  final startTime = data['startTime'] as String?;
+                  final endTime = data['endTime'] as String?;
+                  
                   final dateText = start == null
                       ? ''
                       : end == null || start.isAtSameMomentAs(end)
-                          ? DateFormat('dd/MM/yyyy').format(start)
-                          : '${DateFormat('dd/MM/yyyy').format(start)} - ${DateFormat('dd/MM/yyyy').format(end)}';
+                          ? formatDateTime(start, startTime)
+                          : '${formatDateTime(start, startTime)} - ${formatDateTime(end, endTime)}';
 
                   return Container(
                     decoration: BoxDecoration(
@@ -142,38 +158,87 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
                       ),
                       borderRadius: BorderRadius.circular(9),
                     ),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.all(10),
-                      title: Text(data['policyName'] ??
-                          AppLocalizations.of(context)!.unknownPolicy),
-                      subtitle: Text(dateText),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (status == 'pending') ...[
-                            IconButton(
-                              icon: const Icon(Icons.check_circle,
-                                  color: Colors.green),
-                              tooltip: AppLocalizations.of(context)!.approve,
-                              onPressed: () => _updateStatus(ref, 'approved'),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.edit,
-                                  color: Colors.blueAccent),
-                              tooltip: AppLocalizations.of(context)!.edit,
-                              onPressed: () => _editDates(ref, start, end),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.cancel, color: Colors.red),
-                              tooltip: AppLocalizations.of(context)!.deny,
-                              onPressed: () => _denyWithNote(ref),
-                            ),
-                          ] else ...[
-                            _statusChip(status,
-                                Theme.of(context).extension<AppColors>()!),
-                          ]
-                        ],
-                      ),
+                    padding: const EdgeInsets.all(10),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                data['policyName'] ?? AppLocalizations.of(context)!.unknownPolicy,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                dateText,
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 14,
+                                ),
+                              ),
+
+                              if (data['reviewNote'] != null && data['reviewNote'].toString().isNotEmpty) ...[
+                                const SizedBox(height: 2),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.note,
+                                      size: 12,
+                                      color: Colors.red[600],
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        data['reviewNote'],
+                                        style: TextStyle(
+                                          color: Colors.red[600],
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                              // Action buttons below the request details (moved from right side)
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  if (status == 'pending') ...[
+                                    _iconBtn(Icons.check, Colors.green, () => _updateStatus(ref, 'approved'), 'Approve'),
+                                    const SizedBox(width: 8),
+                                    _iconBtn(Icons.edit, Colors.blue[400]!, () => _editDates(ref, start, end), 'Edit'),
+                                    const SizedBox(width: 8),
+                                    _iconBtn(Icons.cancel, Colors.red, () => _denyWithNote(ref), 'Deny'),
+                                  ] else if (status == 'approved') ...[
+                                    if (data['isEdited'] == true) ...[
+                                      _iconBtn(Icons.verified, Colors.orange, () {}, 'Edited'),
+                                    ] else ...[
+                                      _iconBtn(Icons.verified, Colors.green, () {}, 'Approved'),
+                                    ],
+                                    const SizedBox(width: 8),
+                                    _iconBtn(Icons.edit, Colors.blue[400]!, () => _editDates(ref, start, end), 'Edit'),
+                                    const SizedBox(width: 8),
+                                    _iconBtn(Icons.delete, Colors.red[300]!, () => _deleteRequest(ref), 'Delete'),
+                                  ] else if (status == 'rejected') ...[
+                                    _iconBtn(Icons.cancel, Colors.red, () {}, 'Rejected'),
+                                  ] else if (status == 'deleted') ...[
+                                    _iconBtn(Icons.delete, Colors.grey, () {}, 'Deleted'),
+                                  ],
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+
+
+                      ],
                     ),
                   );
                 },
@@ -185,15 +250,321 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
     );
   }
 
+
+
+  /// Get holidays for the company in the given date range
+  Future<Set<String>> _getHolidays(String companyId, DateTime fromDate, DateTime toDate) async {
+    try {
+      final holidaysSnapshot = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(companyId)
+          .collection('holidays')
+          .where('date', isGreaterThanOrEqualTo: '${fromDate.year}-${fromDate.month.toString().padLeft(2, '0')}-${fromDate.day.toString().padLeft(2, '0')}')
+          .where('date', isLessThanOrEqualTo: '${toDate.year}-${toDate.month.toString().padLeft(2, '0')}-${toDate.day.toString().padLeft(2, '0')}')
+          .get();
+
+      final holidays = <String>{};
+      for (final doc in holidaysSnapshot.docs) {
+        final data = doc.data();
+        final date = data['date'] as String?;
+        if (date != null) {
+          holidays.add(date);
+        }
+      }
+      return holidays;
+    } catch (e) {
+      return <String>{};
+    }
+  }
+
+  /// Get paid holiday policies for the company in the given date range
+  Future<Map<String, int>> _getPaidHolidayPolicies(String companyId, DateTime fromDate, DateTime toDate) async {
+    try {
+      final policiesSnapshot = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(companyId)
+          .collection('holiday_policies')
+          .where('paid', isEqualTo: true)
+          .get();
+
+      final paidDays = <String, int>{};
+      for (final doc in policiesSnapshot.docs) {
+        final data = doc.data();
+        final period = data['period'] as Map<String, dynamic>?;
+        final startTimestamp = period?['start'] as Timestamp?;
+        final endTimestamp = period?['end'] as Timestamp?;
+        final repeatAnnually = data['repeatAnnually'] ?? false;
+
+        if (startTimestamp != null && endTimestamp != null) {
+          final startDate = startTimestamp.toDate();
+          final endDate = endTimestamp.toDate();
+
+          if (repeatAnnually) {
+            // For annual repeating policies, check each year in the range
+            for (int year = fromDate.year; year <= toDate.year; year++) {
+              final yearStart = DateTime(year, startDate.month, startDate.day);
+              final yearEnd = DateTime(year, endDate.month, endDate.day);
+
+              if (yearStart.isBefore(toDate) && yearEnd.isAfter(fromDate)) {
+                final effectiveStart = yearStart.isAfter(fromDate) ? yearStart : fromDate;
+                final effectiveEnd = yearEnd.isBefore(toDate) ? yearEnd : toDate;
+
+                for (int i = 0; i <= effectiveEnd.difference(effectiveStart).inDays; i++) {
+                  final dayDate = effectiveStart.add(Duration(days: i));
+                  final dayKey = '${dayDate.year}-${dayDate.month.toString().padLeft(2, '0')}-${dayDate.day.toString().padLeft(2, '0')}';
+                  paidDays[dayKey] = 1; // Mark as paid day
+                }
+              }
+            }
+          } else {
+            // Non-repeating policy
+            if (startDate.isBefore(toDate) && endDate.isAfter(fromDate)) {
+              final effectiveStart = startDate.isAfter(fromDate) ? startDate : fromDate;
+              final effectiveEnd = endDate.isBefore(toDate) ? endDate : toDate;
+
+              for (int i = 0; i <= effectiveEnd.difference(effectiveStart).inDays; i++) {
+                final dayDate = effectiveStart.add(Duration(days: i));
+                final dayKey = '${dayDate.year}-${dayDate.month.toString().padLeft(2, '0')}-${dayDate.day.toString().padLeft(2, '0')}';
+                paidDays[dayKey] = 1; // Mark as paid day
+              }
+            }
+          }
+        }
+      }
+      return paidDays;
+    } catch (e) {
+      return <String, int>{};
+    }
+  }
+
+  /// Get time-off policies for the company in the given date range
+  Future<Map<String, Map<String, dynamic>>> _getTimeOffPolicies(String companyId, DateTime fromDate, DateTime toDate) async {
+    try {
+      final policiesSnapshot = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(companyId)
+          .collection('timeoff_policies')
+          .get();
+
+      final policies = <String, Map<String, dynamic>>{};
+      for (final doc in policiesSnapshot.docs) {
+        final data = doc.data();
+        final period = data['period'] as Map<String, dynamic>?;
+        final startTimestamp = period?['start'] as Timestamp?;
+        final endTimestamp = period?['end'] as Timestamp?;
+        final repeatAnnually = data['repeatAnnually'] ?? false;
+        final doesNotCount = data['doesNotCount'] ?? false;
+
+        if (startTimestamp != null && endTimestamp != null) {
+          final startDate = startTimestamp.toDate();
+          final endDate = endTimestamp.toDate();
+
+          if (repeatAnnually) {
+            // For annual repeating policies, check each year in the range
+            for (int year = fromDate.year; year <= toDate.year; year++) {
+              final yearStart = DateTime(year, startDate.month, startDate.day);
+              final yearEnd = DateTime(year, endDate.month, endDate.day);
+
+              if (yearStart.isBefore(toDate) && yearEnd.isAfter(fromDate)) {
+                final effectiveStart = yearStart.isAfter(fromDate) ? yearStart : fromDate;
+                final effectiveEnd = yearEnd.isBefore(toDate) ? yearEnd : toDate;
+
+                for (int i = 0; i <= effectiveEnd.difference(effectiveStart).inDays; i++) {
+                  final dayDate = effectiveStart.add(Duration(days: i));
+                  final dayKey = '${dayDate.year}-${dayDate.month.toString().padLeft(2, '0')}-${dayDate.day.toString().padLeft(2, '0')}';
+                  policies[dayKey] = {
+                    'doesNotCount': doesNotCount,
+                    'name': data['name'] ?? 'Unknown Policy',
+                  };
+                }
+              }
+            }
+          } else {
+            // Non-repeating policy
+            if (startDate.isBefore(toDate) && endDate.isAfter(fromDate)) {
+              final effectiveStart = startDate.isAfter(fromDate) ? startDate : fromDate;
+              final effectiveEnd = endDate.isBefore(toDate) ? endDate : toDate;
+
+              for (int i = 0; i <= effectiveEnd.difference(effectiveStart).inDays; i++) {
+                final dayDate = effectiveStart.add(Duration(days: i));
+                final dayKey = '${dayDate.year}-${dayDate.month.toString().padLeft(2, '0')}-${dayDate.day.toString().padLeft(2, '0')}';
+                policies[dayKey] = {
+                  'doesNotCount': doesNotCount,
+                  'name': data['name'] ?? 'Unknown Policy',
+                };
+              }
+            }
+          }
+        }
+      }
+      return policies;
+    } catch (e) {
+      return <String, Map<String, dynamic>>{};
+    }
+  }
+
+  /// Check if a day should be excluded from vacation calculation based on time-off policies
+  bool _isExcludedByTimeOffPolicy(String dateKey, Map<String, Map<String, dynamic>> policies, String requestType) {
+    final policy = policies[dateKey];
+    if (policy == null) return false;
+    
+    // If the policy says "does not count", exclude it
+    if (policy['doesNotCount'] == true) {
+      return true;
+    }
+    
+    // You can add more logic here for specific policy types
+    // For example, if it's a sick leave policy and the request is vacation
+    return false;
+  }
+
   Future<void> _updateStatus(
       DocumentReference<Map<String, dynamic>> ref, String status) async {
-    await ref
-        .update({'status': status, 'updatedAt': FieldValue.serverTimestamp()});
+    // Get current user ID for approvedBy field
+    final currentUser = FirebaseAuth.instance.currentUser;
+    final approvedBy = currentUser?.uid ?? 'unknown';
+    
+    // Update the time-off request status
+    await ref.update({
+      'status': status, 
+      'updatedAt': FieldValue.serverTimestamp(),
+      if (status == 'approved') 'approvedBy': approvedBy,
+    });
+    
+    // If approved, update the user's vacation balance
+    if (status == 'approved') {
+      try {
+        // Get the time-off request data
+        final requestData = await ref.get();
+        final data = requestData.data();
+        
+        if (data != null) {
+          final userId = data['userId'] as String?;
+          final startDate = (data['startDate'] as Timestamp?)?.toDate();
+          final endDate = (data['endDate'] as Timestamp?)?.toDate();
+          final type = data['type']?.toString().toLowerCase() ?? '';
+          final days = (data['totalWorkingDays'] as num?) ?? 0;
+          
+          // Only update for vacation types
+          if (userId != null && 
+              (type.contains('vacation') || type.contains('urlaub')) &&
+              startDate != null && endDate != null) {
+            
+            // Get user's working days configuration for accurate day calculation
+            final userDoc = await FirebaseFirestore.instance
+                .collection('companies')
+                .doc(widget.companyId)
+                .collection('users')
+                .doc(userId)
+                .get();
+            
+            if (userDoc.exists) {
+              final userData = userDoc.data();
+              final workingDaysStr = userData?['workingDays']?.toString() ?? 'Monday,Tuesday,Wednesday,Thursday,Friday';
+              final workingDaysList = workingDaysStr.split(',').map((dayName) {
+                switch (dayName.trim()) {
+                  case 'Monday': return 1;
+                  case 'Tuesday': return 2;
+                  case 'Wednesday': return 3;
+                  case 'Thursday': return 4;
+                  case 'Friday': return 5;
+                  case 'Saturday': return 6;
+                  case 'Sunday': return 7;
+                  default: return 0;
+                }
+              }).where((d) => d > 0).toList();
+              // Calculate ONLY working days (exclude weekends, holidays, and non-working days)
+              int workingDaysCount = 0;
+              
+              // Get company holidays and policies for this date range
+              final holidays = await _getHolidays(widget.companyId, startDate, endDate);
+              final paidHolidays = await _getPaidHolidayPolicies(widget.companyId, startDate, endDate);
+              final timeOffPolicies = await _getTimeOffPolicies(widget.companyId, startDate, endDate);
+              
+              for (DateTime date = startDate; !date.isAfter(endDate); date = date.add(const Duration(days: 1))) {
+                final dateKey = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+                
+                if (workingDaysList.contains(date.weekday)) {
+                  // Check if this day is excluded from vacation calculation
+                                    if (holidays.contains(dateKey) || 
+                      paidHolidays.containsKey(dateKey) ||
+                      _isExcludedByTimeOffPolicy(dateKey, timeOffPolicies, type)) {
+                    // Day excluded from vacation calculation
+                  } else {
+                    workingDaysCount++;
+                  }
+          }
+        }
+        
+        // Use days directly if provided, otherwise use calculated working days
+        final daysToDeduct = days > 0 ? days : workingDaysCount.toDouble();
+        
+        // Update user's annualLeaveDays.used field
+        await FirebaseFirestore.instance
+            .collection('companies')
+            .doc(widget.companyId)
+            .collection('users')
+            .doc(userId)
+            .update({
+          'annualLeaveDays.used': FieldValue.increment(daysToDeduct),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+        
+        // Vacation balance updated successfully
+            }
+          }
+        }
+      } catch (e) {
+        // Don't fail the approval if balance update fails
+        AppLogger.error('Error updating vacation balance: $e');
+      }
+    }
   }
 
   Future<void> _editDates(DocumentReference<Map<String, dynamic>> ref,
       DateTime? start, DateTime? end) async {
-    DateRange? range = DateRange(startDate: start, endDate: end);
+    if (!mounted) return;
+    
+    // Get the current request data to extract times
+    final requestData = await ref.get();
+    final data = requestData.data();
+    
+    // Parse the stored times
+    TimeOfDay? startTime;
+    TimeOfDay? endTime;
+    
+    if (data != null) {
+      if (data['startTime'] != null) {
+        final timeStr = data['startTime'] as String;
+        final parts = timeStr.split(':');
+        if (parts.length == 2) {
+          startTime = TimeOfDay(
+            hour: int.parse(parts[0]),
+            minute: int.parse(parts[1]),
+          );
+        }
+      }
+      
+      if (data['endTime'] != null) {
+        final timeStr = data['endTime'] as String;
+        final parts = timeStr.split(':');
+        if (parts.length == 2) {
+          endTime = TimeOfDay(
+            hour: int.parse(parts[0]),
+            minute: int.parse(parts[1]),
+          );
+        }
+      }
+    }
+    
+    DateRange? range = DateRange(
+      startDate: start, 
+      endDate: end,
+      startTime: startTime,
+      endTime: endTime,
+    );
+    
+    if (!mounted) return;
     final DateRange? picked = await showDialog<DateRange>(
       context: context,
       builder: (context) => Dialog(
@@ -203,13 +574,110 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
           minDate: DateTime(2020),
           maxDate: DateTime(2030),
           showTodayIndicator: true,
+          showTime: true, // Enable time selection for editing
+          companyId: widget.companyId, // Pass company ID to show approved requests
         ),
       ),
     );
+    
     if (picked != null && picked.isComplete) {
+      // Get user's working days configuration for accurate day calculation
+      final userDoc = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(widget.companyId)
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser?.uid)
+          .get();
+      
+      final userData = userDoc.data();
+      final workingDays = userData?['workingDays'] as List<dynamic>? ?? ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+      final workingDaysList = workingDays.map((dayName) => dayName.toString()).toList();
+      
+      // Calculate working days and calendar days
+      final totalWorkingDays = picked.calculateWorkingDays(workingDaysList);
+      final totalCalendarDays = picked.endDate!.difference(picked.startDate!).inDays + 1;
+      final totalNonworkingDays = totalCalendarDays - totalWorkingDays;
+      
+      // Calculate total working hours based on time range
+      double totalWorkingHours = 0.0;
+      if (picked.startTime != null && picked.endTime != null) {
+        // Calculate hours for each working day
+        totalWorkingHours = totalWorkingDays * _calculateHoursBetweenTimes(
+          picked.startTime!, 
+          picked.endTime!
+        );
+      } else {
+        // Full day (8 hours default)
+        totalWorkingHours = totalWorkingDays * 8.0;
+      }
+      
+      // Create start and end DateTime with time if available
+      DateTime startDateTime = picked.startDate!;
+      DateTime endDateTime = picked.endDate!;
+      
+      if (picked.startTime != null) {
+        startDateTime = DateTime(
+          startDateTime.year,
+          startDateTime.month,
+          startDateTime.day,
+          picked.startTime!.hour,
+          picked.startTime!.minute,
+        );
+      }
+      
+      if (picked.endTime != null) {
+        endDateTime = DateTime(
+          endDateTime.year,
+          endDateTime.month,
+          endDateTime.day,
+          picked.endTime!.hour,
+          picked.endTime!.minute,
+        );
+      }
+      
       await ref.update({
-        'startDate': Timestamp.fromDate(picked.startDate!),
-        'endDate': Timestamp.fromDate(picked.endDate!),
+        'startDate': Timestamp.fromDate(startDateTime),
+        'endDate': Timestamp.fromDate(endDateTime),
+        'totalCalendarDays': totalCalendarDays,
+        'totalWorkingDays': totalWorkingDays,
+        'totalNonworkingDays': totalNonworkingDays,
+        'totalWorkingHours': totalWorkingHours,
+        'editedAt': FieldValue.serverTimestamp(),
+        'editedBy': FirebaseAuth.instance.currentUser?.uid,
+        'isEdited': true,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    }
+  }
+
+  Future<void> _deleteRequest(
+      DocumentReference<Map<String, dynamic>> ref) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        final colors = Theme.of(context).extension<AppColors>()!;
+        return AlertDialog(
+          title: Text('Delete Request'),
+          content: const Text('Are you sure you want to delete this approved request? This action cannot be undone.'),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(AppLocalizations.of(context)!.cancel)),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: colors.red, foregroundColor: Colors.white),
+              child: const Text('Delete'),
+            )
+          ],
+        );
+      },
+    );
+    if (ok == true) {
+      await ref.update({
+        'status': 'deleted',
+        'deletedAt': FieldValue.serverTimestamp(),
+        'deletedBy': FirebaseAuth.instance.currentUser?.uid,
         'updatedAt': FieldValue.serverTimestamp(),
       });
     }
@@ -253,34 +721,23 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
     }
   }
 
-  Widget _statusChip(String status, AppColors colors) {
-    Color bg;
-    Color fg;
-    String statusText;
-    switch (status) {
-      case 'approved':
-        bg = colors.green;
-        fg = Colors.white;
-        statusText = AppLocalizations.of(context)!.approved;
-        break;
-      case 'rejected':
-        bg = colors.red;
-        fg = Colors.white;
-        statusText = AppLocalizations.of(context)!.rejected;
-        break;
-      default:
-        bg = colors.orange;
-        fg = Colors.white;
-        statusText = AppLocalizations.of(context)!.pending;
-        break;
-    }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration:
-          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(16)),
-      child: Text(statusText.toUpperCase(),
-          style:
-              TextStyle(color: fg, fontWeight: FontWeight.w600, fontSize: 12)),
+  Widget _iconBtn(IconData icon, Color color, VoidCallback onPressed, String tooltip) {
+    return IconButton(
+      icon: Icon(icon, color: color, size: 20),
+      tooltip: tooltip,
+      onPressed: onPressed,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
     );
   }
+
+  /// Calculate hours between two times
+  double _calculateHoursBetweenTimes(TimeOfDay startTime, TimeOfDay endTime) {
+    final startMinutes = startTime.hour * 60 + startTime.minute;
+    final endMinutes = endTime.hour * 60 + endTime.minute;
+    final differenceMinutes = endMinutes - startMinutes;
+    return differenceMinutes / 60.0;
+  }
 }
+
+

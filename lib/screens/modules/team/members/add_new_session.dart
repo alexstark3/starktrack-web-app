@@ -428,9 +428,38 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
       final duration = endDateTime.difference(startDateTime);
       final durationMinutes = duration.inMinutes;
 
-      // Check if per diem is included and set the perDiem field
-      final hasPerDiem =
-          _expenses.containsKey('Per Diem') || _expenses.containsKey('perDiem');
+      // Check Per Diem validation (same as Time Tracker)
+      final dayStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
+      final perDiemQuery = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(widget.companyId)
+          .collection('users')
+          .doc(widget.userId)
+          .collection('all_logs')
+          .where('sessionDate', isEqualTo: dayStr)
+          .get();
+          
+      bool perDiemAlreadyUsed = false;
+      for (var doc in perDiemQuery.docs) {
+        final data = doc.data();
+        final expenses = Map<String, dynamic>.from(data['expenses'] ?? {});
+        if (expenses.containsKey('Per diem')) {
+          perDiemAlreadyUsed = true;
+          break;
+        }
+      }
+      
+      // Check if trying to add per diem when already used
+      if (_expenses.containsKey('Per diem') && perDiemAlreadyUsed) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Per diem already used for this day'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
 
       // Generate custom log ID (same pattern as time tracker)
       String generateLogId(DateTime dt) {
@@ -459,7 +488,7 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
         }
       }
 
-      // Create session data
+      // Create session data (same format as Time Tracker)
       final sessionData = {
         'sessionDate': DateFormat('yyyy-MM-dd').format(_selectedDate),
         'begin': Timestamp.fromDate(startDateTime),
@@ -468,10 +497,9 @@ class _AddNewSessionDialogState extends State<AddNewSessionDialog> {
         'project': _projectController.text.trim(),
         'projectId': actualProjectId ?? '',
         'note': _noteController.text.trim(),
-        'expenses': _expenses,
-        'perDiem': hasPerDiem,
+        'expenses': _expenses, // Per diem stored inside expenses map (no separate boolean)
         'approved': false,
-        'created_at': Timestamp.now(),
+        'createdAt': FieldValue.serverTimestamp(), // Match Time Tracker field name
         'created_by_team_leader': true,
       };
 

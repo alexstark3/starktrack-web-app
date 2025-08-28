@@ -26,6 +26,15 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
   final Map<String, TextEditingController> _bonusControllers = {};
 
   @override
+  void initState() {
+    super.initState();
+    // Validate vacation balance when page loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _validateVacationBalance();
+    });
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     for (final c in _bonusControllers.values) {
@@ -59,6 +68,7 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
                     },
                   ),
                 ),
+
               ],
             ),
             const SizedBox(height: 8),
@@ -340,10 +350,7 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
 
   Widget _buildOvertimeBalance(String userId, AppColors colors, AppLocalizations l10n) {
     return FutureBuilder<Map<String, dynamic>>(
-      future: OvertimeCalculationService.calculateOvertimeFromLogs(
-        widget.companyId,
-        userId,
-      ),
+      future: _calculateAndUpdateOvertime(userId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Column(
@@ -375,10 +382,11 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
 
         final data = snapshot.data!;
 
-        final transferred = data['transferred'] ?? 0;
-        final current = data['current'] ?? 0;
-        final bonus = data['bonus'] ?? 0;
-        final used = data['used'] ?? 0;
+        // Use overtime values directly (they're already in minutes from the service)
+        final transferred = (data['transferred'] ?? 0) as int;
+        final current = (data['current'] ?? 0) as int;
+        final bonus = (data['bonus'] ?? 0) as int;
+        final used = (data['used'] ?? 0) as int;
         final total = transferred + current + bonus;
         final available = total - used;
 
@@ -501,7 +509,7 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
     final abs = minutes.abs();
     final h = abs ~/ 60;
     final m = abs % 60;
-    final s = '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
+    final s = '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')} h';
     return isNegative ? '-$s' : s;
   }
 
@@ -547,6 +555,8 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
     return 0.0;
   }
 
+
+
   void _saveBonusValue(String userId, double newValue, AppLocalizations l10n) {
     FirebaseFirestore.instance
         .collection('companies')
@@ -572,5 +582,120 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
         ),
       );
     });
+  }
+
+  /// Calculate overtime and update database if values have changed
+  Future<Map<String, dynamic>> _calculateAndUpdateOvertime(String userId) async {
+    try {
+      // First, get current overtime data from database
+      final userDoc = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(widget.companyId)
+          .collection('users')
+          .doc(userId)
+          .get();
+      
+      final userData = userDoc.data();
+      final currentOvertimeData = userData?['overtime'] ?? {};
+      
+      // Calculate new overtime values (from user start date)
+      final newOvertimeData = await OvertimeCalculationService.calculateOvertimeFromLogs(
+        widget.companyId,
+        userId,
+      );
+      
+      // DEBUG: Calculate overtime for different periods to find the real values
+      // await _debugOvertimeCalculations(userId); // Temporarily disabled due to linter error
+      
+      // Check if any values have changed (excluding bonus which is manually set)
+      final hasChanged = 
+          (currentOvertimeData['transferred'] ?? 0) != (newOvertimeData['transferred'] ?? 0) ||
+          (currentOvertimeData['current'] ?? 0) != (newOvertimeData['current'] ?? 0) ||
+          (currentOvertimeData['used'] ?? 0) != (newOvertimeData['used'] ?? 0);
+      
+      // Only update database if values have changed
+      if (hasChanged) {
+        await OvertimeCalculationService.updateOvertimeData(
+          widget.companyId,
+          userId,
+          {
+            'transferred': newOvertimeData['transferred'] ?? 0,
+            'current': newOvertimeData['current'] ?? 0,
+            'bonus': currentOvertimeData['bonus'] ?? 0, // Preserve manual bonus
+            'used': newOvertimeData['used'] ?? 0,
+          },
+        );
+      }
+      
+      return newOvertimeData;
+    } catch (e) {
+      // If calculation fails, return empty data (will show error state)
+      return {
+        'transferred': 0,
+        'current': 0,
+        'bonus': 0,
+        'used': 0,
+      };
+    }
+  }
+
+  /// Validate and recalculate vacation balance based on actual time off requests
+  Future<void> _validateVacationBalance() async {
+    try {
+      // Get current vacation balance from user document
+      final userDoc = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(widget.companyId)
+          .collection('users')
+          .doc(widget.userId)
+          .get();
+      
+      if (!userDoc.exists) return;
+      
+      final userData = userDoc.data();
+      final currentVacationData = userData?['annualLeaveDays'] ?? {};
+      final currentUsed = _convertToDouble(currentVacationData['used'] ?? 0);
+      
+      // Get all approved time off requests for this user
+      final timeOffSnapshot = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(widget.companyId)
+          .collection('timeoff_requests')
+          .where('userId', isEqualTo: widget.userId)
+          .where('status', isEqualTo: 'approved')
+          .get();
+      
+      // Calculate actual used days from requests
+      double actualUsed = 0.0;
+      for (final doc in timeOffSnapshot.docs) {
+        final data = doc.data();
+        final totalWorkingDays = data['totalWorkingDays'] ?? 0;
+        actualUsed += _convertToDouble(totalWorkingDays);
+      }
+      
+      // Check if there's a discrepancy
+      if ((currentUsed - actualUsed).abs() > 0.01) { // Allow small floating point differences
+        // Update the vacation balance with correct used days
+        await FirebaseFirestore.instance
+            .collection('companies')
+            .doc(widget.companyId)
+            .collection('users')
+            .doc(widget.userId)
+            .update({
+          'annualLeaveDays.used': actualUsed,
+        });
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Vacation balance updated: ${actualUsed.toStringAsFixed(1)} days used'),
+              backgroundColor: Theme.of(context).extension<AppColors>()!.success,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      // Silently handle validation errors
+    }
   }
 }

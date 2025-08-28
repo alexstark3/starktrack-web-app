@@ -164,6 +164,18 @@ abstract class AppLocalizations {
   String get descriptionOptional;
   String get submitRequest;
   String get pickDates;
+  String get selectedRange;
+
+  // Reports
+  String get reports;
+  String get createReport;
+  String get reportName;
+  String get reportOrientation;
+  String get selectFields;
+  String get filters;
+  String get exportCsv;
+  String get runReport;
+  String get deleteSuccessful;
 
   // App shell/system
   String get systemMaintenance;
@@ -593,6 +605,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Weekly Hours'**
   String get weeklyHours;
+
+  /// No description provided for @workingDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Working Days per Week'**
+  String get workingDays;
+
+  /// No description provided for @overtimeDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Overtime Days'**
+  String get overtimeDays;
 
   /// No description provided for @workload.
   ///

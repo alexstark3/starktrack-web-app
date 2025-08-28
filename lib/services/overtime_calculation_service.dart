@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 class OvertimeCalculationService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+
+
   /// Calculate overtime for a user based on their time logs
   static Future<Map<String, dynamic>> calculateOvertimeFromLogs(
     String companyId,
@@ -33,7 +35,39 @@ class OvertimeCalculationService {
       final userData = userDoc.data() as Map<String, dynamic>;
       final weeklyHours =
           userData['weeklyHours'] ?? 40; // Default 40 hours per week
-      final dailyHours = weeklyHours / 5; // Assuming 5 working days per week
+      
+      // Get working days configuration
+      final workingDays = userData['workingDays'] as List<dynamic>? ?? ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+      final workingDaysList = workingDays.map((dayName) {
+        switch (dayName.toString()) {
+          case 'Monday': return 1;
+          case 'Tuesday': return 2;
+          case 'Wednesday': return 3;
+          case 'Thursday': return 4;
+          case 'Friday': return 5;
+          case 'Saturday': return 6;
+          case 'Sunday': return 7;
+          default: return 0;
+        }
+      }).where((d) => d > 0).toList();
+      final dailyHours = weeklyHours / workingDaysList.length; // Calculate based on actual working days
+      
+      // Get overtime days configuration
+      final overtimeDays = userData['overtimeDays'] as List<dynamic>? ?? ['Saturday', 'Sunday'];
+      final overtimeDaysList = overtimeDays.isEmpty 
+          ? <int>[] 
+          : overtimeDays.map((dayName) {
+              switch (dayName.toString()) {
+                case 'Monday': return 1;
+                case 'Tuesday': return 2;
+                case 'Wednesday': return 3;
+                case 'Thursday': return 4;
+                case 'Friday': return 5;
+                case 'Saturday': return 6;
+                case 'Sunday': return 7;
+                default: return 0;
+              }
+            }).where((d) => d > 0).toList();
 
       // Get user's start date (when they joined the company)
       final startDateString = userData['startDate'] as String?;
@@ -118,7 +152,7 @@ class OvertimeCalculationService {
         }
       }
 
-      // Build full set of days to evaluate: all weekdays in range, plus any day
+      // Build full set of days to evaluate: all working days in range, plus any day
       // that has logs or paid time (holiday/timeoff). This ensures regular
       // workdays without logs contribute undertime.
       final df = DateFormat('yyyy-MM-dd');
@@ -126,7 +160,21 @@ class OvertimeCalculationService {
       for (var d = effectiveFromDate;
           !d.isAfter(actualToDate);
           d = d.add(const Duration(days: 1))) {
-        if (d.weekday >= DateTime.monday && d.weekday <= DateTime.friday) {
+        // Check if this day is a working day based on user configuration
+        // workingDays now contains individual day numbers (1=Monday, 2=Tuesday, etc.)
+        final workingDaysList = workingDays.map((dayName) {
+          switch (dayName.toString()) {
+            case 'Monday': return 1;
+            case 'Tuesday': return 2;
+            case 'Wednesday': return 3;
+            case 'Thursday': return 4;
+            case 'Friday': return 5;
+            case 'Saturday': return 6;
+            case 'Sunday': return 7;
+            default: return 0;
+          }
+        }).where((d) => d > 0).toList();
+        if (workingDaysList.contains(d.weekday)) {
           days.add(df.format(d));
         }
       }
@@ -137,6 +185,8 @@ class OvertimeCalculationService {
       int totalOvertimeMinutes = 0;
       int totalWorkingDays = 0;
       List<Map<String, dynamic>> calculationDetails = [];
+
+
 
       for (final day in days) {
         final date = DateTime.parse(day);
@@ -152,8 +202,8 @@ class OvertimeCalculationService {
         // Check if it has paid time off
         final hasPaidTime = paidMinutes > 0;
 
-        // Check if it's a weekend (Saturday = 6, Sunday = 7)
-        final isWeekend = date.weekday >= 6;
+        // Check if it's an overtime day based on user configuration
+        final isOvertimeDay = overtimeDaysList.contains(date.weekday);
 
         Map<String, dynamic> dayDetail = {
           'date': day,
@@ -162,7 +212,7 @@ class OvertimeCalculationService {
           'paidMinutes': paidMinutes,
           'totalMinutes': totalMinutesForDay,
           'isHoliday': isHoliday,
-          'isWeekend': isWeekend,
+          'isOvertimeDay': isOvertimeDay,
           'hasPaidTime': hasPaidTime,
           'overtimeMinutes': 0,
           'overtimeHours': '0.00',
@@ -174,10 +224,10 @@ class OvertimeCalculationService {
           dayDetail['overtimeHours'] = (minutesWorked / 60).toStringAsFixed(2);
           dayDetail['reason'] = 'Holiday - all time counts as overtime';
           totalOvertimeMinutes += minutesWorked;
-        } else if (isWeekend) {
+        } else if (isOvertimeDay) {
           dayDetail['overtimeMinutes'] = minutesWorked;
           dayDetail['overtimeHours'] = (minutesWorked / 60).toStringAsFixed(2);
-          dayDetail['reason'] = 'Weekend - all time counts as overtime';
+          dayDetail['reason'] = 'Overtime day - all time counts as overtime';
           totalOvertimeMinutes += minutesWorked;
         } else {
           // Regular working day
@@ -189,6 +239,7 @@ class OvertimeCalculationService {
           dayDetail['expectedMinutes'] = expectedMinutes;
           dayDetail['expectedHours'] =
               (expectedMinutes / 60).toStringAsFixed(2);
+
 
           if (dayOvertime > 0) {
             // Overtime - worked more than expected (including paid time)
@@ -217,6 +268,8 @@ class OvertimeCalculationService {
 
         calculationDetails.add(dayDetail);
       }
+
+
 
       // Cap overtime at reasonable amount (max 20 hours per week)
       final maxOvertimePerWeek = 20 * 60; // 20 hours in minutes
@@ -266,24 +319,63 @@ class OvertimeCalculationService {
     DateTime toDate,
   ) async {
     try {
-      final holidaysSnapshot = await _firestore
+      final policiesSnapshot = await _firestore
           .collection('companies')
           .doc(companyId)
-          .collection('holidays')
-          .where('date',
-              isGreaterThanOrEqualTo: DateFormat('yyyy-MM-dd').format(fromDate))
-          .where('date',
-              isLessThanOrEqualTo: DateFormat('yyyy-MM-dd').format(toDate))
+          .collection('holiday_policies')
           .get();
 
       final holidays = <String>{};
-      for (final doc in holidaysSnapshot.docs) {
+      
+      for (final doc in policiesSnapshot.docs) {
         final data = doc.data();
-        final date = data['date'] as String?;
-        if (date != null) {
-          holidays.add(date);
+        
+        final period = data['period'] as Map<String, dynamic>?;
+        final startTimestamp = period?['start'] as Timestamp?;
+        final endTimestamp = period?['end'] as Timestamp?;
+        final repeatAnnually = data['repeatAnnually'] ?? false;
+
+        if (startTimestamp != null && endTimestamp != null) {
+          final startDate = startTimestamp.toDate();
+          final endDate = endTimestamp.toDate();
+
+
+
+          // Check if this policy applies to the date range
+          if (repeatAnnually) {
+            // For annual repeating policies, check each year in the range
+            for (int year = fromDate.year; year <= toDate.year; year++) {
+              final yearStart = DateTime(year, startDate.month, startDate.day);
+              final yearEnd = DateTime(year, endDate.month, endDate.day);
+
+              if (yearStart.isBefore(toDate.add(Duration(days: 1))) && yearEnd.isAfter(fromDate.subtract(Duration(days: 1)))) {
+                // Policy applies to this year, add all days in the range
+                final effectiveStart = yearStart.isAfter(fromDate) ? yearStart : fromDate;
+                final effectiveEnd = yearEnd.isBefore(toDate) ? yearEnd : toDate;
+
+                for (int i = 0; i <= effectiveEnd.difference(effectiveStart).inDays; i++) {
+                  final dayDate = effectiveStart.add(Duration(days: i));
+                  final dayKey = DateFormat('yyyy-MM-dd').format(dayDate);
+                  holidays.add(dayKey);
+                }
+              }
+            }
+          } else {
+            // Non-repeating policy, check if it overlaps with the date range
+            if (startDate.isBefore(toDate.add(Duration(days: 1))) && endDate.isAfter(fromDate.subtract(Duration(days: 1)))) {
+              final effectiveStart = startDate.isAfter(fromDate) ? startDate : fromDate;
+              final effectiveEnd = endDate.isBefore(toDate) ? endDate : toDate;
+
+              for (int i = 0; i <= effectiveEnd.difference(effectiveStart).inDays; i++) {
+                final dayDate = effectiveStart.add(Duration(days: i));
+                final dayKey = DateFormat('yyyy-MM-dd').format(dayDate);
+                holidays.add(dayKey);
+              }
+            }
+          }
         }
       }
+
 
       return holidays;
     } catch (e) {

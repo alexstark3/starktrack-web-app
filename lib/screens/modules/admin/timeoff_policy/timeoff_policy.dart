@@ -513,6 +513,7 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
   // Additional toggles for time off policy
   bool _isAccruing = true;
   String _timeUnit = 'Days'; // 'Days' or 'Hours'
+  String _type = 'vacation'; // 'vacation', 'sick', 'other'
   bool _doesNotCount = false;
   bool _includeOvertime = false;
   bool _allowNegativeBalance = false;
@@ -616,6 +617,7 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
       final policy = widget.existingPolicy!;
 
       _nameController.text = policy['name'] ?? '';
+      _type = policy['type'] ?? 'vacation';
       _selectedColor = Color(policy['color'] ?? 0xFF000000);
 
       final period = policy['period'] as Map<String, dynamic>?;
@@ -732,6 +734,7 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
     try {
       final policyData = {
         'name': _nameController.text.trim(),
+        'type': _type,
         'color': _selectedColor.toARGB32(),
         'isPaid': _isPaid,
         'isRepeating': _isRepeating,
@@ -832,38 +835,97 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Name field with member-style border
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white24
-                            : Colors.black26,
-                        width: 1,
-                      ),
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? appColors.cardColorDark
-                          : Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                  // Name field
+                  SizedBox(
+                    height: 38,
                     child: TextField(
                       controller: _nameController,
                       decoration: InputDecoration(
-                        hintText: l10n.enterPolicyName,
-                        hintStyle: TextStyle(
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? const Color(0xFFB3B3B3)
-                              : appColors.textColor,
+                        labelText: l10n.enterPolicyName,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).brightness == Brightness.dark 
+                                ? appColors.borderColorDark 
+                                : appColors.borderColorLight,
+                            width: 1,
+                          ),
                         ),
-                        border: InputBorder.none,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).brightness == Brightness.dark 
+                                ? appColors.borderColorDark 
+                                : appColors.borderColorLight,
+                            width: 1,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: appColors.primaryBlue, width: 2),
+                        ),
                         contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 12),
+                            horizontal: 12, vertical: 9),
                       ),
                       style: TextStyle(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? const Color(0xFFCCCCCC)
-                            : appColors.textColor,
+                        color: appColors.textColor,
                       ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Type selection
+                  Text(
+                    'Type',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: appColors.textColor,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 38,
+                    child: DropdownButtonFormField<String>(
+                      initialValue: _type,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).brightness == Brightness.dark 
+                                ? appColors.borderColorDark 
+                                : appColors.borderColorLight,
+                            width: 1,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).brightness == Brightness.dark 
+                                ? appColors.borderColorDark 
+                                : appColors.borderColorLight,
+                            width: 1,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: appColors.primaryBlue, width: 2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 9,
+                        ),
+                      ),
+                                          items: [
+                        DropdownMenuItem(value: 'vacation', child: Text('Vacation')),
+                        DropdownMenuItem(value: 'sick', child: Text('Sick Leave')),
+                        DropdownMenuItem(value: 'other', child: Text('Other')),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _type = value!;
+                        });
+                      },
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -1065,152 +1127,7 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
                   ],
                   const SizedBox(height: 20),
 
-                  // Date picker
-                  Text(
-                    l10n.date,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: appColors.textColor,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  InkWell(
-                    onTap: _showDatePicker,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 12),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? Colors.white24
-                              : Colors.black26,
-                          width: 1,
-                        ),
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? appColors.cardColorDark
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.calendar_today,
-                              color: appColors.primaryBlue, size: 20),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              _selectedDateRange != null &&
-                                      _selectedDateRange!.hasSelection
-                                  ? _selectedDateRange.toString()
-                                  : 'Select Date',
-                              style: TextStyle(
-                                color: _selectedDateRange != null &&
-                                        _selectedDateRange!.hasSelection
-                                    ? appColors.textColor
-                                    : (Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? const Color(0xFFB3B3B3)
-                                        : appColors.textColor),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Accruing toggle
-                  Row(
-                    children: [
-                      Text(
-                        'Accruing',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: appColors.textColor,
-                        ),
-                      ),
-                      const Spacer(),
-                      Switch(
-                        value: _isAccruing,
-                        onChanged: (value) {
-                          setState(() {
-                            _isAccruing = value;
-                          });
-                        },
-                        activeThumbColor: appColors.primaryBlue,
-                      ),
-                    ],
-                  ),
-                  if (_isAccruing) ...[
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 120,
-                          child: TextFormField(
-                            initialValue: _accruingAmount.toString(),
-                            decoration: InputDecoration(
-                              labelText: 'Amount',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                            ),
-                            keyboardType: TextInputType.number,
-                            onChanged: (value) {
-                              setState(() {
-                                _accruingAmount = double.tryParse(value) ?? 1.0;
-                              });
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          '$_timeUnit Per',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: appColors.textColor,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        SizedBox(
-                          width: 100,
-                          child: DropdownButtonFormField<String>(
-                            initialValue: _accruingPeriod,
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                            ),
-                            items: ['Month', 'Year'].map((period) {
-                              return DropdownMenuItem<String>(
-                                value: period,
-                                child: Text(period),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                _accruingPeriod = value!;
-                              });
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                  const SizedBox(height: 12),
-
-                  // Time Unit radio buttons
+                  // Time Unit radio buttons (moved before date)
                   Text(
                     'Time Unit',
                     style: TextStyle(
@@ -1226,6 +1143,8 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
                         onTap: () {
                           setState(() {
                             _timeUnit = 'Days';
+                            // Keep time selection available for half-day selection
+                            // _showTimeSelection remains true if user wants to use it
                           });
                         },
                         child: Row(
@@ -1297,13 +1216,198 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 20),
 
-                  // Does not count toggle
+
+
+                  // Date picker
+                  Text(
+                    l10n.date,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: appColors.textColor,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 38,
+                    child: InkWell(
+                      onTap: _showDatePicker,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Theme.of(context).brightness == Brightness.dark 
+                                ? appColors.borderColorDark 
+                                : appColors.borderColorLight,
+                            width: 1,
+                          ),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.calendar_today,
+                                color: appColors.primaryBlue, size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _selectedDateRange != null &&
+                                        _selectedDateRange!.hasSelection
+                                    ? _selectedDateRange.toString()
+                                    : 'Select Date',
+                                style: TextStyle(
+                                  color: _selectedDateRange != null &&
+                                          _selectedDateRange!.hasSelection
+                                      ? appColors.textColor
+                                      : appColors.darkGray,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Accruing toggle
                   Row(
                     children: [
                       Text(
-                        'Does not count',
+                        'Accruing',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: appColors.textColor,
+                        ),
+                      ),
+                      const Spacer(),
+                      Switch(
+                        value: _isAccruing,
+                        onChanged: (value) {
+                          setState(() {
+                            _isAccruing = value;
+                          });
+                        },
+                        activeThumbColor: appColors.primaryBlue,
+                      ),
+                    ],
+                  ),
+                  if (_isAccruing) ...[
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: 100,
+                          height: 38,
+                          child: TextFormField(
+                            initialValue: _accruingAmount.toString(),
+                            decoration: InputDecoration(
+                              labelText: 'Amount',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).brightness == Brightness.dark 
+                                      ? appColors.borderColorDark 
+                                      : appColors.borderColorLight,
+                                  width: 1,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).brightness == Brightness.dark 
+                                      ? appColors.borderColorDark 
+                                      : appColors.borderColorLight,
+                                  width: 1,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: appColors.primaryBlue, width: 2),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 9,
+                              ),
+                            ),
+                            keyboardType: TextInputType.number,
+                            onChanged: (value) {
+                              setState(() {
+                                _accruingAmount = double.tryParse(value) ?? 1.0;
+                              });
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          '$_timeUnit Per',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: appColors.textColor,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: SizedBox(
+                            height: 38,
+                            child: DropdownButtonFormField<String>(
+                              initialValue: _accruingPeriod,
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).brightness == Brightness.dark 
+                                        ? appColors.borderColorDark 
+                                        : appColors.borderColorLight,
+                                    width: 1,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).brightness == Brightness.dark 
+                                        ? appColors.borderColorDark 
+                                        : appColors.borderColorLight,
+                                    width: 1,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(color: appColors.primaryBlue, width: 2),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 9,
+                                ),
+                              ),
+                              items: ['Month', 'Year'].map((period) {
+                                return DropdownMenuItem<String>(
+                                  value: period,
+                                  child: Text(period),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  _accruingPeriod = value!;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+
+                  // Exclude from Vacancies toggle
+                  Row(
+                    children: [
+                      Text(
+                        'Exclude from Vacancies',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -1327,14 +1431,19 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        border: Border.all(color: appColors.lightGray),
+                        border: Border.all(
+                          color: Theme.of(context).brightness == Brightness.dark 
+                              ? appColors.borderColorDark 
+                              : appColors.borderColorLight,
+                          width: 1,
+                        ),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Choose all that apply:',
+                            'When this policy is active, these days will NOT count against vacation balance:',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -1463,25 +1572,47 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
                     Row(
                       children: [
                         Expanded(
-                          child: TextFormField(
-                            initialValue: _negativeBalanceDays.toString(),
-                            decoration: InputDecoration(
-                              labelText: 'Days',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
+                          child: SizedBox(
+                            height: 38,
+                            child: TextFormField(
+                              initialValue: _negativeBalanceDays.toString(),
+                              decoration: InputDecoration(
+                                labelText: 'Days',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).brightness == Brightness.dark 
+                                        ? appColors.borderColorDark 
+                                        : appColors.borderColorLight,
+                                    width: 1,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).brightness == Brightness.dark 
+                                        ? appColors.borderColorDark 
+                                        : appColors.borderColorLight,
+                                    width: 1,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(color: appColors.primaryBlue, width: 2),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 9,
+                                ),
                               ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
+                              keyboardType: TextInputType.number,
+                              onChanged: (value) {
+                                setState(() {
+                                  _negativeBalanceDays =
+                                      double.tryParse(value) ?? 5.0;
+                                });
+                              },
                             ),
-                            keyboardType: TextInputType.number,
-                            onChanged: (value) {
-                              setState(() {
-                                _negativeBalanceDays =
-                                    double.tryParse(value) ?? 5.0;
-                              });
-                            },
                           ),
                         ),
                       ],
@@ -1517,7 +1648,12 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        border: Border.all(color: appColors.lightGray),
+                        border: Border.all(
+                          color: Theme.of(context).brightness == Brightness.dark 
+                              ? appColors.borderColorDark 
+                              : appColors.borderColorLight,
+                          width: 1,
+                        ),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: EmbeddedUserGroupSearch(

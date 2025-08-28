@@ -50,6 +50,10 @@ class _AddUserDialogState extends State<AddUserDialog> {
   late TextEditingController _passwordController;
   late TextEditingController _startDateController;
 
+  // State variables for day selection
+  List<String> _selectedWorkingDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+  List<String> _selectedOvertimeDays = ['Saturday', 'Sunday'];
+
   // Form state
   List<String> _selectedRoles = [];
   List<String> _selectedModules = CompanyModuleService.getCoreModules();
@@ -63,6 +67,28 @@ class _AddUserDialogState extends State<AddUserDialog> {
   
   // Company modules
   List<String> _companyModules = CompanyModuleService.getCoreModules();
+
+  // Working days options - individual day selection
+  final List<Map<String, String>> _workingDaysOptions = [
+    {'value': 'Monday', 'label': 'Monday'},
+    {'value': 'Tuesday', 'label': 'Tuesday'},
+    {'value': 'Wednesday', 'label': 'Wednesday'},
+    {'value': 'Thursday', 'label': 'Thursday'},
+    {'value': 'Friday', 'label': 'Friday'},
+    {'value': 'Saturday', 'label': 'Saturday'},
+    {'value': 'Sunday', 'label': 'Sunday'},
+  ];
+
+  // Overtime days options - individual day selection
+  final List<Map<String, String>> _overtimeDaysOptions = [
+    {'value': 'Monday', 'label': 'Monday'},
+    {'value': 'Tuesday', 'label': 'Tuesday'},
+    {'value': 'Wednesday', 'label': 'Wednesday'},
+    {'value': 'Thursday', 'label': 'Thursday'},
+    {'value': 'Friday', 'label': 'Friday'},
+    {'value': 'Saturday', 'label': 'Saturday'},
+    {'value': 'Sunday', 'label': 'Sunday'},
+  ];
 
   @override
   void initState() {
@@ -118,6 +144,8 @@ class _AddUserDialogState extends State<AddUserDialog> {
         'canViewTeamTimeOff': false,
         'privateAdress': {},
         'workAddress': {},
+        'workingDays': '5', // Add default for new user
+        'overtimeDays': '6,7', // Add default for new user
       };
 
       _privateAddress = {};
@@ -160,6 +188,15 @@ class _AddUserDialogState extends State<AddUserDialog> {
     // Initialize start date controller
     final startDate = _userData['startDate'] ?? '';
     _startDateController = TextEditingController(text: startDate);
+
+    // Initialize new dropdown values
+    // Set defaults for working days and overtime days (these fields may not exist yet)
+    _selectedWorkingDays = _userData['workingDays'] != null && _userData['workingDays'] is List<String>
+        ? List<String>.from(_userData['workingDays']!)
+        : ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    _selectedOvertimeDays = _userData['overtimeDays'] != null && _userData['overtimeDays'] is List<String>
+        ? List<String>.from(_userData['overtimeDays']!)
+        : ['Saturday', 'Sunday'];
   }
 
   /// Load company modules to determine which modules can be assigned to users
@@ -389,16 +426,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
     }
   }
 
-  void _onWorkplaceSameChanged(bool value) {
-    if (mounted) {
-      setState(() {
-        _workplaceSame = value;
-        if (value) {
-          _workAddress = Map<String, dynamic>.from(_privateAddress);
-        }
-      });
-    }
-  }
+
 
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
@@ -436,6 +464,9 @@ class _AddUserDialogState extends State<AddUserDialog> {
         'canViewTeamTimeOff': _canViewTeamTimeOff,
         'privateAdress': _privateAddress,
         'workAddress': _workAddress,
+        // Add working days and overtime days configuration
+        'workingDays': _selectedWorkingDays,
+        'overtimeDays': _selectedOvertimeDays,
         'updatedAt': FieldValue.serverTimestamp(),
       };
       
@@ -783,11 +814,8 @@ class _AddUserDialogState extends State<AddUserDialog> {
                       ),
                       // Workplace same as private address toggle
                       const SizedBox(height: 8),
-                      _buildSwitchRow(
-                        l10n.workplaceSame,
-                        _workplaceSame,
-                        _onWorkplaceSameChanged,
-                      ),
+                      _buildSwitchRow(l10n.workplaceSame, _workplaceSame,
+                          (value) => setState(() => _workplaceSame = value)),
                       const SizedBox(height: 16),
                       // Work Address label and fields (if needed)
                       if (!_workplaceSame) ...[
@@ -932,6 +960,130 @@ class _AddUserDialogState extends State<AddUserDialog> {
                       ),
                       const SizedBox(height: 16),
 
+                      // Working Days and Overtime Days dropdowns
+                      Row(
+                        children: [
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              decoration: InputDecoration(
+                                labelText: l10n.workingDays,
+                                filled: true,
+                                fillColor: Theme.of(context).brightness == Brightness.dark
+                                    ? appColors.cardColorDark
+                                    : Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).brightness == Brightness.dark
+                                        ? Colors.white24
+                                        : Colors.black26,
+                                    width: 1,
+                                  ),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                              ),
+                              items: _workingDaysOptions.map((option) {
+                                final isSelected = _selectedWorkingDays.contains(option['value']);
+                                return DropdownMenuItem<String>(
+                                  value: option['value'],
+                                  child: Row(
+                                    children: [
+                                      Checkbox(
+                                        value: isSelected,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            if (value!) {
+                                              _selectedWorkingDays.add(option['value']!);
+                                            } else {
+                                              _selectedWorkingDays.remove(option['value']!);
+                                            }
+                                          });
+                                        },
+                                        activeColor: appColors.primaryBlue,
+                                        checkColor: appColors.whiteTextOnBlue,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(option['label']!),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                // Handle dropdown open/close if needed
+                              },
+                              selectedItemBuilder: (context) {
+                                return [
+                                  Text(
+                                    '${_selectedWorkingDays.length} days selected',
+                                    style: TextStyle(color: appColors.textColor),
+                                  ),
+                                ];
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              decoration: InputDecoration(
+                                labelText: l10n.overtimeDays,
+                                filled: true,
+                                fillColor: Theme.of(context).brightness == Brightness.dark
+                                    ? appColors.cardColorDark
+                                    : Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).brightness == Brightness.dark
+                                        ? Colors.white24
+                                        : Colors.black26,
+                                    width: 1,
+                                  ),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                              ),
+                              items: _overtimeDaysOptions.map((option) {
+                                final isSelected = _selectedOvertimeDays.contains(option['value']);
+                                return DropdownMenuItem<String>(
+                                  value: option['value'],
+                                  child: Row(
+                                    children: [
+                                      Checkbox(
+                                        value: isSelected,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            if (value!) {
+                                              _selectedOvertimeDays.add(option['value']!);
+                                            } else {
+                                              _selectedOvertimeDays.remove(option['value']!);
+                                            }
+                                          });
+                                        },
+                                        activeColor: appColors.primaryBlue,
+                                        checkColor: appColors.whiteTextOnBlue,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(option['label']!),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                // Handle dropdown open/close if needed
+                              },
+                              selectedItemBuilder: (context) {
+                                return [
+                                  Text(
+                                    '${_selectedOvertimeDays.length} days selected',
+                                    style: TextStyle(color: appColors.textColor),
+                                  ),
+                                ];
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
                       // Start Date field
                       GestureDetector(
                         onTap: () => _showDatePicker(context),
@@ -1012,8 +1164,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(
-                                color: appColors.primaryBlue, width: 2),
+                            borderSide: BorderSide(color: appColors.primaryBlue, width: 2),
                           ),
                           labelStyle: TextStyle(color: appColors.textColor),
                         ),

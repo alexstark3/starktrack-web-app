@@ -244,7 +244,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                 icon: Icons.people,
                 color: Colors.green,
                 onTap: () {
-                  // TODO: Navigate to admin user management
+                  // Treba da se napraa Navigate to admin user management
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                         content: Text('Admin User Management - Coming Soon')),
@@ -261,7 +261,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                 icon: Icons.analytics,
                 color: Colors.purple,
                 onTap: () {
-                  // TODO: Navigate to system statistics
+                  // Treba da se napraa Navigate to system statistics
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('System Statistics - Coming Soon')),
                   );

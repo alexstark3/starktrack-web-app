@@ -5,6 +5,9 @@ import '../../../theme/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../utils/app_logger.dart';
 import '../../../widgets/calendar.dart';
+import '../../../services/overtime_calculation_service.dart';
+import '../team/members/members_view.dart';
+
 
 const double kFilterHeight = 38;
 const double kFilterRadius = 9;
@@ -189,7 +192,11 @@ class _HistoryLogsState extends State<HistoryLogs> {
           ],
           onChanged: (val) {
             if (val != null) {
-              setState(() => groupType = val);
+              setState(() {
+                groupType = val;
+                // Reset date range when switching to a different grouping type
+                dateRange = null;
+              });
             }
           },
         ),
@@ -354,6 +361,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
 
                   var logs = snapshot.data!.docs;
 
+                  // Filter logs: exclude today's sessions (they belong in tracker view)
                   List<QueryDocumentSnapshot> filteredLogs = logs.where((doc) {
                                          final data = doc.data() as Map<String, dynamic>;
                      final begin = (data['begin'] is Timestamp)
@@ -414,6 +422,23 @@ class _HistoryLogsState extends State<HistoryLogs> {
                        }
                      }
 
+                     // Exclude today's sessions from history view ONLY when viewing default unfiltered day view
+                     // Show today's sessions in month/week/year views or when any filters are applied
+                     if (begin != null && 
+                         dateRange == null && 
+                         searchProject.isEmpty && 
+                         searchNote.isEmpty && 
+                         groupType == GroupType.day) {
+                       final today = DateTime.now();
+                       final sessionDate = DateTime(begin.year, begin.month, begin.day);
+                       final todayOnly = DateTime(today.year, today.month, today.day);
+                       
+                       // Only exclude today's sessions when viewing unfiltered day view
+                       if (sessionDate.isAtSameMomentAs(todayOnly)) {
+                         return false;
+                       }
+                     }
+
                     if (searchProject.isNotEmpty &&
                         !project
                             .toLowerCase()
@@ -427,6 +452,8 @@ class _HistoryLogsState extends State<HistoryLogs> {
                             .contains(searchNote.toLowerCase())) {
                       return false;
                     }
+
+
 
                     return true;
                   }).toList();
@@ -451,6 +478,12 @@ class _HistoryLogsState extends State<HistoryLogs> {
                       Duration duration = Duration.zero;
                       double totalExpense = 0.0;
                       Map<String, dynamic> expensesMap = {};
+                      
+                      // Status fields
+                      bool isApproved = false;
+                      bool isRejected = false;
+                      bool isApprovedAfterEdit = false;
+                      bool isEdited = false;
 
                       try {
                         begin = (data['begin'] is Timestamp)
@@ -467,6 +500,25 @@ class _HistoryLogsState extends State<HistoryLogs> {
                         perDiem = perDiemRaw == true ||
                             perDiemRaw == 1 ||
                             perDiemRaw == '1';
+
+                        // Extract approval status
+                        final approvedRaw = data['approved'];
+                        final rejectedRaw = data['rejected'];
+                        final approvedAfterEditRaw = data['approvedAfterEdit'];
+                        final editedRaw = data['edited'];
+                        
+                        isApproved = approvedRaw == true ||
+                            approvedRaw == 1 ||
+                            approvedRaw == '1';
+                        isRejected = rejectedRaw == true ||
+                            rejectedRaw == 1 ||
+                            rejectedRaw == '1';
+                        isApprovedAfterEdit = approvedAfterEditRaw == true ||
+                            approvedAfterEditRaw == 1 ||
+                            approvedAfterEditRaw == '1';
+                        isEdited = editedRaw == true ||
+                            editedRaw == 1 ||
+                            editedRaw == '1';
 
                         // Calculate duration
                         if (begin != null && end != null) {
@@ -511,6 +563,10 @@ class _HistoryLogsState extends State<HistoryLogs> {
                         perDiem: perDiem,
                         expense: totalExpense,
                         expensesMap: expensesMap,
+                        isApproved: isApproved,
+                        isRejected: isRejected,
+                        isApprovedAfterEdit: isApprovedAfterEdit,
+                        isEdited: isEdited,
                       ));
                     } catch (e) {
                       AppLogger.error('Error creating history entry: $e');
@@ -531,11 +587,20 @@ class _HistoryLogsState extends State<HistoryLogs> {
 
                   // Group entries
                   Map<String, List<_HistoryEntry>> grouped = {};
+                  
+                  // Check if we have a custom date range selected
+                  bool hasCustomDateRange = dateRange != null && 
+                      (dateRange!.startDate != null || dateRange!.endDate != null);
+                  
                   for (var entry in entries) {
                     String key = '';
                     if (entry.begin == null) {
                       key = l10n.unknown;
+                    } else if (hasCustomDateRange) {
+                      // For custom date range, group all entries together
+                      key = _formatDateRange(dateRange!, false);
                     } else {
+                      // Normal grouping by selected type
                       switch (groupType) {
                         case GroupType.day:
                           key = dateFormat.format(entry.begin!);
@@ -558,6 +623,11 @@ class _HistoryLogsState extends State<HistoryLogs> {
                   // Sort group keys
                   final sortedKeys = grouped.keys.toList()
                     ..sort((a, b) {
+                      // For custom date ranges, no sorting needed (only one group)
+                      if (hasCustomDateRange) {
+                        return 0;
+                      }
+                      
                       if (groupType == GroupType.day) {
                         try {
                           return DateTime.parse(b).compareTo(DateTime.parse(a));
@@ -612,19 +682,19 @@ class _HistoryLogsState extends State<HistoryLogs> {
                         }
                       }
 
-                              return Container(
-          key: ValueKey('history_group_$groupKey'),
-          margin: const EdgeInsets.only(bottom: 10),
-          decoration: BoxDecoration(
-            color: isDark
-                ? appColors.cardColorDark
-                : appColors.backgroundLight,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isDark ? appColors.borderColorDark : appColors.borderColorLight,
-              width: 1,
-            ),
-          ),
+                      return Container(
+                        key: ValueKey('history_group_$groupKey'),
+                        margin: const EdgeInsets.only(bottom: 10),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? appColors.cardColorDark
+                              : appColors.backgroundLight,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isDark ? appColors.borderColorDark : appColors.borderColorLight,
+                            width: 1,
+                          ),
+                        ),
                         child: Column(
                           children: [
                             // Group header
@@ -780,11 +850,57 @@ class _HistoryLogsState extends State<HistoryLogs> {
                                                   '${l10n.totalExpenses}: ${expenseFormat.format(entry.expense)}',
                                                   style: const TextStyle(
                                                     color: Colors.red,
-                                                    fontWeight: FontWeight.w600,
+                                                    fontWeight:
+                                                        FontWeight.w600,
                                                     fontSize: 15,
                                                   ),
                                                 ),
                                               ),
+                                            
+                                            // Status icons and edit button - left aligned
+                                            Padding(
+                                              padding: const EdgeInsets.only(top: 8.0),
+                                              child: Row(
+                                                children: [
+                                                  // Status indicators
+                                                  if (entry.isApprovedAfterEdit)
+                                                    const Icon(Icons.verified,
+                                                        color: Colors.orange, size: 20)
+                                                  else if (entry.isApproved)
+                                                    const Icon(Icons.verified,
+                                                        color: Colors.green, size: 20)
+                                                  else if (entry.isRejected)
+                                                    const Icon(Icons.cancel,
+                                                        color: Colors.red, size: 20)
+                                                  else if (entry.isEdited)
+                                                    // Edited session waiting for approval - show both icons
+                                                    Row(
+                                                      children: [
+                                                        const Icon(Icons.verified,
+                                                            color: Colors.orange, size: 20),
+                                                        const SizedBox(width: 8),
+                                                        const Icon(Icons.hourglass_empty,
+                                                            color: Colors.orange, size: 20),
+                                                      ],
+                                                    )
+                                                  else
+                                                    // Pending status (not approved, not rejected, not edited)
+                                                    const Icon(Icons.hourglass_empty,
+                                                        color: Colors.orange, size: 20),
+                                                  
+                                                  const SizedBox(width: 8),
+                                                  
+                                                  // Edit icon for rejected sessions and regular pending (not edited ones)
+                                                  if (entry.isRejected || (!entry.isApproved && !entry.isRejected && !entry.isApprovedAfterEdit && !entry.isEdited))
+                                                    IconButton(
+                                                      onPressed: () => _showEditDialog(context, entry),
+                                                      icon: const Icon(Icons.edit, color: Colors.blue, size: 20),
+                                                      padding: EdgeInsets.zero,
+                                                      constraints: const BoxConstraints(),
+                                                    ),
+                                                ],
+                                              ),
+                                            ),
                                           ],
                                         ),
                                       ),
@@ -804,25 +920,50 @@ class _HistoryLogsState extends State<HistoryLogs> {
                                   bottomRight: Radius.circular(12),
                                 ),
                               ),
-                              child: Wrap(
-                                spacing: 16,
-                                runSpacing: 4,
-                                children: [
-                                  Text(
-                                    '${l10n.totalTime}: ${_formatDuration(groupTotal)}',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      color: theme.colorScheme.primary,
+                              child: FutureBuilder<Map<String, dynamic>?>(
+                                future: _calculateGroupOvertime(groupList),
+                                builder: (context, overtimeSnapshot) {
+                                  List<Widget> totalWidgets = [
+                                    Text(
+                                      '${l10n.totalTime}: ${_formatDuration(groupTotal)}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        color: theme.colorScheme.primary,
+                                      ),
                                     ),
-                                  ),
-                                  Text(
-                                    '${l10n.totalExpenses}: ${expenseFormat.format(groupExpense)}',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      color: theme.colorScheme.primary,
+                                    Text(
+                                      '${l10n.totalExpenses}: ${expenseFormat.format(groupExpense)}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        color: theme.colorScheme.primary,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ];
+
+                                  // Add overtime if available
+                                  if (overtimeSnapshot.hasData && overtimeSnapshot.data != null) {
+                                    final overtimeData = overtimeSnapshot.data!;
+                                    final overtimeMinutes = overtimeData['overtimeMinutes'] as int? ?? 0;
+                                    final isOvertime = overtimeMinutes > 0;
+                                    final color = isOvertime ? Colors.green : Colors.red;
+                                    
+                                    totalWidgets.add(
+                                      Text(
+                                        'Overtime: ${_formatOvertimeHours(overtimeMinutes / 60)}',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          color: color,
+                                        ),
+                                      ),
+                                    );
+                                  }
+
+                                  return Wrap(
+                                    spacing: 16,
+                                    runSpacing: 4,
+                                    children: totalWidgets,
+                                  );
+                                },
                               ),
                             ),
                           ],
@@ -835,6 +976,227 @@ class _HistoryLogsState extends State<HistoryLogs> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // Helper method to calculate overtime for a group of entries
+  Future<Map<String, dynamic>?> _calculateGroupOvertime(List<_HistoryEntry> entries) async {
+    try {
+      if (entries.isEmpty) return null;
+      
+      // Get the first entry to determine the period
+      final firstEntry = entries.first;
+      if (firstEntry.begin == null) return null;
+      
+      DateTime fromDate;
+      DateTime toDate;
+      
+      // Calculate date range based on groupType
+      switch (groupType) {
+        case GroupType.month:
+          // Month: 1st to today (don't calculate future days)
+          fromDate = DateTime(firstEntry.begin!.year, firstEntry.begin!.month, 1);
+          // Don't go beyond today
+          final now = DateTime.now();
+          final lastDayOfMonth = DateTime(firstEntry.begin!.year, firstEntry.begin!.month + 1, 0).day;
+          final monthEnd = DateTime(firstEntry.begin!.year, firstEntry.begin!.month, lastDayOfMonth, 23, 59, 59, 999);
+          toDate = now.isBefore(monthEnd) ? now : monthEnd;
+          break;
+        case GroupType.week:
+          // Full week: Monday to Sunday
+          final weekStart = firstEntry.begin!.subtract(Duration(days: firstEntry.begin!.weekday - 1));
+          fromDate = DateTime(weekStart.year, weekStart.month, weekStart.day);
+          toDate = DateTime(weekStart.year, weekStart.month, weekStart.day + 6, 23, 59, 59);
+          break;
+        case GroupType.year:
+          // Full year: January 1st to December 31st
+          fromDate = DateTime(firstEntry.begin!.year, 1, 1);
+          toDate = DateTime(firstEntry.begin!.year, 12, 31, 23, 59, 59);
+          break;
+        case GroupType.day:
+          // Single day
+          fromDate = DateTime(firstEntry.begin!.year, firstEntry.begin!.month, firstEntry.begin!.day);
+          toDate = DateTime(firstEntry.begin!.year, firstEntry.begin!.month, firstEntry.begin!.day, 23, 59, 59);
+          break;
+      }
+      
+
+      
+      // Calculate overtime for the full period
+      final result = await OvertimeCalculationService.calculateOvertimeFromLogs(
+        widget.companyId,
+        widget.userId,
+        fromDate: fromDate,
+        toDate: toDate,
+      );
+      
+      final calculationDetails = result['calculationDetails'] as List<Map<String, dynamic>>? ?? [];
+      int totalOvertimeMinutes = 0;
+      
+      for (final dayDetail in calculationDetails) {
+        final dayOvertimeMinutes = dayDetail['overtimeMinutes'] as int? ?? 0;
+        totalOvertimeMinutes += dayOvertimeMinutes;
+      }
+      
+      return {
+        'overtimeMinutes': totalOvertimeMinutes,
+        'overtimeHours': (totalOvertimeMinutes / 60).toStringAsFixed(2),
+      };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Helper method to format overtime hours
+  String _formatOvertimeHours(double hours) {
+    final isNegative = hours < 0;
+    final absHours = hours.abs();
+    final h = absHours.floor();
+    final m = ((absHours - h) * 60).round();
+    
+    String result = '';
+    if (h > 0) {
+      result += '${h}h';
+    }
+    if (m > 0) {
+      result += ' ${m.toString().padLeft(2, '0')}m';
+    }
+    if (result.isEmpty) {
+      result = '0m';
+    }
+    
+    return isNegative ? '-$result' : result;
+  }
+
+  // Show edit dialog for history entries
+  Future<void> _showEditDialog(BuildContext context, _HistoryEntry entry) async {
+    // Store context reference before async operations
+    final messenger = ScaffoldMessenger.of(context);
+    
+    // Get the log document reference
+    final logDoc = await _getLogDocument(entry.sessionDate, entry.begin);
+    if (logDoc == null) {
+      if (mounted) {
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('Could not find log document to edit'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+
+    // Get projects list for the company
+    final projects = await _getProjectsList();
+    
+    // Get user name for initials display
+    final userName = await _getUserName();
+    
+    // Show simplified edit dialog for history
+    if (mounted) {
+      await _showHistoryEditDialog(this.context, logDoc, projects, userName);
+    }
+  }
+
+  // Get log document reference
+  Future<DocumentSnapshot?> _getLogDocument(String sessionDate, DateTime? begin) async {
+    try {
+      final companyId = widget.companyId;
+      final userId = widget.userId;
+      
+      final snapshot = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(companyId)
+          .collection('users')
+          .doc(userId)
+          .collection('all_logs')
+          .where('sessionDate', isEqualTo: sessionDate)
+          .get();
+
+      // Find the log with matching time
+      for (final doc in snapshot.docs) {
+        final data = doc.data();
+        final logBegin = (data['begin'] as Timestamp?)?.toDate();
+        if (logBegin != null && begin != null) {
+          // Compare hours and minutes
+          if (logBegin.hour == begin.hour && logBegin.minute == begin.minute) {
+            return doc;
+          }
+        }
+      }
+      return null;
+    } catch (e) {
+      AppLogger.error('Error getting log document: $e');
+      return null;
+    }
+  }
+
+  // Get projects list
+  Future<List<String>> _getProjectsList() async {
+    try {
+      final companyId = widget.companyId;
+      final snapshot = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(companyId)
+          .collection('projects')
+          .get();
+      
+      return snapshot.docs
+          .map((doc) => doc.data()['name'] as String? ?? '')
+          .where((name) => name.isNotEmpty)
+          .toList();
+    } catch (e) {
+      AppLogger.error('Error getting projects list: $e');
+      return [];
+    }
+  }
+
+  // Get user name for initials display
+  Future<String> _getUserName() async {
+    try {
+      final companyId = widget.companyId;
+      final userId = widget.userId;
+      
+      final userDoc = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(companyId)
+          .collection('users')
+          .doc(userId)
+          .get();
+      
+      if (userDoc.exists) {
+        final userData = userDoc.data() as Map<String, dynamic>;
+        return userData['name'] as String? ?? 'Worker';
+      }
+      return 'Worker';
+    } catch (e) {
+      AppLogger.error('Error getting user name: $e');
+      return 'Worker';
+    }
+  }
+
+  // Show edit dialog for history entries using the shared edit log dialog
+  Future<void> _showHistoryEditDialog(
+    BuildContext context, 
+    DocumentSnapshot logDoc, 
+    List<String> projects, 
+    String workerName
+  ) async {
+    // Use the shared edit log dialog from team members module
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => EditLogDialog(
+        logDoc: logDoc,
+        projects: projects,
+        isWorkerMode: true, // Workers edit their own logs
+        workerName: workerName, // Pass worker name for initials display
+        onSaved: () {
+          // Refresh the history view
+          setState(() {});
+        },
       ),
     );
   }
@@ -851,6 +1213,10 @@ class _HistoryEntry {
   final bool perDiem;
   final double expense;
   final Map<String, dynamic> expensesMap;
+  final bool isApproved;
+  final bool isRejected;
+  final bool isApprovedAfterEdit;
+  final bool isEdited;
 
   _HistoryEntry({
     required this.begin,
@@ -862,6 +1228,10 @@ class _HistoryEntry {
     required this.perDiem,
     required this.expense,
     required this.expensesMap,
+    required this.isApproved,
+    required this.isRejected,
+    required this.isApprovedAfterEdit,
+    required this.isEdited,
   });
 }
 
@@ -888,6 +1258,8 @@ int _weekNumber(DateTime date) {
       ((startOfWeek.difference(jan4StartOfWeek).inDays) / 7).floor() + 1;
   return weekNumber;
 }
+
+
 
  // Helper function to translate expense keys
  String _translateExpenseKey(String key, AppLocalizations l10n) {
@@ -922,3 +1294,7 @@ int _weekNumber(DateTime date) {
      return '${DateFormat('dd/MM/yyyy').format(dateRange.startDate!)} - ${DateFormat('dd/MM/yyyy').format(dateRange.endDate!)}';
    }
  }
+
+
+
+

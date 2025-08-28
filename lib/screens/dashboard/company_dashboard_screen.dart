@@ -140,8 +140,10 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
               },
             ),
           if (tabLabels.contains('Reports'))
-            const ReportsScreen(
-              key: PageStorageKey('reports'),
+            ReportsScreen(
+              key: const PageStorageKey('reports'),
+              companyId: widget.companyId,
+              userId: widget.userId,
             ),
           if (tabLabels.contains(l10n.admin))
             AdminPanel(

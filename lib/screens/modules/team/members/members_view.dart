@@ -5,7 +5,6 @@ import '../../../../theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../services/overtime_calculation_service.dart';
 import 'add_new_session.dart';
-
 part 'status_icon.part.dart';
 part 'totals_header.part.dart';
 part 'helpers.part.dart';
@@ -1434,6 +1433,12 @@ class _LogsTableState extends State<_LogsTable> {
                                       'rejectedAt':
                                           FieldValue.serverTimestamp(),
                                       if (note.isNotEmpty) 'managerNote': note,
+                                      if (note.isNotEmpty) 'messages': FieldValue.arrayUnion([{
+                                        'from': 'manager',
+                                        'message': note,
+                                        'timestamp': Timestamp.fromDate(DateTime.now().toUtc()),
+                                        'action': 'rejected'
+                                      }]),
                                     });
                                     if (note.isNotEmpty) {
                                       await _sendManagerNoteToUser(
@@ -1444,10 +1449,8 @@ class _LogsTableState extends State<_LogsTable> {
                                     widget.onAction();
                                   },
                                 ),
-                              // Edit
-                              if (!isApproved &&
-                                  !isRejected &&
-                                  !isApprovedAfterEdit)
+                              // Edit - for team leaders to edit any session (except approved ones, already edited+approved, and rejected ones)
+                              if (!isApproved && !isApprovedAfterEdit && !isRejected)
                                 IconButton(
                                   icon: const Icon(Icons.edit,
                                       color: Colors.blue, size: 20),
@@ -1455,10 +1458,12 @@ class _LogsTableState extends State<_LogsTable> {
                                   onPressed: () async {
                                     await showDialog(
                                       context: context,
-                                      builder: (_) => _EditLogDialog(
+                                      builder: (_) => EditLogDialog(
                                         logDoc: entry.doc,
                                         projects: _allProjects,
                                         onSaved: widget.onAction,
+                                        isWorkerMode: false,
+                                        workerName: null,
                                       ),
                                     );
                                   },
@@ -1475,22 +1480,8 @@ class _LogsTableState extends State<_LogsTable> {
                                     final confirmed =
                                         await _showDeleteConfirmation(
                                             context, data);
-                                    String? note;
-                                    if (confirmed == true) {
-                                      if (!context.mounted) {
-                                        return;
-                                      }
-                                      note = await _promptManagerNote(context,
-                                          AppLocalizations.of(context)!.delete);
-                                    }
                                     if (confirmed == true) {
                                       await entry.doc.reference.delete();
-                                      if (note != null && note.isNotEmpty) {
-                                        await _sendManagerNoteToUser(
-                                            logRef: entry.doc.reference,
-                                            note: note,
-                                            type: 'deleted');
-                                      }
                                       widget.onAction();
                                       if (context.mounted) {
                                         ScaffoldMessenger.of(context)

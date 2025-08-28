@@ -71,6 +71,29 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get pickDates => 'Pick dates';
 
+  @override
+  String get selectedRange => 'Date Range';
+
+  // Reports
+  @override
+  String get reports => 'Reports';
+  @override
+  String get createReport => 'Create Report';
+  @override
+  String get reportName => 'Report Name';
+  @override
+  String get reportOrientation => 'Report Orientation';
+  @override
+  String get selectFields => 'Select Fields';
+  @override
+  String get filters => 'Filters';
+  @override
+  String get exportCsv => 'Export CSV';
+  @override
+  String get runReport => 'Run Report';
+  @override
+  String get deleteSuccessful => 'Deleted successfully';
+
   // App shell/system
   @override
   String get systemMaintenance =>
@@ -331,6 +354,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get weeklyHours => 'Weekly Hours';
+
+  @override
+  String get workingDays => 'Working Days per Week';
+
+  @override
+  String get overtimeDays => 'Overtime Days';
 
   @override
   String get workload => 'Workload';

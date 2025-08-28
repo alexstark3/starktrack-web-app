@@ -96,8 +96,30 @@ service cloud.firestore {
 
       /* ----- Reports collection - only for users with reports module ----- */
       match /reports/{docId} {
-        allow read: if request.auth != null &&
-                     hasModuleAccess(request.auth.uid, companyId, 'reports');
+        allow read, write: if request.auth != null &&
+                           hasModuleAccess(request.auth.uid, companyId, 'reports');
+        
+        // Allow access to subcollections within reports
+        match /{subcollection}/{subdocId} {
+          allow read, write: if request.auth != null &&
+                             hasModuleAccess(request.auth.uid, companyId, 'reports');
+        }
+      }
+      
+      /* ----- Report-related collections ----- */
+      match /report_cache/{docId} {
+        allow read, write: if request.auth != null &&
+                           hasModuleAccess(request.auth.uid, companyId, 'reports');
+      }
+      
+      match /report_exports/{docId} {
+        allow read, write: if request.auth != null &&
+                           hasModuleAccess(request.auth.uid, companyId, 'reports');
+      }
+      
+      match /report_logs/{docId} {
+        allow read, write: if request.auth != null &&
+                           hasModuleAccess(request.auth.uid, companyId, 'reports');
       }
 
       /* ----- Other company sub-collections ----- */
@@ -166,6 +188,13 @@ service cloud.firestore {
                      (request.auth.uid == resource.data.userId ||
                       hasRoleInCompany(request.auth.uid, companyId,
                                        ['admin','company_admin','super_admin']));
+      }
+
+      match /holidays/{docId} {
+        allow read: if request.auth != null &&
+                     isUserInCompany(request.auth.uid, companyId);
+        allow write: if hasRoleInCompany(request.auth.uid, companyId,
+                                         ['admin','company_admin','super_admin']);
       }
 
       /* ----- Time-tracking logs ----- */

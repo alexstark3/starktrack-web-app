@@ -78,6 +78,29 @@ class AppLocalizationsIt extends AppLocalizationsEn {
   @override
   String get pickDates => 'Seleziona date';
 
+  @override
+  String get selectedRange => 'Intervallo date';
+
+  // Reports
+  @override
+  String get reports => 'Report';
+  @override
+  String get createReport => 'Crea report';
+  @override
+  String get reportName => 'Nome report';
+  @override
+  String get reportOrientation => 'Orientamento report';
+  @override
+  String get selectFields => 'Seleziona campi';
+  @override
+  String get filters => 'Filtri';
+  @override
+  String get exportCsv => 'Esporta CSV';
+  @override
+  String get runReport => 'Esegui report';
+  @override
+  String get deleteSuccessful => 'Eliminato con successo';
+
   // Timeline labels
   @override
   String get teamMember => 'Membro del team';

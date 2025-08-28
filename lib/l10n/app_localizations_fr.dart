@@ -81,6 +81,29 @@ class AppLocalizationsFr extends AppLocalizationsEn {
   @override
   String get pickDates => 'Choisir des dates';
 
+  @override
+  String get selectedRange => 'Plage de dates';
+
+  // Reports
+  @override
+  String get reports => 'Rapports';
+  @override
+  String get createReport => 'Créer un rapport';
+  @override
+  String get reportName => 'Nom du rapport';
+  @override
+  String get reportOrientation => 'Orientation du rapport';
+  @override
+  String get selectFields => 'Sélectionner les champs';
+  @override
+  String get filters => 'Filtres';
+  @override
+  String get exportCsv => 'Exporter CSV';
+  @override
+  String get runReport => 'Exécuter le rapport';
+  @override
+  String get deleteSuccessful => 'Supprimé avec succès';
+
   // Timeline labels
   @override
   String get teamMember => 'Membre de l\'équipe';
@@ -402,6 +425,12 @@ class AppLocalizationsFr extends AppLocalizationsEn {
 
   @override
   String get weeklyHours => 'Heures hebdomadaires';
+
+  @override
+  String get workingDays => 'Jours de travail par semaine';
+
+  @override
+  String get overtimeDays => 'Jours d\'heures supplémentaires';
 
   // Additional core features
   @override

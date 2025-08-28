@@ -258,13 +258,7 @@ class _OvertimeTabState extends State<OvertimeTab> {
   Widget _buildOvertimeBalance(String userId, AppColors colors) {
     return FutureBuilder<Map<String, dynamic>>(
       key: ValueKey('overtime_calculation_$userId'),
-      future: OvertimeCalculationService.calculateOvertimeFromLogs(
-        widget.companyId,
-        userId,
-        fromDate:
-            DateTime.now().subtract(const Duration(days: 28)), // Last 4 weeks
-        toDate: DateTime.now(),
-      ),
+      future: _calculateAndUpdateOvertime(userId),
       builder: (context, overtimeSnapshot) {
         if (overtimeSnapshot.connectionState == ConnectionState.waiting) {
           return Column(
@@ -375,7 +369,7 @@ class _OvertimeTabState extends State<OvertimeTab> {
     final hours = value ~/ 60;
     final minutes = value % 60;
     final displayValue =
-        '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+        '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')} h';
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
@@ -415,7 +409,7 @@ class _OvertimeTabState extends State<OvertimeTab> {
     final hours = value ~/ 60;
     final minutes = value % 60;
     final displayValue =
-        '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+        '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')} h';
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
@@ -550,6 +544,58 @@ class _OvertimeTabState extends State<OvertimeTab> {
           ),
         );
       }
+    }
+  }
+
+  /// Calculate overtime and update database if values have changed
+  Future<Map<String, dynamic>> _calculateAndUpdateOvertime(String userId) async {
+    try {
+      // First, get current overtime data from database
+      final userDoc = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(widget.companyId)
+          .collection('users')
+          .doc(userId)
+          .get();
+      
+      final userData = userDoc.data();
+      final currentOvertimeData = userData?['overtime'] ?? {};
+      
+      // Calculate new overtime values (from user start date, same as other modules)
+      final newOvertimeData = await OvertimeCalculationService.calculateOvertimeFromLogs(
+        widget.companyId,
+        userId,
+      );
+      
+      // Check if any values have changed (excluding bonus which is manually set)
+      final hasChanged = 
+          (currentOvertimeData['transferred'] ?? 0) != (newOvertimeData['transferred'] ?? 0) ||
+          (currentOvertimeData['current'] ?? 0) != (newOvertimeData['current'] ?? 0) ||
+          (currentOvertimeData['used'] ?? 0) != (newOvertimeData['used'] ?? 0);
+      
+      // Only update database if values have changed
+      if (hasChanged) {
+        await OvertimeCalculationService.updateOvertimeData(
+          widget.companyId,
+          userId,
+          {
+            'transferred': newOvertimeData['transferred'] ?? 0,
+            'current': newOvertimeData['current'] ?? 0,
+            'bonus': currentOvertimeData['bonus'] ?? 0, // Preserve manual bonus
+            'used': newOvertimeData['used'] ?? 0,
+          },
+        );
+      }
+      
+      return newOvertimeData;
+    } catch (e) {
+      // If calculation fails, return empty data (will show error state)
+      return {
+        'transferred': 0,
+        'current': 0,
+        'bonus': 0,
+        'used': 0,
+      };
     }
   }
 }
