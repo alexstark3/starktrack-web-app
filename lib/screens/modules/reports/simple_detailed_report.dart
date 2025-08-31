@@ -4,8 +4,10 @@ import 'package:intl/intl.dart';
 import '../../../theme/app_colors.dart';
 import 'user_excel_export.dart';
 import 'project_excel_export.dart';
+import 'client_excel_export.dart';
 import 'user_report.dart';
 import 'project_report.dart';
+import 'client_report.dart';
 
 class SimpleDetailedReport extends StatefulWidget {
   final String companyId;
@@ -25,9 +27,11 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
   List<Map<String, dynamic>> _reportData = [];
   Map<String, Map<String, dynamic>> _userReportData = {};
   Map<String, Map<String, dynamic>> _projectReportData = {};
+  Map<String, Map<String, dynamic>> _clientReportData = {};
   bool _isLoading = true;
   TabController? _tabController;
   TabController? _projectTabController;
+  TabController? _clientTabController;
 
 
   @override
@@ -40,6 +44,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
   void dispose() {
     _tabController?.dispose();
     _projectTabController?.dispose();
+    _clientTabController?.dispose();
     super.dispose();
   }
 
@@ -88,6 +93,21 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
           break;
         case 'client':
           await _generateClientReport();
+          // Initialize tab controller for client reports if multiple clients
+          if (_clientReportData.length > 1) {
+            _clientTabController?.dispose();
+            _clientTabController = TabController(
+              length: _clientReportData.length,
+              vsync: this,
+            );
+            _clientTabController!.addListener(() {
+              if (!_clientTabController!.indexIsChanging) {
+                setState(() {
+                  // Tab changed, rebuild UI
+                });
+              }
+            });
+          }
           break;
         default:
           await _generateTimeReport();
@@ -138,153 +158,28 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
   }
 
   Future<void> _generateClientReport() async {
-    // Generating client report
+    // Generate client report using the new ClientReport class
+    final clientReport = ClientReport(
+      companyId: widget.companyId,
+      reportConfig: widget.reportConfig,
+    );
     
-    // Get clients
-    final clientsSnapshot = await FirebaseFirestore.instance
-        .collection('companies')
-        .doc(widget.companyId)
-        .collection('clients')
-        .get();
+    await clientReport.generateReport();
+    _clientReportData = clientReport.clientReportData;
     
-    // Found clients
-    
-    // Get projects
-    final projectsSnapshot = await FirebaseFirestore.instance
-        .collection('companies')
-        .doc(widget.companyId)
-        .collection('projects')
-        .get();
-    
-    // Get users
-    final usersSnapshot = await FirebaseFirestore.instance
-        .collection('companies')
-        .doc(widget.companyId)
-        .collection('users')
-        .get();
-    
-    final usersMap = <String, String>{};
-    for (var doc in usersSnapshot.docs) {
-      final data = doc.data();
-      // Build full name from firstName + surname
-      final firstName = data['firstName']?.toString() ?? '';
-      final surname = data['surname']?.toString() ?? '';
-      final fullName = (firstName.isNotEmpty && surname.isNotEmpty) 
-          ? '$firstName $surname'
-          : data['name']?.toString() ?? 
-            data['displayName']?.toString() ?? 
-            data['email']?.toString() ?? 
-            'Unknown User';
-      usersMap[doc.id] = fullName;
-    }
-
-    final allLogs = <Map<String, dynamic>>[];
-
-    // For each client, get all projects and their logs
-    for (final clientDoc in clientsSnapshot.docs) {
-      final clientData = clientDoc.data();
-      final clientName = clientData['name']?.toString() ?? 'Unknown Client';
+    // For backward compatibility, also set _reportData
+    if (_clientReportData.isNotEmpty) {
+      final firstClient = _clientReportData.values.first;
+      final projects = firstClient['projects'] as List<Map<String, dynamic>>;
+      final allSessions = <Map<String, dynamic>>[];
       
-      // Processing client
-
-      // Find all projects for this client
-      final clientProjects = projectsSnapshot.docs.where(
-        (project) => project.data()['client'] == clientDoc.id
-      ).toList();
-      
-      // Client has projects
-
-      // Get logs for each project of this client
-      for (final projectDoc in clientProjects) {
-        final projectData = projectDoc.data();
-        final projectName = projectData['name']?.toString() ?? 'Unknown Project';
-        
-        // Get logs from all users for this project
-        for (final userDoc in usersSnapshot.docs) {
-          final userName = usersMap[userDoc.id] ?? 'Unknown User';
-
-          final logsSnapshot = await FirebaseFirestore.instance
-              .collection('companies')
-              .doc(widget.companyId)
-              .collection('users')
-              .doc(userDoc.id)
-              .collection('all_logs')
-              .get();
-
-          for (final logDoc in logsSnapshot.docs) {
-            final logData = logDoc.data();
-            
-            // Filter by project ID
-            if (logData['projectId'] != projectDoc.id) continue;
-            
-            final rowData = <String, dynamic>{};
-
-            // Date
-            final timestamp = logData['begin'] as Timestamp?;
-            if (timestamp != null) {
-              rowData['Date'] = DateFormat('dd/MM/yyyy (EEE)').format(timestamp.toDate());
-            } else {
-              rowData['Date'] = '';
-            }
-
-            // Client
-            rowData['Client'] = clientName;
-            
-            // Project
-            rowData['Project'] = projectName;
-
-            // Worker
-            rowData['Worker'] = userName;
-
-            // Start time
-            final begin = logData['begin'] as Timestamp?;
-            rowData['Start'] = begin != null ? DateFormat('HH:mm').format(begin.toDate()) : '';
-
-            // End time
-            final end = logData['end'] as Timestamp?;
-            rowData['End'] = end != null ? DateFormat('HH:mm').format(end.toDate()) : '';
-
-            // Total time
-            final minutes = (logData['duration_minutes'] as num?)?.toInt() ?? 0;
-            final hours = minutes ~/ 60;
-            final mins = minutes % 60;
-            rowData['Total'] = '${hours.toString().padLeft(2, '0')}:${mins.toString().padLeft(2, '0')} h';
-
-            // Note
-            rowData['Note'] = logData['note']?.toString() ?? '';
-
-            // Expenses
-            final expenses = logData['expenses'] as Map<String, dynamic>? ?? {};
-            final expenseDetails = <String>[];
-            
-            for (var entry in expenses.entries) {
-              final value = entry.value;
-              if (value is num && value > 0) {
-                expenseDetails.add('${entry.key}: $value');
-              }
-            }
-            
-            if (logData['perDiem'] == true) {
-              expenseDetails.add('Per diem: 16');
-            }
-            
-            rowData['Expenses'] = expenseDetails.join(', ');
-
-            allLogs.add(rowData);
-          }
-        }
+      for (final project in projects) {
+        final sessions = project['sessions'] as List<Map<String, dynamic>>;
+        allSessions.addAll(sessions);
       }
+      
+      _reportData = allSessions;
     }
-
-    // Sort by date
-    allLogs.sort((a, b) {
-      final dateA = a['Date'] as String? ?? '';
-      final dateB = b['Date'] as String? ?? '';
-      return dateB.compareTo(dateA);
-    });
-
-    // Client report generated
-    _reportData = allLogs;
   }
 
   Future<void> _generateTimeReport() async {
@@ -297,15 +192,19 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
     
     // Exporting report
     
-    // For user reports with multiple users, create single Excel file with multiple sheets
-    if (orientation == 'user' && _userReportData.length > 1) {
-      // Exporting multi-user report
+    // For user reports (single or multiple), create single Excel file with multiple sheets
+    if (orientation == 'user') {
+      // Exporting user report (single or multiple)
       
       try {
         UserExcelExportService.exportExcelWithMultipleSheets(_userReportData, widget.reportConfig);
         // Excel export completed successfully
+        final sheetCount = _userReportData.length;
+        final message = sheetCount > 1 
+            ? 'Excel file with multiple user sheets exported successfully!'
+            : 'Excel file exported successfully!';
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Excel file with multiple user sheets exported successfully!')),
+          SnackBar(content: Text(message)),
         );
       } catch (e) {
         // Error during Excel export
@@ -313,14 +212,37 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
           SnackBar(content: Text('Export failed: $e')),
         );
       }
-    } else if (orientation == 'project' && _projectReportData.length > 1) {
-      // Exporting multi-project report
+    } else if (orientation == 'project') {
+      // Exporting project report (single or multiple)
       
       try {
         ProjectExcelExportService.exportExcelWithMultipleProjectSheets(_projectReportData, widget.reportConfig);
         // Excel export completed successfully
+        final sheetCount = _projectReportData.length;
+        final message = sheetCount > 1 
+            ? 'Excel file with multiple project sheets exported successfully!'
+            : 'Excel file exported successfully!';
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Excel file with multiple project sheets exported successfully!')),
+          SnackBar(content: Text(message)),
+        );
+      } catch (e) {
+        // Error during Excel export
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Export failed: $e')),
+        );
+      }
+    } else if (orientation == 'client') {
+      // Exporting client report (single or multiple)
+      
+      try {
+        ClientExcelExportService.exportExcelWithMultipleClientSheets(_clientReportData, widget.reportConfig);
+        // Excel export completed successfully
+        final sheetCount = _clientReportData.length;
+        final message = sheetCount > 1 
+            ? 'Excel file with multiple client sheets exported successfully!'
+            : 'Excel file exported successfully!';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message)),
         );
       } catch (e) {
         // Error during Excel export
@@ -329,8 +251,8 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
         );
       }
     } else {
-      // Exporting single report
-              UserExcelExportService.exportSingleReport(_reportData, widget.reportConfig);
+      // Exporting single report (user or time)
+      UserExcelExportService.exportSingleReport(_reportData, widget.reportConfig);
     }
   }
 
@@ -435,61 +357,70 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
   Widget _buildReportContent(AppColors colors) {
     final orientation = widget.reportConfig['orientation'] as String? ?? 'time';
     
-    // For user reports with multiple users, show tabs
-    if (orientation == 'user' && _userReportData.length > 1 && _tabController != null) {
-      return Column(
-        children: [
-          // Tab bar
-          TabBar(
-            controller: _tabController,
-            isScrollable: true,
-            labelColor: colors.primaryBlue,
-            unselectedLabelColor: colors.textColor.withValues(alpha: 0.7),
-            indicatorColor: colors.primaryBlue,
-            tabs: _userReportData.values.map((userData) {
-              final userName = userData['userName'] as String;
-              final totalTime = userData['totalTime'] as String;
-              final totalSessions = userData['totalSessions'] as int;
-              
-              return Tab(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      userName,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      '$totalSessions sessions • $totalTime',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: colors.textColor.withValues(alpha: 0.7),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 16),
-          
-          // Tab content
-          Expanded(
-            child: TabBarView(
+    // For user reports (single or multiple), show proper user content
+    if (orientation == 'user' && _userReportData.isNotEmpty) {
+      // If multiple users, show tabs
+      if (_userReportData.length > 1 && _tabController != null) {
+        return Column(
+          children: [
+            // Tab bar
+            TabBar(
               controller: _tabController,
-              children: _userReportData.values.map((userData) {
-                final sessions = userData['sessions'] as List<Map<String, dynamic>>;
-                return _buildUserTabContent(userData, sessions, colors);
+              isScrollable: true,
+              labelColor: colors.primaryBlue,
+              unselectedLabelColor: colors.textColor.withValues(alpha: 0.7),
+              indicatorColor: colors.primaryBlue,
+              tabs: _userReportData.values.map((userData) {
+                final userName = userData['userName'] as String;
+                final totalTime = userData['totalTime'] as String;
+                final totalSessions = userData['totalSessions'] as int;
+                
+                return Tab(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        userName,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        '$totalSessions sessions • $totalTime',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: colors.textColor.withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
               }).toList(),
             ),
-          ),
-        ],
-      );
+            const SizedBox(height: 16),
+            
+            // Tab content
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: _userReportData.values.map((userData) {
+                  final sessions = userData['sessions'] as List<Map<String, dynamic>>;
+                  return _buildUserTabContent(userData, sessions, colors);
+                }).toList(),
+              ),
+            ),
+          ],
+        );
+      } else {
+        // Single user - show user content without tabs
+        final userData = _userReportData.values.first;
+        final sessions = userData['sessions'] as List<Map<String, dynamic>>;
+        return _buildUserTabContent(userData, sessions, colors);
+      }
     } else if (orientation == 'project' && _projectReportData.isNotEmpty) {
-      return Column(
-        children: [
-          // Tab bar (only if multiple projects)
-          if (_projectReportData.length > 1 && _projectTabController != null) ...[
+      // If multiple projects, show tabs
+      if (_projectReportData.length > 1 && _projectTabController != null) {
+        return Column(
+          children: [
+            // Tab bar
             TabBar(
               controller: _projectTabController,
               isScrollable: true,
@@ -522,35 +453,91 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
               }).toList(),
             ),
             const SizedBox(height: 16),
+            
+            // Tab content
+            Expanded(
+              child: TabBarView(
+                controller: _projectTabController,
+                children: _projectReportData.values.map((projectData) {
+                  final sessions = projectData['sessions'] as List<Map<String, dynamic>>;
+                  return _buildProjectTabContent(projectData, sessions, colors);
+                }).toList(),
+              ),
+            ),
           ],
-          
-          // Tab content or single project content
-          Expanded(
-            child: _projectReportData.length > 1 && _projectTabController != null
-              ? TabBarView(
-                  controller: _projectTabController,
-                  children: _projectReportData.values.map((projectData) {
-                    final sessions = projectData['sessions'] as List<Map<String, dynamic>>;
-                    return _buildProjectTabContent(projectData, sessions, colors);
+        );
+      } else {
+        // Single project - show project content without tabs
+        final projectData = _projectReportData.values.first;
+        final sessions = projectData['sessions'] as List<Map<String, dynamic>>;
+        return _buildProjectTabContent(projectData, sessions, colors);
+      }
+          } else if (orientation == 'client' && _clientReportData.isNotEmpty) {
+        // If multiple clients, show tabs
+        if (_clientReportData.length > 1 && _clientTabController != null) {
+          return Column(
+            children: [
+              // Tab bar
+              TabBar(
+                controller: _clientTabController,
+                isScrollable: true,
+                labelColor: colors.primaryBlue,
+                unselectedLabelColor: colors.textColor.withValues(alpha: 0.7),
+                indicatorColor: colors.primaryBlue,
+                tabs: _clientReportData.values.map((clientData) {
+                  final clientName = clientData['clientName'] as String;
+                  final totalProjects = clientData['totalProjects'] as int;
+                  final totalTime = clientData['totalTime'] as String;
+                  
+                  return Tab(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          clientName,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          '$totalProjects projects • $totalTime',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: colors.textColor.withValues(alpha: 0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 16),
+              
+              // Tab content
+              Expanded(
+                child: TabBarView(
+                  controller: _clientTabController,
+                  children: _clientReportData.values.map((clientData) {
+                    final projects = clientData['projects'] as List<Map<String, dynamic>>;
+                    return _buildClientTabContent(clientData, projects, colors);
                   }).toList(),
-                )
-              : _buildProjectTabContent(
-                  _projectReportData.values.first, 
-                  _projectReportData.values.first['sessions'] as List<Map<String, dynamic>>, 
-                  colors
                 ),
+              ),
+            ],
+          );
+        } else {
+          // Single client - show client content without tabs
+          final clientData = _clientReportData.values.first;
+          final projects = clientData['projects'] as List<Map<String, dynamic>>;
+          return _buildClientTabContent(clientData, projects, colors);
+        }
+      } else {
+        // For single user/project or other report types, show normal table
+        return SingleChildScrollView(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: _buildDataTable(colors),
           ),
-        ],
-      );
-    } else {
-      // For single user/project or other report types, show normal table
-      return SingleChildScrollView(
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: _buildDataTable(colors),
-        ),
-      );
-    }
+        );
+      }
   }
 
   Widget _buildUserTabContent(Map<String, dynamic> userData, List<Map<String, dynamic>> sessions, AppColors colors) {
@@ -770,6 +757,60 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
     );
   }
 
+  Widget _buildClientTabContent(Map<String, dynamic> clientData, List<Map<String, dynamic>> projects, AppColors colors) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Client information
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: colors.primaryBlue.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: colors.primaryBlue.withValues(alpha: 0.3)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  clientData['clientName'] as String,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: colors.primaryBlue,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    _buildSummaryItem('Total Projects', '${clientData['totalProjects']}', colors),
+                    const SizedBox(width: 24),
+                    _buildSummaryItem('Total Time', clientData['totalTime'] as String, colors),
+                    const SizedBox(width: 24),
+                    _buildSummaryItem('Total Expenses', clientData['totalExpenses'] > 0 ? '${clientData['totalExpenses']?.toStringAsFixed(2)}' : '0.00', colors),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          
+          // Projects table
+          if (projects.isNotEmpty)
+            _buildClientProjectsTable(projects, colors)
+          else
+            Center(
+              child: Text(
+                'No projects found for this client in the selected period',
+                style: TextStyle(color: colors.textColor.withValues(alpha: 0.7)),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   bool _shouldShowSummarySection() {
     final selectedFields = (widget.reportConfig['fields'] as List<dynamic>?)?.cast<String>() ?? [];
     return selectedFields.contains('totalSessions') || 
@@ -839,6 +880,73 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildClientProjectsTable(List<Map<String, dynamic>> projects, AppColors colors) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: colors.primaryBlue.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // HEADERS SECTION - Medium blue background with TOP rounded corners
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: colors.primaryBlue.withValues(alpha: 0.1),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(6),
+                topRight: Radius.circular(6),
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(flex: 3, child: Text('Project Name', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))),
+                Expanded(flex: 2, child: Text('Reference', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))),
+                Expanded(flex: 3, child: Text('Address', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))),
+                Expanded(flex: 2, child: Text('Total Time', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))),
+                Expanded(flex: 2, child: Text('Total Expenses', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))),
+              ],
+            ),
+          ),
+          
+          // PROJECTS SECTION - Light background, NO individual cards
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              children: projects.map((project) => _buildClientProjectRow(project, colors)).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildClientProjectRow(Map<String, dynamic> project, AppColors colors) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        border: Border(
+          bottom: BorderSide(color: colors.primaryBlue.withValues(alpha: 0.1), width: 1),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(flex: 3, child: Text(project['projectName']?.toString() ?? '', style: TextStyle(color: colors.textColor))),
+          Expanded(flex: 2, child: Text(project['projectRef']?.toString() ?? '', style: TextStyle(color: colors.textColor))),
+          Expanded(flex: 3, child: Text(project['projectAddress']?.toString() ?? '', style: TextStyle(color: colors.textColor))),
+          Expanded(flex: 2, child: Text(project['totalTime']?.toString() ?? '', style: TextStyle(color: colors.textColor))),
+          Expanded(flex: 2, child: Text('${project['totalExpenses']?.toStringAsFixed(2) ?? '0.00'} CHF', style: TextStyle(color: colors.textColor))),
+        ],
+      ),
     );
   }
 

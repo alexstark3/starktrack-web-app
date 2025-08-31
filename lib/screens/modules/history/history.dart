@@ -921,7 +921,9 @@ class _HistoryLogsState extends State<HistoryLogs> {
                                 ),
                               ),
                               child: FutureBuilder<Map<String, dynamic>?>(
-                                future: _calculateGroupOvertime(groupList),
+                                future: hasCustomDateRange 
+                                    ? _calculateOvertimeForCustomDateRange()
+                                    : _calculateGroupOvertime(groupList),
                                 builder: (context, overtimeSnapshot) {
                                   List<Widget> totalWidgets = [
                                     Text(
@@ -995,19 +997,22 @@ class _HistoryLogsState extends State<HistoryLogs> {
       // Calculate date range based on groupType
       switch (groupType) {
         case GroupType.month:
-          // Month: 1st to today (don't calculate future days)
+          // Month: 1st to last day of month (full month, not just to today)
           fromDate = DateTime(firstEntry.begin!.year, firstEntry.begin!.month, 1);
-          // Don't go beyond today
-          final now = DateTime.now();
           final lastDayOfMonth = DateTime(firstEntry.begin!.year, firstEntry.begin!.month + 1, 0).day;
-          final monthEnd = DateTime(firstEntry.begin!.year, firstEntry.begin!.month, lastDayOfMonth, 23, 59, 59, 999);
-          toDate = now.isBefore(monthEnd) ? now : monthEnd;
+          toDate = DateTime(firstEntry.begin!.year, firstEntry.begin!.month, lastDayOfMonth, 23, 59, 59, 999);
           break;
         case GroupType.week:
-          // Full week: Monday to Sunday
-          final weekStart = firstEntry.begin!.subtract(Duration(days: firstEntry.begin!.weekday - 1));
-          fromDate = DateTime(weekStart.year, weekStart.month, weekStart.day);
-          toDate = DateTime(weekStart.year, weekStart.month, weekStart.day + 6, 23, 59, 59);
+          // Full week: Monday to Sunday using ISO week calculation (same as team members view)
+          final weekParts = _getWeekInfo(firstEntry.begin!);
+          final year = weekParts['year'] as int;
+          final weekNumber = weekParts['weekNumber'] as int;
+          final jan4 = DateTime(year, 1, 4);
+          final startOfYear = jan4.subtract(Duration(days: jan4.weekday - 1));
+          final weekStart = startOfYear.add(Duration(days: (weekNumber - 1) * 7));
+          final weekEnd = weekStart.add(const Duration(days: 6));
+          fromDate = weekStart;
+          toDate = weekEnd; // Sunday is already included (weekStart + 6 days)
           break;
         case GroupType.year:
           // Full year: January 1st to December 31st
@@ -1021,9 +1026,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
           break;
       }
       
-
-      
-      // Calculate overtime for the full period
+      // Calculate overtime for the full period using the same service
       final result = await OvertimeCalculationService.calculateOvertimeFromLogs(
         widget.companyId,
         widget.userId,
@@ -1031,21 +1034,53 @@ class _HistoryLogsState extends State<HistoryLogs> {
         toDate: toDate,
       );
       
-      final calculationDetails = result['calculationDetails'] as List<Map<String, dynamic>>? ?? [];
-      int totalOvertimeMinutes = 0;
-      
-      for (final dayDetail in calculationDetails) {
-        final dayOvertimeMinutes = dayDetail['overtimeMinutes'] as int? ?? 0;
-        totalOvertimeMinutes += dayOvertimeMinutes;
-      }
+      // Use 'current' field for consistency with other views
+      final overtimeMinutes = result['current'] as int? ?? 0;
       
       return {
-        'overtimeMinutes': totalOvertimeMinutes,
-        'overtimeHours': (totalOvertimeMinutes / 60).toStringAsFixed(2),
+        'overtimeMinutes': overtimeMinutes,
+        'overtimeHours': (overtimeMinutes / 60).toStringAsFixed(2),
       };
     } catch (e) {
       return null;
     }
+  }
+
+  // Helper method to calculate overtime for a custom date range
+  Future<Map<String, dynamic>?> _calculateOvertimeForCustomDateRange() async {
+    try {
+      if (dateRange == null || dateRange!.startDate == null || dateRange!.endDate == null) {
+        return null;
+      }
+
+      final fromDate = dateRange!.startDate!;
+      final toDate = dateRange!.endDate!;
+
+      final result = await OvertimeCalculationService.calculateOvertimeFromLogs(
+        widget.companyId,
+        widget.userId,
+        fromDate: fromDate,
+        toDate: toDate,
+      );
+
+      final overtimeMinutes = result['current'] as int? ?? 0;
+
+      return {
+        'overtimeMinutes': overtimeMinutes,
+        'overtimeHours': (overtimeMinutes / 60).toStringAsFixed(2),
+      };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Helper method to get week information (same logic as team members view)
+  Map<String, dynamic> _getWeekInfo(DateTime date) {
+    final weekNumber = _weekNumber(date);
+    return {
+      'year': date.year,
+      'weekNumber': weekNumber,
+    };
   }
 
   // Helper method to format overtime hours
@@ -1059,11 +1094,11 @@ class _HistoryLogsState extends State<HistoryLogs> {
     if (h > 0) {
       result += '${h}h';
     }
-    if (m > 0) {
-      result += ' ${m.toString().padLeft(2, '0')}m';
+    if (m > 0 || result.isNotEmpty) {
+      result += '${result.isNotEmpty ? ' ' : ''}${m.toString().padLeft(2, '0')}m';
     }
     if (result.isEmpty) {
-      result = '0m';
+      result = '0h 00m';
     }
     
     return isNegative ? '-$result' : result;

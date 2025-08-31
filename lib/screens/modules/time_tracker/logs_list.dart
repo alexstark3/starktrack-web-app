@@ -184,15 +184,19 @@ class _LogsListState extends State<LogsList> {
               final breakStr = _formatBreak(prevEnd, begin, breakDuration);
 
               rows.add(
-                Card(
+                Container(
                   key: ValueKey('break_$i'),
                   margin: const EdgeInsets.symmetric(vertical: 4),
-                  color: isDark
-                      ? const Color(0xFF2A2A2A)
-                      : const Color(0xFFF5F5F5),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: isDark
+                        ? const Color(0xFF2A2A2A)
+                        : const Color(0xFFF5F5F5),
+                    border: Border.all(
+                      color: isDark ? appColors.borderColorDark : appColors.borderColorLight,
+                      width: 1,
+                    ),
+                  ),
                   child: SizedBox(
                     width: double.infinity,
                     child: Padding(
@@ -223,18 +227,10 @@ class _LogsListState extends State<LogsList> {
                 color: isDark
                     ? appColors.cardColorDark
                     : appColors.backgroundLight,
-                border: isDark
-                    ? Border.all(color: const Color(0xFF404040), width: 1)
-                    : null,
-                boxShadow: isDark
-                    ? null
-                    : [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.15),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                border: Border.all(
+                  color: isDark ? appColors.borderColorDark : appColors.borderColorLight,
+                  width: 1,
+                ),
               ),
               child: SizedBox(
                 width: double.infinity,
@@ -369,7 +365,18 @@ class _LogsListState extends State<LogsList> {
         margin: EdgeInsets.zero,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: child,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: theme.brightness == Brightness.dark 
+                  ? const Color(0xFF404040)
+                  : const Color(0xFFB3B3B3),
+              width: 1,
+            ),
+          ),
+          child: child,
+        ),
       );
 }
 
@@ -925,8 +932,10 @@ class _LogEditRowState extends State<_LogEditRow>
                                         .withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(4),
                                 border: Border.all(
-                                  color: widget.appColors.primaryBlue
-                                      .withValues(alpha: 0.3),
+                                  color: Theme.of(context).brightness == Brightness.dark
+                                      ? widget.appColors.borderColorDark
+                                      : widget.appColors.borderColorLight,
+                                  width: 1,
                                 ),
                               ),
                               child: Text(line,
@@ -1152,8 +1161,10 @@ class _LogEditRowState extends State<_LogEditRow>
                                             .withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(4),
                                     border: Border.all(
-                                      color: widget.appColors.primaryBlue
-                                          .withValues(alpha: 0.3),
+                                      color: Theme.of(context).brightness == Brightness.dark
+                                          ? widget.appColors.borderColorDark
+                                          : widget.appColors.borderColorLight,
+                                      width: 1,
                                     ),
                                   ),
                                   child: Text(line,
@@ -1180,7 +1191,12 @@ class _LogEditRowState extends State<_LogEditRow>
                   padding:
                       const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                   decoration: BoxDecoration(
-                    border: Border.all(color: widget.borderColor),
+                    border: Border.all(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? widget.appColors.borderColorDark
+                          : widget.appColors.borderColorLight,
+                      width: 1,
+                    ),
                     borderRadius: BorderRadius.circular(8),
                     color: Theme.of(context).brightness == Brightness.dark
                         ? widget.appColors.cardColorDark

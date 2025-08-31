@@ -43,18 +43,11 @@ class _TodayLineState extends State<TodayLine> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: isDark ? appColors.cardColorDark : theme.cardColor,
-          border: isDark
-              ? Border.all(color: const Color(0xFF404040), width: 1)
-              : null,
-          boxShadow: isDark
-              ? null
-              : [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.15),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+          border: Border.all(
+            color: isDark ? appColors.borderColorDark : appColors.borderColorLight,
+            width: 1,
+          ),
+
         ),
         child: Card(
           color: Colors.transparent,

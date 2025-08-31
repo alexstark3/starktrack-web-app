@@ -505,16 +505,10 @@ class _TimeEntryCardState extends State<TimeEntryCard>
       color: isDark ? app.cardColorDark : theme.cardColor,
       borderRadius: BorderRadius.circular(12),
       border: Border.all(
-          color: isDark ? const Color(0xFF404040) : theme.dividerColor),
-      boxShadow: isDark
-          ? null
-          : [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
+        color: isDark ? app.borderColorDark : app.borderColorLight,
+        width: 1,
+      ),
+
     );
 
     TextStyle fieldStyle = TextStyle(
@@ -609,18 +603,11 @@ class _TimeEntryCardState extends State<TimeEntryCard>
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: isDark ? app.cardColorDark : theme.cardColor,
-          border: isDark
-              ? Border.all(color: const Color(0xFF404040), width: 1)
-              : null,
-          boxShadow: isDark
-              ? null
-              : [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.15),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+          border: Border.all(
+            color: isDark ? app.borderColorDark : app.borderColorLight,
+            width: 1,
+          ),
+
         ),
         child: Card(
           color: Colors.transparent,

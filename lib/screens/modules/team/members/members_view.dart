@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../services/overtime_calculation_service.dart';
+import '../../../../widgets/calendar.dart';
 import 'add_new_session.dart';
 part 'status_icon.part.dart';
 part 'totals_header.part.dart';
@@ -64,19 +65,12 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
         '${memberData['firstName'] ?? ''} ${memberData['surname'] ?? ''}';
 
     BoxDecoration pillDecoration = BoxDecoration(
-      border:
-          Border.all(color: isDark ? Colors.white24 : Colors.black26, width: 1),
+      border: Border.all(
+        color: isDark ? colors.borderColorDark : colors.borderColorLight,
+        width: 1,
+      ),
       color: isDark ? colors.cardColorDark : Colors.white,
       borderRadius: BorderRadius.circular(10),
-      boxShadow: isDark
-          ? null
-          : [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
     );
 
     TextStyle pillTextStyle = TextStyle(
@@ -96,15 +90,10 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
           decoration: BoxDecoration(
             color: isDark ? colors.cardColorDark : Colors.white,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: isDark
-                ? null
-                : [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+            border: Border.all(
+              color: isDark ? colors.borderColorDark : colors.borderColorLight,
+              width: 1,
+            ),
           ),
           child: Column(
             children: [
@@ -176,28 +165,33 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) => AddNewSessionDialog(
-                                  companyId: widget.companyId,
-                                  userId: userId,
-                                  userName: userName,
-                                  onSessionAdded: () {
-                                    setState(() {});
-                                  },
+                          SizedBox(
+                            height: 38,
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AddNewSessionDialog(
+                                    companyId: widget.companyId,
+                                    userId: userId,
+                                    userName: userName,
+                                    onSessionAdded: () {
+                                      setState(() {});
+                                    },
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.add_circle_outline),
+                              label: Text(
+                                  AppLocalizations.of(context)!.addNewSession),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: colors.primaryBlue,
+                                foregroundColor: colors.whiteTextOnBlue,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(9),
                                 ),
-                              );
-                            },
-                            icon: const Icon(Icons.add_circle_outline),
-                            label: Text(
-                                AppLocalizations.of(context)!.addNewSession),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: colors.primaryBlue,
-                              foregroundColor: colors.whiteTextOnBlue,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                               ),
                             ),
                           ),
@@ -209,98 +203,86 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                       // Filter controls
                       LayoutBuilder(
                         builder: (context, constraints) {
-                          // From and To date pickers
-                          final fromDatePicker = InkWell(
-                            borderRadius: BorderRadius.circular(kFilterRadius),
-                            onTap: () async {
-                              DateTime? picked = await showDatePicker(
-                                context: context,
-                                initialDate: fromDate ?? DateTime.now(),
-                                firstDate: DateTime(2023),
-                                lastDate: DateTime(2100),
-                              );
-                              if (picked != null) {
-                                setState(() => fromDate = picked);
-                              }
-                            },
-                            child: Container(
-                              height: kFilterHeight,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 18),
-                              decoration: pillDecoration,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.date_range,
-                                      color: theme.colorScheme.primary,
-                                      size: 20),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    fromDate == null
-                                        ? AppLocalizations.of(context)!.from
-                                        : dateFormat.format(fromDate!),
-                                    style: TextStyle(
-                                      color: fromDate == null
-                                          ? theme.colorScheme.primary
-                                          : (isDark
-                                              ? Colors.white
-                                                  .withValues(alpha: 0.87)
-                                              : Colors.black
-                                                  .withValues(alpha: 0.87)),
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: kFilterFontSize,
+                          // Date range picker widget
+                          final dateRangeField = InkWell(
+                              borderRadius: BorderRadius.circular(kFilterRadius),
+                              onTap: () async {
+                                await showDialog(
+                                  context: context,
+                                  builder: (context) => Dialog(
+                                    backgroundColor: colors.backgroundLight,
+                                    child: Container(
+                                      constraints: const BoxConstraints(maxWidth: 400, maxHeight: 500),
+                                      padding: const EdgeInsets.all(10),
+                                      child: CustomCalendar(
+                                        initialDateRange: (fromDate != null || toDate != null)
+                                            ? DateRange(
+                                                startDate: fromDate,
+                                                endDate: toDate,
+                                              )
+                                            : null,
+                                        onDateRangeChanged: (newDateRange) {
+                                          setState(() {
+                                            fromDate = newDateRange.startDate;
+                                            toDate = newDateRange.endDate;
+                                            // Reset group type when selecting custom dates
+                                            groupType = GroupType.day;
+                                          });
+                                        },
+                                        minDate: DateTime(2023),
+                                        maxDate: DateTime(2100),
+                                        title: AppLocalizations.of(context)!.pickDates,
+                                      ),
                                     ),
                                   ),
-                                ],
-                              ),
-                            ),
-                          );
-
-                          final toDatePicker = InkWell(
-                            borderRadius: BorderRadius.circular(kFilterRadius),
-                            onTap: () async {
-                              DateTime? picked = await showDatePicker(
-                                context: context,
-                                initialDate: toDate ?? DateTime.now(),
-                                firstDate: DateTime(2023),
-                                lastDate: DateTime(2100),
-                              );
-                              if (picked != null) {
-                                setState(() => toDate = picked);
-                              }
-                            },
-                            child: Container(
-                              height: kFilterHeight,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 18),
-                              decoration: pillDecoration,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.date_range,
-                                      color: theme.colorScheme.primary,
-                                      size: 20),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    toDate == null
-                                        ? AppLocalizations.of(context)!.to
-                                        : dateFormat.format(toDate!),
-                                    style: TextStyle(
-                                      color: toDate == null
-                                          ? theme.colorScheme.primary
-                                          : (isDark
-                                              ? Colors.white
-                                                  .withValues(alpha: 0.87)
-                                              : Colors.black
-                                                  .withValues(alpha: 0.87)),
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: kFilterFontSize,
+                                );
+                              },
+                              child: Container(
+                                constraints: BoxConstraints(
+                                  minHeight: kFilterHeight,
+                                  maxHeight: 60, // Always allow expansion for wrapped text
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                decoration: pillDecoration,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.calendar_today, color: theme.colorScheme.primary, size: 20),
+                                    const SizedBox(width: 8),
+                                    Flexible(
+                                      child: LayoutBuilder(
+                                        builder: (context, constraints) {
+                                          return Text(
+                                            (fromDate == null && toDate == null)
+                                                ? AppLocalizations.of(context)!.pickDates
+                                                : (fromDate != null && toDate != null)
+                                                    ? (fromDate!.isAtSameMomentAs(toDate!)
+                                                        ? dateFormat.format(fromDate!)
+                                                        : '${dateFormat.format(fromDate!)} - ${dateFormat.format(toDate!)}')
+                                                    : (fromDate != null
+                                                        ? '${dateFormat.format(fromDate!)} - ...'
+                                                        : (toDate != null
+                                                            ? '... - ${dateFormat.format(toDate!)}'
+                                                            : AppLocalizations.of(context)!.pickDates)),
+                                            style: TextStyle(
+                                              color: (fromDate == null && toDate == null)
+                                                  ? theme.colorScheme.primary
+                                                  : (isDark
+                                                      ? Colors.white.withValues(alpha: 0.87)
+                                                      : Colors.black.withValues(alpha: 0.87)),
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: kFilterFontSize,
+                                            ),
+                                            overflow: TextOverflow.visible,
+                                            maxLines: 2, // Allow up to 2 lines
+                                          );
+                                        },
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          );
+                            );
 
                           // Group type dropdown
                           final groupDropdown = Container(
@@ -337,7 +319,12 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                                 ],
                                 onChanged: (val) {
                                   if (val != null) {
-                                    setState(() => groupType = val);
+                                    setState(() {
+                                      groupType = val;
+                                      // Reset custom date range when changing group type
+                                      fromDate = null;
+                                      toDate = null;
+                                    });
                                   }
                                 },
                               ),
@@ -386,31 +373,19 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                           );
 
                           // Refresh button
-                          final refreshBtn = Container(
+                          final refreshBtn = SizedBox(
                             height: kFilterHeight,
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? theme.colorScheme.primary
-                                      .withValues(alpha: 0.2)
-                                  : theme.colorScheme.primary
-                                      .withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: isDark
-                                  ? null
-                                  : [
-                                      BoxShadow(
-                                        color: Colors.black
-                                            .withValues(alpha: 0.08),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                            ),
-                            child: IconButton(
-                              icon: Icon(Icons.refresh,
-                                  color: theme.colorScheme.primary, size: 24),
-                              tooltip:
-                                  AppLocalizations.of(context)!.clearFilters,
+                            width: kFilterHeight, // Make it square
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: colors.primaryBlue,
+                                foregroundColor: colors.whiteTextOnBlue,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                padding: EdgeInsets.zero, // Remove padding to make it square
+                              ),
                               onPressed: () {
                                 setState(() {
                                   fromDate = null;
@@ -422,6 +397,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                                   _noteController.clear();
                                 });
                               },
+                              child: const Icon(Icons.refresh, size: 24),
                             ),
                           );
 
@@ -442,9 +418,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          fromDatePicker,
-                                          const SizedBox(height: 8),
-                                          toDatePicker,
+                                          dateRangeField,
                                         ],
                                       );
                                     } else {
@@ -453,9 +427,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          fromDatePicker,
-                                          const SizedBox(width: kFilterSpacing),
-                                          toDatePicker,
+                                          dateRangeField,
                                         ],
                                       );
                                     }
@@ -507,9 +479,7 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                             return Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                fromDatePicker,
-                                const SizedBox(width: kFilterSpacing),
-                                toDatePicker,
+                                dateRangeField,
                                 const SizedBox(width: kFilterSpacing),
                                 groupDropdown,
                                 const SizedBox(width: kFilterSpacing),
@@ -669,13 +639,21 @@ class _LogsTableState extends State<_LogsTable> {
               style: TextStyle(color: colors.textColor),
             ),
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: colors.red,
-              foregroundColor: colors.whiteTextOnBlue,
+          SizedBox(
+            height: 38,
+            child: ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colors.red,
+                foregroundColor: colors.whiteTextOnBlue,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              ),
+              child: Text(AppLocalizations.of(context)!.delete),
             ),
-            child: Text(AppLocalizations.of(context)!.delete),
           ),
         ],
       ),
@@ -720,20 +698,28 @@ class _LogsTableState extends State<_LogsTable> {
                 child: Text(AppLocalizations.of(context)!.cancel,
                     style: TextStyle(color: colors.textColor)),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  final value = ctrl.text.trim();
-                  if (value.isEmpty) {
-                    setState(() => showError = true);
-                    return;
-                  }
-                  Navigator.of(context).pop(value);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colors.primaryBlue,
-                  foregroundColor: colors.whiteTextOnBlue,
+              SizedBox(
+                height: 38,
+                child: ElevatedButton(
+                  onPressed: () {
+                    final value = ctrl.text.trim();
+                    if (value.isEmpty) {
+                      setState(() => showError = true);
+                      return;
+                    }
+                    Navigator.of(context).pop(value);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colors.primaryBlue,
+                    foregroundColor: colors.whiteTextOnBlue,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  ),
+                  child: Text(AppLocalizations.of(context)!.save),
                 ),
-                child: Text(AppLocalizations.of(context)!.save),
               ),
             ],
           ),
@@ -778,7 +764,7 @@ class _LogsTableState extends State<_LogsTable> {
   // Helper for formatting overtime hours consistently
   String _formatOvertimeHours(double hours) {
     if (hours == 0) {
-      return '0m';
+      return '0h 00m';
     }
 
     final isNegative = hours < 0;
@@ -786,10 +772,18 @@ class _LogsTableState extends State<_LogsTable> {
     final h = absHours.floor();
     final m = ((absHours - h) * 60).round();
 
+    String result = '';
     if (h > 0) {
-      return '${isNegative ? '-' : ''}${h}h ${m.toString().padLeft(2, '0')}m';
+      result += '${h}h';
     }
-    return '${isNegative ? '-' : ''}${m}m';
+    if (m > 0 || result.isNotEmpty) {
+      result += '${result.isNotEmpty ? ' ' : ''}${m.toString().padLeft(2, '0')}m';
+    }
+    if (result.isEmpty) {
+      result = '0h 00m';
+    }
+    
+    return isNegative ? '-$result' : result;
   }
 
   int _weekNumber(DateTime date) {
@@ -849,173 +843,11 @@ class _LogsTableState extends State<_LogsTable> {
     }
   }
 
-  Future<Map<String, dynamic>?> _calculateDailyOvertime(
-      String userId, String date) async {
-    try {
-      // Convert EU date format (dd/MM/yyyy) to ISO format (yyyy-MM-dd) for the service
-      final euDate = DateFormat('dd/MM/yyyy').parse(date);
-      final isoDate = DateFormat('yyyy-MM-dd').format(euDate);
 
-      final result = await OvertimeCalculationService.calculateOvertimeFromLogs(
-        widget.companyId,
-        userId,
-        fromDate: euDate,
-        toDate: euDate.add(const Duration(days: 1)),
-      );
 
-      // Find the calculation details for this specific date
-      final calculationDetails =
-          result['calculationDetails'] as List<Map<String, dynamic>>? ?? [];
-      for (final dayDetail in calculationDetails) {
-        if (dayDetail['date'] == isoDate) {
-          return {
-            'overtimeMinutes': dayDetail['overtimeMinutes'] ?? 0,
-            'overtimeHours': dayDetail['overtimeHours'] ?? '0.00',
-            'reason': '',
-            'expectedHours': dayDetail['expectedHours'] ?? '8.00',
-          };
-        }
-      }
-      return null;
-    } catch (e) {
-      return null;
-    }
-  }
 
-  Future<Map<String, dynamic>?> _calculateWeeklyOvertime(
-      String userId, String weekKey) async {
-    try {
-      // Parse week key format: "Week X, YYYY"
-      final parts = weekKey.split(', ');
-      final year = int.parse(parts[1]);
-      final weekNumber = int.parse(parts[0].split(' ')[1]);
 
-      // Calculate the start date of the week
-      final jan4 = DateTime(year, 1, 4);
-      final startOfYear = jan4.subtract(Duration(days: jan4.weekday - 1));
-      final weekStart = startOfYear.add(Duration(days: (weekNumber - 1) * 7));
-      final weekEnd = weekStart.add(const Duration(days: 6));
 
-      // Removed debug prints
-
-      // Calculate overtime for the entire week at once (not from user start date)
-      final result = await OvertimeCalculationService.calculateOvertimeFromLogs(
-        widget.companyId,
-        userId,
-        fromDate: weekStart,
-        toDate: weekEnd,
-      );
-
-      final calculationDetails =
-          result['calculationDetails'] as List<Map<String, dynamic>>? ?? [];
-      int totalOvertimeMinutes = 0;
-
-      for (final dayDetail in calculationDetails) {
-        final dateStr = dayDetail['date'] as String?;
-        if (dateStr != null) {
-          // Parse the date for proper comparison
-          final dayDate = DateTime.parse(dateStr);
-          // EU format conversion removed (unused)
-          // Only include days that are within the week range
-          if (dayDate.isAfter(weekStart.subtract(const Duration(days: 1))) &&
-              dayDate.isBefore(weekEnd)) {
-            final dayOvertimeMinutes =
-                dayDetail['overtimeMinutes'] as int? ?? 0;
-            totalOvertimeMinutes += dayOvertimeMinutes;
-          } else {}
-        }
-      }
-
-      final totalOvertimeHours = (totalOvertimeMinutes / 60).toStringAsFixed(2);
-      final reason = '';
-
-      // Removed debug prints
-
-      return {
-        'overtimeMinutes': totalOvertimeMinutes,
-        'overtimeHours': totalOvertimeHours,
-        'reason': reason,
-      };
-    } catch (e) {
-      return null;
-    }
-  }
-
-  Future<Map<String, dynamic>?> _calculateMonthlyOvertime(
-      String userId, String monthKey) async {
-    try {
-      // Parse month key format: "MMMM YYYY"
-      final monthDate = DateFormat('MMMM yyyy').parse(monthKey);
-      final monthStart = DateTime(monthDate.year, monthDate.month, 1);
-      final monthEnd = DateTime(monthDate.year, monthDate.month + 1, 1);
-
-      // Calculate overtime for the entire month at once (not from user start date)
-      final result = await OvertimeCalculationService.calculateOvertimeFromLogs(
-        widget.companyId,
-        userId,
-        fromDate: monthStart,
-        toDate: monthEnd,
-      );
-
-      final calculationDetails =
-          result['calculationDetails'] as List<Map<String, dynamic>>? ?? [];
-      int totalOvertimeMinutes = 0;
-
-      for (final dayDetail in calculationDetails) {
-        final dayOvertimeMinutes = dayDetail['overtimeMinutes'] as int? ?? 0;
-        totalOvertimeMinutes += dayOvertimeMinutes;
-      }
-
-      final totalOvertimeHours = (totalOvertimeMinutes / 60).toStringAsFixed(2);
-      final reason = '';
-
-      return {
-        'overtimeMinutes': totalOvertimeMinutes,
-        'overtimeHours': totalOvertimeHours,
-        'reason': reason,
-      };
-    } catch (e) {
-      return null;
-    }
-  }
-
-  Future<Map<String, dynamic>?> _calculateYearlyOvertime(
-      String userId, String yearKey) async {
-    try {
-      // Parse year key format: "YYYY"
-      final year = int.parse(yearKey);
-      final yearStart = DateTime(year, 1, 1);
-      final yearEnd = DateTime(year + 1, 1, 1);
-
-      // Calculate overtime for the entire year at once (not from user start date)
-      final result = await OvertimeCalculationService.calculateOvertimeFromLogs(
-        widget.companyId,
-        userId,
-        fromDate: yearStart,
-        toDate: yearEnd,
-      );
-
-      final calculationDetails =
-          result['calculationDetails'] as List<Map<String, dynamic>>? ?? [];
-      int totalOvertimeMinutes = 0;
-
-      for (final dayDetail in calculationDetails) {
-        final dayOvertimeMinutes = dayDetail['overtimeMinutes'] as int? ?? 0;
-        totalOvertimeMinutes += dayOvertimeMinutes;
-      }
-
-      final totalOvertimeHours = (totalOvertimeMinutes / 60).toStringAsFixed(2);
-      final reason = '';
-
-      return {
-        'overtimeMinutes': totalOvertimeMinutes,
-        'overtimeHours': totalOvertimeHours,
-        'reason': reason,
-      };
-    } catch (e) {
-      return null;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -1046,16 +878,20 @@ class _LogsTableState extends State<_LogsTable> {
               .join(',')
               .toLowerCase();
 
-          // Date range filter
-          if (widget.fromDate != null &&
-              begin != null &&
-              begin.isBefore(widget.fromDate!)) {
-            return false;
+          // Date range filter - normalize dates to remove time components
+          if (widget.fromDate != null && begin != null) {
+            final beginDate = DateTime(begin.year, begin.month, begin.day);
+            final fromDate = DateTime(widget.fromDate!.year, widget.fromDate!.month, widget.fromDate!.day);
+            if (beginDate.isBefore(fromDate)) {
+              return false;
+            }
           }
-          if (widget.toDate != null &&
-              begin != null &&
-              begin.isAfter(widget.toDate!)) {
-            return false;
+          if (widget.toDate != null && begin != null) {
+            final beginDate = DateTime(begin.year, begin.month, begin.day);
+            final toDate = DateTime(widget.toDate!.year, widget.toDate!.month, widget.toDate!.day);
+            if (beginDate.isAfter(toDate)) {
+              return false;
+            }
           }
 
           // Project filter
@@ -1078,6 +914,8 @@ class _LogsTableState extends State<_LogsTable> {
           return Center(
               child: Text(AppLocalizations.of(context)!.noTimeLogsFound));
         }
+        
+
 
         // ==== GROUPING LOGIC STARTS HERE ====
         // Convert to models for easier handling
@@ -1210,12 +1048,26 @@ class _LogsTableState extends State<_LogsTable> {
           addRepaintBoundaries: false,
           itemCount: sortedKeys.length,
           itemBuilder: (context, groupIdx) {
+            // If date range filtering is active, only show the first group
+            if ((widget.fromDate != null || widget.toDate != null) && groupIdx > 0) {
+              return const SizedBox.shrink();
+            }
+            
             final groupKey = sortedKeys[groupIdx];
-            final groupList = grouped[groupKey]!;
-
-            final groupTotal = groupList.fold<Duration>(
+            
+            // When date range filtering is active, show ALL sessions from the original entries list
+            final List<_HistoryEntry> entriesToShow;
+            if (widget.fromDate != null || widget.toDate != null) {
+              // Get all entries directly from the original entries list (already filtered by date range)
+              entriesToShow = entries;
+            } else {
+              // Normal behavior: show only this group's entries
+              entriesToShow = grouped[groupKey]!;
+            }
+            
+            final groupTotal = entriesToShow.fold<Duration>(
                 Duration.zero, (accDuration, e) => accDuration + e.duration);
-            final groupExpense = groupList.fold<double>(0.0, (accAmount, e) {
+            final groupExpense = entriesToShow.fold<double>(0.0, (accAmount, e) {
               if (e.expense.isNaN) {
                 return accAmount;
               }
@@ -1279,7 +1131,9 @@ class _LogsTableState extends State<_LogsTable> {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              groupKey,
+                              (widget.fromDate != null || widget.toDate != null) 
+                                  ? 'Selected Date Range' 
+                                  : groupKey,
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: theme.colorScheme.primary,
@@ -1291,7 +1145,7 @@ class _LogsTableState extends State<_LogsTable> {
                     ),
                   ),
                   // Group entries
-                  ...groupList.map((entry) {
+                  ...entriesToShow.map((entry) {
                     final data = entry.doc.data() as Map<String, dynamic>;
                     final approvedRaw = data['approved'];
                     final rejectedRaw = data['rejected'];
@@ -1530,22 +1384,62 @@ class _LogsTableState extends State<_LogsTable> {
                           .doc(widget.userId)
                           .get(),
                       builder: (context, userSnapshot) {
-                        List<Widget> totalWidgets = [
-                          Text(
-                            '${AppLocalizations.of(context)!.totalTime}: ${_formatDuration(groupTotal)}',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              color: theme.colorScheme.primary,
+                        List<Widget> totalWidgets = [];
+                        
+                        // If date range filtering is active, calculate totals for entire range
+                        if (widget.fromDate != null || widget.toDate != null) {
+                          // Only show combined totals for the first group when date range filtering is active
+                          if (groupIdx == 0) {
+                            // Calculate combined totals for all groups in the selected date range
+                            final allEntries = grouped.values.expand((entries) => entries).toList();
+                            final combinedTotal = allEntries.fold<Duration>(
+                                Duration.zero, (accDuration, e) => accDuration + e.duration);
+                            final combinedExpense = allEntries.fold<double>(0.0, (accAmount, e) {
+                              if (e.expense.isNaN) {
+                                return accAmount;
+                              }
+                              return accAmount + e.expense;
+                            });
+                            
+                            totalWidgets = [
+                              Text(
+                                '${AppLocalizations.of(context)!.totalTime}: ${_formatDuration(combinedTotal)}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                              Text(
+                                '${AppLocalizations.of(context)!.totalExpenses}: ${expenseFormat.format(combinedExpense)}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                            ];
+                          } else {
+                            // For other groups when date range filtering is active, don't show totals
+                            return const SizedBox.shrink();
+                          }
+                        } else {
+                          // No date range filtering - show per-group totals
+                          totalWidgets = [
+                            Text(
+                              '${AppLocalizations.of(context)!.totalTime}: ${_formatDuration(groupTotal)}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                color: theme.colorScheme.primary,
+                              ),
                             ),
-                          ),
-                          Text(
-                            '${AppLocalizations.of(context)!.totalExpenses}: ${expenseFormat.format(groupExpense)}',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              color: theme.colorScheme.primary,
+                            Text(
+                              '${AppLocalizations.of(context)!.totalExpenses}: ${expenseFormat.format(groupExpense)}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                color: theme.colorScheme.primary,
+                              ),
                             ),
-                          ),
-                        ];
+                          ];
+                        }
 
                         // Add overtime calculation for all grouping types
                         if (userSnapshot.hasData) {
@@ -1563,6 +1457,9 @@ class _LogsTableState extends State<_LogsTable> {
                                   toDate: widget.toDate,
                                 ),
                                 builder: (context, overtimeSnapshot) {
+                                  // Create a fresh copy of totalWidgets to avoid modifying the original
+                                  final List<Widget> overtimeWidgets = List.from(totalWidgets);
+                                  
                                   if (overtimeSnapshot.hasData &&
                                       overtimeSnapshot.data != null) {
                                     final overtimeData = overtimeSnapshot.data!;
@@ -1573,7 +1470,7 @@ class _LogsTableState extends State<_LogsTable> {
                                     final color =
                                         isOvertime ? Colors.green : Colors.red;
 
-                                    totalWidgets.add(
+                                    overtimeWidgets.add(
                                       Text(
                                         'Overtime: ${_formatOvertimeHours(overtimeMinutes / 60)}',
                                         style: TextStyle(
@@ -1587,91 +1484,103 @@ class _LogsTableState extends State<_LogsTable> {
                                   return Wrap(
                                     spacing: 16,
                                     runSpacing: 4,
-                                    children: totalWidgets,
+                                    children: overtimeWidgets,
                                   );
                                 },
                               );
                             } else {
-                              // For other groups when date range filtering is active, don't show overtime
-                              return Wrap(
-                                spacing: 16,
-                                runSpacing: 4,
-                                children: totalWidgets,
-                              );
+                              // For other groups when date range filtering is active, don't show anything
+                              return const SizedBox.shrink();
                             }
                           } else {
                             // Calculate overtime based on grouping type (only when no date range filtering)
+                            // Use the same OvertimeCalculationService for consistency
                             Future<Map<String, dynamic>?> overtimeFuture;
 
                             switch (widget.groupType) {
                               case GroupType.day:
-                                overtimeFuture = _calculateDailyOvertime(
-                                    widget.userId, groupKey);
+                                // For single day, calculate overtime for that specific day
+                                final dayDate = DateFormat('dd/MM/yyyy').parse(groupKey);
+                                overtimeFuture = OvertimeCalculationService.calculateOvertimeFromLogs(
+                                  widget.companyId,
+                                  widget.userId,
+                                  fromDate: DateTime(dayDate.year, dayDate.month, dayDate.day),
+                                  toDate: DateTime(dayDate.year, dayDate.month, dayDate.day, 23, 59, 59),
+                                );
                                 break;
                               case GroupType.week:
-                                overtimeFuture = _calculateWeeklyOvertime(
-                                    widget.userId, groupKey);
+                                // For week, calculate overtime for the full week
+                                final weekParts = groupKey.split(', ');
+                                final year = int.parse(weekParts[1]);
+                                final weekNumber = int.parse(weekParts[0].split(' ')[1]);
+                                final jan4 = DateTime(year, 1, 4);
+                                final startOfYear = jan4.subtract(Duration(days: jan4.weekday - 1));
+                                final weekStart = startOfYear.add(Duration(days: (weekNumber - 1) * 7));
+                                final weekEnd = weekStart.add(const Duration(days: 6));
+                                overtimeFuture = OvertimeCalculationService.calculateOvertimeFromLogs(
+                                  widget.companyId,
+                                  widget.userId,
+                                  fromDate: weekStart,
+                                  toDate: weekEnd,
+                                );
                                 break;
                               case GroupType.month:
-                                overtimeFuture = _calculateMonthlyOvertime(
-                                    widget.userId, groupKey);
+                                // For month, calculate overtime for the full month
+                                final monthDate = DateFormat('MMMM yyyy').parse(groupKey);
+                                final monthStart = DateTime(monthDate.year, monthDate.month, 1);
+                                final monthEnd = DateTime(monthDate.year, monthDate.month + 1, 0); // Last day of current month
+                                overtimeFuture = OvertimeCalculationService.calculateOvertimeFromLogs(
+                                  widget.companyId,
+                                  widget.userId,
+                                  fromDate: monthStart,
+                                  toDate: monthEnd,
+                                );
                                 break;
                               case GroupType.year:
-                                overtimeFuture = _calculateYearlyOvertime(
-                                    widget.userId, groupKey);
+                                // For year, calculate overtime for the full year
+                                final year = int.parse(groupKey);
+                                final yearStart = DateTime(year, 1, 1);
+                                final yearEnd = DateTime(year + 1, 1, 1);
+                                overtimeFuture = OvertimeCalculationService.calculateOvertimeFromLogs(
+                                  widget.companyId,
+                                  widget.userId,
+                                  fromDate: yearStart,
+                                  toDate: yearEnd,
+                                );
                                 break;
                             }
 
                             return FutureBuilder<Map<String, dynamic>?>(
                               future: overtimeFuture,
                               builder: (context, overtimeSnapshot) {
+                                // Create a fresh copy of totalWidgets to avoid modifying the original
+                                final List<Widget> groupOvertimeWidgets = List.from(totalWidgets);
+                                
                                 if (overtimeSnapshot.hasData &&
                                     overtimeSnapshot.data != null) {
                                   final overtimeData = overtimeSnapshot.data!;
-                                  final overtimeMinutes =
-                                      overtimeData['overtimeMinutes'] as int? ??
-                                          0;
+                                  // Use 'current' field for consistency with other views
+                                  final overtimeMinutes = overtimeData['current'] as int? ?? 0;
                                   // Show overtime value
                                   final isOvertime = overtimeMinutes > 0;
                                   final color =
                                       isOvertime ? Colors.green : Colors.red;
 
-                                  // Check if overtime is already added to prevent duplicates
-                                  bool overtimeAlreadyAdded = false;
-                                  for (final widget in totalWidgets) {
-                                    if (widget is Text &&
-                                        widget.data
-                                                ?.toString()
-                                                .contains('Overtime:') ==
-                                            true) {
-                                      overtimeAlreadyAdded = true;
-                                      break;
-                                    }
-                                  }
-
-                                  if (!overtimeAlreadyAdded) {
-                                    totalWidgets.add(
-                                      Text(
-                                        'Overtime: ${_formatOvertimeHours(overtimeMinutes / 60)}',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w700,
-                                          color: color,
-                                        ),
+                                  groupOvertimeWidgets.add(
+                                    Text(
+                                      'Overtime: ${_formatOvertimeHours(overtimeMinutes / 60)}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        color: color,
                                       ),
-                                    );
-                                  } else {}
-
-                                  // For week 27, let's show the breakdown
-                                  if (groupKey.contains('Week 27')) {
-                                    // calculationDetails not used; removed
-                                    // Breakdown loop removed
-                                  }
+                                    ),
+                                  );
                                 }
 
                                 return Wrap(
                                   spacing: 16,
                                   runSpacing: 4,
-                                  children: totalWidgets,
+                                  children: groupOvertimeWidgets,
                                 );
                               },
                             );

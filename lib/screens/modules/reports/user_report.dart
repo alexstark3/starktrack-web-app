@@ -269,15 +269,15 @@ class UserReport {
         }
       }
       
-      // Calculate overtime for each day
+      // Calculate overtime for each day using the same logic as OvertimeCalculationService
       for (final entry in dailyLogsByDate.entries) {
         final date = entry.key;
         final dayMinutes = entry.value.fold<int>(0, (total, minutes) => total + minutes);
         
         // Get user's working days configuration
-        final workingDaysStr = userData['workingDays']?.toString() ?? 'Monday,Tuesday,Wednesday,Thursday,Friday';
-        final workingDaysList = workingDaysStr.split(',').map((dayName) {
-          switch (dayName.trim()) {
+        final workingDays = userData['workingDays'] as List<dynamic>? ?? ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        final workingDaysList = workingDays.map((dayName) {
+          switch (dayName.toString().trim()) {
             case 'Monday': return 1;
             case 'Tuesday': return 2;
             case 'Wednesday': return 3;
@@ -288,12 +288,70 @@ class UserReport {
             default: return 0;
           }
         }).where((d) => d > 0).toList();
+        
         final weeklyHours = userData['weeklyHours'] ?? 40;
         final dailyHours = weeklyHours / workingDaysList.length;
-        final standardDayMinutes = (dailyHours * 60).round(); // Calculate based on user's config
+        final standardDayMinutes = (dailyHours * 60).round();
         
-        final overtimeMinutes = dayMinutes - standardDayMinutes;
+        // Parse the date string to DateTime (format: dd/MM/yyyy)
+        final dateParts = date.split('/');
+        if (dateParts.length != 3) continue;
         
+        final day = int.tryParse(dateParts[0]);
+        final month = int.tryParse(dateParts[1]);
+        final year = int.tryParse(dateParts[2]);
+        
+        if (year == null || month == null || day == null) continue;
+        
+        final dateTime = DateTime(year, month, day);
+        final isWorkingDay = workingDaysList.contains(dateTime.weekday);
+        
+        // Check if it's a holiday (company paid time)
+        bool isHoliday = false;
+        int paidMinutes = 0;
+        
+        try {
+          // Get company holidays
+          final companyDoc = await FirebaseFirestore.instance
+              .collection('companies')
+              .doc(companyId)
+              .get();
+          
+          if (companyDoc.exists) {
+            final companyData = companyDoc.data() ?? {};
+            final holidays = companyData['holidays'] as Map<String, dynamic>? ?? {};
+            
+            // Check if this date is a holiday
+            final holidayKey = '${day.toString().padLeft(2, '0')}.${month.toString().padLeft(2, '0')}';
+            if (holidays.containsKey(holidayKey)) {
+              isHoliday = true;
+              paidMinutes = standardDayMinutes; // Company pays for full day
+            }
+          }
+        } catch (e) {
+          // If holiday check fails, continue without holiday benefits
+        }
+        
+        // Calculate overtime using the same logic as OvertimeCalculationService
+        int overtimeMinutes = 0;
+        
+        if (isHoliday) {
+          // Holiday: company gives 8h + worker work - expected 8h
+          final expectedMinutes = standardDayMinutes;
+          overtimeMinutes = (paidMinutes + dayMinutes - expectedMinutes).toInt();
+        } else if (!isWorkingDay && dayMinutes > 0) {
+          // Non-working day (weekend) with work - DOUBLE TIME
+          overtimeMinutes = (dayMinutes * 2).toInt();
+        } else if (isWorkingDay) {
+          // Regular working day
+          if (dayMinutes > standardDayMinutes) {
+            overtimeMinutes = (dayMinutes - standardDayMinutes).toInt();
+          } else if (dayMinutes < standardDayMinutes) {
+            overtimeMinutes = (dayMinutes - standardDayMinutes).toInt(); // Will be negative (undertime)
+          }
+        }
+        
+        // Format the overtime display
         if (overtimeMinutes != 0) {
           final overtimeHours = overtimeMinutes.abs() ~/ 60;
           final overtimeMins = overtimeMinutes.abs() % 60;
@@ -359,10 +417,10 @@ class UserReport {
         final endDate = record['endDate'] as Timestamp?;
         
         if (status == 'approved' && startDate != null && endDate != null) {
-          // Get user's working days configuration for accurate day calculation
-          final workingDaysStr = userData['workingDays']?.toString() ?? 'Monday,Tuesday,Wednesday,Thursday,Friday';
-          final workingDaysList = workingDaysStr.split(',').map((dayName) {
-            switch (dayName.trim()) {
+          // Get user's working days configuration for accurate day calculation - fix parsing issue
+          final workingDays = userData['workingDays'] as List<dynamic>? ?? ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+          final workingDaysList = workingDays.map((dayName) {
+            switch (dayName.toString().trim()) {
               case 'Monday': return 1;
               case 'Tuesday': return 2;
               case 'Wednesday': return 3;
