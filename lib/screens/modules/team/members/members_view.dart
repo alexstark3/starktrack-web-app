@@ -125,27 +125,22 @@ class _MemberHistoryScreenState extends State<MemberHistoryScreen> {
                       right: 16), // Reduced top padding
                   child: Row(
                     children: [
-                      Expanded(
-                        child: Row(
-                          children: [
-                            Text(
-                              userName,
-                              style: TextStyle(
-                                color: colors.primaryBlue,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18, // Reduced from 22 to 18
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            _StatusIcon(
-                                companyId: widget.companyId, userId: userId),
-                          ],
+                      Text(
+                        userName,
+                        style: TextStyle(
+                          color: colors.primaryBlue,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18, // Reduced from 22 to 18
                         ),
                       ),
+                      const SizedBox(width: 8),
+                      _StatusIcon(
+                          companyId: widget.companyId, userId: userId),
+                      const SizedBox(width: 8),
                       Icon(
-                        _isCardExpanded ? Icons.expand_less : Icons.expand_more,
+                        _isCardExpanded ? Icons.arrow_drop_up : Icons.arrow_drop_down,
                         color: colors.primaryBlue,
-                        size: 24,
+                        size: 30,
                       ),
                     ],
                   ),

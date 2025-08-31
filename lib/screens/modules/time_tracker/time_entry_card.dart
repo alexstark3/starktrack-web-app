@@ -155,6 +155,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
       barrierDismissible: false,
       builder: (_) => StatefulBuilder(
         builder: (context, setStateDialog) {
+          final appColors = Theme.of(context).extension<AppColors>()!;
           bool canAddExpense() {
             final name = nameCtrl.text.trim();
             final amountStr = amountCtrl.text.trim();
@@ -211,14 +212,14 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                   ),
                   Text(
                     key,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.normal, fontSize: 16),
+                    style: TextStyle(
+                        fontWeight: FontWeight.normal, fontSize: 16, color: appColors.textColor),
                   ),
                   const Spacer(),
                   Text(
                     '${(tempExpenses[key] as num).toStringAsFixed(2)} CHF',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.normal, fontSize: 16),
+                    style: TextStyle(
+                        fontWeight: FontWeight.normal, fontSize: 16, color: appColors.textColor),
                   ),
                 ],
               ),
@@ -236,20 +237,20 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                   style: TextStyle(
                     fontWeight: FontWeight.normal,
                     fontSize: 16,
-                    color: canEditPerDiem ? Colors.black : Colors.grey.shade400,
+                    color: canEditPerDiem ? appColors.textColor : appColors.darkGray,
                   ),
                 ),
                 const Spacer(),
                 Text(l10n.perDiemAmount,
                     style:
-                        TextStyle(fontWeight: FontWeight.normal, fontSize: 16)),
+                        TextStyle(fontWeight: FontWeight.normal, fontSize: 16, color: appColors.textColor)),
                 if (!canEditPerDiem)
                   Padding(
                     padding: const EdgeInsets.only(left: 8),
                     child: Tooltip(
                       message: l10n.perDiemAlreadyUsed,
                       child:
-                          const Icon(Icons.lock, color: Colors.grey, size: 17),
+                          Icon(Icons.lock, color: appColors.darkGray, size: 17),
                     ),
                   ),
               ],
@@ -259,7 +260,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
           return AlertDialog(
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-            title: Text(l10n.expenses),
+            title: Text(l10n.expenses, style: TextStyle(color: appColors.textColor)),
             content: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -272,8 +273,10 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                         flex: 2,
                         child: TextField(
                           controller: nameCtrl,
+                          style: TextStyle(color: appColors.textColor),
                           decoration: InputDecoration(
                             hintText: l10n.name,
+                            hintStyle: TextStyle(color: appColors.darkGray),
                             border: const UnderlineInputBorder(),
                             isDense: true,
                             contentPadding:
@@ -289,8 +292,10 @@ class _TimeEntryCardState extends State<TimeEntryCard>
                         flex: 1,
                         child: TextField(
                           controller: amountCtrl,
+                          style: TextStyle(color: appColors.textColor),
                           decoration: InputDecoration(
                             hintText: l10n.amount,
+                            hintStyle: TextStyle(color: appColors.darkGray),
                             border: const UnderlineInputBorder(),
                             isDense: true,
                             contentPadding:
@@ -331,7 +336,7 @@ class _TimeEntryCardState extends State<TimeEntryCard>
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: Text(l10n.cancel,
-                    style: TextStyle(color: primaryColor, fontSize: 16)),
+                    style: TextStyle(color: appColors.textColor, fontSize: 16)),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(

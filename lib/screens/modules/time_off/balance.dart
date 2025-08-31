@@ -22,8 +22,7 @@ class TimeOffBalance extends StatefulWidget {
 class _TimeOffBalanceState extends State<TimeOffBalance> {
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
-  final Map<String, bool> _editingBonus = {};
-  final Map<String, TextEditingController> _bonusControllers = {};
+
 
   @override
   void initState() {
@@ -37,9 +36,6 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
   @override
   void dispose() {
     _searchController.dispose();
-    for (final c in _bonusControllers.values) {
-      c.dispose();
-    }
     super.dispose();
   }
 
@@ -275,73 +271,19 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
     AppColors colors,
     AppLocalizations l10n,
   ) {
-    final isEditing = _editingBonus[userId] ?? false;
-    final controller = _bonusControllers[userId] ??
-        TextEditingController(text: value.toStringAsFixed(1));
-    _bonusControllers[userId] = controller;
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text('${l10n.bonus}:'),
-          Row(
-            children: [
-              IconButton(
-                onPressed: () {
-                  if (isEditing) {
-                    final newValue = double.tryParse(controller.text) ?? value;
-                    _saveBonusValue(userId, newValue, l10n);
-                  }
-                  setState(() => _editingBonus[userId] = !isEditing);
-                },
-                icon: Icon(
-                  isEditing ? Icons.save : Icons.edit,
-                  color: isEditing ? colors.success : colors.primaryBlue,
-                  size: 20,
-                ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-              const SizedBox(width: 8),
-              if (isEditing)
-                SizedBox(
-                  width: 80,
-                  child: TextField(
-                    controller: controller,
-                    keyboardType: TextInputType.number,
-                    style: TextStyle(
-                      color: colors.primaryBlue,
-                      fontSize: 14,
-                      fontWeight: FontWeight.normal,
-                    ),
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4),
-                        borderSide: BorderSide(color: colors.primaryBlue),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4),
-                        borderSide:
-                            BorderSide(color: colors.primaryBlue, width: 2),
-                      ),
-                      hintText: '25',
-                    ),
-                  ),
-                )
-              else
-                Text(
-                  '${value.toStringAsFixed(1)} ${l10n.days}',
-                  style: TextStyle(
-                    color: colors.primaryBlue,
-                    fontSize: 14,
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-            ],
+          Text(
+            '${value.toStringAsFixed(1)} ${l10n.days}',
+            style: TextStyle(
+              color: colors.primaryBlue,
+              fontSize: 14,
+              fontWeight: FontWeight.normal,
+            ),
           ),
         ],
       ),
@@ -440,64 +382,15 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
   }
 
   Widget _buildOvertimeBonusRow(int value, String userId, AppColors colors, AppLocalizations l10n) {
-    final isEditing = _editingBonus[userId] ?? false;
-    final controller = _bonusControllers[userId] ??
-        TextEditingController(text: _formatMinutes(value));
-    _bonusControllers[userId] = controller;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text('${l10n.bonus}:'),
-          Row(
-            children: [
-              IconButton(
-                onPressed: () {
-                  if (isEditing) {
-                    final minutes = _parseTimeToMinutes(controller.text);
-                    _saveOvertimeBonusValue(userId, minutes, l10n);
-                  }
-                  setState(() => _editingBonus[userId] = !isEditing);
-                },
-                icon: Icon(
-                  isEditing ? Icons.save : Icons.edit,
-                  color: isEditing ? colors.success : colors.primaryBlue,
-                  size: 20,
-                ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-              const SizedBox(width: 8),
-              if (isEditing)
-                SizedBox(
-                  width: 80,
-                  child: TextField(
-                    controller: controller,
-                    keyboardType: TextInputType.text,
-                    style: TextStyle(color: colors.primaryBlue, fontSize: 14),
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4),
-                        borderSide: BorderSide(color: colors.primaryBlue),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4),
-                        borderSide:
-                            BorderSide(color: colors.primaryBlue, width: 2),
-                      ),
-                      hintText: '01:30',
-                    ),
-                  ),
-                )
-              else
-                Text(
-                  _formatMinutes(value),
-                  style: TextStyle(color: colors.primaryBlue, fontSize: 14),
-                ),
-            ],
+          Text(
+            _formatMinutes(value),
+            style: TextStyle(color: colors.primaryBlue, fontSize: 14),
           ),
         ],
       ),
@@ -513,40 +406,9 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
     return isNegative ? '-$s' : s;
   }
 
-  int _parseTimeToMinutes(String timeText) {
-    final parts = timeText.split(':');
-    if (parts.length == 2) {
-      final h = int.tryParse(parts[0]) ?? 0;
-      final m = int.tryParse(parts[1]) ?? 0;
-      return h * 60 + m;
-    }
-    return int.tryParse(timeText) ?? 0;
-  }
 
-  void _saveOvertimeBonusValue(String userId, int minutes, AppLocalizations l10n) {
-    FirebaseFirestore.instance
-        .collection('companies')
-        .doc(widget.companyId)
-        .collection('users')
-        .doc(userId)
-        .update({'overtime.bonus': minutes}).then((_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${l10n.bonus} ${l10n.hours} ${l10n.updatedSuccessfully}'),
-          backgroundColor: Theme.of(context).extension<AppColors>()!.success,
-        ),
-      );
-    }).catchError((_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.failedToUpdateBonus),
-          backgroundColor: Theme.of(context).extension<AppColors>()!.error,
-        ),
-      );
-    });
-  }
+
+
 
   double _convertToDouble(dynamic value) {
     if (value is double) return value;
@@ -557,32 +419,8 @@ class _TimeOffBalanceState extends State<TimeOffBalance> {
 
 
 
-  void _saveBonusValue(String userId, double newValue, AppLocalizations l10n) {
-    FirebaseFirestore.instance
-        .collection('companies')
-        .doc(widget.companyId)
-        .collection('users')
-        .doc(userId)
-        .update({
-      'annualLeaveDays.bonus': newValue,
-    }).then((_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${l10n.bonus} ${l10n.days} ${l10n.updatedSuccessfully}'),
-          backgroundColor: Theme.of(context).extension<AppColors>()!.success,
-        ),
-      );
-    }).catchError((_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.failedToUpdateBonus),
-          backgroundColor: Theme.of(context).extension<AppColors>()!.error,
-        ),
-      );
-    });
-  }
+
+
 
   /// Calculate overtime and update database if values have changed
   Future<Map<String, dynamic>> _calculateAndUpdateOvertime(String userId) async {

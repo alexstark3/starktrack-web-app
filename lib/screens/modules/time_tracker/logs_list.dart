@@ -652,14 +652,14 @@ class _LogEditRowState extends State<_LogEditRow>
                     ),
                     Text(
                       key,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.normal, fontSize: 16),
+                      style: TextStyle(
+                          fontWeight: FontWeight.normal, fontSize: 16, color: appColors.textColor),
                     ),
                     const Spacer(),
                     Text(
                       '${(tempExpenses[key] as num).toStringAsFixed(2)} CHF',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.normal, fontSize: 16),
+                      style: TextStyle(
+                          fontWeight: FontWeight.normal, fontSize: 16, color: appColors.textColor),
                     ),
                   ],
                 ),
@@ -673,7 +673,7 @@ class _LogEditRowState extends State<_LogEditRow>
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4)),
                   ),
-                  Text(AppLocalizations.of(context)!.perDiem),
+                  Text(AppLocalizations.of(context)!.perDiem, style: TextStyle(color: appColors.textColor)),
                   if (perDiemUsedElsewhere)
                     Padding(
                       padding: const EdgeInsets.only(left: 6),
@@ -681,13 +681,13 @@ class _LogEditRowState extends State<_LogEditRow>
                         message:
                             "Per diem already used in another session today",
                         child: Icon(Icons.info_outline,
-                            color: Colors.grey, size: 18),
+                            color: appColors.darkGray, size: 18),
                       ),
                     ),
                   const Spacer(),
                   Text(AppLocalizations.of(context)!.perDiemAmount,
                       style: TextStyle(
-                          fontWeight: FontWeight.normal, fontSize: 16)),
+                          fontWeight: FontWeight.normal, fontSize: 16, color: appColors.textColor)),
                 ],
               ),
             ];
@@ -695,7 +695,7 @@ class _LogEditRowState extends State<_LogEditRow>
             return AlertDialog(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(18)),
-              title: Text(AppLocalizations.of(context)!.expensesTitle),
+              title: Text(AppLocalizations.of(context)!.expensesTitle, style: TextStyle(color: appColors.textColor)),
               content: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -805,7 +805,7 @@ class _LogEditRowState extends State<_LogEditRow>
                       Padding(
                         padding: const EdgeInsets.only(top: 4.0, bottom: 2.0),
                         child: Text(errorMsg!,
-                            style: const TextStyle(color: Colors.red)),
+                            style: TextStyle(color: appColors.error)),
                       ),
                   ],
                 ),
@@ -818,7 +818,7 @@ class _LogEditRowState extends State<_LogEditRow>
                     Navigator.pop(context);
                   },
                   child: Text(AppLocalizations.of(context)!.cancel,
-                      style: TextStyle(color: primaryColor, fontSize: 16)),
+                      style: TextStyle(color: appColors.textColor, fontSize: 16)),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
