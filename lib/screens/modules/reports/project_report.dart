@@ -5,10 +5,12 @@ import 'dart:convert';
 class ProjectReport {
   final String companyId;
   final Map<String, dynamic> reportConfig;
+  final String Function()? getPerDiemTranslation;
   
   ProjectReport({
     required this.companyId,
     required this.reportConfig,
+    this.getPerDiemTranslation,
   });
 
   // Store project data for tabs/sheets
@@ -232,13 +234,19 @@ class ProjectReport {
         for (var entry in expenses.entries) {
           final value = entry.value;
           if (value is num && value > 0) {
-            expenseDetails.add('${entry.key}: $value');
+            // Translate "Per diem" key if it exists
+            String displayKey = entry.key;
+            if (entry.key == 'Per diem' && getPerDiemTranslation != null) {
+              displayKey = getPerDiemTranslation!();
+            }
+            expenseDetails.add('$displayKey: $value');
             totalExpenses += value.toDouble();
           }
         }
         
         if (logData['perDiem'] == true) {
-          expenseDetails.add('Per diem: 16');
+          final perDiemText = getPerDiemTranslation?.call() ?? 'Per diem';
+          expenseDetails.add('$perDiemText: 16');
           totalExpenses += 16.0;
         }
         
@@ -447,15 +455,21 @@ class ProjectReport {
           for (var entry in expenses.entries) {
             final value = entry.value;
             if (value is num && value > 0) {
-              expenseDetails.add('${entry.key}: $value');
+              // Translate "Per diem" key if it exists
+              String displayKey = entry.key;
+              if (entry.key == 'Per diem' && getPerDiemTranslation != null) {
+                displayKey = getPerDiemTranslation!();
+              }
+              expenseDetails.add('$displayKey: $value');
               totalExpenses += value.toDouble();
             }
           }
           
-          if (logData['perDiem'] == true) {
-            expenseDetails.add('Per diem: 16');
-            totalExpenses += 16.0;
-          }
+           if (logData['perDiem'] == true) {
+             final perDiemText = getPerDiemTranslation?.call() ?? 'Per diem';
+             expenseDetails.add('$perDiemText: 16');
+             totalExpenses += 16.0;
+           }
           
           rowData['Expenses'] = expenseDetails.join(', ');
           rowData['TotalExpenses'] = totalExpenses;
@@ -528,3 +542,5 @@ class ProjectReport {
     return grouped;
   }
 }
+
+

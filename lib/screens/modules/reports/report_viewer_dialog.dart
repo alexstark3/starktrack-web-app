@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:web/web.dart' as web;
 import 'dart:js_interop';
 import '../../../theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 
 
 class ReportViewerDialog extends StatefulWidget {
@@ -70,6 +71,7 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
   }
 
   Future<void> _generateTimeBasedReport(List<String> fields) async {
+    final l10n = AppLocalizations.of(context)!;
     final dateRange = widget.reportConfig['dateRange'] as Map<String, dynamic>?;
     final projectId = widget.reportConfig['projectId'] as String?;
     final userId = widget.reportConfig['userId'] as String?;
@@ -89,7 +91,7 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
         .get();
 
     final projectsMap = {
-      for (var doc in projectsSnapshot.docs) doc.id: doc.data()['name'] ?? 'Unnamed Project'
+      for (var doc in projectsSnapshot.docs) doc.id: doc.data()['name'] ?? l10n.unnamedProject
     };
 
     // Get all clients for name lookup
@@ -100,7 +102,7 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
         .get();
 
     final clientsMap = {
-      for (var doc in clientsSnapshot.docs) doc.id: doc.data()['name'] ?? 'Unnamed Client'
+      for (var doc in clientsSnapshot.docs) doc.id: doc.data()['name'] ?? l10n.unnamedClient
     };
 
     List<Map<String, dynamic>> allLogs = [];
@@ -147,17 +149,17 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
           switch (field) {
             case 'date':
               final begin = logData['begin'] as Timestamp?;
-              rowData['Date'] = begin != null 
+              rowData[l10n.date] = begin != null 
                   ? DateFormat('dd/MM/yyyy').format(begin.toDate())
                   : '';
               break;
             case 'worker':
-              rowData['Worker'] = userName;
+              rowData[l10n.worker] = userName;
               break;
             case 'project':
               final projectId = logData['projectId'] as String?;
-              rowData['Project'] = projectId != null 
-                  ? projectsMap[projectId] ?? 'Unknown Project'
+              rowData[l10n.project] = projectId != null 
+                  ? projectsMap[projectId] ?? l10n.unknownProject
                   : '';
               break;
             case 'client':
@@ -170,22 +172,22 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
                     .doc(projectId)
                     .get();
                 final clientId = projectDoc.data()?['client'] as String?;
-                rowData['Client'] = clientId != null 
-                    ? clientsMap[clientId] ?? 'Unknown Client'
+                rowData[l10n.client] = clientId != null 
+                    ? clientsMap[clientId] ?? l10n.unknownClient
                     : '';
               } else {
-                rowData['Client'] = '';
+                rowData[l10n.client] = '';
               }
               break;
             case 'startTime':
               final begin = logData['begin'] as Timestamp?;
-              rowData['Start Time'] = begin != null 
+              rowData[l10n.startTime] = begin != null 
                   ? DateFormat('HH:mm').format(begin.toDate())
                   : '';
               break;
             case 'endTime':
               final end = logData['end'] as Timestamp?;
-              rowData['End Time'] = end != null 
+              rowData[l10n.endTime] = end != null 
                   ? DateFormat('HH:mm').format(end.toDate())
                   : '';
               break;
@@ -193,10 +195,10 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
               final minutes = logData['duration_minutes'] as int? ?? 0;
               final hours = minutes ~/ 60;
               final mins = minutes % 60;
-              rowData['Duration'] = '${hours.toString().padLeft(2, '0')}:${mins.toString().padLeft(2, '0')} h';
+              rowData[l10n.duration] = '${hours.toString().padLeft(2, '0')}:${mins.toString().padLeft(2, '0')} h';
               break;
             case 'note':
-              rowData['Notes'] = logData['note'] ?? '';
+              rowData[l10n.notes] = logData['note'] ?? '';
               break;
             case 'expenses':
               final expenses = logData['expenses'] as Map<String, dynamic>? ?? {};
@@ -213,20 +215,20 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
               
               // Add per diem if applicable
               if (logData['perDiem'] == true) {
-                expenseDetails.add('Per diem: CHF 16.00');
+                expenseDetails.add('${l10n.perDiem}: CHF 16.00');
                 total += 16.0;
               }
               
               if (expenseDetails.isNotEmpty) {
-                rowData['Expenses'] = expenseDetails.join(', ');
-                rowData['Total Expenses'] = 'CHF ${total.toStringAsFixed(2)}';
+                rowData[l10n.expenses] = expenseDetails.join(', ');
+                rowData[l10n.totalExpenses] = 'CHF ${total.toStringAsFixed(2)}';
               } else {
-                rowData['Expenses'] = '';
-                rowData['Total Expenses'] = 'CHF 0.00';
+                rowData[l10n.expenses] = '';
+                rowData[l10n.totalExpenses] = 'CHF 0.00';
               }
               break;
             case 'perDiem':
-              rowData['Per Diem'] = (logData['perDiem'] == true) ? 'Yes' : 'No';
+              rowData[l10n.perDiem] = (logData['perDiem'] == true) ? 'Yes' : 'No';
               break;
           }
         }
@@ -238,17 +240,18 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
     // Sort by date if date field is included
     if (fields.contains('date')) {
       allLogs.sort((a, b) {
-        final dateA = a['Date'] as String? ?? '';
-        final dateB = b['Date'] as String? ?? '';
+        final dateA = a[l10n.date] as String? ?? '';
+        final dateB = b[l10n.date] as String? ?? '';
         return dateB.compareTo(dateA); // Most recent first
       });
     }
 
     _reportData = allLogs;
-    _columnHeaders = fields.map((field) => _getFieldLabel(field)).toList();
+    _columnHeaders = fields.map((field) => _getFieldLabel(field, AppLocalizations.of(context)!)).toList();
   }
 
   Future<void> _generateProjectBasedReport(List<String> fields) async {
+    final l10n = AppLocalizations.of(context)!;
     final projectsSnapshot = await FirebaseFirestore.instance
         .collection('companies')
         .doc(widget.companyId)
@@ -262,14 +265,14 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
         .get();
 
     final clientsMap = {
-      for (var doc in clientsSnapshot.docs) doc.id: doc.data()['name'] ?? 'Unnamed Client'
+      for (var doc in clientsSnapshot.docs) doc.id: doc.data()['name'] ?? l10n.unnamedClient
     };
 
     List<Map<String, dynamic>> projectReports = [];
 
     for (final projectDoc in projectsSnapshot.docs) {
       final projectData = projectDoc.data();
-      final projectName = projectData['name'] ?? 'Unnamed Project';
+      final projectName = projectData['name'] ?? l10n.unnamedProject;
       final clientId = projectData['client'] as String?;
 
       // Calculate totals for this project
@@ -319,27 +322,27 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
       for (final field in fields) {
         switch (field) {
           case 'project':
-            rowData['Project'] = projectName;
+            rowData[l10n.project] = projectName;
             break;
           case 'client':
-            rowData['Client'] = clientId != null ? clientsMap[clientId] ?? 'Unknown Client' : '';
+            rowData[l10n.client] = clientId != null ? clientsMap[clientId] ?? l10n.unknownClient : '';
             break;
           case 'totalHours':
-            rowData['Total Hours'] = '${totalHours.toStringAsFixed(1)} h';
+            rowData[l10n.totalHours] = '${totalHours.toStringAsFixed(1)} h';
             break;
           case 'totalExpenses':
-            rowData['Total Expenses'] = 'CHF ${totalExpenses.toStringAsFixed(2)}';
+            rowData[l10n.totalExpenses] = 'CHF ${totalExpenses.toStringAsFixed(2)}';
             break;
           case 'userCount':
-            rowData['Users Involved'] = uniqueUsers.length.toString();
+            rowData[l10n.usersInvolved] = uniqueUsers.length.toString();
             break;
           case 'avgHoursPerDay':
             if (workDates.isNotEmpty) {
               final uniqueDays = workDates.map((d) => DateTime(d.year, d.month, d.day)).toSet();
               final avgHours = totalHours / uniqueDays.length;
-              rowData['Avg Hours/Day'] = '${avgHours.toStringAsFixed(1)} h';
+              rowData[l10n.avgHoursPerDay] = '${avgHours.toStringAsFixed(1)} h';
             } else {
-              rowData['Avg Hours/Day'] = '0.0 h';
+              rowData[l10n.avgHoursPerDay] = '0.0 h';
             }
             break;
           case 'dateRange':
@@ -347,13 +350,13 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
               workDates.sort();
               final start = DateFormat('dd/MM/yyyy').format(workDates.first);
               final end = DateFormat('dd/MM/yyyy').format(workDates.last);
-              rowData['Date Range'] = '$start - $end';
+              rowData[l10n.dateRange] = '$start - $end';
             } else {
-              rowData['Date Range'] = 'No activity';
+              rowData[l10n.dateRange] = l10n.noActivity;
             }
             break;
           case 'status':
-            rowData['Status'] = totalHours > 0 ? 'Active' : 'Inactive';
+            rowData[l10n.status] = totalHours > 0 ? l10n.active : l10n.inactive;
             break;
         }
       }
@@ -363,16 +366,17 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
 
     // Sort by total hours descending
     projectReports.sort((a, b) {
-      final hoursA = double.tryParse(a['Total Hours']?.toString().replaceAll(' h', '') ?? '0') ?? 0;
-      final hoursB = double.tryParse(b['Total Hours']?.toString().replaceAll(' h', '') ?? '0') ?? 0;
+      final hoursA = double.tryParse(a[l10n.totalHours]?.toString().replaceAll(' h', '') ?? '0') ?? 0;
+      final hoursB = double.tryParse(b[l10n.totalHours]?.toString().replaceAll(' h', '') ?? '0') ?? 0;
       return hoursB.compareTo(hoursA);
     });
 
     _reportData = projectReports;
-    _columnHeaders = fields.map((field) => _getFieldLabel(field)).toList();
+    _columnHeaders = fields.map((field) => _getFieldLabel(field, AppLocalizations.of(context)!)).toList();
   }
 
   Future<void> _generateUserBasedReport(List<String> fields) async {
+    final l10n = AppLocalizations.of(context)!;
     final usersSnapshot = await FirebaseFirestore.instance
         .collection('companies')
         .doc(widget.companyId)
@@ -426,24 +430,24 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
       for (final field in fields) {
         switch (field) {
           case 'worker':
-            rowData['Worker'] = userName;
+            rowData[l10n.worker] = userName;
             break;
           case 'totalHours':
-            rowData['Total Hours'] = '${totalHours.toStringAsFixed(1)} h';
+            rowData[l10n.totalHours] = '${totalHours.toStringAsFixed(1)} h';
             break;
           case 'totalExpenses':
-            rowData['Total Expenses'] = 'CHF ${totalExpenses.toStringAsFixed(2)}';
+            rowData[l10n.totalExpenses] = 'CHF ${totalExpenses.toStringAsFixed(2)}';
             break;
           case 'projectCount':
-            rowData['Projects Worked'] = uniqueProjects.length.toString();
+            rowData[l10n.projectsWorked] = uniqueProjects.length.toString();
             break;
           case 'avgHoursPerDay':
             if (workDates.isNotEmpty) {
               final uniqueDays = workDates.map((d) => DateTime(d.year, d.month, d.day)).toSet();
               final avgHours = totalHours / uniqueDays.length;
-              rowData['Avg Hours/Day'] = '${avgHours.toStringAsFixed(1)} h';
+              rowData[l10n.avgHoursPerDay] = '${avgHours.toStringAsFixed(1)} h';
             } else {
-              rowData['Avg Hours/Day'] = '0.0 h';
+              rowData[l10n.avgHoursPerDay] = '0.0 h';
             }
             break;
           case 'overtimeHours':
@@ -453,13 +457,13 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
                                   (userOvertimeData['transferred'] as int? ?? 0) + 
                                   (userOvertimeData['bonus'] as int? ?? 0);
             final overtimeHours = overtimeMinutes / 60.0;
-            rowData['Overtime Hours'] = '${overtimeHours.toStringAsFixed(1)} h';
+            rowData[l10n.overtimeHours] = '${overtimeHours.toStringAsFixed(1)} h';
             break;
           case 'vacationDays':
             // Get real vacation data from user document
             final vacationData = userData['annualLeaveDays'] as Map<String, dynamic>? ?? {};
             final usedDays = vacationData['used'] as double? ?? 0.0;
-            rowData['Vacation Days'] = '${usedDays.toStringAsFixed(1)} days';
+            rowData[l10n.vacationDays] = '${usedDays.toStringAsFixed(1)} days';
             break;
           case 'efficiency':
             // Calculate efficiency based on expected vs actual hours
@@ -467,9 +471,9 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
               final uniqueDays = workDates.map((d) => DateTime(d.year, d.month, d.day)).toSet();
               final expectedHours = uniqueDays.length * 8.0; // Assuming 8h/day
               final efficiency = (totalHours / expectedHours * 100).clamp(0, 200);
-              rowData['Efficiency Rating'] = '${efficiency.toStringAsFixed(1)}%';
+              rowData[l10n.efficiencyRating] = '${efficiency.toStringAsFixed(1)}%';
             } else {
-              rowData['Efficiency Rating'] = 'No data';
+              rowData[l10n.efficiencyRating] = l10n.noData;
             }
             break;
         }
@@ -480,16 +484,17 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
 
     // Sort by total hours descending
     userReports.sort((a, b) {
-      final hoursA = double.tryParse(a['Total Hours']?.toString().replaceAll(' h', '') ?? '0') ?? 0;
-      final hoursB = double.tryParse(b['Total Hours']?.toString().replaceAll(' h', '') ?? '0') ?? 0;
+      final hoursA = double.tryParse(a[l10n.totalHours]?.toString().replaceAll(' h', '') ?? '0') ?? 0;
+      final hoursB = double.tryParse(b[l10n.totalHours]?.toString().replaceAll(' h', '') ?? '0') ?? 0;
       return hoursB.compareTo(hoursA);
     });
 
     _reportData = userReports;
-    _columnHeaders = fields.map((field) => _getFieldLabel(field)).toList();
+    _columnHeaders = fields.map((field) => _getFieldLabel(field, AppLocalizations.of(context)!)).toList();
   }
 
   Future<void> _generateClientBasedReport(List<String> fields) async {
+    final l10n = AppLocalizations.of(context)!;
     final clientsSnapshot = await FirebaseFirestore.instance
         .collection('companies')
         .doc(widget.companyId)
@@ -500,7 +505,7 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
 
     for (final clientDoc in clientsSnapshot.docs) {
       final clientData = clientDoc.data();
-      final clientName = clientData['name'] ?? 'Unnamed Client';
+      final clientName = clientData['name'] ?? l10n.unnamedClient;
 
       // Get projects for this client
       final projectsSnapshot = await FirebaseFirestore.instance
@@ -559,16 +564,16 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
       for (final field in fields) {
         switch (field) {
           case 'client':
-            rowData['Client'] = clientName;
+            rowData[l10n.client] = clientName;
             break;
           case 'totalHours':
-            rowData['Total Hours'] = '${totalHours.toStringAsFixed(1)} h';
+            rowData[l10n.totalHours] = '${totalHours.toStringAsFixed(1)} h';
             break;
           case 'totalExpenses':
-            rowData['Total Expenses'] = 'CHF ${totalExpenses.toStringAsFixed(2)}';
+            rowData[l10n.totalExpenses] = 'CHF ${totalExpenses.toStringAsFixed(2)}';
             break;
           case 'projectCount':
-            rowData['Total Projects'] = projectsSnapshot.docs.length.toString();
+            rowData[l10n.totalProjects] = projectsSnapshot.docs.length.toString();
             break;
 
         }
@@ -579,16 +584,17 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
 
     // Sort by total hours descending
     clientReports.sort((a, b) {
-      final hoursA = double.tryParse(a['Total Hours']?.toString().replaceAll(' h', '') ?? '0') ?? 0;
-      final hoursB = double.tryParse(b['Total Hours']?.toString().replaceAll(' h', '') ?? '0') ?? 0;
+      final hoursA = double.tryParse(a[l10n.totalHours]?.toString().replaceAll(' h', '') ?? '0') ?? 0;
+      final hoursB = double.tryParse(b[l10n.totalHours]?.toString().replaceAll(' h', '') ?? '0') ?? 0;
       return hoursB.compareTo(hoursA);
     });
 
     _reportData = clientReports;
-    _columnHeaders = fields.map((field) => _getFieldLabel(field)).toList();
+    _columnHeaders = fields.map((field) => _getFieldLabel(field, AppLocalizations.of(context)!)).toList();
   }
 
   Future<void> _generateExpenseReport(List<String> fields) async {
+    final l10n = AppLocalizations.of(context)!;
     // Generate time-based report first
     await _generateTimeBasedReport(fields);
     
@@ -596,19 +602,19 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
     final expenseEntries = <Map<String, dynamic>>[];
     
     for (final row in _reportData) {
-      final expensesStr = row['Total Expenses'] as String? ?? 'CHF 0.00';
+      final expensesStr = row[l10n.totalExpenses] as String? ?? 'CHF 0.00';
       final expenseAmount = double.tryParse(expensesStr.replaceAll('CHF ', '')) ?? 0.0;
       
       if (expenseAmount > 0) {
         // Add expense type and description if available
         if (fields.contains('expenseType')) {
-          row['Expense Type'] = 'Mixed'; // You could parse individual expense types
+          row[l10n.expenseType] = l10n.mixed; // You could parse individual expense types
         }
         if (fields.contains('amount')) {
-          row['Amount'] = expensesStr;
+          row[l10n.amount] = expensesStr;
         }
         if (fields.contains('description')) {
-          row['Description'] = row['Notes'] ?? '';
+          row[l10n.description] = row[l10n.notes] ?? '';
         }
         
         expenseEntries.add(row);
@@ -620,64 +626,84 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
 
 
 
-  String _getFieldLabel(String field) {
-    final labels = {
-      'date': 'Date',
-      'worker': 'Worker',
-      'project': 'Project',
-      'client': 'Client',
-      'startTime': 'Start',
-      'endTime': 'End',
-      'duration': 'Total',
-      'note': 'Note',
-      'expenses': 'Expenses',
-      'perDiem': 'Per Diem',
-      'totalHours': 'Total Hours',
-      'totalExpenses': 'Total Expenses',
-      'userCount': 'Users Involved',
-      'projectCount': 'Projects Worked',
-      'avgHoursPerDay': 'Avg Hours/Day',
-      'dateRange': 'Date Range',
-      'status': 'Status',
-      'overtimeHours': 'Overtime Hours',
-      'vacationDays': 'Vacation Days',
-      'efficiency': 'Efficiency Rating',
-      'revenue': 'Total Revenue',
-      'profitMargin': 'Profit Margin',
-      'lastActivity': 'Last Activity',
-      'expenseType': 'Expense Type',
-      'amount': 'Amount',
-      'currency': 'Currency',
-      'description': 'Description',
-      'receipt': 'Receipt',
-    };
-    return labels[field] ?? field;
+  String _getFieldLabel(String field, AppLocalizations l10n) {
+    switch (field) {
+      case 'date':
+        return l10n.date;
+      case 'worker':
+        return l10n.worker;
+      case 'project':
+        return l10n.project;
+      case 'client':
+        return l10n.client;
+      case 'startTime':
+        return l10n.startTime;
+      case 'endTime':
+        return l10n.endTime;
+      case 'duration':
+        return l10n.duration;
+      case 'note':
+        return l10n.notes;
+      case 'expenses':
+        return l10n.expenses;
+      case 'perDiem':
+        return l10n.perDiem;
+      case 'totalHours':
+        return l10n.totalHours;
+      case 'totalExpenses':
+        return l10n.totalExpenses;
+      case 'userCount':
+        return l10n.usersInvolved;
+      case 'projectCount':
+        return l10n.projectsWorked;
+      case 'avgHoursPerDay':
+        return l10n.avgHoursPerDay;
+      case 'dateRange':
+        return l10n.dateRange;
+      case 'status':
+        return l10n.status;
+      case 'overtimeHours':
+        return l10n.overtimeHours;
+      case 'vacationDays':
+        return l10n.vacationDays;
+      case 'efficiency':
+        return l10n.efficiencyRating;
+      case 'amount':
+        return l10n.amount;
+      case 'expenseType':
+        return l10n.expenseType;
+      case 'description':
+        return l10n.description;
+      default:
+        return field;
+    }
   }
 
   void _showExportOptions() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Export Report'),
-        content: const Text('Choose export format:'),
+        title: Text(l10n.exportReport),
+        content: Text(l10n.chooseExportFormat),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               _exportToCSV();
             },
-            child: const Text('CSV'),
+            child: Text(l10n.csv),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               _exportToExcel();
             },
-            child: const Text('Excel'),
+            child: Text(l10n.excel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
         ],
       ),
@@ -718,11 +744,12 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
     web.URL.revokeObjectURL(url);
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('CSV exported successfully!')),
+      SnackBar(content: Text(AppLocalizations.of(context)!.csvExportedSuccessfully)),
     );
   }
 
   void _exportToExcel() {
+    final l10n = AppLocalizations.of(context)!;
     if (_reportData.isEmpty) return;
 
     // Create Excel-compatible HTML table with better styling
@@ -731,7 +758,7 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
     htmlContent.writeln('<html>');
     htmlContent.writeln('<head>');
     htmlContent.writeln('<meta charset="UTF-8">');
-    htmlContent.writeln('<title>${widget.reportConfig['name'] ?? 'Report'}</title>');
+    htmlContent.writeln('<title>${widget.reportConfig['name'] ?? l10n.report}</title>');
     htmlContent.writeln('<style>');
     htmlContent.writeln('body { font-family: Arial, sans-serif; margin: 20px; }');
     htmlContent.writeln('h1 { color: #2c5aa0; margin-bottom: 10px; }');
@@ -750,7 +777,7 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
     
     // Report header with metadata
     htmlContent.writeln('<h1>Stark Track Report</h1>');
-    htmlContent.writeln('<h2>${widget.reportConfig['name'] ?? 'Unnamed Report'}</h2>');
+    htmlContent.writeln('<h2>${widget.reportConfig['name'] ?? l10n.unnamedReport}</h2>');
     htmlContent.writeln('<div class="report-info">');
     htmlContent.writeln('<p><strong>Report Type:</strong> ${(widget.reportConfig['orientation'] as String).toUpperCase()}</p>');
     htmlContent.writeln('<p><strong>Generated:</strong> ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}</p>');
@@ -828,12 +855,13 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
     web.URL.revokeObjectURL(url);
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Excel file exported successfully!')),
+      SnackBar(content: Text(AppLocalizations.of(context)!.excelFileExportedSuccessfully)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final colors = Theme.of(context).extension<AppColors>()!;
 
     return Dialog(
@@ -856,7 +884,7 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.reportConfig['name'] ?? 'Report',
+                      widget.reportConfig['name'] ?? l10n.report,
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -879,7 +907,7 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
                       ElevatedButton.icon(
                         onPressed: _showExportOptions,
                         icon: const Icon(Icons.download),
-                        label: const Text('Export'),
+                        label: Text(AppLocalizations.of(context)!.export),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: colors.success,
                           foregroundColor: Colors.white,
@@ -919,7 +947,7 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
                               const SizedBox(height: 16),
                               ElevatedButton(
                                 onPressed: _generateReport,
-                                child: const Text('Retry'),
+                                child: Text(AppLocalizations.of(context)!.retry),
                               ),
                             ],
                           ),
@@ -936,7 +964,7 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
-                                    'No data found for this report',
+                                    AppLocalizations.of(context)!.noDataFoundForThisReport,
                                     style: TextStyle(
                                       color: colors.textColor.withValues(alpha: 0.7),
                                     ),

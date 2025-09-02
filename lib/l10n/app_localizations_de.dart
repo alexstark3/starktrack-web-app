@@ -70,6 +70,8 @@ class AppLocalizationsDe extends AppLocalizations {
 
   // Reports
   @override
+  String get report => 'Bericht';
+  @override
   String get reports => 'Berichte';
   @override
   String get createReport => 'Bericht';
@@ -81,8 +83,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get selectFields => 'Felder auswählen';
   @override
   String get filters => 'Filter';
-  @override
-  String get exportCsv => 'CSV exportieren';
+
   @override
   String get runReport => 'Bericht ausführen';
   @override
@@ -1165,4 +1166,164 @@ class AppLocalizationsDe extends AppLocalizations {
   
   @override
   String get failedToGenerateReport => 'Bericht konnte nicht erstellt werden:';
+  
+  // Report Builder Dialog
+  @override
+  String get dateRange => 'Datumsbereich';
+  
+  @override
+  String get workers => 'Mitarbeiter';
+  
+  @override
+  String get fields => 'Felder';
+  
+  @override
+  String get workerName => 'Mitarbeitername';
+  
+  // Report Builder Dialog - Missing translations
+  @override
+  String get selectDateRange => 'Datumsbereich auswählen';
+  
+  @override
+  String get allWorkers => 'Alle Mitarbeiter';
+  
+  @override
+  String get allProjects => 'Alle Projekte';
+  
+  @override
+  String get allClients => 'Alle Kunden';
+  
+  // Report Cards
+  @override
+  String get created => 'Erstellt';
+  
+  // Report Viewer Dialog
+  @override
+  String get export => 'Exportieren';
+  
+  @override
+  String get exportReport => 'Bericht exportieren';
+  
+  @override
+  String get csv => 'CSV';
+  
+  @override
+  String get excel => 'Excel';
+  
+  @override
+  String get retry => 'Wiederholen';
+  
+  @override
+  String get noDataFoundForThisReport => 'Keine Daten für diesen Bericht gefunden';
+  
+  @override
+  String get detailedSessionReport => 'Detaillierter Sitzungsbericht';
+  
+  @override
+  String get detailedReport => 'Detaillierter Bericht';
+  
+  @override
+  String get unnamedReport => 'Unbenannter Bericht';
+  
+  @override
+  String get unnamedProject => 'Unbenanntes Projekt';
+  
+  @override
+  String get unnamedClient => 'Unbenannter Kunde';
+  
+  @override
+  String get startTime => 'Startzeit';
+  
+  @override
+  String get endTime => 'Endzeit';
+  
+  @override
+  String get notes => 'Notizen';
+  
+  @override
+  String get usersInvolved => 'Beteiligte Benutzer';
+  
+  @override
+  String get projectsWorked => 'Bearbeitete Projekte';
+  
+  @override
+  String get status => 'Status';
+  
+  @override
+  String get overtimeHours => 'Überstunden';
+  
+  @override
+  String get vacationDays => 'Urlaubstage';
+  
+  @override
+  String get efficiencyRating => 'Effizienzbewertung';
+  
+  @override
+  String get expenseType => 'Ausgabentyp';
+  
+  @override
+  String get description => 'Beschreibung';
+  
+  @override
+  String get noActivity => 'Keine Aktivität';
+  
+  @override
+  String get inactive => 'Inaktiv';
+  
+  @override
+  String get mixed => 'Gemischt';
+  
+  @override
+  String get noData => 'Keine Daten';
+  
+  @override
+  String get notSpecified => 'Nicht angegeben';
+  
+  @override
+  String get summary => 'Zusammenfassung';
+  
+  @override
+  String get noSessionsFoundForThisUserInTheSelectedPeriod => 'Keine Sitzungen für diesen Benutzer im ausgewählten Zeitraum gefunden';
+  
+  @override
+  String get noSessionsFoundForThisProjectInTheSelectedPeriod => 'Keine Sitzungen für dieses Projekt im ausgewählten Zeitraum gefunden';
+  
+  @override
+  String get noProjectsFoundForThisClientInTheSelectedPeriod => 'Keine Projekte für diesen Kunden im ausgewählten Zeitraum gefunden';
+  
+  @override
+  String get noDataAvailableForThisReport => 'Keine Daten für diesen Bericht verfügbar';
+  
+  @override
+  String get reference => 'Referenz';
+  
+  @override
+  String get startEnd => 'Start - Ende';
+  
+  @override
+  String get chooseExportFormat => 'Exportformat wählen:';
+  
+  @override
+  String get csvExportedSuccessfully => 'CSV erfolgreich exportiert!';
+  
+  @override
+  String get avgHoursPerDay => 'Durchschn. Std./Tag';
+  
+  @override
+  String get sessions => 'Sitzungen';
+  
+  @override
+  String get sessionCount => 'Sitzungsanzahl';
+  
+  @override
+  String get exportExcel => 'Excel exportieren';
+  
+  @override
+  String get reportRangeLabel => 'Berichtsbereich:';
+  
+  @override
+  String get overtimeLabel => 'Überstunden:';
+  
+  @override
+  String get weekPrefix => 'W';
 }

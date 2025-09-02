@@ -167,13 +167,14 @@ abstract class AppLocalizations {
   String get selectedRange;
 
   // Reports
+  String get report;
   String get reports;
   String get createReport;
   String get reportName;
   String get reportOrientation;
   String get selectFields;
   String get filters;
-  String get exportCsv;
+
   String get runReport;
   String get deleteSuccessful;
 
@@ -2118,6 +2119,74 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to generate report:'**
   String get failedToGenerateReport;
+
+  // Report Builder Dialog Translations (only new ones)
+  String get selectDateRange => 'Select Date Range';
+  String get selectWorkerAllIfEmpty => 'Select Worker (All if empty)';
+  String get allWorkers => 'All Workers';
+  String get selectProjectAllIfEmpty => 'Select Project (All if empty)';
+  String get allProjects => 'All Projects';
+  String get selectClientAllIfEmpty => 'Select Client (All if empty)';
+  String get allClients => 'All Clients';
+  String get reportSavedSuccessfully => 'Report saved successfully!';
+  String get failedToSaveReport => 'Failed to save report:';
+  String get unknownProject => 'Unknown Project';
+  String get unknownClient => 'Unknown Client';
+  
+  // Report Builder Dialog
+  String get dateRange => 'Date Range';
+  String get workers => 'Workers';
+  String get fields => 'Fields';
+  String get workerName => 'Worker Name';
+  
+  // Report Cards
+  String get created => 'Created';
+  
+  // Report Viewer Dialog
+  String get export => 'Export';
+  String get exportReport => 'Export Report';
+  String get csv => 'CSV';
+  String get excel => 'Excel';
+  String get retry => 'Retry';
+  String get noDataFoundForThisReport => 'No data found for this report';
+  String get detailedSessionReport => 'Detailed Session Report';
+  String get detailedReport => 'Detailed Report';
+  String get unnamedReport => 'Unnamed Report';
+  String get unnamedProject => 'Unnamed Project';
+  String get unnamedClient => 'Unnamed Client';
+  String get startTime => 'Start Time';
+  String get endTime => 'End Time';
+  String get notes => 'Notes';
+  String get usersInvolved => 'Users Involved';
+  String get projectsWorked => 'Projects Worked';
+  String get status => 'Status';
+  String get overtimeHours => 'Overtime Hours';
+  String get vacationDays => 'Vacation Days';
+  String get efficiencyRating => 'Efficiency Rating';
+  String get expenseType => 'Expense Type';
+  String get description => 'Description';
+
+  String get noActivity => 'No activity';
+  String get inactive => 'Inactive';
+  String get mixed => 'Mixed';
+  String get noData => 'No data';
+  String get notSpecified => 'Not specified';
+  String get summary => 'Summary';
+  String get noSessionsFoundForThisUserInTheSelectedPeriod => 'No sessions found for this user in the selected period';
+  String get noSessionsFoundForThisProjectInTheSelectedPeriod => 'No sessions found for this project in the selected period';
+  String get noProjectsFoundForThisClientInTheSelectedPeriod => 'No projects found for this client in the selected period';
+  String get noDataAvailableForThisReport => 'No data available for this report';
+  String get reference => 'Reference';
+  String get startEnd => 'Start - End';
+  String get chooseExportFormat => 'Choose export format:';
+  String get csvExportedSuccessfully => 'CSV exported successfully!';
+  String get avgHoursPerDay => 'Avg Hours/Day';
+  String get sessions => 'Sessions';
+  String get sessionCount => 'Session Count';
+  String get exportExcel => 'Export Excel';
+  String get reportRangeLabel => 'Report range:';
+  String get overtimeLabel => 'Overtime:';
+  String get weekPrefix => 'W';
 }
 
 class _AppLocalizationsDelegate

@@ -815,9 +815,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                                                         return Text(
                                                           '${_translateExpenseKey(e.key, l10n)}: ${expenseFormat.format(expenseValue)}',
                                                           style: TextStyle(
-                                                              color: theme
-                                                                  .colorScheme
-                                                                  .error,
+                                                              color: appColors.green,
                                                               fontWeight:
                                                                   FontWeight.w600,
                                                               fontSize: 15),
@@ -831,8 +829,8 @@ class _HistoryLogsState extends State<HistoryLogs> {
                                                                 top: 4.0),
                                                         child: Text(
                                                           '${l10n.totalExpenses}: ${expenseFormat.format(entry.expense)}',
-                                                          style: const TextStyle(
-                                                            color: Colors.red,
+                                                          style: TextStyle(
+                                                            color: appColors.green,
                                                             fontWeight:
                                                                 FontWeight.w600,
                                                             fontSize: 15,
@@ -848,8 +846,8 @@ class _HistoryLogsState extends State<HistoryLogs> {
                                                     top: 2.0),
                                                 child: Text(
                                                   '${l10n.totalExpenses}: ${expenseFormat.format(entry.expense)}',
-                                                  style: const TextStyle(
-                                                    color: Colors.red,
+                                                  style: TextStyle(
+                                                    color: appColors.green,
                                                     fontWeight:
                                                         FontWeight.w600,
                                                     fontSize: 15,
@@ -951,7 +949,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                                     
                                     totalWidgets.add(
                                       Text(
-                                        'Overtime: ${_formatOvertimeHours(overtimeMinutes / 60)}',
+                                        '${l10n.overtime}: ${_formatOvertimeHours(overtimeMinutes / 60)}',
                                         style: TextStyle(
                                           fontWeight: FontWeight.w700,
                                           color: color,

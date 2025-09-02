@@ -4,10 +4,12 @@ import 'package:intl/intl.dart';
 class ClientReport {
   final String companyId;
   final Map<String, dynamic> reportConfig;
+  final String Function()? getPerDiemTranslation;
   
   ClientReport({
     required this.companyId,
     required this.reportConfig,
+    this.getPerDiemTranslation,
   });
 
   // Store client data for tabs/sheets
@@ -172,13 +174,19 @@ class ClientReport {
                 for (var entry in expenses.entries) {
                   final value = entry.value;
                   if (value is num && value > 0) {
-                    expenseDetails.add('${entry.key}: $value');
+                    // Translate "Per diem" key if it exists
+                    String displayKey = entry.key;
+                    if (entry.key == 'Per diem' && getPerDiemTranslation != null) {
+                      displayKey = getPerDiemTranslation!();
+                    }
+                    expenseDetails.add('$displayKey: $value');
                     sessionExpenses += value.toDouble();
                   }
                 }
                 
                 if (logData['perDiem'] == true) {
-                  expenseDetails.add('Per diem: 16');
+                  final perDiemText = getPerDiemTranslation?.call() ?? 'Per diem';
+                  expenseDetails.add('$perDiemText: 16');
                   sessionExpenses += 16.0;
                 }
                 

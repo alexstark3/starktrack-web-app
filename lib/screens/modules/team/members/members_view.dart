@@ -1229,7 +1229,7 @@ class _LogsTableState extends State<_LogsTable> {
                                   return Text(
                                     '${_translateExpenseKey(e.key, AppLocalizations.of(context)!)}: ${expenseFormat.format(expenseValue)}',
                                     style: TextStyle(
-                                        color: theme.colorScheme.error,
+                                        color: appColors.green,
                                         fontWeight: FontWeight.w600,
                                         fontSize: 15),
                                   );
@@ -1472,7 +1472,7 @@ class _LogsTableState extends State<_LogsTable> {
 
                                     overtimeWidgets.add(
                                       Text(
-                                        'Overtime: ${_formatOvertimeHours(overtimeMinutes / 60)}',
+                                        '${AppLocalizations.of(context)!.overtime}: ${_formatOvertimeHours(overtimeMinutes / 60)}',
                                         style: TextStyle(
                                           fontWeight: FontWeight.w700,
                                           color: color,
@@ -1568,7 +1568,7 @@ class _LogsTableState extends State<_LogsTable> {
 
                                   groupOvertimeWidgets.add(
                                     Text(
-                                      'Overtime: ${_formatOvertimeHours(overtimeMinutes / 60)}',
+                                      '${AppLocalizations.of(context)!.overtime}: ${_formatOvertimeHours(overtimeMinutes / 60)}',
                                       style: TextStyle(
                                         fontWeight: FontWeight.w700,
                                         color: color,

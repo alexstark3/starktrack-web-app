@@ -219,7 +219,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                         isDense: true,
                         constraints: const BoxConstraints.tightFor(height: 38),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                        hintText: 'Search reports...',
+                        hintText: l10n.search,
                         hintStyle: TextStyle(
                           color: Theme.of(context).brightness == Brightness.dark
                               ? Theme.of(context).colorScheme.onSurface
@@ -369,7 +369,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                             
                             // Report Details
                             Text(
-                              'Type: ${orientation.toUpperCase()}',
+                              '${l10n.type}: ${_getOrientationLabel(orientation, l10n)}',
                               style: TextStyle(
                                 color: colors.primaryBlue,
                                 fontWeight: FontWeight.w500,
@@ -380,13 +380,13 @@ class _ReportsScreenState extends State<ReportsScreen> {
                             Wrap(
                               children: [
                                 Text(
-                                  'Fields: ',
+                                  '${l10n.fields}: ',
                                   style: TextStyle(
                                     color: colors.textColor.withValues(alpha: 0.7),
                                     fontSize: 13,
                                   ),
                                 ),
-                                ..._getFieldLabels(fields).map((label) => Text(
+                                ..._getFieldLabels(fields, l10n).map((label) => Text(
                                   '$label, ',
                                   style: TextStyle(
                                     color: colors.textColor.withValues(alpha: 0.7),
@@ -397,7 +397,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Created: ${DateFormat('dd/MM/yyyy HH:mm').format(createdAt)}',
+                              '${l10n.created}: ${DateFormat('dd/MM/yyyy HH:mm').format(createdAt)}',
                               style: TextStyle(
                                 color: colors.textColor.withValues(alpha: 0.5),
                                 fontSize: 12,
@@ -444,65 +444,78 @@ class _ReportsScreenState extends State<ReportsScreen> {
     );
   }
 
-  List<String> _getFieldLabels(List<String> fields) {
+  String _getOrientationLabel(String orientation, AppLocalizations l10n) {
+    switch (orientation) {
+      case 'project':
+        return l10n.project;
+      case 'worker':
+        return l10n.worker;
+      case 'client':
+        return l10n.client;
+      default:
+        return orientation.toUpperCase();
+    }
+  }
+
+  List<String> _getFieldLabels(List<String> fields, AppLocalizations l10n) {
     return fields.map((field) {
       switch (field) {
         case 'client':
-          return 'Client';
+          return l10n.client;
         case 'totalHours':
-          return 'Total Hours';
+          return l10n.totalHours;
         case 'totalExpenses':
-          return 'Total Expenses';
+          return l10n.totalExpenses;
         case 'projectCount':
-          return 'Total Projects';
+          return l10n.totalProjects;
         case 'project':
-          return 'Project';
+          return l10n.project;
         case 'worker':
-          return 'Worker';
+          return l10n.worker;
         case 'user':
-          return 'Worker';
+          return l10n.worker;
         case 'date':
-          return 'Date';
+          return l10n.date;
         case 'start':
-          return 'Start';
+          return l10n.start;
         case 'end':
-          return 'End';
+          return l10n.end;
         case 'duration':
-          return 'Duration';
+          return l10n.duration;
         case 'expenses':
-          return 'Expenses';
+          return l10n.expenses;
         case 'note':
-          return 'Note';
+          return l10n.note;
         case 'userCount':
-          return 'Users Involved';
+          return l10n.users;
         case 'avgHoursPerDay':
-          return 'Avg Hours/Day';
+          return l10n.avgHoursPerDay;
         case 'dateRange':
-          return 'Date Range';
+          return l10n.dateRange;
         case 'status':
-          return 'Status';
+          return l10n.status;
         case 'projectName':
-          return 'Project Name';
+          return l10n.projectName;
         case 'projectRef':
-          return 'Reference';
+          return l10n.projectRef;
         case 'projectAddress':
-          return 'Address';
+          return l10n.address;
         case 'totalTime':
-          return 'Total Time';
+          return l10n.totalTime;
         case 'totalOvertime':
-          return 'Total Overtime';
+          return l10n.totalOvertime;
         case 'timeOff':
-          return 'Time Off';
+          return l10n.vacationBalance;
         case 'overtime':
-          return 'Overtime';
+          return l10n.overtime;
         case 'timeoff':
-          return 'Time Off';
+          return l10n.vacationBalance;
         case 'totalSessions':
-          return 'Total Sessions';
+          return l10n.totalSessions;
         case 'sessions':
-          return 'Sessions';
+          return l10n.sessions;
         case 'sessionCount':
-          return 'Session Count';
+          return l10n.sessionCount;
         default:
           // Handle any remaining raw field names by cleaning them up
           String cleaned = field

@@ -30,12 +30,8 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
   String? _selectedClientId;
   bool _isLoading = false;
 
-  // Available report types
-  final Map<String, String> _reportTypes = {
-    'project': 'Project', 
-    'worker': 'Worker',
-    'client': 'Client',
-  };
+  // Available report types - will be initialized with translations
+  Map<String, String> _reportTypes = {};
 
   // Generate report name based on type and timestamp
   String _generateReportName() {
@@ -47,54 +43,76 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
   }
 
   // Available fields for each orientation
-  final Map<String, List<Map<String, String>>> _availableFields = {
-         'project': [
-       {'key': 'totalSessions', 'label': 'Total Sessions'},
-       {'key': 'totalTime', 'label': 'Total Time'},
-       {'key': 'totalExpenses', 'label': 'Total Expenses'},
-       {'key': 'date', 'label': 'Date'},
-       {'key': 'start', 'label': 'Start'},
-       {'key': 'end', 'label': 'End'},
-       {'key': 'duration', 'label': 'Duration'},
-       {'key': 'worker', 'label': 'Worker'},
-       {'key': 'expenses', 'label': 'Expenses'},
-       {'key': 'note', 'label': 'Note'},
-     ],
-         'worker': [
-       {'key': 'worker', 'label': 'Worker Name'},
-       {'key': 'totalHours', 'label': 'Total Hours'},
-       {'key': 'totalExpenses', 'label': 'Total Expenses'},
-       {'key': 'totalOvertime', 'label': 'Total Overtime'},
-       {'key': 'timeOff', 'label': 'Vacation Balance'},
-       {'key': 'project', 'label': 'Project'},
-       {'key': 'start', 'label': 'Start'},
-       {'key': 'end', 'label': 'End'},
-       {'key': 'duration', 'label': 'Duration'},
-       {'key': 'expenses', 'label': 'Expenses'},
-       {'key': 'note', 'label': 'Note'},
-     ],
-    'client': [
-      {'key': 'client', 'label': 'Client Name'},
-      {'key': 'totalHours', 'label': 'Total Hours'},
-      {'key': 'totalExpenses', 'label': 'Total Expenses'},
-      {'key': 'projectCount', 'label': 'Total Projects'},
-    ],
-    
-  };
+    Map<String, List<Map<String, String>>> _getAvailableFields(AppLocalizations l10n) {
+    return {
+      'project': [
+        {'key': 'totalSessions', 'label': l10n.totalSessions},
+        {'key': 'totalTime', 'label': l10n.totalTime},
+        {'key': 'totalExpenses', 'label': l10n.totalExpenses},
+        {'key': 'date', 'label': l10n.date},
+        {'key': 'start', 'label': l10n.start},
+        {'key': 'end', 'label': l10n.end},
+        {'key': 'duration', 'label': l10n.duration},
+        {'key': 'worker', 'label': l10n.worker},
+        {'key': 'expenses', 'label': l10n.expenses},
+        {'key': 'note', 'label': l10n.note},
+      ],
+      'worker': [
+        {'key': 'worker', 'label': l10n.workerName},
+        {'key': 'totalHours', 'label': l10n.totalHours},
+        {'key': 'totalExpenses', 'label': l10n.totalExpenses},
+        {'key': 'totalOvertime', 'label': l10n.totalOvertime},
+        {'key': 'timeOff', 'label': l10n.vacationBalance},
+        {'key': 'project', 'label': l10n.project},
+        {'key': 'start', 'label': l10n.start},
+        {'key': 'end', 'label': l10n.end},
+        {'key': 'duration', 'label': l10n.duration},
+        {'key': 'expenses', 'label': l10n.expenses},
+        {'key': 'note', 'label': l10n.note},
+      ],
+      'client': [
+        {'key': 'client', 'label': l10n.clientName},
+        {'key': 'totalHours', 'label': l10n.totalHours},
+        {'key': 'totalExpenses', 'label': l10n.totalExpenses},
+        {'key': 'projectCount', 'label': l10n.totalProjects},
+      ],
+    };
+  }
 
   @override
   void initState() {
     super.initState();
     _loadData();
-    _initializeFields();
   }
 
-       void _initializeFields() {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_selectedFields.isEmpty) {
+      _initializeFields();
+    }
+    if (_reportTypes.isEmpty) {
+      _initializeReportTypes();
+    }
+  }
+
+  void _initializeFields() {
     // Initialize with default fields for project orientation (default)
-    final projectFields = _availableFields['project'] ?? [];
+    final l10n = AppLocalizations.of(context)!;
+    final availableFields = _getAvailableFields(l10n);
+    final projectFields = availableFields['project'] ?? [];
     for (final field in projectFields) {
       _selectedFields[field['key']!] = true; // All fields preselected by default
     }
+  }
+
+  void _initializeReportTypes() {
+    final l10n = AppLocalizations.of(context)!;
+    _reportTypes = {
+      'project': l10n.project,
+      'worker': l10n.worker,
+      'client': l10n.client,
+    };
   }
 
   Future<void> _loadData() async {
@@ -144,11 +162,13 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
       _selectedFields.clear();
       
       // Set default fields for the new orientation
-      final fields = _availableFields[orientation] ?? [];
+      final l10n = AppLocalizations.of(context)!;
+      final availableFields = _getAvailableFields(l10n);
+      final fields = availableFields[orientation] ?? [];
       final defaultFields = {
         'project': ['totalSessions', 'totalTime', 'totalExpenses', 'date', 'start', 'end', 'duration', 'worker', 'expenses', 'note'],
         'worker': ['worker', 'totalHours', 'totalExpenses', 'totalOvertime', 'timeOff', 'project', 'start', 'end', 'duration', 'expenses', 'note'],
-        'client': ['client', 'totalHours', 'projectCount'],
+        'client': ['client', 'totalHours', 'totalExpenses', 'projectCount'],
       };
       
       for (final field in fields) {
@@ -159,6 +179,7 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
   }
 
   Future<void> _saveReport() async {
+    final l10n = AppLocalizations.of(context)!;
     final selectedFields = _selectedFields.entries
         .where((entry) => entry.value)
         .map((entry) => entry.key)
@@ -166,7 +187,7 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
 
     if (selectedFields.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one field')),
+        SnackBar(content: Text(l10n.pleaseSelectAtLeastOneField)),
       );
       return;
     }
@@ -227,7 +248,7 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
         Navigator.of(context).pop(reportData);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Report saved successfully!'),
+            content: Text(l10n.reportSavedSuccessfully),
             backgroundColor: Theme.of(context).extension<AppColors>()!.success,
           ),
         );
@@ -237,7 +258,7 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to save report: ${e.toString()}'),
+            content: Text('${l10n.failedToSaveReport} ${e.toString()}'),
             backgroundColor: Theme.of(context).extension<AppColors>()!.error,
             duration: const Duration(seconds: 5),
           ),
@@ -292,7 +313,7 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
                   children: [
                     // Report Type
                     Text(
-                      'Report Type',
+                      l10n.reportType,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -332,7 +353,7 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
 
                     // Date Range Filter
                     Text(
-                      'Date Range',
+                      l10n.dateRange,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -366,8 +387,8 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
                         },
                         icon: const Icon(Icons.calendar_today, size: 16),
                         label: Text(_dateRange != null
-                            ? '${_dateRange!.startDate != null ? "${_dateRange!.startDate!.day.toString().padLeft(2, '0')}/${_dateRange!.startDate!.month.toString().padLeft(2, '0')}/${_dateRange!.startDate!.year}" : "Start"} - ${_dateRange!.endDate != null ? "${_dateRange!.endDate!.day.toString().padLeft(2, '0')}/${_dateRange!.endDate!.month.toString().padLeft(2, '0')}/${_dateRange!.endDate!.year}" : "End"}'
-                            : 'Select Date Range'),
+                            ? '${_dateRange!.startDate != null ? "${_dateRange!.startDate!.day.toString().padLeft(2, '0')}/${_dateRange!.startDate!.month.toString().padLeft(2, '0')}/${_dateRange!.startDate!.year}" : l10n.start} - ${_dateRange!.endDate != null ? "${_dateRange!.endDate!.day.toString().padLeft(2, '0')}/${_dateRange!.endDate!.month.toString().padLeft(2, '0')}/${_dateRange!.endDate!.year}" : l10n.end}'
+                            : l10n.selectDateRange),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: colors.backgroundLight,
                           foregroundColor: colors.textColor,
@@ -387,7 +408,7 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
 
                     // Workers Field
                     Text(
-                      'Workers',
+                      l10n.workers,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -411,16 +432,16 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
                         child: DropdownButton<String?>(
                           value: _selectedUserId,
                           isExpanded: true,
-                          hint: const Text('Select Worker (All if empty)'),
+                          hint: Text(l10n.selectWorkerAllIfEmpty),
                           items: [
-                            const DropdownMenuItem<String?>(
+                            DropdownMenuItem<String?>(
                               value: null,
-                              child: Text('All Workers'),
+                              child: Text(l10n.allWorkers),
                             ),
                             ..._users.map((user) => DropdownMenuItem<String?>(
                                   value: user['id'],
                                   child: Text('${user['firstName'] ?? ''} ${user['surname'] ?? ''}'.trim().isEmpty
-                                      ? user['email'] ?? 'Unknown User'
+                                      ? user['email'] ?? l10n.unknownUser
                                       : '${user['firstName'] ?? ''} ${user['surname'] ?? ''}'.trim()),
                                 )),
                           ],
@@ -434,7 +455,7 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
 
                     // Projects Field
                     Text(
-                      'Projects',
+                      l10n.projects,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -458,15 +479,15 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
                         child: DropdownButton<String?>(
                           value: _selectedProjectId,
                           isExpanded: true,
-                          hint: const Text('Select Project (All if empty)'),
+                          hint: Text(l10n.selectProjectAllIfEmpty),
                           items: [
-                            const DropdownMenuItem<String?>(
+                            DropdownMenuItem<String?>(
                               value: null,
-                              child: Text('All Projects'),
+                              child: Text(l10n.allProjects),
                             ),
                             ..._projects.map((project) => DropdownMenuItem<String?>(
                                   value: project['id'],
-                                  child: Text(project['name'] ?? 'Unknown Project'),
+                                  child: Text(project['name'] ?? l10n.unknownProject),
                                 )),
                           ],
                           onChanged: (value) {
@@ -479,7 +500,7 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
 
                     // Clients Field
                     Text(
-                      'Clients',
+                      l10n.clients,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -503,15 +524,15 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
                         child: DropdownButton<String?>(
                           value: _selectedClientId,
                           isExpanded: true,
-                          hint: const Text('Select Client (All if empty)'),
+                          hint: Text(l10n.selectClientAllIfEmpty),
                           items: [
-                            const DropdownMenuItem<String?>(
+                            DropdownMenuItem<String?>(
                               value: null,
-                              child: Text('All Clients'),
+                              child: Text(l10n.allClients),
                             ),
                             ..._clients.map((client) => DropdownMenuItem<String?>(
                                   value: client['id'],
-                                  child: Text(client['name'] ?? 'Unknown Client'),
+                                  child: Text(client['name'] ?? l10n.unknownClient),
                                 )),
                           ],
                           onChanged: (value) {
@@ -524,7 +545,7 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
 
                     // Fields to Include
                     Text(
-                      'Fields to Include',
+                      l10n.fields,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -545,7 +566,7 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: ListView(
-                        children: (_availableFields[_selectedOrientation] ?? [])
+                        children: (_getAvailableFields(l10n)[_selectedOrientation] ?? [])
                             .map((field) => CheckboxListTile(
                                   title: Text(field['label']!),
                                   value: _selectedFields[field['key']] ?? false,
@@ -590,7 +611,7 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
                           height: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : Text('Save Report'),
+                      : Text(l10n.save),
                 ),
               ],
             ),

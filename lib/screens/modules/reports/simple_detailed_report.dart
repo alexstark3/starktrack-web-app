@@ -38,7 +38,14 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
   @override
   void initState() {
     super.initState();
-    _generateReport();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_projectReportData.isEmpty && _userReportData.isEmpty && _clientReportData.isEmpty) {
+      _generateReport();
+    }
   }
 
   @override
@@ -121,9 +128,11 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
   }
 
   Future<void> _generateProjectReport() async {
+    final l10n = AppLocalizations.of(context)!;
     final projectReport = ProjectReport(
       companyId: widget.companyId,
       reportConfig: widget.reportConfig,
+      getPerDiemTranslation: () => l10n.perDiem,
     );
     
     await projectReport.generateReport();
@@ -136,9 +145,11 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
   }
 
   Future<void> _generateUserReport() async {
+    final l10n = AppLocalizations.of(context)!;
     final userReport = UserReport(
       companyId: widget.companyId,
       reportConfig: widget.reportConfig,
+      getPerDiemTranslation: () => l10n.perDiem,
     );
     
     await userReport.generateReport();
@@ -159,10 +170,12 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
   }
 
   Future<void> _generateClientReport() async {
+    final l10n = AppLocalizations.of(context)!;
     // Generate client report using the new ClientReport class
     final clientReport = ClientReport(
       companyId: widget.companyId,
       reportConfig: widget.reportConfig,
+      getPerDiemTranslation: () => l10n.perDiem,
     );
     
     await clientReport.generateReport();
@@ -286,6 +299,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
+    final l10n = AppLocalizations.of(context)!;
 
     return Dialog(
       child: Container(
@@ -304,7 +318,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.reportConfig['name']?.toString() ?? 'Detailed Report',
+                        widget.reportConfig['name']?.toString() ?? l10n.detailedReport,
                         style: TextStyle(
                           fontSize: 18,
                           color: colors.primaryBlue,
@@ -312,7 +326,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
                         ),
                       ),
                       Text(
-                        'Detailed Session Report',
+                        l10n.detailedSessionReport,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: colors.textColor.withValues(alpha: 0.7),
                         ),
@@ -338,7 +352,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
                       child: ElevatedButton.icon(
                         onPressed: _exportToExcel,
                         icon: const Icon(Icons.file_download, size: 20),
-                        label: const Text('Export Excel'),
+                        label: Text(l10n.exportExcel),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: colors.success,
                           foregroundColor: colors.whiteTextOnBlue,
@@ -367,7 +381,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
                   : _reportData.isEmpty
                       ?                         Center(
                           child: Text(
-                            'No data available for this report',
+                            l10n.noDataAvailableForThisReport,
                             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                               color: colors.textColor.withValues(alpha: 0.7),
                             ),
@@ -382,6 +396,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
   }
 
   Widget _buildReportContent(AppColors colors) {
+    final l10n = AppLocalizations.of(context)!;
     final orientation = widget.reportConfig['orientation'] as String? ?? 'time';
     
     // For worker reports (single or multiple), show proper worker content
@@ -411,7 +426,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        '$totalSessions sessions • $totalTime',
+                        '$totalSessions ${l10n.sessions} • $totalTime',
                         style: TextStyle(
                           fontSize: 11,
                           color: colors.textColor.withValues(alpha: 0.7),
@@ -468,7 +483,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        '$totalSessions sessions • $totalTime',
+                        '$totalSessions ${l10n.sessions} • $totalTime',
                         style: TextStyle(
                           fontSize: 11,
                           color: colors.textColor.withValues(alpha: 0.7),
@@ -568,6 +583,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
   }
 
   Widget _buildUserTabContent(Map<String, dynamic> userData, List<Map<String, dynamic>> sessions, AppColors colors) {
+    final l10n = AppLocalizations.of(context)!;
     final groupedSessions = userData['groupedSessions'] as Map<String, Map<String, Map<String, Map<String, List<Map<String, dynamic>>>>>>?;
     
     return SingleChildScrollView(
@@ -599,19 +615,19 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          _buildSummaryItem('Sessions', '${userData['totalSessions']}', colors),
+                          _buildSummaryItem(l10n.sessions, '${userData['totalSessions']}', colors),
                           const SizedBox(width: 24),
-                          _buildSummaryItem('Total Time', userData['totalTime'] as String, colors),
+                          _buildSummaryItem(l10n.totalTime, userData['totalTime'] as String, colors),
                           const SizedBox(width: 24),
-                          _buildSummaryItem('Overtime Balance', userData['totalOvertime'] as String, colors),
+                          _buildSummaryItem(l10n.overtimeBalance, userData['totalOvertime'] as String, colors),
                           const SizedBox(width: 24),
-                          _buildSummaryItem('Expenses', userData['totalExpenses'] > 0 ? '${userData['totalExpenses']?.toStringAsFixed(2)}' : '0.00', colors),
+                          _buildSummaryItem(l10n.expenses, userData['totalExpenses'] > 0 ? '${userData['totalExpenses']?.toStringAsFixed(2)}' : '0.00', colors),
                         ],
                       ),
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          _buildSummaryItem('Vacation Balance', userData['vacationBalance']?.toString() ?? '0.0', colors),
+                          _buildSummaryItem(l10n.vacationBalance, userData['vacationBalance']?.toString() ?? '0.0', colors),
                         ],
                       ),
                     ],
@@ -633,7 +649,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
           else
             Center(
               child: Text(
-                'No sessions found for this user in the selected period',
+                l10n.noSessionsFoundForThisUserInTheSelectedPeriod,
                 style: TextStyle(color: colors.textColor.withValues(alpha: 0.7)),
               ),
             ),
@@ -643,6 +659,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
   }
 
   Widget _buildProjectTabContent(Map<String, dynamic> projectData, List<Map<String, dynamic>> sessions, AppColors colors) {
+    final l10n = AppLocalizations.of(context)!;
     final groupedSessions = projectData['groupedSessions'] as Map<String, Map<String, Map<String, Map<String, List<Map<String, dynamic>>>>>>?;
     
     return SingleChildScrollView(
@@ -672,7 +689,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
                 if (projectData['projectRef'] != null && (projectData['projectRef'] as String).isNotEmpty)
                   Row(
                     children: [
-                      Text('Ref: ', style: TextStyle(fontWeight: FontWeight.w600, color: colors.textColor)),
+                      Text('${l10n.ref}: ', style: TextStyle(fontWeight: FontWeight.w600, color: colors.textColor)),
                       Text(projectData['projectRef'] as String, style: TextStyle(color: colors.textColor)),
                     ],
                   ),
@@ -680,8 +697,8 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
                   padding: EdgeInsets.only(top: 4),
                   child: Row(
                     children: [
-                      Text('Address: ', style: TextStyle(fontWeight: FontWeight.w600, color: colors.textColor)),
-                      Expanded(child: Text(projectData['projectAddress']?.toString() ?? 'Not specified', style: TextStyle(color: colors.textColor))),
+                      Text('${l10n.address}: ', style: TextStyle(fontWeight: FontWeight.w600, color: colors.textColor)),
+                      Expanded(child: Text(projectData['projectAddress']?.toString() ?? l10n.notSpecified, style: TextStyle(color: colors.textColor))),
                     ],
                   ),
                 ),
@@ -697,7 +714,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
                       children: [
                         Row(
                           children: [
-                            Text('Client name: ', style: TextStyle(fontWeight: FontWeight.w600, color: colors.textColor)),
+                            Text('${l10n.clientName}: ', style: TextStyle(fontWeight: FontWeight.w600, color: colors.textColor)),
                             Text(projectData['clientName'] as String, style: TextStyle(color: colors.textColor)),
                           ],
                         ),
@@ -705,8 +722,8 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
                           padding: EdgeInsets.only(top: 4),
                           child: Row(
                             children: [
-                              Text('Address: ', style: TextStyle(fontWeight: FontWeight.w600, color: colors.textColor)),
-                              Expanded(child: Text(projectData['clientAddress']?.toString() ?? 'Not specified', style: TextStyle(color: colors.textColor))),
+                              Text('${l10n.address}: ', style: TextStyle(fontWeight: FontWeight.w600, color: colors.textColor)),
+                              Expanded(child: Text(projectData['clientAddress']?.toString() ?? l10n.notSpecified, style: TextStyle(color: colors.textColor))),
                             ],
                           ),
                         ),
@@ -714,8 +731,8 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
                           padding: EdgeInsets.only(top: 4),
                           child: Row(
                             children: [
-                              Text('Contact: ', style: TextStyle(fontWeight: FontWeight.w600, color: colors.textColor)),
-                              Text(projectData['clientContact']?.toString() ?? 'Not specified', style: TextStyle(color: colors.textColor)),
+                              Text('${l10n.contactPerson}: ', style: TextStyle(fontWeight: FontWeight.w600, color: colors.textColor)),
+                              Text(projectData['clientContact']?.toString() ?? l10n.notSpecified, style: TextStyle(color: colors.textColor)),
                             ],
                           ),
                         ),
@@ -723,8 +740,8 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
                           padding: EdgeInsets.only(top: 4),
                           child: Row(
                             children: [
-                              Text('Email: ', style: TextStyle(fontWeight: FontWeight.w600, color: colors.textColor)),
-                              Text(projectData['clientEmail']?.toString() ?? 'Not specified', style: TextStyle(color: colors.textColor)),
+                              Text('${l10n.email}: ', style: TextStyle(fontWeight: FontWeight.w600, color: colors.textColor)),
+                              Text(projectData['clientEmail']?.toString() ?? l10n.notSpecified, style: TextStyle(color: colors.textColor)),
                             ],
                           ),
                         ),
@@ -732,8 +749,8 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
                           padding: EdgeInsets.only(top: 4),
                           child: Row(
                             children: [
-                              Text('Phone: ', style: TextStyle(fontWeight: FontWeight.w600, color: colors.textColor)),
-                              Text(projectData['clientPhone']?.toString() ?? 'Not specified', style: TextStyle(color: colors.textColor)),
+                              Text('${l10n.phone}: ', style: TextStyle(fontWeight: FontWeight.w600, color: colors.textColor)),
+                              Text(projectData['clientPhone']?.toString() ?? l10n.notSpecified, style: TextStyle(color: colors.textColor)),
                             ],
                           ),
                         ),
@@ -775,7 +792,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
           else
             Center(
               child: Text(
-                'No sessions found for this project in the selected period',
+                l10n.noSessionsFoundForThisProjectInTheSelectedPeriod,
                 style: TextStyle(color: colors.textColor.withValues(alpha: 0.7)),
               ),
             ),
@@ -785,6 +802,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
   }
 
   Widget _buildClientTabContent(Map<String, dynamic> clientData, List<Map<String, dynamic>> projects, AppColors colors) {
+    final l10n = AppLocalizations.of(context)!;
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -810,17 +828,17 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
                 ),
                 const SizedBox(height: 12),
                 if (clientData['clientAddress']?.toString().isNotEmpty == true)
-                  _buildClientInfoRow('Address', clientData['clientAddress'] as String, colors),
+                  _buildClientInfoRow(l10n.address, clientData['clientAddress'] as String, colors),
                 if (clientData['clientContact']?.toString().isNotEmpty == true)
-                  _buildClientInfoRow('Contact Person', clientData['clientContact'] as String, colors),
+                  _buildClientInfoRow(l10n.contactPerson, clientData['clientContact'] as String, colors),
                 if (clientData['clientEmail']?.toString().isNotEmpty == true)
-                  _buildClientInfoRow('Email', clientData['clientEmail'] as String, colors),
+                  _buildClientInfoRow(l10n.email, clientData['clientEmail'] as String, colors),
                 if (clientData['clientPhone']?.toString().isNotEmpty == true)
-                  _buildClientInfoRow('Phone', clientData['clientPhone'] as String, colors),
+                  _buildClientInfoRow(l10n.phone, clientData['clientPhone'] as String, colors),
                 if (clientData['clientCity']?.toString().isNotEmpty == true)
-                  _buildClientInfoRow('City', clientData['clientCity'] as String, colors),
+                  _buildClientInfoRow(l10n.city, clientData['clientCity'] as String, colors),
                 if (clientData['clientCountry']?.toString().isNotEmpty == true)
-                  _buildClientInfoRow('Country', clientData['clientCountry'] as String, colors),
+                  _buildClientInfoRow(l10n.country, clientData['clientCountry'] as String, colors),
               ],
             ),
           ),
@@ -838,7 +856,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Summary',
+                  l10n.summary,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -848,11 +866,11 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    _buildSummaryItem('Total Projects', '${clientData['totalProjects']}', colors),
+                    _buildSummaryItem(l10n.totalProjects, '${clientData['totalProjects']}', colors),
                     const SizedBox(width: 24),
-                    _buildSummaryItem('Total Time', clientData['totalTime'] as String, colors),
+                    _buildSummaryItem(l10n.totalTime, clientData['totalTime'] as String, colors),
                     const SizedBox(width: 24),
-                    _buildSummaryItem('Total Expenses', clientData['totalExpenses'] > 0 ? '${clientData['totalExpenses']?.toStringAsFixed(2)}' : '0.00', colors),
+                    _buildSummaryItem(l10n.totalExpenses, clientData['totalExpenses'] > 0 ? '${clientData['totalExpenses']?.toStringAsFixed(2)}' : '0.00', colors),
                   ],
                 ),
               ],
@@ -866,7 +884,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
           else
             Center(
               child: Text(
-                'No projects found for this client in the selected period',
+                l10n.noProjectsFoundForThisClientInTheSelectedPeriod,
                 style: TextStyle(color: colors.textColor.withValues(alpha: 0.7)),
               ),
             ),
@@ -914,21 +932,22 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
   }
 
   List<Widget> _buildDynamicSummaryItems(Map<String, dynamic> projectData, AppColors colors) {
+    final l10n = AppLocalizations.of(context)!;
     final selectedFields = (widget.reportConfig['fields'] as List<dynamic>?)?.cast<String>() ?? [];
     final List<Widget> items = [];
     
     if (selectedFields.contains('totalSessions')) {
-      items.add(_buildSummaryItem('Sessions', '${projectData['totalSessions']}', colors));
+      items.add(_buildSummaryItem(l10n.sessions, '${projectData['totalSessions']}', colors));
       if (items.length > 1) items.add(const SizedBox(width: 24));
     }
     
     if (selectedFields.contains('totalTime')) {
-      items.add(_buildSummaryItem('Total Time', projectData['totalTime'] as String, colors));
+      items.add(_buildSummaryItem(l10n.totalTime, projectData['totalTime'] as String, colors));
       if (items.length > 1) items.add(const SizedBox(width: 24));
     }
     
     if (selectedFields.contains('totalExpenses')) {
-      items.add(_buildSummaryItem('Expenses', projectData['totalExpenses'] > 0 ? '${projectData['totalExpenses']?.toStringAsFixed(2)}' : '0.00', colors));
+      items.add(_buildSummaryItem(l10n.expenses, projectData['totalExpenses'] > 0 ? '${projectData['totalExpenses']?.toStringAsFixed(2)}' : '0.00', colors));
       if (items.length > 1) items.add(const SizedBox(width: 24));
     }
     
@@ -941,6 +960,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
   }
 
   String _getDateRangeText() {
+    final l10n = AppLocalizations.of(context)!;
     final dateRange = widget.reportConfig['dateRange'] as Map<String, dynamic>?;
     if (dateRange == null) return '';
     
@@ -948,7 +968,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
     final endDate = (dateRange['endDate'] as Timestamp?)?.toDate();
     
     if (startDate != null && endDate != null) {
-      return 'Report range: ${DateFormat('dd/MM/yyyy').format(startDate)} to ${DateFormat('dd/MM/yyyy').format(endDate)}';
+      return '${l10n.reportRangeLabel} ${DateFormat('dd/MM/yyyy').format(startDate)} ${l10n.to} ${DateFormat('dd/MM/yyyy').format(endDate)}';
     }
     return '';
   }
@@ -979,6 +999,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
   }
 
   Widget _buildClientProjectsTable(List<Map<String, dynamic>> projects, AppColors colors) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -1001,11 +1022,11 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
             ),
             child: Row(
               children: [
-                Expanded(flex: 3, child: Text('Project Name', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))),
-                Expanded(flex: 2, child: Text('Reference', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))),
-                Expanded(flex: 3, child: Text('Address', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))),
-                Expanded(flex: 2, child: Text('Total Time', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))),
-                Expanded(flex: 2, child: Text('Total Expenses', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))),
+                Expanded(flex: 3, child: Text(l10n.projectName, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))),
+                Expanded(flex: 2, child: Text(l10n.reference, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))),
+                Expanded(flex: 3, child: Text(l10n.address, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))),
+                Expanded(flex: 2, child: Text(l10n.totalTime, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))),
+                Expanded(flex: 2, child: Text(l10n.totalExpenses, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))),
               ],
             ),
           ),
@@ -1046,36 +1067,37 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
   }
 
   Widget _buildDynamicHeaders(AppColors colors) {
+    final l10n = AppLocalizations.of(context)!;
     final selectedFields = (widget.reportConfig['fields'] as List<dynamic>?)?.cast<String>() ?? [];
     final orientation = widget.reportConfig['orientation'] as String? ?? 'time';
     
     final List<Widget> headerWidgets = [];
     
     if (selectedFields.contains('start') && selectedFields.contains('end')) {
-      headerWidgets.add(Expanded(flex: 2, child: Text('Start - End', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))));
+      headerWidgets.add(Expanded(flex: 2, child: Text(l10n.startEnd, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))));
     } else if (selectedFields.contains('start')) {
-      headerWidgets.add(Expanded(flex: 1, child: Text('Start', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))));
+      headerWidgets.add(Expanded(flex: 1, child: Text(l10n.start, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))));
     } else if (selectedFields.contains('end')) {
-      headerWidgets.add(Expanded(flex: 1, child: Text('End', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))));
+      headerWidgets.add(Expanded(flex: 1, child: Text(l10n.end, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))));
     }
     
     if (selectedFields.contains('duration')) {
-      headerWidgets.add(Expanded(flex: 1, child: Text('Duration', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))));
+      headerWidgets.add(Expanded(flex: 1, child: Text(l10n.duration, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))));
     }
     
     // Handle different field names for different report types
     if (orientation == 'project' && selectedFields.contains('worker')) {
-      headerWidgets.add(Expanded(flex: 2, child: Text('Worker', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))));
+      headerWidgets.add(Expanded(flex: 2, child: Text(l10n.worker, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))));
     } else if (orientation == 'worker' && selectedFields.contains('project')) {
-      headerWidgets.add(Expanded(flex: 2, child: Text('Project', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))));
+      headerWidgets.add(Expanded(flex: 2, child: Text(l10n.project, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))));
     }
     
     if (selectedFields.contains('expenses')) {
-      headerWidgets.add(Expanded(flex: 1, child: Text('Expenses', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))));
+      headerWidgets.add(Expanded(flex: 1, child: Text(l10n.expenses, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))));
     }
     
     if (selectedFields.contains('note')) {
-      headerWidgets.add(Expanded(flex: 2, child: Text('Note', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))));
+      headerWidgets.add(Expanded(flex: 2, child: Text(l10n.note, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))));
     }
     
     return Row(children: headerWidgets);
@@ -1238,6 +1260,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
 
   Widget _buildGroupedSessionsView(
       Map<String, Map<String, Map<String, Map<String, List<Map<String, dynamic>>>>>> groupedSessions, AppColors colors) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: groupedSessions.values.first.entries.map((monthEntry) {
@@ -1338,7 +1361,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
                                       Row(
                                         children: [
                                           Text(
-                                            'Overtime: ',
+                                            l10n.overtimeLabel,
                                             style: TextStyle(
                                               fontSize: 14,
                                               fontWeight: FontWeight.w500,
@@ -1431,7 +1454,8 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
     if (sessions.isEmpty) return const SizedBox();
     
     // Headers that match the actual data structure
-    final headers = ['Date', 'Start - End', 'Duration', 'Project', 'Expenses', 'Note'];
+    final l10n = AppLocalizations.of(context)!;
+    final headers = [l10n.date, l10n.startEnd, l10n.duration, l10n.project, l10n.expenses, l10n.note];
     
     return DataTable(
       columnSpacing: 20,
@@ -1485,7 +1509,8 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
   Widget _buildProjectSessionsTable(List<Map<String, dynamic>> sessions, AppColors colors) {
     if (sessions.isEmpty) return const SizedBox();
     
-    final headers = ['Date', 'Worker', 'Start', 'End', 'Duration', 'Note', 'Expenses'];
+    final l10n = AppLocalizations.of(context)!;
+    final headers = [l10n.date, l10n.worker, l10n.start, l10n.end, l10n.duration, l10n.note, l10n.expenses];
     
     return DataTable(
       columnSpacing: 20,
