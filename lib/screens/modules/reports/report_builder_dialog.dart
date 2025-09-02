@@ -33,7 +33,7 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
   // Available report types
   final Map<String, String> _reportTypes = {
     'project': 'Project', 
-    'user': 'User',
+    'worker': 'Worker',
     'client': 'Client',
   };
 
@@ -60,8 +60,8 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
        {'key': 'expenses', 'label': 'Expenses'},
        {'key': 'note', 'label': 'Note'},
      ],
-         'user': [
-       {'key': 'user', 'label': 'User Name'},
+         'worker': [
+       {'key': 'worker', 'label': 'Worker Name'},
        {'key': 'totalHours', 'label': 'Total Hours'},
        {'key': 'totalExpenses', 'label': 'Total Expenses'},
        {'key': 'totalOvertime', 'label': 'Total Overtime'},
@@ -78,9 +78,6 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
       {'key': 'totalHours', 'label': 'Total Hours'},
       {'key': 'totalExpenses', 'label': 'Total Expenses'},
       {'key': 'projectCount', 'label': 'Total Projects'},
-      {'key': 'revenue', 'label': 'Total Revenue'},
-      {'key': 'profitMargin', 'label': 'Profit Margin'},
-      {'key': 'lastActivity', 'label': 'Last Activity'},
     ],
     
   };
@@ -150,7 +147,7 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
       final fields = _availableFields[orientation] ?? [];
       final defaultFields = {
         'project': ['totalSessions', 'totalTime', 'totalExpenses', 'date', 'start', 'end', 'duration', 'worker', 'expenses', 'note'],
-        'user': ['user', 'totalHours', 'totalExpenses', 'totalOvertime', 'timeOff', 'project', 'start', 'end', 'duration', 'expenses', 'note'],
+        'worker': ['worker', 'totalHours', 'totalExpenses', 'totalOvertime', 'timeOff', 'project', 'start', 'end', 'duration', 'expenses', 'note'],
         'client': ['client', 'totalHours', 'projectCount'],
       };
       
@@ -388,9 +385,9 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Users Field
+                    // Workers Field
                     Text(
-                      'Users',
+                      'Workers',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -414,11 +411,11 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
                         child: DropdownButton<String?>(
                           value: _selectedUserId,
                           isExpanded: true,
-                          hint: const Text('Select User (All if empty)'),
+                          hint: const Text('Select Worker (All if empty)'),
                           items: [
                             const DropdownMenuItem<String?>(
                               value: null,
-                              child: Text('All Users'),
+                              child: Text('All Workers'),
                             ),
                             ..._users.map((user) => DropdownMenuItem<String?>(
                                   value: user['id'],

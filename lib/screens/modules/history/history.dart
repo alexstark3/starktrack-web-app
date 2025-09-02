@@ -894,7 +894,7 @@ class _HistoryLogsState extends State<HistoryLogs> {
                                                   if (entry.isRejected || (!entry.isApproved && !entry.isRejected && !entry.isApprovedAfterEdit && !entry.isEdited))
                                                     IconButton(
                                                       onPressed: () => _showEditDialog(context, entry),
-                                                      icon: const Icon(Icons.edit, color: Colors.blue, size: 20),
+                                                      icon: Icon(Icons.edit, color: Theme.of(context).extension<AppColors>()!.primaryBlue, size: 20),
                                                       padding: EdgeInsets.zero,
                                                       constraints: const BoxConstraints(),
                                                     ),

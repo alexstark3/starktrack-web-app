@@ -72,7 +72,7 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get reports => 'Berichte';
   @override
-  String get createReport => 'Bericht erstellen';
+  String get createReport => 'Bericht';
   @override
   String get reportName => 'Berichtsname';
   @override
@@ -1101,4 +1101,68 @@ class AppLocalizationsDe extends AppLocalizations {
   String get manager => 'Manager';
   @override
   String get changesSaved => 'Änderungen erfolgreich gespeichert!';
+
+  // Missing Report System Translations
+  @override
+  String get starkTrackDetailedSessionReport => 'Stark Track - Detaillierter Sitzungsbericht';
+  
+  @override
+  String get reportNameLabel => 'Berichtsname:';
+  
+  @override
+  String get reportRange => 'Berichtsbereich:';
+  
+  @override
+  String get reportType => 'Berichtstyp:';
+  
+  @override
+  String get generated => 'Erstellt:';
+  
+  @override
+  String get totalSessions => 'Gesamte Sitzungen:';
+  
+  @override
+  String get clientLabel => 'Kunde:';
+  
+  @override
+  String get userLabel => 'Benutzer:';
+  
+  @override
+  String get totalProjects => 'Gesamte Projekte:';
+  
+  @override
+  String get overtimeBalance => 'Überstunden-Guthaben:';
+  
+  @override
+  String get vacationBalance => 'Urlaubs-Guthaben:';
+  
+  @override
+  String get ref => 'Ref:';
+  
+  @override
+  String get totalHours => 'Gesamtstunden';
+  
+  @override
+  String get totalOvertime => 'Gesamte Überstunden';
+  
+  @override
+  String get pleaseSelectAtLeastOneField => 'Bitte wählen Sie mindestens ein Feld aus';
+  
+  @override
+  String get excelFileExportedSuccessfully => 'Excel-Datei erfolgreich exportiert!';
+  
+  @override
+  String get excelFileWithMultipleUserSheetsExportedSuccessfully => 'Excel-Datei mit mehreren Benutzerblättern erfolgreich exportiert!';
+  
+  @override
+  String get excelFileWithMultipleProjectSheetsExportedSuccessfully => 'Excel-Datei mit mehreren Projektblättern erfolgreich exportiert!';
+  
+  @override
+  String get excelFileWithMultipleClientSheetsExportedSuccessfully => 'Excel-Datei mit mehreren Kundenblättern erfolgreich exportiert!';
+  
+  @override
+  String get exportFailed => 'Export fehlgeschlagen:';
+  
+  @override
+  String get failedToGenerateReport => 'Bericht konnte nicht erstellt werden:';
 }

@@ -1992,6 +1992,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reset to this week'**
   String get resetToThisWeek;
+
+  /// No description provided for @starkTrackDetailedSessionReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Stark Track - Detailed Session Report'**
+  String get starkTrackDetailedSessionReport;
+
+  /// No description provided for @reportNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Report Name:'**
+  String get reportNameLabel;
+
+  /// No description provided for @reportRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Report range:'**
+  String get reportRange;
+
+  /// No description provided for @reportType.
+  ///
+  /// In en, this message translates to:
+  /// **'Report Type:'**
+  String get reportType;
+
+  /// No description provided for @generated.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated:'**
+  String get generated;
+
+  /// No description provided for @totalSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Sessions:'**
+  String get totalSessions;
+
+  /// No description provided for @clientLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Client:'**
+  String get clientLabel;
+
+  /// No description provided for @userLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'User:'**
+  String get userLabel;
+
+  /// No description provided for @totalProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Projects:'**
+  String get totalProjects;
+
+  /// No description provided for @overtimeBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Overtime Balance:'**
+  String get overtimeBalance;
+
+  /// No description provided for @vacationBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Vacation Balance:'**
+  String get vacationBalance;
+
+  /// No description provided for @ref.
+  ///
+  /// In en, this message translates to:
+  /// **'Ref:'**
+  String get ref;
+
+  /// No description provided for @totalHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Hours'**
+  String get totalHours;
+
+  /// No description provided for @totalOvertime.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Overtime'**
+  String get totalOvertime;
+
+  /// No description provided for @pleaseSelectAtLeastOneField.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select at least one field'**
+  String get pleaseSelectAtLeastOneField;
+
+  /// No description provided for @excelFileExportedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Excel file exported successfully!'**
+  String get excelFileExportedSuccessfully;
+
+  /// No description provided for @excelFileWithMultipleUserSheetsExportedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Excel file with multiple user sheets exported successfully!'**
+  String get excelFileWithMultipleUserSheetsExportedSuccessfully;
+
+  /// No description provided for @excelFileWithMultipleProjectSheetsExportedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Excel file with multiple project sheets exported successfully!'**
+  String get excelFileWithMultipleProjectSheetsExportedSuccessfully;
+
+  /// No description provided for @excelFileWithMultipleClientSheetsExportedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Excel file with multiple client sheets exported successfully!'**
+  String get excelFileWithMultipleClientSheetsExportedSuccessfully;
+
+  /// No description provided for @exportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed:'**
+  String get exportFailed;
+
+  /// No description provided for @failedToGenerateReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to generate report:'**
+  String get failedToGenerateReport;
 }
 
 class _AppLocalizationsDelegate

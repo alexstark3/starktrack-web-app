@@ -5,7 +5,7 @@ final ThemeData darkTheme = ThemeData(
   brightness: Brightness.dark,
   colorScheme: ColorScheme.dark(
     surface: const Color.fromARGB(255, 25, 25, 25),
-    primary: Color(0xFF65AAEA),
+    primary: Color(0xFF29ABE2),
     secondary: Color(0xFF67C187),
     
     error: Color(0xFFD76C6C),

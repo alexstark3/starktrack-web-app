@@ -81,14 +81,10 @@ class _LoginFormState extends State<LoginForm> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        'Stark Track',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: colors?.primaryBlue ??
-                              Theme.of(context).colorScheme.primary,
-                        ),
+                      Image.asset(
+                        'assets/images/logo_full.png',
+                        height: 50,
+                        fit: BoxFit.contain,
                       ),
                       const SizedBox(height: 32),
                       _buildFields(),

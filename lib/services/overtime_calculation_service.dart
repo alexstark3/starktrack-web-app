@@ -186,17 +186,6 @@ class OvertimeCalculationService {
       int totalWorkingDays = 0;
       List<Map<String, dynamic>> calculationDetails = [];
 
-      // Debug logging
-      print('=== OVERTIME CALCULATION DEBUG ===');
-      print('Company: $companyId, User: $userId');
-      print('Date range: ${DateFormat('yyyy-MM-dd').format(effectiveFromDate)} to ${DateFormat('yyyy-MM-dd').format(actualToDate)}');
-      print('Weekly hours: $weeklyHours');
-      print('Daily hours: $dailyHours');
-      print('Working days: $workingDaysList');
-      print('Overtime days: $overtimeDaysList');
-      print('Total days to evaluate: ${days.length}');
-      print('Days: ${days.toList()}');
-
       for (final day in days) {
         final date = DateTime.parse(day);
         final minutesWorked = dailyMinutes[day] ?? 0;
@@ -213,16 +202,6 @@ class OvertimeCalculationService {
 
         // Check if it's an overtime day based on user configuration
         final isOvertimeDay = overtimeDaysList.contains(date.weekday);
-
-        // Debug logging for each day
-        print('--- Day: $day (${DateFormat('EEEE').format(date)}) ---');
-        print('  Weekday: ${date.weekday}');
-        print('  Is working day: ${workingDaysList.contains(date.weekday)}');
-        print('  Is overtime day: $isOvertimeDay');
-        print('  Is holiday: $isHoliday');
-        print('  Minutes worked: $minutesWorked');
-        print('  Paid minutes: $paidMinutes');
-        print('  Total minutes: $totalMinutesForDay');
 
         Map<String, dynamic> dayDetail = {
           'date': day,
@@ -246,24 +225,24 @@ class OvertimeCalculationService {
           dayDetail['overtimeHours'] = (holidayOvertime / 60).toStringAsFixed(2);
           dayDetail['reason'] = 'Holiday - company paid time + work - expected hours';
           totalOvertimeMinutes += holidayOvertime.toInt();
-          print('  → Holiday: +${paidMinutes}min (company) + ${minutesWorked}min (work) - ${expectedMinutes}min (expected) = ${holidayOvertime}min overtime');
+
         } else if (!workingDaysList.contains(date.weekday) && minutesWorked > 0) {
           // Non-working day (weekend) with work - DOUBLE TIME (check this BEFORE overtime day)
           dayDetail['overtimeMinutes'] = minutesWorked * 2; // Double time
           dayDetail['overtimeHours'] = ((minutesWorked * 2) / 60).toStringAsFixed(2);
           dayDetail['reason'] = 'Non-working day (weekend) - double time overtime';
           totalOvertimeMinutes += (minutesWorked * 2); // Double time
-          print('  → Non-working day (weekend): +${minutesWorked * 2}min overtime (${minutesWorked}min × 2)');
+
         } else if (isOvertimeDay) {
           dayDetail['overtimeMinutes'] = minutesWorked;
           dayDetail['overtimeHours'] = (minutesWorked / 60).toStringAsFixed(2);
           dayDetail['reason'] = 'Overtime day - all time counts as overtime';
           totalOvertimeMinutes += minutesWorked;
-          print('  → Overtime day: +${minutesWorked}min overtime');
+
         } else if (!workingDaysList.contains(date.weekday)) {
           // Non-working day (weekend) with no work - no overtime
           dayDetail['reason'] = 'Non-working day (weekend) - no work';
-          print('  → Non-working day (weekend): no work, no overtime');
+
         } else {
           // Regular working day
           totalWorkingDays++;
@@ -273,11 +252,6 @@ class OvertimeCalculationService {
           dayDetail['expectedMinutes'] = expectedMinutes;
           dayDetail['expectedHours'] = (expectedMinutes / 60).toStringAsFixed(2);
 
-          print('  → Regular working day');
-          print('    Expected: ${expectedMinutes}min (${(expectedMinutes/60).toStringAsFixed(2)}h)');
-          print('    Actual: ${totalMinutesForDay}min (${(totalMinutesForDay/60).toStringAsFixed(2)}h)');
-          print('    Day overtime: ${dayOvertime}min (${(dayOvertime/60).toStringAsFixed(2)}h)');
-
           if (dayOvertime > 0) {
             // Overtime - worked more than expected (including paid time)
             dayDetail['overtimeMinutes'] = dayOvertime.toInt();
@@ -286,7 +260,7 @@ class OvertimeCalculationService {
                 ? 'Regular day with paid time off - overtime calculated'
                 : 'Regular day - overtime calculated';
             totalOvertimeMinutes += dayOvertime.toInt();
-            print('    → Added to total: +${dayOvertime}min');
+
           } else if (dayOvertime < 0) {
             // Undertime - worked less than expected
             dayDetail['overtimeMinutes'] = dayOvertime.toInt();
@@ -295,25 +269,18 @@ class OvertimeCalculationService {
                 ? 'Regular day with paid time off - undertime calculated'
                 : 'Regular day - undertime calculated';
             totalOvertimeMinutes += dayOvertime.toInt(); // This will subtract from total
-            print('    → Added to total: ${dayOvertime}min (undertime)');
+
           } else {
             // Exactly expected hours
             dayDetail['reason'] = hasPaidTime
                 ? 'Regular day with paid time off - no overtime/undertime'
                 : 'Regular day - no overtime/undertime';
-            print('    → No overtime/undertime');
+
           }
         }
 
         calculationDetails.add(dayDetail);
       }
-
-      print('=== FINAL RESULTS ===');
-      print('Total working days: $totalWorkingDays');
-      print('Total overtime minutes: $totalOvertimeMinutes');
-      print('Total overtime hours: ${(totalOvertimeMinutes / 60).toStringAsFixed(2)}');
-      print('========================');
-
 
       // Cap overtime at reasonable amount (max 20 hours per week)
       final maxOvertimePerWeek = 20 * 60; // 20 hours in minutes

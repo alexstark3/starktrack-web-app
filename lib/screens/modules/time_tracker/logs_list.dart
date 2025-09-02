@@ -897,6 +897,7 @@ class _LogEditRowState extends State<_LogEditRow>
     if ((_dialogOpen || _expenseDialogOpen) && !widget.isEditing) {
       return const SizedBox.shrink();
     }
+    final appColors = Theme.of(context).extension<AppColors>()!;
     final style = TextStyle(color: widget.textColor, fontSize: 16);
 
     if (!widget.isEditing) {
@@ -1001,14 +1002,14 @@ class _LogEditRowState extends State<_LogEditRow>
                                     () {}, 'Pending')
                                 : _iconBtn(
                                     Icons.edit,
-                                    Colors.blue[400]!,
+                                    appColors.primaryBlue,
                                     () => widget.setEditingState(
                                         widget.logId, true)),
                 const SizedBox(width: 8),
                 widget.isRejected
                     ? _iconBtn(
                         Icons.edit,
-                        Colors.blue[400]!,
+                        appColors.primaryBlue,
                         () => widget.setEditingState(widget.logId, true),
                         'Edit')
                     : widget.isApproved

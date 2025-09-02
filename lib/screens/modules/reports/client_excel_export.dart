@@ -24,8 +24,7 @@ class ClientExcelExportService {
       first = false;
       sheet.name = _cleanSheetName(clientName);
       
-      // Get selected fields for dynamic content
-      final selectedFields = (reportConfig['fields'] as List<dynamic>?)?.cast<String>() ?? [];
+
 
       // Client Information - Vertical Layout
       sheet.getRangeByIndex(1, 1).setText('Client:');
@@ -138,13 +137,7 @@ class ClientExcelExportService {
       // Empty row after client info
       currentRow++;
       
-      // Client Summary
-      sheet.getRangeByIndex(currentRow, 1).setText('Client Summary:');
-      sheet.getRangeByIndex(currentRow, 1).cellStyle.fontSize = 12;
-      sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
-      sheet.getRangeByIndex(currentRow, 1).cellStyle.backColor = '#4472C4';
-      sheet.getRangeByIndex(currentRow, 1).cellStyle.fontColor = '#FFFFFF';
-      currentRow++;
+
       
       // Total Projects
       sheet.getRangeByIndex(currentRow, 1).setText('Total Projects:');
@@ -193,31 +186,12 @@ class ClientExcelExportService {
       // Empty row after summary
       currentRow++;
       
-      // Projects table headers - dynamic based on selected fields
-      final headerRow = currentRow;
-      final columns = <String>[];
-      final headers = <String>[];
+
       
-      if (selectedFields.contains('projectName') || selectedFields.isEmpty) {
-        columns.add('projectName');
-        headers.add('Project Name');
-      }
-      if (selectedFields.contains('projectRef') || selectedFields.isEmpty) {
-        columns.add('projectRef');
-        headers.add('Reference');
-      }
-      if (selectedFields.contains('projectAddress') || selectedFields.isEmpty) {
-        columns.add('projectAddress');
-        headers.add('Address');
-      }
-      if (selectedFields.contains('totalTime') || selectedFields.isEmpty) {
-        columns.add('totalTime');
-        headers.add('Total Time');
-      }
-      if (selectedFields.contains('totalExpenses') || selectedFields.isEmpty) {
-        columns.add('totalExpenses');
-        headers.add('Total Expenses');
-      }
+      // Projects table headers - always show all columns
+      final headerRow = currentRow;
+      final columns = ['projectName', 'projectRef', 'projectAddress', 'totalTime', 'totalExpenses'];
+      final headers = ['Project Name', 'Reference', 'Address', 'Total Time', 'Total Expenses'];
       
       // Add headers dynamically
       for (int col = 0; col < headers.length; col++) {
@@ -225,8 +199,8 @@ class ClientExcelExportService {
         final cell = sheet.getRangeByIndex(headerRow, col + 1);
         cell.cellStyle.fontSize = 11;
         cell.cellStyle.bold = true;
-        cell.cellStyle.backColor = '#4472C4';
-        cell.cellStyle.fontColor = '#FFFFFF';
+        cell.cellStyle.backColor = '#D9E2F3';
+        cell.cellStyle.fontColor = '#000000';
         cell.cellStyle.borders.all.lineStyle = xlsio.LineStyle.thin;
         cell.cellStyle.borders.all.color = '#000000';
       }
@@ -269,8 +243,9 @@ class ClientExcelExportService {
         currentRow++;
       }
       
-      // Auto-fit columns
-      for (int col = 1; col <= columns.length; col++) {
+      // Auto-fit columns (client info + project table)
+      final maxColumns = columns.length > 2 ? columns.length : 2; // At least 2 columns for client info
+      for (int col = 1; col <= maxColumns; col++) {
         sheet.autoFitColumn(col);
       }
     }

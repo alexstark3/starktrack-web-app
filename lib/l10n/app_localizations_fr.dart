@@ -88,7 +88,7 @@ class AppLocalizationsFr extends AppLocalizationsEn {
   @override
   String get reports => 'Rapports';
   @override
-  String get createReport => 'Créer un rapport';
+  String get createReport => 'Rapport';
   @override
   String get reportName => 'Nom du rapport';
   @override
@@ -863,4 +863,68 @@ class AppLocalizationsFr extends AppLocalizationsEn {
 
   @override
   String get deny => 'Refuser';
+
+  // Missing Report System Translations
+  @override
+  String get starkTrackDetailedSessionReport => 'Stark Track - Rapport de Session Détaillé';
+  
+  @override
+  String get reportNameLabel => 'Nom du Rapport:';
+  
+  @override
+  String get reportRange => 'Plage du Rapport:';
+  
+  @override
+  String get reportType => 'Type de Rapport:';
+  
+  @override
+  String get generated => 'Généré:';
+  
+  @override
+  String get totalSessions => 'Total des Sessions:';
+  
+  @override
+  String get clientLabel => 'Client:';
+  
+  @override
+  String get userLabel => 'Utilisateur:';
+  
+  @override
+  String get totalProjects => 'Total des Projets:';
+  
+  @override
+  String get overtimeBalance => 'Solde d\'Heures Supplémentaires:';
+  
+  @override
+  String get vacationBalance => 'Solde de Vacances:';
+  
+  @override
+  String get ref => 'Ref:';
+  
+  @override
+  String get totalHours => 'Total des Heures';
+  
+  @override
+  String get totalOvertime => 'Total des Heures Supplémentaires';
+  
+  @override
+  String get pleaseSelectAtLeastOneField => 'Veuillez sélectionner au moins un champ';
+  
+  @override
+  String get excelFileExportedSuccessfully => 'Fichier Excel exporté avec succès!';
+  
+  @override
+  String get excelFileWithMultipleUserSheetsExportedSuccessfully => 'Fichier Excel avec plusieurs feuilles utilisateur exporté avec succès!';
+  
+  @override
+  String get excelFileWithMultipleProjectSheetsExportedSuccessfully => 'Fichier Excel avec plusieurs feuilles projet exporté avec succès!';
+  
+  @override
+  String get excelFileWithMultipleClientSheetsExportedSuccessfully => 'Fichier Excel avec plusieurs feuilles client exporté avec succès!';
+  
+  @override
+  String get exportFailed => 'Échec de l\'export:';
+  
+  @override
+  String get failedToGenerateReport => 'Échec de la génération du rapport:';
 }

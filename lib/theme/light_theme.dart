@@ -5,7 +5,7 @@ final ThemeData lightTheme = ThemeData(
   brightness: Brightness.light,
   colorScheme: const ColorScheme.light(
     surface: Colors.white,
-    primary: Color(0xFF65AAEA),
+    primary: Color(0xFF29ABE2),
     secondary: Color(0xFF67C187),
     error: Color(0xFFD76C6C),
   ),

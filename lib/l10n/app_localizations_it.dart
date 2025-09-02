@@ -85,7 +85,7 @@ class AppLocalizationsIt extends AppLocalizationsEn {
   @override
   String get reports => 'Report';
   @override
-  String get createReport => 'Crea report';
+  String get createReport => 'Report';
   @override
   String get reportName => 'Nome report';
   @override
@@ -394,4 +394,68 @@ class AppLocalizationsIt extends AppLocalizationsEn {
 
   @override
   String get failedToUpdateBonus => 'Impossibile aggiornare il valore del bonus';
+
+  // Missing Report System Translations
+  @override
+  String get starkTrackDetailedSessionReport => 'Stark Track - Rapporto Sessione Dettagliato';
+  
+  @override
+  String get reportNameLabel => 'Nome Rapporto:';
+  
+  @override
+  String get reportRange => 'Intervallo Rapporto:';
+  
+  @override
+  String get reportType => 'Tipo Rapporto:';
+  
+  @override
+  String get generated => 'Generato:';
+  
+  @override
+  String get totalSessions => 'Sessioni Totali:';
+  
+  @override
+  String get clientLabel => 'Cliente:';
+  
+  @override
+  String get userLabel => 'Utente:';
+  
+  @override
+  String get totalProjects => 'Progetti Totali:';
+  
+  @override
+  String get overtimeBalance => 'Saldo Ore Straordinarie:';
+  
+  @override
+  String get vacationBalance => 'Saldo Vacanze:';
+  
+  @override
+  String get ref => 'Ref:';
+  
+  @override
+  String get totalHours => 'Ore Totali';
+  
+  @override
+  String get totalOvertime => 'Ore Straordinarie Totali';
+  
+  @override
+  String get pleaseSelectAtLeastOneField => 'Seleziona almeno un campo';
+  
+  @override
+  String get excelFileExportedSuccessfully => 'File Excel esportato con successo!';
+  
+  @override
+  String get excelFileWithMultipleUserSheetsExportedSuccessfully => 'File Excel con più fogli utente esportato con successo!';
+  
+  @override
+  String get excelFileWithMultipleProjectSheetsExportedSuccessfully => 'File Excel con più fogli progetto esportato con successo!';
+  
+  @override
+  String get excelFileWithMultipleClientSheetsExportedSuccessfully => 'File Excel con più fogli cliente esportato con successo!';
+  
+  @override
+  String get exportFailed => 'Esportazione fallita:';
+  
+  @override
+  String get failedToGenerateReport => 'Generazione rapporto fallita:';
 }

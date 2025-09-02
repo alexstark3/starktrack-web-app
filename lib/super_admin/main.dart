@@ -236,7 +236,7 @@ class SuperAdminAuthGate extends StatelessWidget {
                               await FirebaseAuth.instance.signOut();
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue,
+                              backgroundColor: AppColors.dark.primaryBlue,
                               foregroundColor: Colors.white,
                             ),
                             child: const Text('Sign Out'),
@@ -249,7 +249,7 @@ class SuperAdminAuthGate extends StatelessWidget {
                             },
                             child: const Text(
                               'Go to Main App',
-                              style: TextStyle(color: Colors.blue),
+                              style: TextStyle(color: Color(0xFF29ABE2)),
                             ),
                           ),
                         ],

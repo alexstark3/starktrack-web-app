@@ -696,17 +696,17 @@ class _AddUserDialogState extends State<AddUserDialog> {
                       decoration: BoxDecoration(
                         color: isOverLimit
                             ? Colors.red.withValues(alpha: 0.1)
-                            : Colors.blue.withValues(alpha: 0.1),
+                            : appColors.primaryBlue.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: isOverLimit ? Colors.red : Colors.blue,
+                          color: isOverLimit ? Colors.red : appColors.primaryBlue,
                         ),
                       ),
                       child: Row(
                         children: [
                           Icon(
                             isOverLimit ? Icons.warning : Icons.info,
-                            color: isOverLimit ? Colors.red : Colors.blue,
+                            color: isOverLimit ? Colors.red : appColors.primaryBlue,
                             size: 20,
                           ),
                           const SizedBox(width: 8),
@@ -716,7 +716,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
                                   ? 'User limit reached ($userCount/$userLimit). Cannot add more users.'
                                   : 'User limit: $userCount/$userLimit',
                               style: TextStyle(
-                                color: isOverLimit ? Colors.red : Colors.blue,
+                                color: isOverLimit ? Colors.red : appColors.primaryBlue,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -870,23 +870,23 @@ class _AddUserDialogState extends State<AddUserDialog> {
                           padding: const EdgeInsets.all(8),
                           margin: const EdgeInsets.only(bottom: 16),
                           decoration: BoxDecoration(
-                            color: Colors.blue.withValues(alpha: 0.1),
+                            color: appColors.primaryBlue.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.blue),
+                            border: Border.all(color: appColors.primaryBlue),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
                                 children: [
-                                  Icon(Icons.info, color: Colors.blue, size: 16),
+                                  Icon(Icons.info, color: appColors.primaryBlue, size: 16),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       'As Super Admin, you can assign any module to users. Modules not yet enabled for the company will be automatically enabled.',
                                       style: TextStyle(
                                         fontSize: 12,
-                                        color: Colors.blue,
+                                        color: appColors.primaryBlue,
                                         fontStyle: FontStyle.italic,
                                       ),
                                     ),
@@ -899,7 +899,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
                                   'Currently assigned: ${_getUserCurrentModules().join(', ')}',
                                   style: TextStyle(
                                     fontSize: 11,
-                                    color: Colors.blue.withValues(alpha: 0.8),
+                                    color: appColors.primaryBlue.withValues(alpha: 0.8),
                                     fontStyle: FontStyle.italic,
                                   ),
                                 ),

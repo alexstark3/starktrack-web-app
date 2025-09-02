@@ -226,7 +226,7 @@ class _TimeOffPolicyListDialogState extends State<TimeOffPolicyListDialog> {
                                                         horizontal: 8,
                                                         vertical: 2),
                                                     decoration: BoxDecoration(
-                                                      color: Colors.blue
+                                                      color: appColors.primaryBlue
                                                           .withValues(
                                                               alpha: 0.2),
                                                       borderRadius:
@@ -237,7 +237,7 @@ class _TimeOffPolicyListDialogState extends State<TimeOffPolicyListDialog> {
                                                       '${l10n.repeats}: $repeats',
                                                       style: TextStyle(
                                                         fontSize: 12,
-                                                        color: Colors.blue,
+                                                        color: appColors.primaryBlue,
                                                       ),
                                                     ),
                                                   ),
@@ -536,7 +536,7 @@ class _TimeOffPolicyDialogState extends State<TimeOffPolicyDialog> {
   // Predefined colors with good contrast
   final List<Color> _predefinedColors = [
     Colors.red,
-    Colors.blue,
+    const Color(0xFF29ABE2),
     Colors.green,
     Colors.orange,
     Colors.purple,

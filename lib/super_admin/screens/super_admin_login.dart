@@ -166,13 +166,10 @@ class _SuperAdminLoginScreenState extends State<SuperAdminLoginScreen> {
                       const SizedBox(height: 24),
 
                       // App Title
-                      Text(
-                        'Stark Track',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: colors.primaryBlue,
-                        ),
+                      Image.asset(
+                        'assets/images/logo_full.png',
+                        height: 50,
+                        fit: BoxFit.contain,
                       ),
                       const SizedBox(height: 16),
                       // Title

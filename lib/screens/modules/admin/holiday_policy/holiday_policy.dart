@@ -290,14 +290,14 @@ class _HolidayPolicyListDialogState extends State<HolidayPolicyListDialog> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.blue.withValues(alpha: 0.2),
+                              color: appColors.primaryBlue.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
                               l10n.repeatsAnnually,
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.blue,
+                                color: appColors.primaryBlue,
                               ),
                             ),
                           ),
@@ -524,7 +524,7 @@ class _HolidayPolicyDialogState extends State<HolidayPolicyDialog> {
   // Predefined colors with good contrast
   final List<Color> _predefinedColors = [
     Colors.red,
-    Colors.blue,
+    const Color(0xFF29ABE2),
     Colors.green,
     Colors.orange,
     Colors.purple,

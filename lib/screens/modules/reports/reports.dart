@@ -206,20 +206,73 @@ class _ReportsScreenState extends State<ReportsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
+            // Header with Search Bar and Create Report Button
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-                  l10n.reports,
-              style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: colors.textColor,
+              children: [
+                // Search Bar
+                Expanded(
+                  child: SizedBox(
+                    height: 38,
+                    child: TextField(
+                      textAlignVertical: TextAlignVertical.center,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        constraints: const BoxConstraints.tightFor(height: 38),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                        hintText: 'Search reports...',
+                        hintStyle: TextStyle(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Theme.of(context).colorScheme.onSurface
+                              : colors.textColor,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Theme.of(context).colorScheme.onSurface
+                              : colors.darkGray,
+                        ),
+                        filled: true,
+                        fillColor: Theme.of(context).brightness == Brightness.dark
+                            ? colors.lightGray
+                            : Theme.of(context).colorScheme.surface,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? colors.borderColorDark
+                                : colors.borderColorLight,
+                            width: 1,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? colors.borderColorDark
+                                : colors.borderColorLight,
+                            width: 1,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                            color: colors.primaryBlue,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                      style: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Theme.of(context).colorScheme.onSurface
+                            : colors.textColor,
+                      ),
+                    ),
                   ),
                 ),
+                const SizedBox(width: 12),
+                // Create Report Button
                 SizedBox(
-                  width: 140,
+                  width: 120,
                   height: 38,
                   child: ElevatedButton.icon(
                     onPressed: _showReportBuilder,
@@ -229,6 +282,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                       backgroundColor: colors.primaryBlue,
                       foregroundColor: colors.whiteTextOnBlue,
                       padding: const EdgeInsets.symmetric(horizontal: 10),
+                      minimumSize: const Size(120, 38),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -237,7 +291,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 10),
 
             // Reports List
             if (_isLoading)
@@ -287,6 +341,16 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     return Card(
                       margin: const EdgeInsets.only(bottom: 12),
                       color: colors.backgroundLight,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        side: BorderSide(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? colors.borderColorDark
+                              : colors.borderColorLight,
+                          width: 1,
+                        ),
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.all(10.0),
                         child: Column(
@@ -313,12 +377,23 @@ class _ReportsScreenState extends State<ReportsScreen> {
                               ),
                             ),
                             const SizedBox(height: 4),
-                            Text(
-                              'Fields: ${fields.take(3).join(', ')}${fields.length > 3 ? '...' : ''}',
-                              style: TextStyle(
-                                color: colors.textColor.withValues(alpha: 0.7),
-                                fontSize: 13,
-                              ),
+                            Wrap(
+                              children: [
+                                Text(
+                                  'Fields: ',
+                                  style: TextStyle(
+                                    color: colors.textColor.withValues(alpha: 0.7),
+                                    fontSize: 13,
+                                  ),
+                                ),
+                                ..._getFieldLabels(fields).map((label) => Text(
+                                  '$label, ',
+                                  style: TextStyle(
+                                    color: colors.textColor.withValues(alpha: 0.7),
+                                    fontSize: 13,
+                                  ),
+                                )),
+                              ],
                             ),
                             const SizedBox(height: 4),
                             Text(
@@ -367,5 +442,75 @@ class _ReportsScreenState extends State<ReportsScreen> {
         ),
       ),
     );
+  }
+
+  List<String> _getFieldLabels(List<String> fields) {
+    return fields.map((field) {
+      switch (field) {
+        case 'client':
+          return 'Client';
+        case 'totalHours':
+          return 'Total Hours';
+        case 'totalExpenses':
+          return 'Total Expenses';
+        case 'projectCount':
+          return 'Total Projects';
+        case 'project':
+          return 'Project';
+        case 'worker':
+          return 'Worker';
+        case 'user':
+          return 'Worker';
+        case 'date':
+          return 'Date';
+        case 'start':
+          return 'Start';
+        case 'end':
+          return 'End';
+        case 'duration':
+          return 'Duration';
+        case 'expenses':
+          return 'Expenses';
+        case 'note':
+          return 'Note';
+        case 'userCount':
+          return 'Users Involved';
+        case 'avgHoursPerDay':
+          return 'Avg Hours/Day';
+        case 'dateRange':
+          return 'Date Range';
+        case 'status':
+          return 'Status';
+        case 'projectName':
+          return 'Project Name';
+        case 'projectRef':
+          return 'Reference';
+        case 'projectAddress':
+          return 'Address';
+        case 'totalTime':
+          return 'Total Time';
+        case 'totalOvertime':
+          return 'Total Overtime';
+        case 'timeOff':
+          return 'Time Off';
+        case 'overtime':
+          return 'Overtime';
+        case 'timeoff':
+          return 'Time Off';
+        case 'totalSessions':
+          return 'Total Sessions';
+        case 'sessions':
+          return 'Sessions';
+        case 'sessionCount':
+          return 'Session Count';
+        default:
+          // Handle any remaining raw field names by cleaning them up
+          String cleaned = field
+              .replaceAll(RegExp(r'\$[0-9]+'), '') // Remove $1, $2, etc.
+              .replaceAll(RegExp(r'([A-Z])'), ' \$1') // Add spaces before capitals
+              .trim();
+          return cleaned.isEmpty ? field : cleaned;
+      }
+    }).toList();
   }
 }

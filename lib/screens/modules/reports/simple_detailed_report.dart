@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../../../theme/app_colors.dart';
-import 'user_excel_export.dart';
+import '../../../l10n/app_localizations.dart';
+import 'worker_excel_export.dart';
 import 'project_excel_export.dart';
 import 'client_excel_export.dart';
-import 'user_report.dart';
 import 'project_report.dart';
 import 'client_report.dart';
+import 'worker_report.dart';
 
 class SimpleDetailedReport extends StatefulWidget {
   final String companyId;
@@ -73,7 +74,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
             });
           }
           break;
-        case 'user':
+        case 'worker':
           await _generateUserReport();
           // Initialize tab controller for user reports if multiple users
           if (_userReportData.length > 1) {
@@ -189,27 +190,28 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
 
   void _exportToExcel() {
     final orientation = widget.reportConfig['orientation'] as String? ?? 'time';
+    final l10n = AppLocalizations.of(context)!;
     
     // Exporting report
     
-    // For user reports (single or multiple), create single Excel file with multiple sheets
-    if (orientation == 'user') {
+    // For worker reports (single or multiple), create single Excel file with multiple sheets
+    if (orientation == 'worker') {
       // Exporting user report (single or multiple)
       
       try {
-        UserExcelExportService.exportExcelWithMultipleSheets(_userReportData, widget.reportConfig);
+        UserExcelExportService.exportExcelWithMultipleSheets(_userReportData, widget.reportConfig, translations: _getTranslations(context));
         // Excel export completed successfully
         final sheetCount = _userReportData.length;
         final message = sheetCount > 1 
-            ? 'Excel file with multiple user sheets exported successfully!'
-            : 'Excel file exported successfully!';
+            ? l10n.excelFileWithMultipleUserSheetsExportedSuccessfully
+            : l10n.excelFileExportedSuccessfully;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(message)),
         );
       } catch (e) {
         // Error during Excel export
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export failed: $e')),
+          SnackBar(content: Text('${l10n.exportFailed} $e')),
         );
       }
     } else if (orientation == 'project') {
@@ -220,15 +222,15 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
         // Excel export completed successfully
         final sheetCount = _projectReportData.length;
         final message = sheetCount > 1 
-            ? 'Excel file with multiple project sheets exported successfully!'
-            : 'Excel file exported successfully!';
+            ? l10n.excelFileWithMultipleProjectSheetsExportedSuccessfully
+            : l10n.excelFileExportedSuccessfully;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(message)),
         );
       } catch (e) {
         // Error during Excel export
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export failed: $e')),
+          SnackBar(content: Text('${l10n.exportFailed} $e')),
         );
       }
     } else if (orientation == 'client') {
@@ -239,21 +241,46 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
         // Excel export completed successfully
         final sheetCount = _clientReportData.length;
         final message = sheetCount > 1 
-            ? 'Excel file with multiple client sheets exported successfully!'
-            : 'Excel file exported successfully!';
+            ? l10n.excelFileWithMultipleClientSheetsExportedSuccessfully
+            : l10n.excelFileExportedSuccessfully;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(message)),
         );
       } catch (e) {
         // Error during Excel export
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export failed: $e')),
+          SnackBar(content: Text('${l10n.exportFailed} $e')),
         );
       }
     } else {
       // Exporting single report (user or time)
-      UserExcelExportService.exportSingleReport(_reportData, widget.reportConfig);
+      UserExcelExportService.exportSingleReport(_reportData, widget.reportConfig, translations: _getTranslations(context));
     }
+  }
+
+  Map<String, String> _getTranslations(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return {
+      'starkTrackDetailedSessionReport': l10n.starkTrackDetailedSessionReport,
+      'reportNameLabel': l10n.reportNameLabel,
+      'reportRange': l10n.reportRange,
+      'reportType': l10n.reportType,
+      'generated': l10n.generated,
+      'totalSessions': l10n.totalSessions,
+      'userLabel': l10n.userLabel,
+      'totalTime': l10n.totalTime,
+      'totalExpenses': l10n.totalExpenses,
+      'overtimeBalance': l10n.overtimeBalance,
+      'vacationBalance': l10n.vacationBalance,
+      'date': l10n.date,
+      'start': l10n.start,
+      'end': l10n.end,
+      'duration': l10n.duration,
+      'project': l10n.project,
+      'expenses': l10n.expenses,
+      'amount': l10n.amount,
+      'note': l10n.note,
+    };
   }
 
   @override
@@ -357,8 +384,8 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
   Widget _buildReportContent(AppColors colors) {
     final orientation = widget.reportConfig['orientation'] as String? ?? 'time';
     
-    // For user reports (single or multiple), show proper user content
-    if (orientation == 'user' && _userReportData.isNotEmpty) {
+    // For worker reports (single or multiple), show proper worker content
+    if (orientation == 'worker' && _userReportData.isNotEmpty) {
       // If multiple users, show tabs
       if (_userReportData.length > 1 && _tabController != null) {
         return Column(
@@ -762,7 +789,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Client information
+          // Client Information Card
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -775,6 +802,43 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
               children: [
                 Text(
                   clientData['clientName'] as String,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: colors.primaryBlue,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                if (clientData['clientAddress']?.toString().isNotEmpty == true)
+                  _buildClientInfoRow('Address', clientData['clientAddress'] as String, colors),
+                if (clientData['clientContact']?.toString().isNotEmpty == true)
+                  _buildClientInfoRow('Contact Person', clientData['clientContact'] as String, colors),
+                if (clientData['clientEmail']?.toString().isNotEmpty == true)
+                  _buildClientInfoRow('Email', clientData['clientEmail'] as String, colors),
+                if (clientData['clientPhone']?.toString().isNotEmpty == true)
+                  _buildClientInfoRow('Phone', clientData['clientPhone'] as String, colors),
+                if (clientData['clientCity']?.toString().isNotEmpty == true)
+                  _buildClientInfoRow('City', clientData['clientCity'] as String, colors),
+                if (clientData['clientCountry']?.toString().isNotEmpty == true)
+                  _buildClientInfoRow('Country', clientData['clientCountry'] as String, colors),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          
+          // Summary Card
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: colors.primaryBlue.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: colors.primaryBlue.withValues(alpha: 0.3)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Summary',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -806,6 +870,37 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
                 style: TextStyle(color: colors.textColor.withValues(alpha: 0.7)),
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildClientInfoRow(String label, String value, AppColors colors) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              '$label:',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: colors.textColor,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 14,
+                color: colors.textColor,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -971,7 +1066,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
     // Handle different field names for different report types
     if (orientation == 'project' && selectedFields.contains('worker')) {
       headerWidgets.add(Expanded(flex: 2, child: Text('Worker', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))));
-    } else if (orientation == 'user' && selectedFields.contains('project')) {
+    } else if (orientation == 'worker' && selectedFields.contains('project')) {
       headerWidgets.add(Expanded(flex: 2, child: Text('Project', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: colors.primaryBlue))));
     }
     
@@ -1053,7 +1148,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
           ),
         ),
       ));
-    } else if (orientation == 'user' && selectedFields.contains('project')) {
+    } else if (orientation == 'worker' && selectedFields.contains('project')) {
       rowWidgets.add(Expanded(
         flex: 2,
         child: Text(
@@ -1116,7 +1211,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
     // Handle different field names for different report types
     if (orientation == 'project' && selectedFields.contains('worker')) {
       rowWidgets.add(Expanded(flex: 2, child: SizedBox()));
-    } else if (orientation == 'user' && selectedFields.contains('project')) {
+    } else if (orientation == 'worker' && selectedFields.contains('project')) {
       rowWidgets.add(Expanded(flex: 2, child: SizedBox()));
     }
     

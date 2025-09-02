@@ -225,13 +225,13 @@ class _TimeOffRequestsState extends State<TimeOffRequests> {
                                   if (status == 'rejected') ...[
                                     _iconBtn(Icons.cancel, Colors.red, () {}, 'Rejected'),
                                     const SizedBox(width: 8),
-                                    _iconBtn(Icons.edit, Colors.blue[400]!, () => _editRejectedRequest(docs[index].reference, data), 'Edit'),
+                                    _iconBtn(Icons.edit, Theme.of(context).extension<AppColors>()!.primaryBlue, () => _editRejectedRequest(docs[index].reference, data), 'Edit'),
                                     const SizedBox(width: 8),
                                     _iconBtn(Icons.delete, Colors.red[300]!, () => _deleteRequest(docs[index].reference), 'Delete'),
                                   ] else if (status == 'pending') ...[
                                     _iconBtn(Icons.hourglass_empty, Colors.orange, () {}, 'Pending'),
                                     const SizedBox(width: 8),
-                                    _iconBtn(Icons.edit, Colors.blue[400]!, () => _editRequest(docs[index].reference, data), 'Edit'),
+                                    _iconBtn(Icons.edit, Theme.of(context).extension<AppColors>()!.primaryBlue, () => _editRequest(docs[index].reference, data), 'Edit'),
                                     const SizedBox(width: 8),
                                     _iconBtn(Icons.delete, Colors.red[300]!, () => _deleteRequest(docs[index].reference), 'Delete'),
                                   ] else if (status == 'approved') ...[

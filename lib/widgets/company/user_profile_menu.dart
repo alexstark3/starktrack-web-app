@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
+import '../../theme/app_colors.dart';
 
 class UserProfileMenu extends StatefulWidget {
   final String initials;
@@ -41,7 +42,7 @@ class _UserProfileMenuState extends State<UserProfileMenu> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: const Color(0xFF1490DE).withValues(alpha:0.7),
+              color: Theme.of(context).extension<AppColors>()!.primaryBlue.withValues(alpha:0.7),
               borderRadius: BorderRadius.circular(4),
             ),
             alignment: Alignment.center,

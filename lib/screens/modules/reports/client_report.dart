@@ -93,11 +93,28 @@ class ClientReport {
       for (final clientDoc in clientsSnapshot.docs) {
         final clientData = clientDoc.data();
         final clientName = clientData['name']?.toString() ?? 'Unknown Client';
-        final clientAddress = clientData['address']?.toString() ?? '';
-        final clientContact = clientData['contactPerson']?.toString() ?? '';
+        
+        // Format client address from individual components (same as project report)
+        final clientStreet = clientData['street']?.toString() ?? '';
+        final clientNumber = clientData['number']?.toString() ?? '';
+        final clientPostCode = clientData['post_code']?.toString() ?? '';
+        final clientCity = clientData['city']?.toString() ?? '';
+        
+        final clientAddressParts = <String>[];
+        if (clientStreet.isNotEmpty) clientAddressParts.add(clientStreet);
+        if (clientNumber.isNotEmpty) clientAddressParts.add(clientNumber);
+        if (clientPostCode.isNotEmpty) clientAddressParts.add(clientPostCode);
+        if (clientCity.isNotEmpty) clientAddressParts.add(clientCity);
+        final clientAddress = clientAddressParts.join(' ');
+        
+        // Get contact person from contact_person object (same as project report)
+        final contactPerson = clientData['contact_person'] as Map<String, dynamic>? ?? {};
+        final firstName = contactPerson['first_name']?.toString() ?? '';
+        final surname = contactPerson['surname']?.toString() ?? '';
+        final clientContact = '$firstName $surname'.trim();
+        
         final clientEmail = clientData['email']?.toString() ?? '';
         final clientPhone = clientData['phone']?.toString() ?? '';
-        final clientCity = clientData['city']?.toString() ?? '';
         final clientCountry = clientData['country']?.toString() ?? '';
 
         // Find all projects for this client

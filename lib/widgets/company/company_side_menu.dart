@@ -100,20 +100,24 @@ class _CompanySideMenuState extends State<CompanySideMenu> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (widget.showBrand) ...[
-              const SizedBox(height: 12), // Restore original
+              const SizedBox(height: 8), // Reduced top padding
               Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal:
-                        widget.compact ? 16 : 25), // Keep horizontal reduction
-                child: Text(
-                  widget.compact ? 'ST' : 'Stark Track',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                padding: EdgeInsets.only(
+                    left: widget.compact ? 12 : 25, 
+                    right: 8), // 10px front collapsed, 20px front expanded, 8px back both
+                child: widget.compact
+                    ? Image.asset(
+                        'assets/images/logo_collapsed.png',
+                        height: 40,
+                        fit: BoxFit.contain,
+                      )
+                    : Image.asset(
+                        'assets/images/logo_full.png',
+                        height: 40,
+                        fit: BoxFit.contain,
+                      ),
               ),
-              const SizedBox(height: 18), // Restore original
+              const SizedBox(height: 8), // Reduced bottom padding
               Divider(
                 height: 1,
                 thickness: 1,
@@ -143,15 +147,13 @@ class _CompanySideMenuState extends State<CompanySideMenu> {
                         ? Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'ST',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w500,
-                                  color: theme.colorScheme.onSurface
-                                      .withValues(alpha: 0.6),
-                                ),
+                              Image.asset(
+                                'assets/images/logo_collapsed.png',
+                                width: 20,
+                                height: 20,
+                                fit: BoxFit.contain,
                               ),
+                              const SizedBox(height: 4),
                               Text(
                                 _appInfo.replaceAll('Stark Track ', ''),
                                 style: TextStyle(

@@ -78,7 +78,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reports => 'Reports';
   @override
-  String get createReport => 'Create Report';
+  String get createReport => 'Report';
   @override
   String get reportName => 'Report Name';
   @override
@@ -1083,4 +1083,68 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resetToThisWeek => 'Reset to this week';
+
+  // Missing Report System Translations
+  @override
+  String get starkTrackDetailedSessionReport => 'Stark Track - Detailed Session Report';
+  
+  @override
+  String get reportNameLabel => 'Report Name:';
+  
+  @override
+  String get reportRange => 'Report range:';
+  
+  @override
+  String get reportType => 'Report Type:';
+  
+  @override
+  String get generated => 'Generated:';
+  
+  @override
+  String get totalSessions => 'Total Sessions:';
+  
+  @override
+  String get clientLabel => 'Client:';
+  
+  @override
+  String get userLabel => 'User:';
+  
+  @override
+  String get totalProjects => 'Total Projects:';
+  
+  @override
+  String get overtimeBalance => 'Overtime Balance:';
+  
+  @override
+  String get vacationBalance => 'Vacation Balance:';
+  
+  @override
+  String get ref => 'Ref:';
+  
+  @override
+  String get totalHours => 'Total Hours';
+  
+  @override
+  String get totalOvertime => 'Total Overtime';
+  
+  @override
+  String get pleaseSelectAtLeastOneField => 'Please select at least one field';
+  
+  @override
+  String get excelFileExportedSuccessfully => 'Excel file exported successfully!';
+  
+  @override
+  String get excelFileWithMultipleUserSheetsExportedSuccessfully => 'Excel file with multiple user sheets exported successfully!';
+  
+  @override
+  String get excelFileWithMultipleProjectSheetsExportedSuccessfully => 'Excel file with multiple project sheets exported successfully!';
+  
+  @override
+  String get excelFileWithMultipleClientSheetsExportedSuccessfully => 'Excel file with multiple client sheets exported successfully!';
+  
+  @override
+  String get exportFailed => 'Export failed:';
+  
+  @override
+  String get failedToGenerateReport => 'Failed to generate report:';
 }

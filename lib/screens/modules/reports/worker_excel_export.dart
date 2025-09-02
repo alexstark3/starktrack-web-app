@@ -7,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserExcelExportService {
   /// Export a single report to Excel format
-  static void exportSingleReport(List<Map<String, dynamic>> reportData, Map<String, dynamic> reportConfig) {
+  static void exportSingleReport(List<Map<String, dynamic>> reportData, Map<String, dynamic> reportConfig, {Map<String, String>? translations}) {
     if (reportData.isEmpty) return;
 
     final workbook = xlsio.Workbook();
@@ -15,8 +15,8 @@ class UserExcelExportService {
     sheet.name = 'Report';
 
     // Add report header info
-    sheet.getRangeByIndex(1, 1).setText('Stark Track - Detailed Session Report');
-    sheet.getRangeByIndex(2, 1).setText('Report Name:');
+    sheet.getRangeByIndex(1, 1).setText(translations?['starkTrackDetailedSessionReport'] ?? 'Stark Track - Detailed Session Report');
+    sheet.getRangeByIndex(2, 1).setText(translations?['reportNameLabel'] ?? 'Report Name:');
     sheet.getRangeByIndex(2, 2).setText(reportConfig['name'] ?? 'Detailed Report');
     
     // Add date range if available
@@ -27,21 +27,21 @@ class UserExcelExportService {
       final endDate = (dateRange['endDate'] as Timestamp?)?.toDate();
       
       if (startDate != null && endDate != null) {
-        sheet.getRangeByIndex(currentRow, 1).setText('Report range:');
+        sheet.getRangeByIndex(currentRow, 1).setText(translations?['reportRange'] ?? 'Report range:');
         sheet.getRangeByIndex(currentRow, 2).setText('${DateFormat('dd/MM/yyyy').format(startDate)} to ${DateFormat('dd/MM/yyyy').format(endDate)}');
         currentRow++;
       }
     }
     
-    sheet.getRangeByIndex(currentRow, 1).setText('Report Type:');
+    sheet.getRangeByIndex(currentRow, 1).setText(translations?['reportType'] ?? 'Report Type:');
     sheet.getRangeByIndex(currentRow, 2).setText((reportConfig['orientation'] as String? ?? 'time').toUpperCase());
     currentRow++;
     
-    sheet.getRangeByIndex(currentRow, 1).setText('Generated:');
+    sheet.getRangeByIndex(currentRow, 1).setText(translations?['generated'] ?? 'Generated:');
     sheet.getRangeByIndex(currentRow, 2).setText(DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now()));
     currentRow++;
     
-    sheet.getRangeByIndex(currentRow, 1).setText('Total Sessions:');
+    sheet.getRangeByIndex(currentRow, 1).setText(translations?['totalSessions'] ?? 'Total Sessions:');
     sheet.getRangeByIndex(currentRow, 2).setText(reportData.length.toString());
 
     if (reportData.isNotEmpty) {
@@ -82,6 +82,7 @@ class UserExcelExportService {
   static void exportExcelWithMultipleSheets(
     Map<String, Map<String, dynamic>> userReportData,
     Map<String, dynamic> reportConfig,
+    {Map<String, String>? translations}
   ) {
 
 
@@ -99,7 +100,7 @@ class UserExcelExportService {
       sheet.name = _cleanSheetName(userName);
 
       // User summary header with formatting - User: and name on same row with same styling
-      sheet.getRangeByIndex(1, 1).setText('User:');
+      sheet.getRangeByIndex(1, 1).setText(translations?['userLabel'] ?? 'User:');
       sheet.getRangeByIndex(1, 1).cellStyle.backColor = '#4472C4'; // Blue background
       sheet.getRangeByIndex(1, 1).cellStyle.fontColor = '#FFFFFF'; // White text
       sheet.getRangeByIndex(1, 1).cellStyle.fontSize = 12;
@@ -123,7 +124,7 @@ class UserExcelExportService {
         final endDate = (dateRange['endDate'] as Timestamp?)?.toDate();
         
                  if (startDate != null && endDate != null) {
-           sheet.getRangeByIndex(2, 1).setText('Report range:');
+           sheet.getRangeByIndex(2, 1).setText(translations?['reportRange'] ?? 'Report range:');
            sheet.getRangeByIndex(2, 1).cellStyle.fontSize = 11;
            sheet.getRangeByIndex(2, 1).cellStyle.bold = true;
            sheet.getRangeByIndex(2, 2).setText('${DateFormat('dd/MM/yyyy').format(startDate)} to ${DateFormat('dd/MM/yyyy').format(endDate)}');
@@ -137,14 +138,14 @@ class UserExcelExportService {
            
            // Shift all other rows down by 1
            // Total Sessions
-           sheet.getRangeByIndex(3, 1).setText('Total Sessions:');
+           sheet.getRangeByIndex(3, 1).setText(translations?['totalSessions'] ?? 'Total Sessions:');
         } else {
           // Total Sessions (no date range)
-          sheet.getRangeByIndex(2, 1).setText('Total Sessions:');
+          sheet.getRangeByIndex(2, 1).setText(translations?['totalSessions'] ?? 'Total Sessions:');
         }
       } else {
         // Total Sessions (no date range)
-        sheet.getRangeByIndex(2, 1).setText('Total Sessions:');
+        sheet.getRangeByIndex(2, 1).setText(translations?['totalSessions'] ?? 'Total Sessions:');
       }
       
       // Get the current row index for totals section
@@ -156,28 +157,28 @@ class UserExcelExportService {
       sheet.getRangeByIndex(totalsStartRow, 2).cellStyle.fontSize = 11;
       
       // Total Time
-      sheet.getRangeByIndex(totalsStartRow + 1, 1).setText('Total Time:');
+      sheet.getRangeByIndex(totalsStartRow + 1, 1).setText(translations?['totalTime'] ?? 'Total Time:');
       sheet.getRangeByIndex(totalsStartRow + 1, 1).cellStyle.fontSize = 11;
       sheet.getRangeByIndex(totalsStartRow + 1, 1).cellStyle.bold = true;
       sheet.getRangeByIndex(totalsStartRow + 1, 2).setText(userData['totalTime']?.toString() ?? '0');
       sheet.getRangeByIndex(totalsStartRow + 1, 2).cellStyle.fontSize = 11;
       
       // Total Expenses
-      sheet.getRangeByIndex(totalsStartRow + 2, 1).setText('Total Expenses:');
+      sheet.getRangeByIndex(totalsStartRow + 2, 1).setText(translations?['totalExpenses'] ?? 'Total Expenses:');
       sheet.getRangeByIndex(totalsStartRow + 2, 1).cellStyle.fontSize = 11;
       sheet.getRangeByIndex(totalsStartRow + 2, 1).cellStyle.bold = true;
       sheet.getRangeByIndex(totalsStartRow + 2, 2).setText('${userData['totalExpenses']?.toStringAsFixed(2) ?? '0.00'} CHF');
       sheet.getRangeByIndex(totalsStartRow + 2, 2).cellStyle.fontSize = 11;
       
       // Overtime Balance
-      sheet.getRangeByIndex(totalsStartRow + 3, 1).setText('Overtime Balance:');
+      sheet.getRangeByIndex(totalsStartRow + 3, 1).setText(translations?['overtimeBalance'] ?? 'Overtime Balance:');
       sheet.getRangeByIndex(totalsStartRow + 3, 1).cellStyle.fontSize = 11;
       sheet.getRangeByIndex(totalsStartRow + 3, 1).cellStyle.bold = true;
       sheet.getRangeByIndex(totalsStartRow + 3, 2).setText(userData['totalOvertime']?.toString() ?? '0:00 h');
       sheet.getRangeByIndex(totalsStartRow + 3, 2).cellStyle.fontSize = 11;
       
       // Vacation Balance
-      sheet.getRangeByIndex(totalsStartRow + 4, 1).setText('Vacation Balance:');
+      sheet.getRangeByIndex(totalsStartRow + 4, 1).setText(translations?['vacationBalance'] ?? 'Vacation Balance:');
       sheet.getRangeByIndex(totalsStartRow + 4, 1).cellStyle.fontSize = 11;
       sheet.getRangeByIndex(totalsStartRow + 4, 1).cellStyle.bold = true;
       sheet.getRangeByIndex(totalsStartRow + 4, 2).setText(userData['vacationBalance']?.toString() ?? '0.0');
@@ -195,14 +196,14 @@ class UserExcelExportService {
 
       // Sessions table headers with formatting
       final headerRow = totalsEndRow + 3; // 1 empty row after totals, then headers
-      sheet.getRangeByIndex(headerRow, 1).setText('Date');
-      sheet.getRangeByIndex(headerRow, 2).setText('Start');
-      sheet.getRangeByIndex(headerRow, 3).setText('End');
-      sheet.getRangeByIndex(headerRow, 4).setText('Duration');
-      sheet.getRangeByIndex(headerRow, 5).setText('Project');
-      sheet.getRangeByIndex(headerRow, 6).setText('Expenses');
-      sheet.getRangeByIndex(headerRow, 7).setText('Amount');
-      sheet.getRangeByIndex(headerRow, 8).setText('Note');
+      sheet.getRangeByIndex(headerRow, 1).setText(translations?['date'] ?? 'Date');
+      sheet.getRangeByIndex(headerRow, 2).setText(translations?['start'] ?? 'Start');
+      sheet.getRangeByIndex(headerRow, 3).setText(translations?['end'] ?? 'End');
+      sheet.getRangeByIndex(headerRow, 4).setText(translations?['duration'] ?? 'Duration');
+      sheet.getRangeByIndex(headerRow, 5).setText(translations?['project'] ?? 'Project');
+      sheet.getRangeByIndex(headerRow, 6).setText(translations?['expenses'] ?? 'Expenses');
+      sheet.getRangeByIndex(headerRow, 7).setText(translations?['amount'] ?? 'Amount');
+      sheet.getRangeByIndex(headerRow, 8).setText(translations?['note'] ?? 'Note');
       
       // Format headers
       for (int col = 1; col <= 8; col++) {

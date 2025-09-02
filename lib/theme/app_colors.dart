@@ -117,7 +117,7 @@ class AppColors extends ThemeExtension<AppColors> {
 
   // Light and dark presets
   static const AppColors light = AppColors(
-    primaryBlue: Color(0xFF65AAEA),
+    primaryBlue: Color(0xFF29ABE2),
     darkGray: Color(0xFF58595B),
     midGray: Color(0xFFB0B0B0), // Example mid gray (you can adjust this)
     lightGray: Color(0xFFEAEAEB),
@@ -139,7 +139,7 @@ class AppColors extends ThemeExtension<AppColors> {
   );
 
   static const AppColors dark = AppColors(
-    primaryBlue: Color(0xFF65AAEA),
+    primaryBlue: Color(0xFF29ABE2),
     darkGray: Color(0xFF969696), // VS Code secondary text
     midGray: Color(0xFF6A6A6A), // VS Code muted text
     lightGray: Color(0xFF2D2D30), // VS Code active elements

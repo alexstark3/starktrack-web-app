@@ -49,7 +49,7 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
         case 'project':
           await _generateProjectBasedReport(fields);
           break;
-        case 'user':
+        case 'worker':
           await _generateUserBasedReport(fields);
           break;
         case 'client':
@@ -151,8 +151,8 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
                   ? DateFormat('dd/MM/yyyy').format(begin.toDate())
                   : '';
               break;
-            case 'user':
-              rowData['User'] = userName;
+            case 'worker':
+              rowData['Worker'] = userName;
               break;
             case 'project':
               final projectId = logData['projectId'] as String?;
@@ -425,8 +425,8 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
       
       for (final field in fields) {
         switch (field) {
-          case 'user':
-            rowData['User'] = userName;
+          case 'worker':
+            rowData['Worker'] = userName;
             break;
           case 'totalHours':
             rowData['Total Hours'] = '${totalHours.toStringAsFixed(1)} h';
@@ -570,45 +570,7 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
           case 'projectCount':
             rowData['Total Projects'] = projectsSnapshot.docs.length.toString();
             break;
-          case 'revenue':
-            // Calculate average hourly rate from all projects for this client
-            double totalRevenue = 0.0;
-            int projectsWithRates = 0;
-            
-            for (final projectDoc in projectsSnapshot.docs) {
-              final projectData = projectDoc.data();
-              final hourlyRate = projectData['hourlyRate'] as double? ?? 0.0;
-              if (hourlyRate > 0) {
-                // Get hours for this specific project
-                double projectHours = 0.0;
-                // You would need to calculate project-specific hours here
-                totalRevenue += projectHours * hourlyRate;
-                projectsWithRates++;
-              }
-            }
-            
-            if (projectsWithRates > 0) {
-              rowData['Total Revenue'] = 'CHF ${totalRevenue.toStringAsFixed(2)}';
-            } else {
-              rowData['Total Revenue'] = 'No rates set';
-            }
-            break;
-          case 'profitMargin':
-            // Simplified profit margin calculation
-            if (totalExpenses > 0) {
-              // Assume average 25% profit margin if no specific rates
-              final estimatedRevenue = totalExpenses * 1.33; // 25% margin
-              final margin = ((estimatedRevenue - totalExpenses) / estimatedRevenue * 100);
-              rowData['Profit Margin'] = '~${margin.toStringAsFixed(1)}%';
-            } else {
-              rowData['Profit Margin'] = 'No expense data';
-            }
-            break;
-          case 'lastActivity':
-            rowData['Last Activity'] = lastActivity != null 
-                ? DateFormat('dd/MM/yyyy').format(lastActivity)
-                : 'No activity';
-            break;
+
         }
       }
 
@@ -661,7 +623,7 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
   String _getFieldLabel(String field) {
     final labels = {
       'date': 'Date',
-      'user': 'Worker',
+      'worker': 'Worker',
       'project': 'Project',
       'client': 'Client',
       'startTime': 'Start',

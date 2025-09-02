@@ -1301,8 +1301,8 @@ class _LogsTableState extends State<_LogsTable> {
                               // Edit - for team leaders to edit any session (except approved ones, already edited+approved, and rejected ones)
                               if (!isApproved && !isApprovedAfterEdit && !isRejected)
                                 IconButton(
-                                  icon: const Icon(Icons.edit,
-                                      color: Colors.blue, size: 20),
+                                  icon: Icon(Icons.edit,
+                                      color: Theme.of(context).extension<AppColors>()!.primaryBlue, size: 20),
                                   tooltip: AppLocalizations.of(context)!.edit,
                                   onPressed: () async {
                                     await showDialog(

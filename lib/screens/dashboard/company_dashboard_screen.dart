@@ -139,7 +139,7 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
                 });
               },
             ),
-          if (tabLabels.contains('Reports'))
+          if (tabLabels.contains(l10n.reports))
             ReportsScreen(
               key: const PageStorageKey('reports'),
               companyId: widget.companyId,
@@ -266,7 +266,7 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
         (widget.roles.contains('company_admin') ||
          widget.roles.contains('admin') ||
          widget.roles.contains('team_leader'))) {
-      l.add(_ScreenCfg('Reports', Icons.assessment));
+      l.add(_ScreenCfg(l10n.reports, Icons.assessment));
     }
     
     // ADMIN MODULE: Only show if company has admin module AND user has required role

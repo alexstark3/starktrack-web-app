@@ -213,7 +213,7 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
                                   if (status == 'pending') ...[
                                     _iconBtn(Icons.check, Colors.green, () => _updateStatus(ref, 'approved'), 'Approve'),
                                     const SizedBox(width: 8),
-                                    _iconBtn(Icons.edit, Colors.blue[400]!, () => _editDates(ref, start, end), 'Edit'),
+                                    _iconBtn(Icons.edit, Theme.of(context).extension<AppColors>()!.primaryBlue, () => _editDates(ref, start, end), 'Edit'),
                                     const SizedBox(width: 8),
                                     _iconBtn(Icons.cancel, Colors.red, () => _denyWithNote(ref), 'Deny'),
                                   ] else if (status == 'approved') ...[
@@ -223,7 +223,7 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
                                       _iconBtn(Icons.verified, Colors.green, () {}, 'Approved'),
                                     ],
                                     const SizedBox(width: 8),
-                                    _iconBtn(Icons.edit, Colors.blue[400]!, () => _editDates(ref, start, end), 'Edit'),
+                                    _iconBtn(Icons.edit, Theme.of(context).extension<AppColors>()!.primaryBlue, () => _editDates(ref, start, end), 'Edit'),
                                     const SizedBox(width: 8),
                                     _iconBtn(Icons.delete, Colors.red[300]!, () => _deleteRequest(ref), 'Delete'),
                                   ] else if (status == 'rejected') ...[

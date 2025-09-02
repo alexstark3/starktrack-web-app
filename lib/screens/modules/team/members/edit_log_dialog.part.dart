@@ -176,7 +176,7 @@ class _EditLogDialogState extends State<EditLogDialog> {
                   Checkbox(
                       value: true,
                       onChanged: (checked) => handleExpenseChange(key, checked),
-                      checkColor: Colors.blue,
+                      checkColor: colors.primaryBlue,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4))),
                   Text(key,
@@ -192,7 +192,7 @@ class _EditLogDialogState extends State<EditLogDialog> {
                 Checkbox(
                     value: tempPerDiem,
                     onChanged: perDiemAvailable ? handlePerDiemChange : null,
-                    checkColor: Colors.blue,
+                    checkColor: colors.primaryBlue,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4))),
                 Text('Per Diem',
@@ -256,7 +256,7 @@ class _EditLogDialogState extends State<EditLogDialog> {
                         ElevatedButton(
                             onPressed: canAddExpense() ? addExpense : null,
                             style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
+                                backgroundColor: colors.primaryBlue,
                                 foregroundColor: colors.whiteTextOnBlue,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8)),
@@ -272,10 +272,10 @@ class _EditLogDialogState extends State<EditLogDialog> {
                     onPressed: () => Navigator.pop(context),
                     child: Text(AppLocalizations.of(context)!.cancelLabel,
                         style:
-                            const TextStyle(color: Colors.blue, fontSize: 16))),
+                            TextStyle(color: colors.primaryBlue, fontSize: 16))),
                 ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
+                        backgroundColor: colors.primaryBlue,
                         foregroundColor: colors.whiteTextOnBlue,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20)),
@@ -375,14 +375,14 @@ class _EditLogDialogState extends State<EditLogDialog> {
                                       decoration: BoxDecoration(
                                           color: Theme.of(context).brightness ==
                                                   Brightness.dark
-                                              ? Colors.blue
+                                              ? colors.primaryBlue
                                                   .withValues(alpha: 0.2)
-                                              : Colors.blue
+                                              : colors.primaryBlue
                                                   .withValues(alpha: 0.1),
                                           borderRadius:
                                               BorderRadius.circular(4),
                                           border: Border.all(
-                                              color: Colors.blue
+                                              color: colors.primaryBlue
                                                   .withValues(alpha: 0.3))),
                                       child: Text(
                                           '${entry.key} ${(entry.value as num?)?.toStringAsFixed(2) ?? '0.00'} CHF',
@@ -395,12 +395,12 @@ class _EditLogDialogState extends State<EditLogDialog> {
                                     decoration: BoxDecoration(
                                         color: Theme.of(context).brightness ==
                                                 Brightness.dark
-                                            ? Colors.blue.withValues(alpha: 0.2)
-                                            : Colors.blue
+                                            ? colors.primaryBlue.withValues(alpha: 0.2)
+                                            : colors.primaryBlue
                                                 .withValues(alpha: 0.1),
                                         borderRadius: BorderRadius.circular(4),
                                         border: Border.all(
-                                            color: Colors.blue
+                                            color: colors.primaryBlue
                                                 .withValues(alpha: 0.3))),
                                     child: Text(
                                         AppLocalizations.of(context)!
@@ -577,6 +577,7 @@ class _EditLogDialogState extends State<EditLogDialog> {
 
   // Build message history widget
   Widget _buildMessageHistory() {
+    final colors = Theme.of(context).extension<AppColors>()!;
     final data = widget.logDoc.data() as Map<String, dynamic>;
     final messages = data['messages'] as List<dynamic>? ?? [];
     
@@ -609,7 +610,7 @@ class _EditLogDialogState extends State<EditLogDialog> {
               return Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: isManager ? Colors.red.shade50 : Colors.blue.shade50,
+                  color: isManager ? Colors.red.shade50 : colors.primaryBlue.withValues(alpha: 0.1),
                   border: Border(
                     bottom: BorderSide(color: Colors.grey.shade200, width: 0.5),
                   ),
@@ -620,7 +621,7 @@ class _EditLogDialogState extends State<EditLogDialog> {
                     Icon(
                       isManager ? Icons.person : Icons.person_outline,
                       size: 16,
-                      color: isManager ? Colors.red : Colors.blue,
+                      color: isManager ? Colors.red : colors.primaryBlue,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -632,7 +633,7 @@ class _EditLogDialogState extends State<EditLogDialog> {
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
-                              color: isManager ? Colors.red : Colors.blue,
+                              color: isManager ? Colors.red : colors.primaryBlue,
                             ),
                           ),
                           const SizedBox(height: 4),
