@@ -7,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserExcelExportService {
   /// Export a single report to Excel format
-  static void exportSingleReport(List<Map<String, dynamic>> reportData, Map<String, dynamic> reportConfig, {Map<String, String>? translations}) {
+  static void exportSingleReport(List<Map<String, dynamic>> reportData, Map<String, dynamic> reportConfig, {String? filename, Map<String, String>? translations}) {
     if (reportData.isEmpty) return;
 
     final workbook = xlsio.Workbook();
@@ -73,7 +73,7 @@ class UserExcelExportService {
     final url = web.URL.createObjectURL(blob);
     final anchor = web.document.createElement('a') as web.HTMLAnchorElement
       ..href = url
-      ..download = '${reportConfig['name'] ?? 'report'}.xlsx';
+      ..download = filename ?? '${reportConfig['name'] ?? (translations?['report'] ?? 'report')}.xlsx';
     anchor.click();
     web.URL.revokeObjectURL(url);
   }
@@ -82,7 +82,7 @@ class UserExcelExportService {
   static void exportExcelWithMultipleSheets(
     Map<String, Map<String, dynamic>> userReportData,
     Map<String, dynamic> reportConfig,
-    {Map<String, String>? translations}
+    {String? filename, Map<String, String>? translations}
   ) {
 
 
@@ -328,7 +328,7 @@ class UserExcelExportService {
     final url = web.URL.createObjectURL(blob);
     final anchor = web.document.createElement('a') as web.HTMLAnchorElement
       ..href = url
-      ..download = '${reportConfig['name'] ?? 'multi_user_report'}.xlsx';
+      ..download = filename ?? '${reportConfig['name'] ?? 'multi_user_report'}.xlsx';
     anchor.click();
     web.URL.revokeObjectURL(url);
     

@@ -33,6 +33,31 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
     _generateReport();
   }
 
+  // Translate report name dynamically based on current language
+  String _translateReportName(String storedName, AppLocalizations l10n) {
+    // Check if the name starts with an orientation key
+    final orientationMap = {
+      'project': l10n.project,
+      'worker': l10n.worker,
+      'client': l10n.client,
+    };
+    
+    for (final entry in orientationMap.entries) {
+      if (storedName.startsWith('${entry.key} ')) {
+        // Replace the orientation key with translated name and capitalize first letter
+        final translatedName = storedName.replaceFirst('${entry.key} ', '${entry.value} ');
+        return translatedName.isNotEmpty 
+            ? translatedName[0].toUpperCase() + translatedName.substring(1)
+            : translatedName;
+      }
+    }
+    
+    // If no orientation key found, return the original name with first letter capitalized
+    return storedName.isNotEmpty 
+        ? storedName[0].toUpperCase() + storedName.substring(1)
+        : storedName;
+  }
+
   Future<void> _generateReport() async {
     try {
       setState(() {
@@ -758,7 +783,7 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
     htmlContent.writeln('<html>');
     htmlContent.writeln('<head>');
     htmlContent.writeln('<meta charset="UTF-8">');
-    htmlContent.writeln('<title>${widget.reportConfig['name'] ?? l10n.report}</title>');
+    htmlContent.writeln('<title>${_translateReportName(widget.reportConfig['name'] ?? l10n.report, l10n)}</title>');
     htmlContent.writeln('<style>');
     htmlContent.writeln('body { font-family: Arial, sans-serif; margin: 20px; }');
     htmlContent.writeln('h1 { color: #2c5aa0; margin-bottom: 10px; }');
@@ -777,7 +802,7 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
     
     // Report header with metadata
     htmlContent.writeln('<h1>Stark Track Report</h1>');
-    htmlContent.writeln('<h2>${widget.reportConfig['name'] ?? l10n.unnamedReport}</h2>');
+    htmlContent.writeln('<h2>${_translateReportName(widget.reportConfig['name'] ?? l10n.unnamedReport, l10n)}</h2>');
     htmlContent.writeln('<div class="report-info">');
     htmlContent.writeln('<p><strong>Report Type:</strong> ${(widget.reportConfig['orientation'] as String).toUpperCase()}</p>');
     htmlContent.writeln('<p><strong>Generated:</strong> ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}</p>');
@@ -884,7 +909,7 @@ class _ReportViewerDialogState extends State<ReportViewerDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.reportConfig['name'] ?? l10n.report,
+                      _translateReportName(widget.reportConfig['name'] ?? l10n.report, l10n),
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,

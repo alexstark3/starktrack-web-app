@@ -11,6 +11,7 @@ class ProjectExcelExportService {
   static void exportExcelWithMultipleProjectSheets(
     Map<String, Map<String, dynamic>> projectReportData,
     Map<String, dynamic> reportConfig,
+    {String? filename, Map<String, String>? translations}
   ) {
     final workbook = xlsio.Workbook();
 
@@ -29,7 +30,7 @@ class ProjectExcelExportService {
       final selectedFields = (reportConfig['fields'] as List<dynamic>?)?.cast<String>() ?? [];
 
                            // Project Information - Vertical Layout
-        sheet.getRangeByIndex(1, 1).setText('Project:');
+        sheet.getRangeByIndex(1, 1).setText(translations?['projectLabel'] ?? 'Project:');
         sheet.getRangeByIndex(1, 1).cellStyle.fontSize = 12; // Same size as project name
         sheet.getRangeByIndex(1, 1).cellStyle.bold = true;
         sheet.getRangeByIndex(1, 1).cellStyle.backColor = '#4472C4'; // Blue background like project name
@@ -49,7 +50,7 @@ class ProjectExcelExportService {
           final endDate = (dateRange['endDate'] as Timestamp?)?.toDate();
           
           if (startDate != null && endDate != null) {
-            sheet.getRangeByIndex(currentRow, 1).setText('Report range:');
+            sheet.getRangeByIndex(currentRow, 1).setText(translations?['reportRange'] ?? 'Report range:');
             sheet.getRangeByIndex(currentRow, 1).cellStyle.fontSize = 11;
             sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
             sheet.getRangeByIndex(currentRow, 1).cellStyle.backColor = '#E7E6E6';
@@ -61,7 +62,7 @@ class ProjectExcelExportService {
         }
         
         // Project Reference
-        sheet.getRangeByIndex(currentRow, 1).setText('Ref:');
+        sheet.getRangeByIndex(currentRow, 1).setText(translations?['ref'] ?? 'Ref:');
         sheet.getRangeByIndex(currentRow, 1).cellStyle.fontSize = 11;
         sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
         sheet.getRangeByIndex(currentRow, 1).cellStyle.backColor = '#E7E6E6';
@@ -72,7 +73,7 @@ class ProjectExcelExportService {
         currentRow++;
         
         // Project Address
-        sheet.getRangeByIndex(currentRow, 1).setText('Address:');
+        sheet.getRangeByIndex(currentRow, 1).setText(translations?['address'] ?? 'Address:');
         sheet.getRangeByIndex(currentRow, 1).cellStyle.fontSize = 11;
         sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
         sheet.getRangeByIndex(currentRow, 1).cellStyle.backColor = '#E7E6E6';
@@ -96,7 +97,7 @@ class ProjectExcelExportService {
         currentRow++;
        
        // Client Information - Vertical Layout
-       sheet.getRangeByIndex(currentRow, 1).setText('Client name:');
+       sheet.getRangeByIndex(currentRow, 1).setText(translations?['clientLabel'] ?? 'Client name:');
        sheet.getRangeByIndex(currentRow, 1).cellStyle.fontSize = 11;
        sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
        sheet.getRangeByIndex(currentRow, 1).cellStyle.backColor = '#E7E6E6';
@@ -106,7 +107,7 @@ class ProjectExcelExportService {
        currentRow++;
        
        // Client Address
-       sheet.getRangeByIndex(currentRow, 1).setText('Address:');
+       sheet.getRangeByIndex(currentRow, 1).setText(translations?['address'] ?? 'Address:');
        sheet.getRangeByIndex(currentRow, 1).cellStyle.fontSize = 11;
        sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
        sheet.getRangeByIndex(currentRow, 1).cellStyle.backColor = '#E7E6E6';
@@ -116,7 +117,7 @@ class ProjectExcelExportService {
        currentRow++;
        
        // Client Contact Person
-       sheet.getRangeByIndex(currentRow, 1).setText('Contact:');
+       sheet.getRangeByIndex(currentRow, 1).setText(translations?['contactPerson'] ?? 'Contact:');
        sheet.getRangeByIndex(currentRow, 1).cellStyle.fontSize = 11;
        sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
        sheet.getRangeByIndex(currentRow, 1).cellStyle.backColor = '#E7E6E6';
@@ -126,7 +127,7 @@ class ProjectExcelExportService {
        currentRow++;
        
        // Client Email
-       sheet.getRangeByIndex(currentRow, 1).setText('Email:');
+       sheet.getRangeByIndex(currentRow, 1).setText(translations?['email'] ?? 'Email:');
        sheet.getRangeByIndex(currentRow, 1).cellStyle.fontSize = 11;
        sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
        sheet.getRangeByIndex(currentRow, 1).cellStyle.backColor = '#E7E6E6';
@@ -136,7 +137,7 @@ class ProjectExcelExportService {
        currentRow++;
        
        // Client Phone
-       sheet.getRangeByIndex(currentRow, 1).setText('Phone:');
+       sheet.getRangeByIndex(currentRow, 1).setText(translations?['phone'] ?? 'Phone:');
        sheet.getRangeByIndex(currentRow, 1).cellStyle.fontSize = 11;
        sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
        sheet.getRangeByIndex(currentRow, 1).cellStyle.backColor = '#E7E6E6';
@@ -163,19 +164,19 @@ class ProjectExcelExportService {
        final summaryItems = <Map<String, dynamic>>[];
        if (selectedFields.contains('totalSessions')) {
          summaryItems.add({
-           'label': 'Total Sessions:',
+           'label': translations?['totalSessions'] ?? 'Total Sessions:',
            'value': projectData['totalSessions']?.toString() ?? '0'
          });
        }
        if (selectedFields.contains('totalTime')) {
          summaryItems.add({
-           'label': 'Total Time:',
+           'label': translations?['totalTime'] ?? 'Total Time:',
            'value': projectData['totalTime']?.toString() ?? '0:00 h'
          });
        }
        if (selectedFields.contains('totalExpenses')) {
          summaryItems.add({
-           'label': 'Total Expenses:',
+           'label': translations?['totalExpenses'] ?? 'Total Expenses:',
            'value': '${projectData['totalExpenses']?.toStringAsFixed(2) ?? '0.00'} CHF'
          });
        }
@@ -211,38 +212,38 @@ class ProjectExcelExportService {
         var colIndex = 1;
         
         if (selectedFields.contains('date')) {
-          headers.add('Date');
+          headers.add(translations?['date'] ?? 'Date');
           fieldMappings['date'] = colIndex.toString();
           colIndex++;
         }
         if (selectedFields.contains('start')) {
-          headers.add('Start');
+          headers.add(translations?['start'] ?? 'Start');
           fieldMappings['start'] = colIndex.toString();
           colIndex++;
         }
         if (selectedFields.contains('end')) {
-          headers.add('End');
+          headers.add(translations?['end'] ?? 'End');
           fieldMappings['end'] = colIndex.toString();
           colIndex++;
         }
         if (selectedFields.contains('duration')) {
-          headers.add('Duration');
+          headers.add(translations?['duration'] ?? 'Duration');
           fieldMappings['duration'] = colIndex.toString();
           colIndex++;
         }
         if (selectedFields.contains('worker')) {
-          headers.add('Worker');
+          headers.add(translations?['worker'] ?? 'Worker');
           fieldMappings['worker'] = colIndex.toString();
           colIndex++;
         }
         if (selectedFields.contains('expenses')) {
-          headers.add('Expense Description');
-          headers.add('Expense Amount');
+          headers.add(translations?['expenses'] ?? 'Expense Description');
+          headers.add(translations?['amount'] ?? 'Expense Amount');
           fieldMappings['expenses'] = colIndex.toString();
           colIndex += 2;
         }
         if (selectedFields.contains('note')) {
-          headers.add('Note');
+          headers.add(translations?['note'] ?? 'Note');
           fieldMappings['note'] = colIndex.toString();
           colIndex++;
         }
@@ -435,7 +436,7 @@ class ProjectExcelExportService {
     final url = web.URL.createObjectURL(blob);
     final anchor = web.document.createElement('a') as web.HTMLAnchorElement
       ..href = url
-      ..download = '${reportConfig['name'] ?? 'multi_project_report'}.xlsx';
+      ..download = filename ?? '${reportConfig['name'] ?? (translations?['multiProjectReport'] ?? 'multi_project_report')}.xlsx';
     anchor.click();
     web.URL.revokeObjectURL(url);
   }

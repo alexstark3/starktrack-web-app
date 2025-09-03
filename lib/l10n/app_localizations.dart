@@ -2187,6 +2187,9 @@ abstract class AppLocalizations {
   String get reportRangeLabel => 'Report range:';
   String get overtimeLabel => 'Overtime:';
   String get weekPrefix => 'W';
+  String get clientReport => 'client_report';
+  String get multiProjectReport => 'multi_project_report';
+  String get multiUserReport => 'multi_user_report';
 }
 
 class _AppLocalizationsDelegate

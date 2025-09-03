@@ -10,6 +10,7 @@ class ClientExcelExportService {
   static void exportExcelWithMultipleClientSheets(
     Map<String, Map<String, dynamic>> clientReportData,
     Map<String, dynamic> reportConfig,
+    {String? filename, Map<String, String>? translations}
   ) {
     final workbook = xlsio.Workbook();
 
@@ -27,7 +28,7 @@ class ClientExcelExportService {
 
 
       // Client Information - Vertical Layout
-      sheet.getRangeByIndex(1, 1).setText('Client:');
+      sheet.getRangeByIndex(1, 1).setText(translations?['clientLabel'] ?? 'Client:');
       sheet.getRangeByIndex(1, 1).cellStyle.fontSize = 12;
       sheet.getRangeByIndex(1, 1).cellStyle.bold = true;
       sheet.getRangeByIndex(1, 1).cellStyle.backColor = '#4472C4';
@@ -47,7 +48,7 @@ class ClientExcelExportService {
         final endDate = (dateRange['endDate'] as Timestamp?)?.toDate();
         
         if (startDate != null && endDate != null) {
-          sheet.getRangeByIndex(currentRow, 1).setText('Report range:');
+          sheet.getRangeByIndex(currentRow, 1).setText(translations?['reportRange'] ?? 'Report range:');
           sheet.getRangeByIndex(currentRow, 1).cellStyle.fontSize = 11;
           sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
           sheet.getRangeByIndex(currentRow, 1).cellStyle.backColor = '#E7E6E6';
@@ -59,7 +60,7 @@ class ClientExcelExportService {
       }
       
       // Client Address
-      sheet.getRangeByIndex(currentRow, 1).setText('Address:');
+      sheet.getRangeByIndex(currentRow, 1).setText(translations?['address'] ?? 'Address:');
       sheet.getRangeByIndex(currentRow, 1).cellStyle.fontSize = 11;
       sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
       sheet.getRangeByIndex(currentRow, 1).cellStyle.backColor = '#E7E6E6';
@@ -70,7 +71,7 @@ class ClientExcelExportService {
       currentRow++;
       
       // Client Contact Person
-      sheet.getRangeByIndex(currentRow, 1).setText('Contact Person:');
+      sheet.getRangeByIndex(currentRow, 1).setText(translations?['contactPerson'] ?? 'Contact Person:');
       sheet.getRangeByIndex(currentRow, 1).cellStyle.fontSize = 11;
       sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
       sheet.getRangeByIndex(currentRow, 1).cellStyle.backColor = '#E7E6E6';
@@ -81,7 +82,7 @@ class ClientExcelExportService {
       currentRow++;
       
       // Client Email
-      sheet.getRangeByIndex(currentRow, 1).setText('Email:');
+      sheet.getRangeByIndex(currentRow, 1).setText(translations?['email'] ?? 'Email:');
       sheet.getRangeByIndex(currentRow, 1).cellStyle.fontSize = 11;
       sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
       sheet.getRangeByIndex(currentRow, 1).cellStyle.backColor = '#E7E6E6';
@@ -92,7 +93,7 @@ class ClientExcelExportService {
       currentRow++;
       
       // Client Phone
-      sheet.getRangeByIndex(currentRow, 1).setText('Phone:');
+      sheet.getRangeByIndex(currentRow, 1).setText(translations?['phone'] ?? 'Phone:');
       sheet.getRangeByIndex(currentRow, 1).cellStyle.fontSize = 11;
       sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
       sheet.getRangeByIndex(currentRow, 1).cellStyle.backColor = '#E7E6E6';
@@ -103,7 +104,7 @@ class ClientExcelExportService {
       currentRow++;
       
       // Client City
-      sheet.getRangeByIndex(currentRow, 1).setText('City:');
+      sheet.getRangeByIndex(currentRow, 1).setText(translations?['city'] ?? 'City:');
       sheet.getRangeByIndex(currentRow, 1).cellStyle.fontSize = 11;
       sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
       sheet.getRangeByIndex(currentRow, 1).cellStyle.backColor = '#E7E6E6';
@@ -114,7 +115,7 @@ class ClientExcelExportService {
       currentRow++;
       
       // Client Country
-      sheet.getRangeByIndex(currentRow, 1).setText('Country:');
+      sheet.getRangeByIndex(currentRow, 1).setText(translations?['country'] ?? 'Country:');
       sheet.getRangeByIndex(currentRow, 1).cellStyle.fontSize = 11;
       sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
       sheet.getRangeByIndex(currentRow, 1).cellStyle.backColor = '#E7E6E6';
@@ -140,7 +141,7 @@ class ClientExcelExportService {
 
       
       // Total Projects
-      sheet.getRangeByIndex(currentRow, 1).setText('Total Projects:');
+      sheet.getRangeByIndex(currentRow, 1).setText(translations?['totalProjects'] ?? 'Total Projects:');
       sheet.getRangeByIndex(currentRow, 1).cellStyle.fontSize = 11;
       sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
       sheet.getRangeByIndex(currentRow, 1).cellStyle.backColor = '#E7E6E6';
@@ -151,7 +152,7 @@ class ClientExcelExportService {
       currentRow++;
       
       // Total Time
-      sheet.getRangeByIndex(currentRow, 1).setText('Total Time:');
+      sheet.getRangeByIndex(currentRow, 1).setText(translations?['totalTime'] ?? 'Total Time:');
       sheet.getRangeByIndex(currentRow, 1).cellStyle.fontSize = 11;
       sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
       sheet.getRangeByIndex(currentRow, 1).cellStyle.backColor = '#E7E6E6';
@@ -162,7 +163,7 @@ class ClientExcelExportService {
       currentRow++;
       
       // Total Expenses
-      sheet.getRangeByIndex(currentRow, 1).setText('Total Expenses:');
+      sheet.getRangeByIndex(currentRow, 1).setText(translations?['totalExpenses'] ?? 'Total Expenses:');
       sheet.getRangeByIndex(currentRow, 1).cellStyle.fontSize = 11;
       sheet.getRangeByIndex(currentRow, 1).cellStyle.bold = true;
       sheet.getRangeByIndex(currentRow, 1).cellStyle.backColor = '#E7E6E6';
@@ -191,7 +192,13 @@ class ClientExcelExportService {
       // Projects table headers - always show all columns
       final headerRow = currentRow;
       final columns = ['projectName', 'projectRef', 'projectAddress', 'totalTime', 'totalExpenses'];
-      final headers = ['Project Name', 'Reference', 'Address', 'Total Time', 'Total Expenses'];
+      final headers = [
+        translations?['projectName'] ?? 'Project Name',
+        translations?['reference'] ?? 'Reference',
+        translations?['address'] ?? 'Address',
+        translations?['totalTime'] ?? 'Total Time',
+        translations?['totalExpenses'] ?? 'Total Expenses'
+      ];
       
       // Add headers dynamically
       for (int col = 0; col < headers.length; col++) {
@@ -259,7 +266,7 @@ class ClientExcelExportService {
     final url = web.URL.createObjectURL(blob);
     final anchor = web.document.createElement('a') as web.HTMLAnchorElement
       ..href = url
-      ..download = 'client_report_${DateFormat('yyyyMMdd_HHmm').format(DateTime.now())}.xlsx';
+      ..download = filename ?? '${translations?['clientReport'] ?? 'client_report'}_${DateFormat('yyyyMMdd_HHmm').format(DateTime.now())}.xlsx';
     anchor.click();
     web.URL.revokeObjectURL(url);
   }

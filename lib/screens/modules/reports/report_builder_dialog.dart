@@ -38,8 +38,8 @@ class _ReportBuilderDialogState extends State<ReportBuilderDialog> {
     final now = DateTime.now();
     final dateStr = '${now.year}.${now.month.toString().padLeft(2, '0')}.${now.day.toString().padLeft(2, '0')}';
     final timeStr = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-    final type = _reportTypes[_selectedOrientation] ?? 'Report';
-    return '$type $dateStr $timeStr';
+    // Store the orientation key instead of translated name
+    return '$_selectedOrientation $dateStr $timeStr';
   }
 
   // Available fields for each orientation

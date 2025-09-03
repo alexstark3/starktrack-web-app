@@ -204,6 +204,8 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
   void _exportToExcel() {
     final orientation = widget.reportConfig['orientation'] as String? ?? 'time';
     final l10n = AppLocalizations.of(context)!;
+    final translations = _getTranslations(context);
+    final filename = _generateExcelFilename(orientation, translations);
     
     // Exporting report
     
@@ -212,7 +214,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
       // Exporting user report (single or multiple)
       
       try {
-        UserExcelExportService.exportExcelWithMultipleSheets(_userReportData, widget.reportConfig, translations: _getTranslations(context));
+        UserExcelExportService.exportExcelWithMultipleSheets(_userReportData, widget.reportConfig, filename: filename, translations: translations);
         // Excel export completed successfully
         final sheetCount = _userReportData.length;
         final message = sheetCount > 1 
@@ -231,7 +233,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
       // Exporting project report (single or multiple)
       
       try {
-        ProjectExcelExportService.exportExcelWithMultipleProjectSheets(_projectReportData, widget.reportConfig);
+        ProjectExcelExportService.exportExcelWithMultipleProjectSheets(_projectReportData, widget.reportConfig, filename: filename, translations: translations);
         // Excel export completed successfully
         final sheetCount = _projectReportData.length;
         final message = sheetCount > 1 
@@ -250,7 +252,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
       // Exporting client report (single or multiple)
       
       try {
-        ClientExcelExportService.exportExcelWithMultipleClientSheets(_clientReportData, widget.reportConfig);
+        ClientExcelExportService.exportExcelWithMultipleClientSheets(_clientReportData, widget.reportConfig, filename: filename, translations: translations);
         // Excel export completed successfully
         final sheetCount = _clientReportData.length;
         final message = sheetCount > 1 
@@ -267,8 +269,62 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
       }
     } else {
       // Exporting single report (user or time)
-      UserExcelExportService.exportSingleReport(_reportData, widget.reportConfig, translations: _getTranslations(context));
+      UserExcelExportService.exportSingleReport(_reportData, widget.reportConfig, filename: filename, translations: translations);
     }
+  }
+
+  // Translate report name dynamically based on current language
+  String _translateReportName(String storedName, AppLocalizations l10n) {
+    // Check if the name starts with an orientation key
+    final orientationMap = {
+      'project': l10n.project,
+      'worker': l10n.worker,
+      'client': l10n.client,
+    };
+    
+    for (final entry in orientationMap.entries) {
+      if (storedName.startsWith('${entry.key} ')) {
+        // Replace the orientation key with translated name and capitalize first letter
+        final translatedName = storedName.replaceFirst('${entry.key} ', '${entry.value} ');
+        return translatedName.isNotEmpty 
+            ? translatedName[0].toUpperCase() + translatedName.substring(1)
+            : translatedName;
+      }
+    }
+    
+    // If no orientation key found, return the original name with first letter capitalized
+    return storedName.isNotEmpty 
+        ? storedName[0].toUpperCase() + storedName.substring(1)
+        : storedName;
+  }
+
+  // Generate consistent Excel filename with proper formatting and translation
+  String _generateExcelFilename(String orientation, Map<String, String>? translations) {
+    final now = DateTime.now();
+    final dateStr = DateFormat('yyyy.MM.dd').format(now);
+    final timeStr = DateFormat('HH-mm').format(now);
+    
+    String baseName;
+    switch (orientation) {
+      case 'worker':
+        baseName = translations?['multiUserReport'] ?? 'multi_user_report';
+        break;
+      case 'project':
+        baseName = translations?['multiProjectReport'] ?? 'multi_project_report';
+        break;
+      case 'client':
+        baseName = translations?['clientReport'] ?? 'client_report';
+        break;
+      default:
+        baseName = translations?['report'] ?? 'report';
+    }
+    
+    // Capitalize first letter
+    final capitalizedName = baseName.isNotEmpty 
+        ? baseName[0].toUpperCase() + baseName.substring(1)
+        : baseName;
+    
+    return '$capitalizedName $dateStr $timeStr.xlsx';
   }
 
   Map<String, String> _getTranslations(BuildContext context) {
@@ -281,8 +337,10 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
       'generated': l10n.generated,
       'totalSessions': l10n.totalSessions,
       'userLabel': l10n.userLabel,
+      'clientLabel': l10n.clientLabel,
       'totalTime': l10n.totalTime,
       'totalExpenses': l10n.totalExpenses,
+      'totalProjects': l10n.totalProjects,
       'overtimeBalance': l10n.overtimeBalance,
       'vacationBalance': l10n.vacationBalance,
       'date': l10n.date,
@@ -290,9 +348,23 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
       'end': l10n.end,
       'duration': l10n.duration,
       'project': l10n.project,
+      'projectLabel': l10n.projectLabel,
+      'worker': l10n.worker,
+      'projectName': l10n.projectName,
       'expenses': l10n.expenses,
       'amount': l10n.amount,
       'note': l10n.note,
+      'ref': l10n.ref,
+      'reference': l10n.reference,
+      'address': l10n.address,
+      'contactPerson': l10n.contactPerson,
+      'email': l10n.email,
+      'phone': l10n.phone,
+      'city': l10n.city,
+      'country': l10n.country,
+      'clientReport': l10n.clientReport,
+      'multiProjectReport': l10n.multiProjectReport,
+      'multiUserReport': l10n.multiUserReport,
     };
   }
 
@@ -318,7 +390,7 @@ class _SimpleDetailedReportState extends State<SimpleDetailedReport> with Single
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.reportConfig['name']?.toString() ?? l10n.detailedReport,
+                        _translateReportName(widget.reportConfig['name']?.toString() ?? l10n.detailedReport, l10n),
                         style: TextStyle(
                           fontSize: 18,
                           color: colors.primaryBlue,

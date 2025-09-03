@@ -1088,4 +1088,13 @@ class AppLocalizationsFr extends AppLocalizationsEn {
   
   @override
   String get weekPrefix => 'S';
+  
+  @override
+  String get clientReport => 'client';
+  
+  @override
+  String get multiProjectReport => 'projet';
+  
+  @override
+  String get multiUserReport => 'travailleur';
 }

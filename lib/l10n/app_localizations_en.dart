@@ -1329,4 +1329,13 @@ class AppLocalizationsEn extends AppLocalizations {
   
   @override
   String get weekPrefix => 'W';
+  
+  @override
+  String get clientReport => 'client';
+  
+  @override
+  String get multiProjectReport => 'project';
+  
+  @override
+  String get multiUserReport => 'worker';
 }

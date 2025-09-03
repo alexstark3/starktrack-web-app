@@ -632,4 +632,13 @@ class AppLocalizationsIt extends AppLocalizationsEn {
   
   @override
   String get weekPrefix => 'S';
+  
+  @override
+  String get clientReport => 'cliente';
+  
+  @override
+  String get multiProjectReport => 'progetto';
+  
+  @override
+  String get multiUserReport => 'lavoratore';
 }

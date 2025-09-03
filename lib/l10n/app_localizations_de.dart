@@ -159,7 +159,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get expenses => 'Ausgaben';
 
   @override
-  String get perDiem => 'Spesen';
+  String get perDiem => 'Spese';
 
   @override
   String get worked => 'Gearbeitet';
@@ -674,10 +674,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get perDiemAmount => '16.00 CHF';
 
   @override
-  String get perDiemAlreadyUsed => 'Spesen bereits für diesen Tag verwendet';
+  String get perDiemAlreadyUsed => 'Spese bereits für diesen Tag verwendet';
 
   @override
-  String get perDiemAlreadyEntered => 'Spesen bereits heute eingegeben';
+  String get perDiemAlreadyEntered => 'Spese bereits heute eingegeben';
 
   @override
   String get startAndEndTimesCannotBeEmpty =>
@@ -773,7 +773,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get perDiemAlreadyUsedInAnotherSession =>
-      'Spesen bereits in einer anderen Sitzung heute verwendet';
+      'Spese bereits in einer anderen Sitzung heute verwendet';
 
   @override
   String get all => 'Alle';
@@ -841,7 +841,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String perDiemLabel(String amount) {
-    return 'Spesen $amount CHF';
+    return 'Spese $amount CHF';
   }
 
   @override
@@ -1326,4 +1326,13 @@ class AppLocalizationsDe extends AppLocalizations {
   
   @override
   String get weekPrefix => 'W';
+  
+  @override
+  String get clientReport => 'kunde';
+  
+  @override
+  String get multiProjectReport => 'projekt';
+  
+  @override
+  String get multiUserReport => 'mitarbeiter';
 }

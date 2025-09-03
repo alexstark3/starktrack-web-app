@@ -32,6 +32,31 @@ class _ReportsScreenState extends State<ReportsScreen> {
     _loadSavedReports();
   }
 
+  // Translate report name dynamically based on current language
+  String _translateReportName(String storedName, AppLocalizations l10n) {
+    // Check if the name starts with an orientation key
+    final orientationMap = {
+      'project': l10n.project,
+      'worker': l10n.worker,
+      'client': l10n.client,
+    };
+    
+    for (final entry in orientationMap.entries) {
+      if (storedName.startsWith('${entry.key} ')) {
+        // Replace the orientation key with translated name and capitalize first letter
+        final translatedName = storedName.replaceFirst('${entry.key} ', '${entry.value} ');
+        return translatedName.isNotEmpty 
+            ? translatedName[0].toUpperCase() + translatedName.substring(1)
+            : translatedName;
+      }
+    }
+    
+    // If no orientation key found, return the original name with first letter capitalized
+    return storedName.isNotEmpty 
+        ? storedName[0].toUpperCase() + storedName.substring(1)
+        : storedName;
+  }
+
   Future<void> _loadSavedReports() async {
     try {
   
@@ -358,7 +383,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                           children: [
                             // Report Title
                             Text(
-                              report['name'] ?? 'Unnamed Report',
+                              _translateReportName(report['name'] ?? 'Unnamed Report', l10n),
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
