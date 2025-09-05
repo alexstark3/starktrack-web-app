@@ -10,6 +10,9 @@
         ],
         "admin": [
           "admin-starktracklog"
+        ],
+        "marketing": [
+          "starktrack-marketing"
         ]
       }
     }
