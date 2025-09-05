@@ -420,8 +420,7 @@ class _AddClientDialogState extends State<AddClientDialog> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error =
-            'Fehler beim Speichern des ${AppLocalizations.of(context)!.client.toLowerCase()}. Bitte versuchen Sie es erneut.';
+        _error = '${AppLocalizations.of(context)!.error}: ${AppLocalizations.of(context)!.failedToSaveReport} ${AppLocalizations.of(context)!.client.toLowerCase()}.';
         _isSaving = false;
       });
     }
@@ -439,7 +438,7 @@ class EditClientDialog extends StatefulWidget {
 }
 
 class _EditClientDialogState extends State<EditClientDialog> {
-  final _formKey = GlobalKey<FormState>();
+  final _editFormKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
@@ -509,7 +508,7 @@ class _EditClientDialogState extends State<EditClientDialog> {
         padding: const EdgeInsets.all(28),
         child: SingleChildScrollView(
           child: Form(
-            key: _formKey,
+            key: _editFormKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -678,7 +677,7 @@ class _EditClientDialogState extends State<EditClientDialog> {
       _error = null;
     });
 
-    if (!_formKey.currentState!.validate()) {
+    if (!_editFormKey.currentState!.validate()) {
       setState(() => _isSaving = false);
       return;
     }

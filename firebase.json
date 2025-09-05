@@ -25,18 +25,33 @@
   "hosting": [
     {
       "target": "main",
-    "public": "build/web",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ]
+      "public": "build/web",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    },
+    {
+      "target": "marketing",
+      "public": "build/marketing",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
     },
     {
       "target": "admin",
@@ -58,6 +73,13 @@
     "main": {
       "hosting": {
         "starktrack": [
+          "starktracklog"
+        ]
+      }
+    },
+    "marketing": {
+      "hosting": {
+        "starktrack-marketing": [
           "starktracklog"
         ]
       }

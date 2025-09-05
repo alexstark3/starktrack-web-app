@@ -7,10 +7,12 @@ import '../../../../widgets/app_search_field.dart';
 
 class BalanceTab extends StatefulWidget {
   final String companyId;
+  final Map<String, dynamic> access;
 
   const BalanceTab({
     super.key,
     required this.companyId,
+    required this.access,
   });
 
   @override
@@ -87,6 +89,40 @@ class _BalanceTabState extends State<BalanceTab> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
     final l10n = AppLocalizations.of(context)!;
+
+    // Check if time_off module is enabled
+    if (widget.access['time_off'] != true) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.calendar_month_outlined,
+              size: 64,
+              color: colors.darkGray,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Time Off Module Required',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: colors.darkGray,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'The Time Off module must be enabled to access balance management.',
+              style: TextStyle(
+                fontSize: 14,
+                color: colors.darkGray,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

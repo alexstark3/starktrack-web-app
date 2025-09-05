@@ -10,7 +10,13 @@ import 'package:starktrack/utils/app_logger.dart';
 
 class TeamApprovalsScreen extends StatefulWidget {
   final String companyId;
-  const TeamApprovalsScreen({super.key, required this.companyId});
+  final Map<String, dynamic> access;
+  
+  const TeamApprovalsScreen({
+    super.key, 
+    required this.companyId,
+    required this.access,
+  });
 
   @override
   State<TeamApprovalsScreen> createState() => _TeamApprovalsScreenState();
@@ -22,6 +28,40 @@ class _TeamApprovalsScreenState extends State<TeamApprovalsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Check if time_off module is enabled
+    if (widget.access['time_off'] != true) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.calendar_month_outlined,
+              size: 64,
+              color: Theme.of(context).extension<AppColors>()!.darkGray,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Time Off Module Required',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).extension<AppColors>()!.darkGray,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'The Time Off module must be enabled to access approvals.',
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).extension<AppColors>()!.darkGray,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
     return Column(
       children: [
         Padding(

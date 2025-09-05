@@ -1,47 +1,81 @@
-const functions = require("firebase-functions");
-const admin = require("firebase-admin");
-admin.initializeApp();
+const {onDocumentCreated} = require("firebase-functions/v2/firestore");
+const {initializeApp} = require("firebase-admin/app");
+const {getFirestore, FieldValue} = require("firebase-admin/firestore");
+const nodemailer = require("nodemailer");
 
-exports.createCompanyUser = functions.https.onCall(async (data, context) => {
-  // Only allow signed-in users (admins) to call this function
-  if (!context.auth) {
-        throw new functions.https.HttpsError(
-                "unauthenticated",
-                "Not signed in",
-        );
-  }
+initializeApp();
 
-  // Optionally: Check if context.auth.uid is an admin in the company
-  const {email, password, companyId, userData} = data;
+// Email configuration
+const emailConfig = {
+  service: "gmail",
+  auth: {
+    user: "a.stark.ch@gmail.com", // Replace with your email
+    pass: "npen xegx aeit uyag", // Replace with Gmail app password
+  },
+};
 
-  // 1. Create Auth user
-  let userRecord;
-  try {
-        userRecord = await admin.auth().createUser({
-                email,
-                password,
+// Create transporter
+const transporter = nodemailer.createTransport(emailConfig);
+
+
+// Contact form email function
+exports.sendContactEmail = onDocumentCreated("contact_messages/{messageId}", async (event) => {
+      const messageData = event.data.data();
+      const messageId = event.params.messageId;
+
+      try {
+        // Email content
+        const mailOptions = {
+          from: emailConfig.auth.user,
+          to: "a.stark.ch@gmail.com", // Replace with your email
+          replyTo: messageData.email,
+          subject: `New Contact Form Message from ${messageData.name}`,
+          html: `
+          <h2>New Contact Form Message</h2>
+          <p><strong>From:</strong> ${messageData.name} 
+          (${messageData.email})</p>
+          <p><strong>Company:</strong> ${messageData.company}</p>
+          <p><strong>Message:</strong></p>
+          <p>${messageData.message.replace(/\n/g, "<br>")}</p>
+          <hr>
+          <p><em>Sent via Stark Track Contact Form</em></p>
+        `,
+          text: `
+          New Contact Form Message
+          
+          From: ${messageData.name} (${messageData.email})
+          Company: ${messageData.company}
+          
+          Message:
+          ${messageData.message}
+          
+          ---
+          Sent via Stark Track Contact Form
+        `,
+        };
+
+        // Send email
+        await transporter.sendMail(mailOptions);
+
+        // Update status in Firestore
+        await event.data.ref.update({
+          status: "sent",
+          sentAt: FieldValue.serverTimestamp(),
         });
-  } catch (e) {
-        throw new functions.https.HttpsError(
-                "already-exists",
-                "Email already in use",
-        );
-  }
 
-  // 2. Write to /companies/{companyId}/users/{newUid}
-  await admin.firestore().collection("companies")
-      .doc(companyId)
-      .collection("users")
-      .doc(userRecord.uid)
-      .set(userData);
+        console.log("Email sent successfully for message:", messageId);
+        return null;
+      } catch (error) {
+        console.error("Error sending email:", error);
 
-  // 3. Write to /userCompany/{newUid}
-  await admin.firestore().collection("userCompany")
-      .doc(userRecord.uid)
-      .set({email, companyId});
+        // Update status in Firestore
+        await event.data.ref.update({
+          status: "failed",
+          error: error.message,
+          failedAt: FieldValue.serverTimestamp(),
+        });
 
-  return {
-      success: true,
-      uid: userRecord.uid,
-  };
-});
+        throw error;
+      }
+    });
+

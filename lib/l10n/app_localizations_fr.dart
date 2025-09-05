@@ -333,6 +333,263 @@ class AppLocalizationsFr extends AppLocalizationsEn {
   @override
   String get enterYourPassword => 'Entrez votre mot de passe';
 
+  String get forgotPassword => 'Mot de passe oublié';
+
+  @override
+  String get home => 'Accueil';
+
+  @override
+  String get features => 'Fonctionnalités';
+
+  @override
+  String get pricing => 'Tarifs';
+
+  @override
+  String get getStarted => 'Commencer';
+
+  @override
+  String get aboutUs => 'À propos';
+
+  @override
+  String get getInTouch => 'Nous contacter';
+
+  @override
+  String get sendUsMessage => 'Envoyez-nous un message';
+
+  @override
+  String get fullName => 'Nom complet';
+
+  @override
+  String get enterFullName => 'Entrez votre nom complet';
+
+  @override
+  String get emailAddress => 'Adresse e-mail';
+
+  @override
+  String get enterEmailAddress => 'Entrez votre adresse e-mail';
+
+  @override
+  String get company => 'Entreprise';
+
+  @override
+  String get enterCompanyName => 'Entrez le nom de votre entreprise';
+
+  @override
+  String get message => 'Message';
+
+  @override
+  String get sendMessage => 'Envoyer le message';
+
+  @override
+  String get pleaseEnterName => 'Veuillez entrer votre nom';
+
+  @override
+  String get pleaseEnterEmail => 'Veuillez entrer votre e-mail';
+
+  @override
+  String get pleaseEnterValidEmail => 'Veuillez entrer une adresse e-mail valide';
+
+  @override
+  String get pleaseEnterMessage => 'Veuillez entrer votre message';
+
+  @override
+  String get notProvided => 'Non fourni';
+
+  @override
+  String get timeTrackingMadeSimple => 'Suivi du temps simplifié';
+
+  @override
+  String get professionalTimeTracking => 'Suivi du temps professionnel et gestion de projet pour équipes de toutes tailles. Accès depuis n\'importe quel appareil - bureau, tablette ou mobile. Suivez le temps, gérez les projets et boostez la productivité.';
+
+  @override
+  String get startFreeTrial => 'Commencer l\'essai gratuit';
+
+  @override
+  String get watchDemo => 'Voir la démo';
+
+  @override
+  String get dashboardPreview => 'Aperçu du tableau de bord';
+
+  @override
+  String get everythingYouNeedToTrackTime => 'Tout ce dont vous avez besoin pour suivre le temps';
+
+  @override
+  String get powerfulFeaturesDesigned => 'Fonctionnalités puissantes conçues pour rationaliser votre flux de travail';
+
+  @override
+  String get timeTracking => 'Suivi du temps';
+
+  @override
+  String get trackTimeWithPrecision => 'Suivez le temps avec précision. Démarrez, arrêtez et gérez vos sessions de travail sans effort.';
+
+  @override
+  String get teamManagement => 'Gestion d\'équipe';
+
+  @override
+  String get manageYourTeam => 'Gérez votre équipe, assignez des projets et suivez les progrès de tous en temps réel.';
+
+  @override
+  String get projectManagement => 'Gestion de projet';
+
+  @override
+  String get organizeAndTrack => 'Organisez et suivez tous vos projets en un seul endroit. Définissez des échéances, assignez des tâches et surveillez les progrès.';
+
+  @override
+  String get mobileResponsive => 'Responsive mobile';
+
+  @override
+  String get accessFromAnywhere => 'Accédez à vos données de suivi du temps de n\'importe où. Fonctionne parfaitement sur ordinateur, tablette et appareils mobiles.';
+
+  @override
+  String get howItWorks => 'Comment ça marche';
+
+  @override
+  String get signUp => 'Contactez-nous';
+
+  @override
+  String get startTracking => 'Commencer le suivi';
+
+  @override
+  String get reportsAnalytics => 'Rapports et analyses';
+
+  @override
+  String get generateDetailedReports => 'Générez des rapports détaillés et des insights pour optimiser la productivité de votre équipe.';
+
+  @override
+  String get secureReliable => 'Sécurisé et fiable';
+
+  @override
+  String get dataSafeWithEnterprise => 'Vos données sont sécurisées avec une sécurité de niveau entreprise et une garantie de disponibilité de 99,9%.';
+
+  @override
+  String get createAccountAndSetup => 'Contactez-nous pour une consultation et nous organiserons le plan parfait pour vos besoins.';
+
+  @override
+  String get beginTrackingTime => 'Commencez à suivre le temps sur les projets et tâches immédiatement.';
+
+  @override
+  String get analyzeAndImprove => 'Analyser et améliorer';
+
+  @override
+  String get reviewReportsAndOptimize => 'Examinez les rapports et optimisez la productivité de votre équipe.';
+
+  @override
+  String get simpleTransparentPricing => 'Tarification simple et transparente';
+
+  @override
+  String get choosePlanThatFits => 'Choisissez le plan qui correspond à la taille de votre équipe';
+
+  @override
+  String get demoTrial => 'Version d\'essai';
+
+  @override
+  String get tryBeforeYouBuy => 'Essayez avant d\'acheter';
+
+  @override
+  String get fourteenDayFreeTrial => 'Essai gratuit de 14 jours';
+
+  @override
+  String get fullAccessToAllFeatures => 'Accès complet à toutes les fonctionnalités';
+
+  @override
+  String get upToFiveUsers => 'Jusqu\'à 5 utilisateurs';
+
+  @override
+  String get emailSupport => 'Support par e-mail';
+
+  @override
+  String get noCreditCardRequired => 'Aucune carte de crédit requise';
+
+  @override
+  String get starter => 'Starter';
+
+  @override
+  String get perfectForIndividuals => 'Parfait pour les particuliers';
+
+  @override
+  String get basicTimeTracking => 'Suivi du temps de base';
+
+  @override
+  String get mobileWebAccess => 'Accès web mobile';
+
+  @override
+  String get professional => 'Professionnel';
+
+  @override
+  String get bestForSmallTeams => 'Idéal pour les petites équipes';
+
+  @override
+  String get bestForMediumTeams => 'Idéal pour les équipes moyennes';
+
+  @override
+  String get starterPrice => 'CHF 5';
+
+  @override
+  String get professionalPrice => 'CHF 9';
+
+  @override
+  String get perUser => '-par utilisateur-';
+
+  @override
+  String get free => 'Gratuit';
+
+  @override
+  String get custom => 'Personnalisé';
+
+  @override
+  String get unlimitedProjects => 'Projets illimités';
+
+  @override
+  String get advancedReporting => 'Rapports avancés';
+
+  @override
+  String get timeOffManagement => 'Gestion des congés';
+
+  @override
+  String get prioritySupport => 'Support prioritaire';
+
+  @override
+  String get integrations => 'Intégrations';
+
+  @override
+  String get enterprise => 'Enterprise';
+
+  @override
+  String get forLargeOrganizations => 'Pour les grandes organisations';
+
+  @override
+  String get everythingInProfessional => 'Tout ce qui est dans Professionnel';
+
+  @override
+  String get customIntegrations => 'Intégrations personnalisées';
+
+  @override
+  String get customReporting => 'Rapports personnalisés';
+
+  @override
+  String get dedicatedSupport => 'Support dédié';
+
+  @override
+  String get mostPopular => 'Le plus populaire';
+
+  @override
+  String get readyToGetStarted => 'Prêt à commencer ?';
+
+  @override
+  String get joinOtherTeams => 'Rejoignez les autres équipes qui utilisent déjà Stark Track pour booster votre productivité.';
+
+  @override
+  String get startYourFreeTrial => 'Commencez votre essai gratuit';
+
+  @override
+  String get professionalTimeTrackingForTeams => 'Suivi du temps professionnel et gestion de projet pour les équipes.';
+
+  @override
+  String get allRightsReserved => 'Tous droits réservés.';
+
+  @override
+  String get haveQuestionsAboutStarkTrack => 'Vous avez des questions sur Stark Track ? Nous aimerions avoir de vos nouvelles !';
+
   // Authentication and User Management
   @override
   String get login => 'Connexion';
@@ -545,7 +802,7 @@ class AppLocalizationsFr extends AppLocalizationsEn {
   @override
   String get yearly => 'Annuel';
   @override
-  String get monthly => 'Mensuel';
+  String get monthly => 'mensuel';
   @override
   String get ok => 'OK';
   @override
@@ -951,6 +1208,81 @@ class AppLocalizationsFr extends AppLocalizationsEn {
   
   @override
   String get allProjects => 'Tous les projets';
+
+  @override
+  String get selectLanguage => 'Sélectionner la langue';
+
+  @override
+  String get contactPersonName => 'Prénom du contact';
+  
+  @override
+  String get contactPersonSurname => 'Nom du contact';
+  
+  @override
+  String get companyAddress => 'Adresse de l\'entreprise';
+  
+  @override
+  String get numberOfWorkers => 'Nombre d\'employés';
+  
+  @override
+  String get phoneNumber => 'Numéro de téléphone';
+  
+  @override
+  String get interestedIn => 'Intéressé par';
+  
+  @override
+  String get enterInterestedIn => 'Entrez ce qui vous intéresse';
+
+  @override
+  String get ourStory => 'Notre Histoire';
+  
+  @override
+  String get ourStoryContent => 'Stark Track est né d\'un besoin simple : rendre le suivi du temps sans effort et puissant pour les équipes de toutes tailles. Nous croyons que lorsque les équipes peuvent facilement suivre leur temps et gérer leurs projets, elles peuvent se concentrer sur ce qui compte le plus - livrer un excellent travail.';
+  
+  @override
+  String get ourMission => 'Notre Mission';
+  
+  @override
+  String get ourMissionContent => 'Donner aux équipes les moyens d\'utiliser des outils intuitifs de suivi du temps et de gestion de projet qui stimulent la productivité et fournissent des informations précieuses sur la façon dont le temps est passé.';
+  
+  @override
+  String get ourValues => 'Nos Valeurs';
+  
+  @override
+  String get ourValuesContent => 'Nous nous engageons envers la simplicité, la fiabilité et l\'expérience utilisateur. Chaque fonctionnalité que nous construisons est conçue avec nos utilisateurs à l\'esprit, garantissant que le suivi du temps améliore plutôt que d\'entraver la productivité.';
+  
+  @override
+  String get whyChooseStarkTrack => 'Pourquoi choisir Stark Track ?';
+  
+  @override
+  String get whyChooseStarkTrackContent => '• Interface simple et intuitive\n• Fonctionne sur tout appareil - bureau, tablette ou mobile\n• Rapports et analyses puissants\n• Sécurisé et fiable\n• Tarifs abordables pour les équipes de toutes tailles\n• Excellent support client';
+  
+  @override
+  String get enterContactPersonName => 'Entrez le prénom du contact';
+  
+  @override
+  String get enterContactPersonSurname => 'Entrez le nom du contact';
+  
+  @override
+  String get enterCompanyAddress => 'Entrez l\'adresse de l\'entreprise';
+  
+  @override
+  String get enterNumberOfWorkers => 'Entrez le nombre d\'employés';
+  
+  @override
+  String get enterPhoneNumber => 'Entrez le numéro de téléphone';
+  
+  @override
+  String get pleaseEnterContactPersonName => 'Veuillez entrer le prénom du contact';
+  
+  @override
+  String get pleaseEnterContactPersonSurname => 'Veuillez entrer le nom du contact';
+  
+  @override
+  String get pleaseEnterPhoneNumber => 'Veuillez entrer le numéro de téléphone';
+  
+  @override
+  String get pleaseEnterValidPhoneNumber => 'Veuillez entrer un numéro de téléphone valide';
   
   @override
   String get allClients => 'Tous les clients';

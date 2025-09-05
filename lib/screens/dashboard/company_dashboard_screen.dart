@@ -110,6 +110,7 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
               companyId: widget.companyId,
               userId: widget.userId,
               selectedMember: _selectedMember, // Pass selected member
+              access: widget.access, // Pass access information
               onSelectMember: (member) {
                 // Add callback like projects/clients
                 setState(() {
@@ -150,6 +151,7 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
               key: const PageStorageKey('admin'),
               companyId: widget.companyId,
               currentUserRoles: widget.roles,
+              access: widget.access,
             ),
           if (tabLabels.contains(l10n.settings))
             const SettingsScreen(key: PageStorageKey('settings')),

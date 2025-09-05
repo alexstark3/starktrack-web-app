@@ -76,10 +76,25 @@ class CompanyModuleService {
     }
   }
 
-  /// Update company modules
+  /// Update company modules and sync with all users
   static Future<bool> updateCompanyModules(
       String companyId, List<String> modules) async {
     try {
+      // Get current company modules to determine what was removed
+      final currentModules = await getCompanyModules(companyId);
+      final removedModules = currentModules.where((module) => !modules.contains(module)).toList();
+      
+      AppLogger.info('Company $companyId: Current modules: $currentModules');
+      AppLogger.info('Company $companyId: New modules: $modules');
+      AppLogger.info('Company $companyId: Removed modules: $removedModules');
+      
+      // Remove modules from all users that were removed from company
+      for (final removedModule in removedModules) {
+        AppLogger.info('Removing module "$removedModule" from all users in company $companyId');
+        await _removeModuleFromAllUsers(companyId, removedModule);
+      }
+      
+      // Update company modules
       await FirebaseFirestore.instance
           .collection(_companiesCollection)
           .doc(companyId)
@@ -87,6 +102,8 @@ class CompanyModuleService {
         'modules': modules,
         'updatedAt': FieldValue.serverTimestamp(),
       });
+      
+      AppLogger.info('Successfully updated company $companyId modules to: $modules');
       return true;
     } catch (e) {
       AppLogger.error('Error updating company modules: $e');
@@ -144,16 +161,69 @@ class CompanyModuleService {
     }
   }
 
-  /// Remove module from company
+  /// Remove module from company and all users in that company
   static Future<bool> removeModuleFromCompany(
       String companyId, String module) async {
     try {
+      // First, remove module from all users in the company
+      await _removeModuleFromAllUsers(companyId, module);
+      
+      // Then, remove module from company
       final currentModules = await getCompanyModules(companyId);
       currentModules.remove(module);
       return await updateCompanyModules(companyId, currentModules);
     } catch (e) {
       AppLogger.error('Error removing module from company: $e');
       return false;
+    }
+  }
+
+  /// Remove module from all users in a company
+  static Future<void> _removeModuleFromAllUsers(String companyId, String module) async {
+    try {
+      // Get all users in the company
+      final usersSnapshot = await FirebaseFirestore.instance
+          .collection(_companiesCollection)
+          .doc(companyId)
+          .collection('users')
+          .get();
+
+      AppLogger.info('Found ${usersSnapshot.docs.length} users in company $companyId');
+
+      // Update each user to remove the module
+      final batch = FirebaseFirestore.instance.batch();
+      int updatedUsers = 0;
+      
+      for (final userDoc in usersSnapshot.docs) {
+        final userData = userDoc.data();
+        final userModules = (userData['modules'] as List?)?.cast<String>() ?? <String>[];
+        
+        AppLogger.info('User ${userDoc.id} has modules: $userModules');
+        
+        // Only update if user actually has this module
+        if (userModules.contains(module)) {
+          userModules.remove(module);
+          batch.update(userDoc.reference, {
+            'modules': userModules,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+          updatedUsers++;
+          AppLogger.info('Will remove module "$module" from user ${userDoc.id}. New modules: $userModules');
+        } else {
+          AppLogger.info('User ${userDoc.id} does not have module "$module"');
+        }
+      }
+      
+      // Commit all updates
+      if (updatedUsers > 0) {
+        await batch.commit();
+        AppLogger.info('Successfully removed module "$module" from $updatedUsers users in company $companyId');
+      } else {
+        AppLogger.info('No users had module "$module" to remove in company $companyId');
+      }
+    } catch (e) {
+      AppLogger.error('Error removing module from users: $e');
+      rethrow;
     }
   }
 

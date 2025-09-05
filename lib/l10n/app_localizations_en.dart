@@ -536,7 +536,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yearly => 'Yearly';
 
   @override
-  String get monthly => 'Monthly';
+  String get monthly => 'monthly';
 
   @override
   String get ok => 'OK';
@@ -931,6 +931,263 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enterYourPassword => 'Enter your password';
+
+  String get forgotPassword => 'Forgot my password';
+
+  @override
+  String get home => 'Home';
+
+  @override
+  String get features => 'Features';
+
+  @override
+  String get pricing => 'Pricing';
+
+  @override
+  String get getStarted => 'Get Started';
+
+  @override
+  String get aboutUs => 'About Us';
+
+  @override
+  String get getInTouch => 'Get in Touch';
+
+  @override
+  String get sendUsMessage => 'Send us a Message';
+
+  @override
+  String get fullName => 'Full Name';
+
+  @override
+  String get enterFullName => 'Enter your full name';
+
+  @override
+  String get emailAddress => 'Email Address';
+
+  @override
+  String get enterEmailAddress => 'Enter your email address';
+
+  @override
+  String get company => 'Company';
+
+  @override
+  String get enterCompanyName => 'Enter your company name';
+
+  @override
+  String get message => 'Message';
+
+  @override
+  String get sendMessage => 'Send Message';
+
+  @override
+  String get pleaseEnterName => 'Please enter your name';
+
+  @override
+  String get pleaseEnterEmail => 'Please enter your email';
+
+  @override
+  String get pleaseEnterValidEmail => 'Please enter a valid email address';
+
+  @override
+  String get pleaseEnterMessage => 'Please enter your message';
+
+  @override
+  String get notProvided => 'Not provided';
+
+  @override
+  String get timeTrackingMadeSimple => 'Time Tracking Made Simple';
+
+  @override
+  String get professionalTimeTracking => 'Professional time tracking and project management for teams of all sizes. Access from any device - desktop, tablet, or mobile. Track time, manage projects, and boost productivity.';
+
+  @override
+  String get startFreeTrial => 'Start Free Trial';
+
+  @override
+  String get watchDemo => 'Watch Demo';
+
+  @override
+  String get dashboardPreview => 'Dashboard Preview';
+
+  @override
+  String get everythingYouNeedToTrackTime => 'Everything You Need to Track Time';
+
+  @override
+  String get powerfulFeaturesDesigned => 'Powerful features designed to streamline your workflow';
+
+  @override
+  String get timeTracking => 'Time Tracking';
+
+  @override
+  String get trackTimeWithPrecision => 'Track time with precision. Start, stop, and manage your work sessions effortlessly.';
+
+  @override
+  String get teamManagement => 'Team Management';
+
+  @override
+  String get manageYourTeam => 'Manage your team, assign projects, and track everyone\'s progress in real-time.';
+
+  @override
+  String get projectManagement => 'Project Management';
+
+  @override
+  String get organizeAndTrack => 'Organize and track all your projects in one place. Set deadlines, assign tasks, and monitor progress.';
+
+  @override
+  String get mobileResponsive => 'Mobile Responsive';
+
+  @override
+  String get accessFromAnywhere => 'Access your time tracking data from anywhere. Works perfectly on desktop, tablet, and mobile devices.';
+
+  @override
+  String get howItWorks => 'How It Works';
+
+  @override
+  String get signUp => 'Contact Us';
+
+  @override
+  String get startTracking => 'Start Tracking';
+
+  @override
+  String get reportsAnalytics => 'Reports & Analytics';
+
+  @override
+  String get generateDetailedReports => 'Generate detailed reports and insights to optimize your team\'s productivity.';
+
+  @override
+  String get secureReliable => 'Secure & Reliable';
+
+  @override
+  String get dataSafeWithEnterprise => 'Your data is safe with enterprise-grade security and 99.9% uptime guarantee.';
+
+  @override
+  String get createAccountAndSetup => 'Contact us for consultation and we will arrange the perfect Plan for your needs.';
+
+  @override
+  String get beginTrackingTime => 'Begin tracking time on projects and tasks immediately.';
+
+  @override
+  String get analyzeAndImprove => 'Analyze & Improve';
+
+  @override
+  String get reviewReportsAndOptimize => 'Review reports and optimize your team\'s productivity.';
+
+  @override
+  String get simpleTransparentPricing => 'Simple, Transparent Pricing';
+
+  @override
+  String get choosePlanThatFits => 'Choose the plan that fits your team size';
+
+  @override
+  String get demoTrial => 'Demo Trial';
+
+  @override
+  String get tryBeforeYouBuy => 'Try before you buy';
+
+  @override
+  String get fourteenDayFreeTrial => '14-day free trial';
+
+  @override
+  String get fullAccessToAllFeatures => 'Full access to all features';
+
+  @override
+  String get upToFiveUsers => 'Up to 5 users';
+
+  @override
+  String get emailSupport => 'Email support';
+
+  @override
+  String get noCreditCardRequired => 'No credit card required';
+
+  @override
+  String get starter => 'Starter';
+
+  @override
+  String get perfectForIndividuals => 'Perfect for individuals';
+
+  @override
+  String get basicTimeTracking => 'Basic time tracking';
+
+  @override
+  String get mobileWebAccess => 'Mobile web access';
+
+  @override
+  String get professional => 'Professional';
+
+  @override
+  String get bestForSmallTeams => 'Best for small teams';
+
+  @override
+  String get bestForMediumTeams => 'Best for medium teams';
+
+  @override
+  String get starterPrice => 'CHF 5';
+
+  @override
+  String get professionalPrice => 'CHF 9';
+
+  @override
+  String get perUser => '-per User-';
+
+  @override
+  String get free => 'Free';
+
+  @override
+  String get custom => 'Custom';
+
+  @override
+  String get unlimitedProjects => 'Unlimited projects';
+
+  @override
+  String get advancedReporting => 'Advanced reporting';
+
+  @override
+  String get timeOffManagement => 'Time off management';
+
+  @override
+  String get prioritySupport => 'Priority support';
+
+  @override
+  String get integrations => 'Integrations';
+
+  @override
+  String get enterprise => 'Enterprise';
+
+  @override
+  String get forLargeOrganizations => 'For large organizations';
+
+  @override
+  String get everythingInProfessional => 'Everything in Professional';
+
+  @override
+  String get customIntegrations => 'Custom integrations';
+
+  @override
+  String get customReporting => 'Custom reporting';
+
+  @override
+  String get dedicatedSupport => 'Dedicated support';
+
+  @override
+  String get mostPopular => 'Most Popular';
+
+  @override
+  String get readyToGetStarted => 'Ready to Get Started?';
+
+  @override
+  String get joinOtherTeams => 'Join the other teams already using Stark Track to boost your productivity.';
+
+  @override
+  String get startYourFreeTrial => 'Start Your Free Trial';
+
+  @override
+  String get professionalTimeTrackingForTeams => 'Professional time tracking and project management for teams.';
+
+  @override
+  String get allRightsReserved => 'All rights reserved.';
+
+  @override
+  String get haveQuestionsAboutStarkTrack => 'Have questions about Stark Track? We\'d love to hear from you!';
   @override
   String get enterYourEmail => 'Enter your email address';
 
@@ -1161,6 +1418,81 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectProjectAllIfEmpty => 'Select Project (All if empty)';
+
+  @override
+  String get selectLanguage => 'Select Language';
+
+  @override
+  String get contactPersonName => 'Contact Person Name';
+  
+  @override
+  String get contactPersonSurname => 'Contact Person Surname';
+  
+  @override
+  String get companyAddress => 'Company Address';
+  
+  @override
+  String get numberOfWorkers => 'Number of Workers';
+  
+  @override
+  String get phoneNumber => 'Phone Number';
+  
+  @override
+  String get interestedIn => 'Interested In';
+  
+  @override
+  String get enterInterestedIn => 'Enter what you are interested in';
+
+  @override
+  String get ourStory => 'Our Story';
+  
+  @override
+  String get ourStoryContent => 'Stark Track was born from a simple need: to make time tracking effortless and powerful for teams of all sizes. We believe that when teams can easily track their time and manage their projects, they can focus on what matters most - delivering great work.';
+  
+  @override
+  String get ourMission => 'Our Mission';
+  
+  @override
+  String get ourMissionContent => 'To empower teams with intuitive time tracking and project management tools that boost productivity and provide valuable insights into how time is spent.';
+  
+  @override
+  String get ourValues => 'Our Values';
+  
+  @override
+  String get ourValuesContent => 'We are committed to simplicity, reliability, and user experience. Every feature we build is designed with our users in mind, ensuring that time tracking enhances rather than hinders productivity.';
+  
+  @override
+  String get whyChooseStarkTrack => 'Why Choose Stark Track?';
+  
+  @override
+  String get whyChooseStarkTrackContent => '• Simple and intuitive interface\n• Works on any device - desktop, tablet, or mobile\n• Powerful reporting and analytics\n• Secure and reliable\n• Affordable pricing for teams of all sizes\n• Excellent customer support';
+  
+  @override
+  String get enterContactPersonName => 'Enter contact person name';
+  
+  @override
+  String get enterContactPersonSurname => 'Enter contact person surname';
+  
+  @override
+  String get enterCompanyAddress => 'Enter company address';
+  
+  @override
+  String get enterNumberOfWorkers => 'Enter number of workers';
+  
+  @override
+  String get enterPhoneNumber => 'Enter phone number';
+  
+  @override
+  String get pleaseEnterContactPersonName => 'Please enter contact person name';
+  
+  @override
+  String get pleaseEnterContactPersonSurname => 'Please enter contact person surname';
+  
+  @override
+  String get pleaseEnterPhoneNumber => 'Please enter phone number';
+  
+  @override
+  String get pleaseEnterValidPhoneNumber => 'Please enter a valid phone number';
 
   @override
   String get allProjects => 'All Projects';

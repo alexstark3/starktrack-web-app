@@ -86,6 +86,8 @@ service cloud.firestore {
       match /clients/{docId} {
         allow read: if request.auth != null &&
                      hasModuleAccess(request.auth.uid, companyId, 'clients');
+        allow write: if request.auth != null &&
+                      hasModuleAccess(request.auth.uid, companyId, 'clients');
       }
 
       /* ----- Team collection - only for users with team module ----- */
@@ -247,6 +249,13 @@ service cloud.firestore {
 
     match /login_attempts/{emailKey} {
       allow read, write: if true;   /* public for rate-limiting */
+    }
+
+    /* Contact form messages - allow public write for contact form */
+    match /contact_messages/{messageId} {
+      allow create: if true;  /* Allow anyone to create contact messages */
+      allow read, update, delete: if request.auth != null &&
+                                   request.auth.uid == 'KxJqwhobV5T8RBZhXKaHYHlLxaA3'; /* Only super admin can read/update/delete */
     }
 
     match /migrations/{migrationId} {

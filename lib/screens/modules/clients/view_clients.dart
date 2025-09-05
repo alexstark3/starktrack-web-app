@@ -162,42 +162,14 @@ class _ViewClientsState extends State<ViewClients> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Client name and edit button
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            client['name'] ?? '',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: colors.primaryBlue,
-                            ),
-                          ),
-                        ),
-                        ElevatedButton.icon(
-                          onPressed: () async {
-                            final result = await showDialog<bool>(
-                              context: context,
-                              builder: (ctx) => EditClientDialog(
-                                companyId: widget.companyId,
-                                client: widget.client,
-                              ),
-                            );
-                            if (result == true) {
-                              widget.onEdit(); // Call the callback to refresh the parent
-                            }
-                          },
-                          icon: const Icon(Icons.edit, size: 20),
-                          label: Text(AppLocalizations.of(context)!.edit),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: colors.primaryBlue,
-                            foregroundColor: colors.whiteTextOnBlue,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8)),
-                          ),
-                        ),
-                      ],
+                    // Client name
+                    Text(
+                      client['name'] ?? '',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: colors.primaryBlue,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     // Info fields
@@ -217,6 +189,53 @@ class _ViewClientsState extends State<ViewClients> {
                               AppLocalizations.of(context)!.city, client['city'] ?? ''),
                         if (country.isNotEmpty)
                           _infoRow(AppLocalizations.of(context)!.country, country),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    // Action buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: () async {
+                            final result = await showDialog<bool>(
+                              context: context,
+                              builder: (ctx) => EditClientDialog(
+                                companyId: widget.companyId,
+                                client: widget.client,
+                              ),
+                            );
+                            if (result == true) {
+                              widget.onEdit(); // Call the callback to refresh the parent
+                            }
+                          },
+                          icon: const Icon(Icons.edit, size: 16),
+                          label: Text(AppLocalizations.of(context)!.edit),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: colors.primaryBlue,
+                            foregroundColor: colors.whiteTextOnBlue,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 8),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          onPressed: () => _showDeleteConfirmation(
+                            context,
+                            widget.client['id'],
+                            client['name'] ?? '',
+                            widget.companyId,
+                          ),
+                          icon: Icon(
+                            Icons.delete,
+                            color: colors.error,
+                            size: 20,
+                          ),
+                          tooltip: AppLocalizations.of(context)!.delete,
+                        ),
                       ],
                     ),
                   ],
@@ -312,6 +331,117 @@ class _ViewClientsState extends State<ViewClients> {
           ],
         ),
       );
+
+  Future<void> _showDeleteConfirmation(
+    BuildContext context,
+    String clientId,
+    String clientName,
+    String companyId,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = Theme.of(context).extension<AppColors>()!;
+    
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            '${l10n.delete} ${l10n.client}',
+            style: TextStyle(color: colors.primaryBlue),
+          ),
+          content: Text(
+            l10n.confirmDeleteMessage.replaceAll('this user', '"$clientName"'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(l10n.cancel),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colors.error,
+                foregroundColor: colors.whiteTextOnBlue,
+              ),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _deleteClient(context, clientId, companyId);
+              },
+              child: Text(l10n.delete),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _deleteClient(
+    BuildContext context,
+    String clientId,
+    String companyId,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = Theme.of(context).extension<AppColors>()!;
+    
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Row(
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(width: 20),
+              Text('${l10n.delete} ${l10n.client}...'),
+            ],
+          ),
+        );
+      },
+    );
+
+    try {
+      // Delete the main client document
+      await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(companyId)
+          .collection('clients')
+          .doc(clientId)
+          .delete();
+
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${l10n.client} ${l10n.deleteSuccessful}'),
+            backgroundColor: colors.success,
+          ),
+        );
+        
+        // Navigate back to client list
+        widget.onEdit();
+      }
+    } catch (e) {
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${l10n.error}: $e'),
+            backgroundColor: colors.error,
+          ),
+        );
+      }
+    }
+  }
+
 }
 
 class _ProjectCard extends StatelessWidget {

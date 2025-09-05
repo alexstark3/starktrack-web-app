@@ -1700,6 +1700,522 @@ abstract class AppLocalizations {
   String get enterYourPassword;
   String get enterYourEmail;
 
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot my password'**
+  String get forgotPassword;
+
+  /// No description provided for @home.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get home;
+
+  /// No description provided for @features.
+  ///
+  /// In en, this message translates to:
+  /// **'Features'**
+  String get features;
+
+  /// No description provided for @pricing.
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing'**
+  String get pricing;
+
+  /// No description provided for @getStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Started'**
+  String get getStarted;
+
+  /// No description provided for @aboutUs.
+  ///
+  /// In en, this message translates to:
+  /// **'About Us'**
+  String get aboutUs;
+
+  /// No description provided for @getInTouch.
+  ///
+  /// In en, this message translates to:
+  /// **'Get in Touch'**
+  String get getInTouch;
+
+  /// No description provided for @sendUsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Send us a Message'**
+  String get sendUsMessage;
+
+  /// No description provided for @fullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get fullName;
+
+  /// No description provided for @enterFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your full name'**
+  String get enterFullName;
+
+  /// No description provided for @emailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Address'**
+  String get emailAddress;
+
+  /// No description provided for @enterEmailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email address'**
+  String get enterEmailAddress;
+
+  /// No description provided for @company.
+  ///
+  /// In en, this message translates to:
+  /// **'Company (Optional)'**
+  String get company;
+
+  /// No description provided for @enterCompanyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your company name'**
+  String get enterCompanyName;
+
+  /// No description provided for @message.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get message;
+
+  /// No description provided for @sendMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Message'**
+  String get sendMessage;
+
+  /// No description provided for @pleaseEnterName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your name'**
+  String get pleaseEnterName;
+
+  /// No description provided for @pleaseEnterEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your email'**
+  String get pleaseEnterEmail;
+
+  /// No description provided for @pleaseEnterValidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email address'**
+  String get pleaseEnterValidEmail;
+
+  /// No description provided for @pleaseEnterMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your message'**
+  String get pleaseEnterMessage;
+
+  /// No description provided for @notProvided.
+  ///
+  /// In en, this message translates to:
+  /// **'Not provided'**
+  String get notProvided;
+
+  /// No description provided for @timeTrackingMadeSimple.
+  ///
+  /// In en, this message translates to:
+  /// **'Time Tracking Made Simple'**
+  String get timeTrackingMadeSimple;
+
+  /// No description provided for @professionalTimeTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional time tracking and project management for teams of all sizes. Access from any device - desktop, tablet, or mobile. Track time, manage projects, and boost productivity.'**
+  String get professionalTimeTracking;
+
+  /// No description provided for @startFreeTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Free Trial'**
+  String get startFreeTrial;
+
+  /// No description provided for @watchDemo.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch Demo'**
+  String get watchDemo;
+
+  /// No description provided for @dashboardPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard Preview'**
+  String get dashboardPreview;
+
+  /// No description provided for @everythingYouNeedToTrackTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything You Need to Track Time'**
+  String get everythingYouNeedToTrackTime;
+
+  /// No description provided for @powerfulFeaturesDesigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Powerful features designed to streamline your workflow'**
+  String get powerfulFeaturesDesigned;
+
+  /// No description provided for @timeTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Time Tracking'**
+  String get timeTracking;
+
+  /// No description provided for @trackTimeWithPrecision.
+  ///
+  /// In en, this message translates to:
+  /// **'Track time with precision. Start, stop, and manage your work sessions effortlessly.'**
+  String get trackTimeWithPrecision;
+
+  /// No description provided for @teamManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Team Management'**
+  String get teamManagement;
+
+  /// No description provided for @manageYourTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your team, assign projects, and track everyone's progress in real-time.'**
+  String get manageYourTeam;
+
+  /// No description provided for @projectManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Project Management'**
+  String get projectManagement;
+
+  /// No description provided for @organizeAndTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'Organize and track all your projects in one place. Set deadlines, assign tasks, and monitor progress.'**
+  String get organizeAndTrack;
+
+  /// No description provided for @mobileResponsive.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile Responsive'**
+  String get mobileResponsive;
+
+  /// No description provided for @accessFromAnywhere.
+  ///
+  /// In en, this message translates to:
+  /// **'Access your time tracking data from anywhere. Works perfectly on desktop, tablet, and mobile devices.'**
+  String get accessFromAnywhere;
+
+  /// No description provided for @howItWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'How It Works'**
+  String get howItWorks;
+
+  /// No description provided for @signUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Us'**
+  String get signUp;
+
+  /// No description provided for @startTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Tracking'**
+  String get startTracking;
+
+  /// No description provided for @reportsAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports & Analytics'**
+  String get reportsAnalytics;
+
+  /// No description provided for @generateDetailedReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate detailed reports and insights to optimize your team\'s productivity.'**
+  String get generateDetailedReports;
+
+  /// No description provided for @secureReliable.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure & Reliable'**
+  String get secureReliable;
+
+  /// No description provided for @dataSafeWithEnterprise.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data is safe with enterprise-grade security and 99.9% uptime guarantee.'**
+  String get dataSafeWithEnterprise;
+
+  /// No description provided for @createAccountAndSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your account and set up your team in minutes.'**
+  String get createAccountAndSetup;
+
+  /// No description provided for @beginTrackingTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Begin tracking time on projects and tasks immediately.'**
+  String get beginTrackingTime;
+
+  /// No description provided for @analyzeAndImprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze & Improve'**
+  String get analyzeAndImprove;
+
+  /// No description provided for @reviewReportsAndOptimize.
+  ///
+  /// In en, this message translates to:
+  /// **'Review reports and optimize your team\'s productivity.'**
+  String get reviewReportsAndOptimize;
+
+  /// No description provided for @simpleTransparentPricing.
+  ///
+  /// In en, this message translates to:
+  /// **'Simple, Transparent Pricing'**
+  String get simpleTransparentPricing;
+
+  /// No description provided for @choosePlanThatFits.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the plan that fits your team size'**
+  String get choosePlanThatFits;
+
+  /// No description provided for @demoTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo Trial'**
+  String get demoTrial;
+
+  /// No description provided for @tryBeforeYouBuy.
+  ///
+  /// In en, this message translates to:
+  /// **'Try before you buy'**
+  String get tryBeforeYouBuy;
+
+  /// No description provided for @fourteenDayFreeTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'14-day free trial'**
+  String get fourteenDayFreeTrial;
+
+  /// No description provided for @fullAccessToAllFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'Full access to all features'**
+  String get fullAccessToAllFeatures;
+
+  /// No description provided for @upToFiveUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to 5 users'**
+  String get upToFiveUsers;
+
+  /// No description provided for @emailSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Email support'**
+  String get emailSupport;
+
+  /// No description provided for @noCreditCardRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'No credit card required'**
+  String get noCreditCardRequired;
+
+  /// No description provided for @starter.
+  ///
+  /// In en, this message translates to:
+  /// **'Starter'**
+  String get starter;
+
+  /// No description provided for @perfectForIndividuals.
+  ///
+  /// In en, this message translates to:
+  /// **'Perfect for individuals'**
+  String get perfectForIndividuals;
+
+  /// No description provided for @basicTimeTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic time tracking'**
+  String get basicTimeTracking;
+
+  /// No description provided for @mobileWebAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile web access'**
+  String get mobileWebAccess;
+
+  /// No description provided for @professional.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional'**
+  String get professional;
+
+  /// No description provided for @bestForSmallTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'Best for small teams'**
+  String get bestForSmallTeams;
+
+  /// No description provided for @bestForMediumTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'Best for medium teams'**
+  String get bestForMediumTeams;
+
+  /// No description provided for @starterPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'CHF 5/user/month'**
+  String get starterPrice;
+
+  /// No description provided for @professionalPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'CHF 9'**
+  String get professionalPrice;
+
+  /// No description provided for @perUser.
+  ///
+  /// In en, this message translates to:
+  /// **'-per User-'**
+  String get perUser;
+
+  /// No description provided for @free.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get free;
+
+  /// No description provided for @custom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get custom;
+
+  /// No description provided for @unlimitedProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited projects'**
+  String get unlimitedProjects;
+
+  /// No description provided for @advancedReporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced reporting'**
+  String get advancedReporting;
+
+  /// No description provided for @timeOffManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Time off management'**
+  String get timeOffManagement;
+
+  /// No description provided for @prioritySupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority support'**
+  String get prioritySupport;
+
+  /// No description provided for @integrations.
+  ///
+  /// In en, this message translates to:
+  /// **'Integrations'**
+  String get integrations;
+
+  /// No description provided for @enterprise.
+  ///
+  /// In en, this message translates to:
+  /// **'Enterprise'**
+  String get enterprise;
+
+  /// No description provided for @forLargeOrganizations.
+  ///
+  /// In en, this message translates to:
+  /// **'For large organizations'**
+  String get forLargeOrganizations;
+
+  /// No description provided for @everythingInProfessional.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything in Professional'**
+  String get everythingInProfessional;
+
+  /// No description provided for @customIntegrations.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom integrations'**
+  String get customIntegrations;
+
+  /// No description provided for @customReporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom reporting'**
+  String get customReporting;
+
+  /// No description provided for @dedicatedSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Dedicated support'**
+  String get dedicatedSupport;
+
+  /// No description provided for @mostPopular.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Popular'**
+  String get mostPopular;
+
+  /// No description provided for @readyToGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to Get Started?'**
+  String get readyToGetStarted;
+
+  /// No description provided for @joinOtherTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'Join the other teams already using Stark Track to boost your productivity.'**
+  String get joinOtherTeams;
+
+  /// No description provided for @startYourFreeTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Your Free Trial'**
+  String get startYourFreeTrial;
+
+  /// No description provided for @professionalTimeTrackingForTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional time tracking and project management for teams.'**
+  String get professionalTimeTrackingForTeams;
+
+  /// No description provided for @allRightsReserved.
+  ///
+  /// In en, this message translates to:
+  /// **'All rights reserved.'**
+  String get allRightsReserved;
+
+  /// No description provided for @haveQuestionsAboutStarkTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'Have questions about Stark Track? We\'d love to hear from you!'**
+  String get haveQuestionsAboutStarkTrack;
+
   /// No description provided for @confirm.
   ///
   /// In en, this message translates to:
@@ -2125,6 +2641,35 @@ abstract class AppLocalizations {
   String get selectWorkerAllIfEmpty => 'Select Worker (All if empty)';
   String get allWorkers => 'All Workers';
   String get selectProjectAllIfEmpty => 'Select Project (All if empty)';
+  String get selectLanguage => 'Select Language';
+  
+  // Contact form fields
+  String get contactPersonName => 'Contact Person Name';
+  String get contactPersonSurname => 'Contact Person Surname';
+  String get companyAddress => 'Company Address';
+  String get numberOfWorkers => 'Number of Workers';
+  String get phoneNumber => 'Phone Number';
+  String get interestedIn => 'Interested In';
+  String get enterInterestedIn => 'Enter what you are interested in';
+  
+  // About Us page translations
+  String get ourStory => 'Our Story';
+  String get ourStoryContent => 'Stark Track was born from a simple need: to make time tracking effortless and powerful for teams of all sizes. We believe that when teams can easily track their time and manage their projects, they can focus on what matters most - delivering great work.';
+  String get ourMission => 'Our Mission';
+  String get ourMissionContent => 'To empower teams with intuitive time tracking and project management tools that boost productivity and provide valuable insights into how time is spent.';
+  String get ourValues => 'Our Values';
+  String get ourValuesContent => 'We are committed to simplicity, reliability, and user experience. Every feature we build is designed with our users in mind, ensuring that time tracking enhances rather than hinders productivity.';
+  String get whyChooseStarkTrack => 'Why Choose Stark Track?';
+  String get whyChooseStarkTrackContent => '• Simple and intuitive interface\n• Works on any device - desktop, tablet, or mobile\n• Powerful reporting and analytics\n• Secure and reliable\n• Affordable pricing for teams of all sizes\n• Excellent customer support';
+  String get enterContactPersonName => 'Enter contact person name';
+  String get enterContactPersonSurname => 'Enter contact person surname';
+  String get enterCompanyAddress => 'Enter company address';
+  String get enterNumberOfWorkers => 'Enter number of workers';
+  String get enterPhoneNumber => 'Enter phone number';
+  String get pleaseEnterContactPersonName => 'Please enter contact person name';
+  String get pleaseEnterContactPersonSurname => 'Please enter contact person surname';
+  String get pleaseEnterPhoneNumber => 'Please enter phone number';
+  String get pleaseEnterValidPhoneNumber => 'Please enter a valid phone number';
   String get allProjects => 'All Projects';
   String get selectClientAllIfEmpty => 'Select Client (All if empty)';
   String get allClients => 'All Clients';

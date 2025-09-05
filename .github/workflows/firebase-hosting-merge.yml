@@ -29,7 +29,11 @@ jobs:
       - name: Build Flutter Web App
         run: flutter build web --release # Builds the web app in release mode for optimization
 
-      # Step 3b: Build the Super Admin Flutter Web App (for admin hosting)
+      # Step 3b: Build the Marketing Site (for starktrack.ch)
+      - name: Build Marketing Site
+        run: flutter build web --release --target=lib/marketing_main.dart --output-dir build/marketing
+
+      # Step 3c: Build the Super Admin Flutter Web App (for admin hosting)
       - name: Build Super Admin Flutter Web App
         run: flutter build web --release --target=lib/super_admin/main.dart --output-dir build/admin
 

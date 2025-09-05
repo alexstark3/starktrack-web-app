@@ -17,7 +17,7 @@ homepage: https://starktrack.ch
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.2.1+700
+version: 1.2.1+701
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -40,6 +40,7 @@ dependencies:
   # Optional but likely needed later:
   firebase_auth: ^6.0.1
   cloud_firestore: ^6.0.0
+
   provider: ^6.1.1
   shared_preferences: ^2.5.3
   flutter_switch: ^0.3.2
@@ -50,10 +51,10 @@ dependencies:
   web: ^1.1.1
   flutter_colorpicker: ^1.0.3
   http: ^1.5.0
-  file_picker: ^8.0.3
-  file_saver: ^0.2.7
-  syncfusion_flutter_xlsio: ^30.2.6
-
+  file_picker: ^10.3.2
+  file_saver: ^0.3.1
+  syncfusion_flutter_xlsio: ^31.1.17
+  flutter_svg: ^2.0.9
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
 

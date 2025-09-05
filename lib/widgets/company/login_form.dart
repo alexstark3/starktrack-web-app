@@ -1,8 +1,11 @@
 // lib/company/widgets/login_form.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/browser_persistence.dart';
+import '../../marketing/landing_page.dart';
+import '../../providers/theme_provider.dart';
 
 /// Login form with animated button and browser data persistence.
 /// • Idle → full‑width 30 px rounded‑rect button.
@@ -69,7 +72,10 @@ class _LoginFormState extends State<LoginForm> {
           padding: const EdgeInsets.all(24.0),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 400),
-            child: Card(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Card(
               color: isDark ? colors?.cardColorDark : Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -104,7 +110,24 @@ class _LoginFormState extends State<LoginForm> {
                       TextButton(
                           onPressed: () {},
                           child: Text(
-                            'Forgot my password',
+                            AppLocalizations.of(context)!.forgotPassword,
+                            style: TextStyle(
+                              color: colors?.primaryBlue ??
+                                  Theme.of(context).colorScheme.primary,
+                              fontSize: 14,
+                            ),
+                          )),
+                      const SizedBox(height: 8),
+                      TextButton(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const LandingPage(),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            'Learn more about Stark Track',
                             style: TextStyle(
                               color: colors?.primaryBlue ??
                                   Theme.of(context).colorScheme.primary,
@@ -115,6 +138,12 @@ class _LoginFormState extends State<LoginForm> {
                   ),
                 ),
               ),
+                ),
+                
+                // Language Selection Dropdown
+                const SizedBox(height: 24),
+                _buildLanguageSelector(colors, isDark),
+              ],
             ),
           ),
         ),
@@ -221,6 +250,132 @@ class _LoginFormState extends State<LoginForm> {
       ],
     );
   }
+
+
+
+Widget _buildLanguageSelector(AppColors? colors, bool isDark) {
+  return Consumer<ThemeProvider>(
+    builder: (context, themeProvider, child) {
+      String getLanguageDisplayName(String languageCode) {
+        switch (languageCode) {
+          case 'EN':
+            return 'English';
+          case 'DE':
+            return 'Deutsch';
+          case 'FR':
+            return 'Français';
+          case 'IT':
+            return 'Italiano';
+          default:
+            return 'English';
+        }
+      }
+
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.translate,
+            color: colors?.primaryBlue ?? Theme.of(context).colorScheme.primary,
+            size: 20,
+          ),
+          const SizedBox(width: 8),
+          Tooltip(
+            message: AppLocalizations.of(context)!.selectLanguage,
+            child: PopupMenuButton<String>(
+              initialValue: themeProvider.language,
+              tooltip: '', // Disable default tooltip
+              color: isDark ? colors?.lightGray ?? Colors.grey[800] : Colors.white,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 0, maxWidth: 100), // Control the width
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+              offset: const Offset(0, 30),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'EN',
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SizedBox(
+                  width: 80, // Fixed width for each item
+                  child: Text(
+                    'English',
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'DE',
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SizedBox(
+                  width: 80,
+                  child: Text(
+                    'Deutsch',
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'FR',
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SizedBox(
+                  width: 80,
+                  child: Text(
+                    'Français',
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'IT',
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SizedBox(
+                  width: 80,
+                  child: Text(
+                    'Italiano',
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            onSelected: (String newValue) {
+              themeProvider.setLanguage(newValue);
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  getLanguageDisplayName(themeProvider.language),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 14,
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_drop_down,
+                  color: colors?.primaryBlue ?? Theme.of(context).colorScheme.primary,
+                ),
+              ],
+            ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
 }
 
 class _AnimatedLoginButton extends StatelessWidget {

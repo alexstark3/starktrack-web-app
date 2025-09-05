@@ -284,8 +284,7 @@ class _SuperAdminDashboardScreenState extends State<SuperAdminDashboardScreen> {
                       await FirestoreBackupService.backupAllCompaniesAsJson();
                   final bytes = utf8.encode(json);
                   await FileSaver.instance.saveFile(
-                    name: 'firestore_backup',
-                    ext: 'json',
+                    name: 'firestore_backup.json',
                     bytes: Uint8List.fromList(bytes),
                     mimeType: MimeType.json,
                   );

@@ -174,6 +174,7 @@ class _ClientsTable extends StatelessWidget {
     required this.onSelectClient,
   });
 
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;

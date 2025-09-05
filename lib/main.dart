@@ -207,23 +207,42 @@ class _AuthGateState extends State<AuthGate> {
                         .map((e) => e.toString())
                         .toList()
                     : <String>[];
-                final access = <String, dynamic>{
-                  'time_tracker': modules.contains('time_tracker'),
-                  'time_off': modules.contains('time_off'),
-                  'team': modules.contains('team'),
-                  'projects': modules.contains('projects'),
-                  'clients': modules.contains('clients'),
-                  'reports': modules.contains('reports'),
-                  'admin': modules.contains('admin'),
-                  'history': modules.contains('history'),
-                };
-                return CompanyDashboardScreen(
-                  companyId: companyId,
-                  userId: uid,
-                  fullName: fullName,
-                  email: email,
-                  roles: roles,
-                  access: access,
+
+                return FutureBuilder<DocumentSnapshot>(
+                  future: FirebaseFirestore.instance
+                      .collection('companies')
+                      .doc(companyId)
+                      .get(),
+                  builder: (context, companySnap) {
+                    if (companySnap.connectionState == ConnectionState.waiting) {
+                      return const Scaffold(
+                          body: Center(child: CircularProgressIndicator()));
+                    }
+                    
+                    final companyData = companySnap.data?.data() as Map<String, dynamic>?;
+                    final companyModules = (companyData?['modules'] as List?)?.cast<String>() ?? <String>[];
+                    
+                    // Create access map that checks both user and company modules
+                    final realAccess = <String, dynamic>{
+                      'time_tracker': modules.contains('time_tracker') && companyModules.contains('time_tracker'),
+                      'time_off': modules.contains('time_off') && companyModules.contains('time_off'),
+                      'team': modules.contains('team') && companyModules.contains('team'),
+                      'projects': modules.contains('projects') && companyModules.contains('projects'),
+                      'clients': modules.contains('clients') && companyModules.contains('clients'),
+                      'reports': modules.contains('reports') && companyModules.contains('reports'),
+                      'admin': modules.contains('admin') && companyModules.contains('admin'),
+                      'history': modules.contains('history') && companyModules.contains('history'),
+                    };
+                    
+                    return CompanyDashboardScreen(
+                      companyId: companyId,
+                      userId: uid,
+                      fullName: fullName,
+                      email: email,
+                      roles: roles,
+                      access: realAccess,
+                    );
+                  },
                 );
               },
             );
@@ -288,23 +307,42 @@ class _AuthGateState extends State<AuthGate> {
             final modules = (data['modules'] is List)
                 ? (data['modules'] as List).map((e) => e.toString()).toList()
                 : <String>[];
-            final access = <String, dynamic>{
-              'time_tracker': modules.contains('time_tracker'),
-              'time_off': modules.contains('time_off'),
-              'team': modules.contains('team'),
-              'projects': modules.contains('projects'),
-              'clients': modules.contains('clients'),
-              'reports': modules.contains('reports'),
-              'admin': modules.contains('admin'),
-              'history': modules.contains('history'),
-            };
-            return CompanyDashboardScreen(
-              companyId: companyId,
-              userId: uid,
-              fullName: fullName,
-              email: email,
-              roles: roles,
-              access: access,
+
+            return FutureBuilder<DocumentSnapshot>(
+              future: FirebaseFirestore.instance
+                  .collection('companies')
+                  .doc(companyId)
+                  .get(),
+              builder: (context, companySnap) {
+                if (companySnap.connectionState == ConnectionState.waiting) {
+                  return const Scaffold(
+                      body: Center(child: CircularProgressIndicator()));
+                }
+                
+                final companyData = companySnap.data?.data() as Map<String, dynamic>?;
+                final companyModules = (companyData?['modules'] as List?)?.cast<String>() ?? <String>[];
+                
+                // Create access map that checks both user and company modules
+                final realAccess = <String, dynamic>{
+                  'time_tracker': modules.contains('time_tracker') && companyModules.contains('time_tracker'),
+                  'time_off': modules.contains('time_off') && companyModules.contains('time_off'),
+                  'team': modules.contains('team') && companyModules.contains('team'),
+                  'projects': modules.contains('projects') && companyModules.contains('projects'),
+                  'clients': modules.contains('clients') && companyModules.contains('clients'),
+                  'reports': modules.contains('reports') && companyModules.contains('reports'),
+                  'admin': modules.contains('admin') && companyModules.contains('admin'),
+                  'history': modules.contains('history') && companyModules.contains('history'),
+                };
+                
+                return CompanyDashboardScreen(
+                  companyId: companyId,
+                  userId: uid,
+                  fullName: fullName,
+                  email: email,
+                  roles: roles,
+                  access: realAccess,
+                );
+              },
             );
           }
         }

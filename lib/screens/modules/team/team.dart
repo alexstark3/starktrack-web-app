@@ -13,6 +13,7 @@ class TeamModuleTabScreen extends StatefulWidget {
   final DocumentSnapshot? selectedMember; // Add selected member parameter
   final void Function(DocumentSnapshot? member)?
       onSelectMember; // Add callback parameter
+  final Map<String, dynamic> access; // Add access parameter
 
   const TeamModuleTabScreen({
     super.key,
@@ -20,6 +21,7 @@ class TeamModuleTabScreen extends StatefulWidget {
     required this.userId,
     this.selectedMember,
     this.onSelectMember,
+    required this.access,
   });
 
   @override
@@ -176,11 +178,13 @@ class _TeamModuleTabScreenState extends State<TeamModuleTabScreen> {
       // Balance tab content
       return BalanceTab(
         companyId: widget.companyId,
+        access: widget.access,
       );
     } else if (_selectedIndex == 3) {
       // Approvals tab content
       return TeamApprovalsScreen(
         companyId: widget.companyId,
+        access: widget.access,
       );
     }
     return const SizedBox.shrink();

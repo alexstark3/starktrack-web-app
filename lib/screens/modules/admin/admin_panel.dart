@@ -12,11 +12,13 @@ import '../../../widgets/app_search_field.dart';
 class AdminPanel extends StatefulWidget {
   final String companyId;
   final List<String> currentUserRoles;
+  final Map<String, dynamic> access;
 
   const AdminPanel({
     super.key,
     required this.companyId,
     required this.currentUserRoles,
+    required this.access,
   });
 
   @override
@@ -371,20 +373,22 @@ class _AdminPanelState extends State<AdminPanel> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 10),
-                            SizedBox(
-                              height: 38,
-                              child: ElevatedButton.icon(
-                                onPressed: _showTimeOffPolicyDialog,
-                                icon: Icon(Icons.schedule,
-                                    color: appColors.whiteTextOnBlue),
-                                label: Text(
-                                  l10n.addTimeOffPolicy,
-                                  style: TextStyle(
+                            // Only show Time Off Policy button if time_off module is enabled
+                            if (widget.access['time_off'] == true) ...[
+                              const SizedBox(height: 10),
+                              SizedBox(
+                                height: 38,
+                                child: ElevatedButton.icon(
+                                  onPressed: _showTimeOffPolicyDialog,
+                                  icon: Icon(Icons.schedule,
                                       color: appColors.whiteTextOnBlue),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: appColors.primaryBlue,
+                                  label: Text(
+                                    l10n.addTimeOffPolicy,
+                                    style: TextStyle(
+                                        color: appColors.whiteTextOnBlue),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: appColors.primaryBlue,
                                   minimumSize: const Size(0, 38),
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 10, vertical: 8),
@@ -394,6 +398,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                 ),
                               ),
                             ),
+                            ],
                           ],
                         );
                       } else {
@@ -424,28 +429,30 @@ class _AdminPanelState extends State<AdminPanel> {
                                 ),
                               ),
                             ),
-                            SizedBox(
-                              height: 38,
-                              child: ElevatedButton.icon(
-                                onPressed: _showTimeOffPolicyDialog,
-                                icon: Icon(Icons.schedule,
-                                    color: appColors.whiteTextOnBlue),
-                                label: Text(
-                                  l10n.addTimeOffPolicy,
-                                  style: TextStyle(
+                            // Only show Time Off Policy button if time_off module is enabled
+                            if (widget.access['time_off'] == true)
+                              SizedBox(
+                                height: 38,
+                                child: ElevatedButton.icon(
+                                  onPressed: _showTimeOffPolicyDialog,
+                                  icon: Icon(Icons.schedule,
                                       color: appColors.whiteTextOnBlue),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: appColors.primaryBlue,
-                                  minimumSize: const Size(0, 38),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 8),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
+                                  label: Text(
+                                    l10n.addTimeOffPolicy,
+                                    style: TextStyle(
+                                        color: appColors.whiteTextOnBlue),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: appColors.primaryBlue,
+                                    minimumSize: const Size(0, 38),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 8),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
                           ],
                         );
                       }
