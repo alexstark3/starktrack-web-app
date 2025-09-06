@@ -1,5 +1,5 @@
 #!/bin/bash
-#./scripts/deploy.sh
+#h
 echo "🚀 Starting version update and sync..."
 
 # Check if we're in a git repository
