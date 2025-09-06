@@ -59,7 +59,7 @@ class Home extends StatelessWidget {
                 constraints: const BoxConstraints(maxWidth: 1450),
                 child: Padding(
                   padding: EdgeInsets.symmetric(
-                    horizontal: isMobile ? 16 : 48,
+                    horizontal: isMobile ? 10 : 20,
                     vertical: isMobile ? 20 : 40,
                   ),
                   child: content,

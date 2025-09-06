@@ -20,22 +20,22 @@ jobs:
       # Step 2: Set up the Flutter SDK environment
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.35.1' # IMPORTANT: Ensure this matches your local Flutter version
+          flutter-version: '3.35.3' # IMPORTANT: Ensure this matches your local Flutter version
           channel: 'stable'       # Assumes you are using the stable channel
           cache: true             # Caches Flutter dependencies for faster builds
 
       # Step 3: Run the Flutter web build command
       # This compiles your Dart code into web-ready HTML, CSS, and JavaScript files
       - name: Build Flutter Web App
-        run: flutter build web --release # Builds the web app in release mode for optimization
+        run: flutter build web --release --web-renderer html # Builds the web app in release mode for optimization
 
       # Step 3b: Build the Marketing Site (for starktrack.ch)
       - name: Build Marketing Site
-        run: flutter build web --release --target=lib/marketing_main.dart --output-dir build/marketing
+        run: flutter build web --release --web-renderer html --target=lib/marketing_main.dart --output-dir build/marketing
 
       # Step 3c: Build the Super Admin Flutter Web App (for admin hosting)
       - name: Build Super Admin Flutter Web App
-        run: flutter build web --release --target=lib/super_admin/main.dart --output-dir build/admin
+        run: flutter build web --release --web-renderer html --target=lib/super_admin/main.dart --output-dir build/admin
 
       # Step 4: Deploy the built web app to Firebase Hosting
       - uses: FirebaseExtended/action-hosting-deploy@v0

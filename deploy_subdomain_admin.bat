@@ -3,7 +3,7 @@ echo 🚀 Setting up Super Admin Subdomain: admin.starktrack.ch
 
 REM Step 1: Build the super admin web app
 echo 📦 Building super admin web app...
-flutter build web --release --target lib/super_admin/main.dart --output-dir build/admin
+flutter build web --release --target lib/super_admin/main.dart --web-renderer html --output-dir build/admin
 
 REM Check if build was successful
 if %errorlevel% neq 0 (
@@ -16,7 +16,7 @@ echo ✅ Super admin build completed successfully!
 
 REM Step 2: Build the main web app (if needed)
 echo 📦 Building main web app...
-flutter build web --release --output-dir build/web
+flutter build web --release --web-renderer html --output-dir build/web
 
 REM Check if build was successful
 if %errorlevel% neq 0 (

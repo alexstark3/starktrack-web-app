@@ -5,6 +5,7 @@ import '../../screens/auth/company_login_screen.dart';
 import 'about_us.dart';
 import 'contact.dart';
 import 'home.dart';
+import 'carousel.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -113,7 +114,7 @@ class _LandingPageState extends State<LandingPage> {
 
   Widget _buildHeroSection(AppColors colors) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 80),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       child: Column(
         children: [
           // Main Headline
@@ -148,146 +149,40 @@ class _LandingPageState extends State<LandingPage> {
           _buildCTAButtons(colors),
           const SizedBox(height: 60),
           
-          // Hero Image/Dashboard Preview
-          Container(
-            width: double.infinity,
-            height: 400,
-            decoration: BoxDecoration(
-              color: colors.primaryBlue.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: colors.primaryBlue.withValues(alpha: 0.2)),
-            ),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.dashboard,
-                    size: 80,
-                    color: colors.primaryBlue.withValues(alpha: 0.5),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    AppLocalizations.of(context)!.dashboardPreview,
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: colors.primaryBlue.withValues(alpha: 0.7),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          // Hero Dashboard Carousel
+          const DashboardCarousel(),
         ],
       ),
     );
   }
 
   Widget _buildCTAButtons(AppColors colors) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isSmallScreen = screenWidth < 600;
-    
-    if (isSmallScreen) {
-      // Stack buttons vertically on small screens
-      return Column(
-        children: [
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ContactPage(interestedIn: 'Free Trial'),
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colors.primaryBlue,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Text(
-                AppLocalizations.of(context)!.startFreeTrial,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-              ),
+    // Single "Start Free Trial" button for all screen sizes
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ContactPage(interestedIn: 'Free Trial'),
             ),
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: colors.primaryBlue,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
           ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: () {
-                // Demo video or tour
-              },
-              style: OutlinedButton.styleFrom(
-                foregroundColor: colors.primaryBlue,
-                side: BorderSide(color: colors.primaryBlue),
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Text(
-                AppLocalizations.of(context)!.watchDemo,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-              ),
-            ),
-          ),
-        ],
-      );
-    } else {
-      // Show buttons horizontally on larger screens
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ContactPage(interestedIn: 'Free Trial'),
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: colors.primaryBlue,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: Text(
-              AppLocalizations.of(context)!.startFreeTrial,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-          ),
-          const SizedBox(width: 24),
-          OutlinedButton(
-            onPressed: () {
-              // Demo video or tour
-            },
-            style: OutlinedButton.styleFrom(
-              foregroundColor: colors.primaryBlue,
-              side: BorderSide(color: colors.primaryBlue),
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: Text(
-              AppLocalizations.of(context)!.watchDemo,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
-      );
-    }
+        ),
+        child: Text(
+          AppLocalizations.of(context)!.startFreeTrial,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        ),
+      ),
+    );
   }
 
   Widget _buildFeaturesSection(AppColors colors, GlobalKey key) {
@@ -297,8 +192,8 @@ class _LandingPageState extends State<LandingPage> {
     return Container(
       key: key,
       padding: EdgeInsets.symmetric(
-        horizontal: isMobile ? 16 : 24, 
-        vertical: isMobile ? 40 : 80
+        horizontal: isMobile ? 10 : 10, 
+        vertical: isMobile ? 10 : 10
       ),
       child: Column(
         children: [
@@ -325,6 +220,8 @@ class _LandingPageState extends State<LandingPage> {
           
           // Features Grid - Responsive
           isMobile ? _buildMobileFeaturesGrid(colors) : _buildDesktopFeaturesGrid(colors),
+          SizedBox(height: isMobile ? 40 : 60),
+          
         ],
       ),
     );
@@ -507,7 +404,7 @@ class _LandingPageState extends State<LandingPage> {
     
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: isMobile ? 16 : 24, 
+        horizontal: isMobile ? 10 : 20, 
         vertical: isMobile ? 40 : 80
       ),
       color: colors.primaryBlue.withValues(alpha: 0.05),
@@ -641,7 +538,7 @@ class _LandingPageState extends State<LandingPage> {
     
     return Container(
       key: key,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 80),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 80),
       child: Column(
         children: [
           Text(
@@ -1055,7 +952,7 @@ class _LandingPageState extends State<LandingPage> {
   Widget _buildCallToActionSection(AppColors colors, GlobalKey key) {
     return Container(
       key: key,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 80),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 80),
       color: colors.primaryBlue,
       child: Column(
         children: [

@@ -36,7 +36,7 @@ class AboutUsPage extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 100),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1000),
